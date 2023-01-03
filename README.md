@@ -39,3 +39,7 @@ I can release a window-compatible one, but ~im lazy~
    *python e_macro.py*
 
 *During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
+
+Credits:
+
+Natro macro for some of the image assets and techniques
