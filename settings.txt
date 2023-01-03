@@ -1,9 +1,9 @@
-===Settings===
-hive_number: 2
+===Callibration===
+hive_number: 3
 walkspeed: 28
 
 ===Gathering===
-=gather size has s,m,l
 gather_size: m
 gather_width: 4
-pack%:95
+gather_time:3
+pack:95

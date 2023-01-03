@@ -7,6 +7,7 @@ import loadsettings
 import pinetree
 import reset
 import gather_elol
+import backpack
 
 savedata = {}
 def loadSave():
@@ -22,7 +23,9 @@ loadSave()
 ww = savedata["ww"]
 wh = savedata["wh"]
 
-
+ms = pag.size()
+mw = ms[0]
+mh = ms[1]
 def canon():
     #Move to canon:
     move.hold("w",2)
@@ -30,9 +33,9 @@ def canon():
     pag.keyDown("d")
     time.sleep(0.5)
     pag.press("space")
+    time.sleep(0.2)
     st = time.perf_counter()
     r = ""
-    time.sleep(0.1)
     pag.keyUp("d")
     while True:
         pag.keyDown("d")
@@ -80,13 +83,12 @@ updateSave("ww",ww)
 updateSave("wh",wh)
 '''
 
-
+setdat = loadsettings.load()
 cmd = """
 osascript -e 'activate application "Roblox"' 
 """
 os.system(cmd)
 
-setdat = loadsettings.load()
 reset.reset()
 convert()
 canon()
@@ -94,10 +96,19 @@ pinetree.go()
 move.press(".")
 move.press(".")
 move.press("1")
-for _ in range(10):
+pag.click()
+timestart = time.perf_counter()
+for _ in range(60):
     pag.mouseDown()
     gather_elol.gather()
     pag.mouseUp()
+    if backpack.bpc() > setdat["pack"]:
+        print('backpack')
+        break
+    if (time.perf_counter() - timestart)/60 > setdat["gather_time"]:
+        print('time')
+        break
+    
 
 
     

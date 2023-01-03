@@ -30,7 +30,7 @@ def reset():
     pag.press('r')
     time.sleep(0.2)
     pag.press('enter')
-    time.sleep(7)
+    time.sleep(8)
     for _ in range(4):
         pag.press('pgup')
     time.sleep(0.1)

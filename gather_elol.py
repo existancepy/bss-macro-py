@@ -12,9 +12,9 @@ size = 0
 if sizeword.lower() == "s":
     size = 1
 elif sizeword.lower() == "m":
-    size =2
+    size =1.5
 else:
-    size = 3
+    size = 2
 def gather():
     move.hold("w",0.5*size)
     move.hold("d",0.3*width)

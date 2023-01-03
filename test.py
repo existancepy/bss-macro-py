@@ -3,11 +3,12 @@ import time
 import os
 import tkinter
 import move
+
 cmd = """
 osascript -e 'activate application "Roblox"' 
 """
-time.sleep(1)
 os.system(cmd)
+time.sleep(1)
 savedata = {}
 def loadSave():
     with open('save.txt') as f:
@@ -20,5 +21,7 @@ def loadSave():
         savedata[l[0]] = l[1]
 loadSave()
 
+print(time.perf_counter())
 
-print(pag.size())
+
+
