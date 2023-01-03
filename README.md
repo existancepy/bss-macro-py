@@ -1,7 +1,7 @@
 **Bee swarm python macro installation and instructions**
 
 Made and tested on mac, currently untested for windows/linux
-*Due to  the code, it is unlikely to work on windows/linux thanks to the retina display*
+*Due to  the code, it is unlikely to work on windows/linux thanks to the retina display.*
 I can release a window-compatible one, but ~im lazy~
 
 Install python v3.9.5: https://www.python.org/downloads/release/python-395/
