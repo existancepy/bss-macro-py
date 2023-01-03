@@ -4,10 +4,6 @@ import os
 import tkinter
 import move
 import loadsettings
-cmd = """
-osascript -e 'activate application "Roblox"' 
-"""
-os.system(cmd)
 time.sleep(1)
 setdat = loadsettings.load()
 sizeword = setdat["gather_size"]
@@ -38,7 +34,7 @@ def gather():
         move.hold("w",0.5*size)
     move.hold("a",le)
     move.hold("s",0.5*size)
-gather()  
+ 
         
     
     
