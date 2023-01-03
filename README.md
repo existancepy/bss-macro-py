@@ -4,22 +4,37 @@ Made and tested on mac, currently untested for windows/linux
 *Due to  the code, it is unlikely to work on windows/linux thanks to the retina display.*
 I can release a window-compatible one, but ~im lazy~
 
+**Installation**
+
 Install python v3.9.5: https://www.python.org/downloads/release/python-395/
 **Check "Add python to path"  in the installation window**
 
-1.Open terminal/command line
+1. Create a folder anywhere (it will be where the macro files are stored)
+
+
+2.Open terminal/command line
 Optional: Create a python venv
 
-2.Run the following command:
+3.Run the following command:
 
-  **pip install pyautogui pillow opencv-python**
+  *pip install pyautogui pillow opencv-python*
 
-3. Navigate to the folder where the e_macro.py file is using the "cd" command:
+4.
+
+**Setup**
+
+4. Go to settings.txt and edit the settings there. A more in-depth explaination of what each setting does is to come soon
+5. Go to save.txt and edit the resolution. You can find it by clicking on the apple icon on the top bar menu -> about this mac -> displays
+ *if you cant find save.txt, that means that I have updated the code. You can adjust the resolution at settings.txt
+ 
+ **Launching the program**
+
+5. Navigate to the folder created in step 1 using the "cd" command:
 
   *eg cd desktop/bee_swarm_macro*
 
-4. run the program with the following command:
+6. run the program with the following command:
 
-  **python e_macro.py**
+  *python e_macro.py*
 
 *During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
