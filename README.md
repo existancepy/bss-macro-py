@@ -6,6 +6,7 @@ I can release a window-compatible one, but ~im lazy~
 
 **Installation**
 
+
 0. Install python v3.9.5: https://www.python.org/downloads/release/python-395/
 **Check "Add python to path"  in the installation window**
 
@@ -14,10 +15,11 @@ I can release a window-compatible one, but ~im lazy~
 
 2.Open terminal/command line
    Optional: Create a python venv
+   
 
 3.Run the following command:
+   *pip install pyautogui pillow opencv-python*
 
-  *pip install pyautogui pillow opencv-python*
 
 **Setup**
 
