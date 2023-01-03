@@ -1,22 +1,22 @@
-#Bee swarm python macro installation and instructions
+**Bee swarm python macro installation and instructions**
 Made and tested on mac, currently untested for windows/linux
 
 Install python v3.9.5: https://www.python.org/downloads/release/python-395/
-Check "Add python to path"  in the installation window
+**Check "Add python to path"  in the installation window**
 
-Open terminal/command line
+1.Open terminal/command line
 Optional: Create a python venv
 
-Run the following command:
+2.Run the following command:
 
-pip install pyautogui pillow opencv-python
+ **pip install pyautogui pillow opencv-python**
 
-Navigate to the folder where the e_macro.py file is using the "cd" command:
+3. Navigate to the folder where the e_macro.py file is using the "cd" command:
 
-eg cd desktop/bee_swarm_macro
+*eg cd desktop/bee_swarm_macro*
 
-run the program with the following command:
+4. run the program with the following command:
 
-python e_macro.py
+**python e_macro.py**
 
-*During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.
+*During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
