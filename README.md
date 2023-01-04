@@ -48,6 +48,7 @@ Natro macro for some of the image assets and techniques
 
 Exiting the macro:
 Tab out of roblox and press ctrl z to quit (not cmd z)
+
 Bugs and fixes:
 
 
