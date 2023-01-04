@@ -43,3 +43,13 @@ I can release a window-compatible one, but ~im lazy~
 Credits:
 
 Natro macro for some of the image assets and techniques
+
+
+Bugs and fixes:
+*Set your display resolution to default
+
+1. The character keeps rotating at the hive before walking
+   - The code is not able to detect the hive. To fix this, take a screenshot of the hive area under your hotbar. Reset your character, then press "." 4        times, pgup (fn+ up arrow) until you cant go up anymore. Than press "o" until you stop zooming out. 
+   - Disable your shift lock switch and using cmd+shift+4, take a screenshot of the area under your hotbar. Try to keep the screenshot as small as possible. 
+   - Here is an example: https://imgur.com/a/pvWYaWP You can take the screenshot anywhere in the red box
+   - Replace hive1.png in the images folder with your new image
