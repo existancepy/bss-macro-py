@@ -46,10 +46,10 @@ Credits:
 
 Natro macro for some of the image assets and techniques
 
-Exiting the macro:
+**Exiting the macro:**
 Tab out of roblox and press ctrl z to quit (not cmd z)
 
-Bugs and fixes:
+**Bugs and fixes:**
 
 
 1. The character keeps rotating at the hive before walking
