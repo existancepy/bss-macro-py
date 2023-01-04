@@ -1,10 +1,8 @@
 import pyautogui as pag
-import time
 import os
 import tkinter
 import move
 import loadsettings
-time.sleep(1)
 setdat = loadsettings.load()
 sizeword = setdat["gather_size"]
 width = setdat["gather_width"]

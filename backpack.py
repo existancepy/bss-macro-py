@@ -16,10 +16,8 @@ def bpc():
     pix = pag.pixel(X1,Y1)
     backpackColor = int(rgb_to_hex(pix[0],pix[1],pix[2]),16)
 
-    #y=mx+c
-
-    gm = 100/(14889259-7105124)
-    gc = 100- gm*14889259
+    gm = 0.00001284664 #100/(14889259-7105124)
+    gc = -91.276 #100- gm*14889259
     perc = int(gm*backpackColor+gc)
 
     if perc > 100:

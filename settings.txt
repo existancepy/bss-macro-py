@@ -1,8 +1,9 @@
 ===Callibration===
-hive_number: 3
+hive_number: 2
 walkspeed: 28
 
 ===Gathering===
+gather_pattern: squares
 gather_size: m
 gather_width: 4
 gather_time:3
