@@ -2,6 +2,7 @@ import pyautogui as pag
 import time
 import os
 import tkinter
+import imagesearch
 
 savedata = {}
 def loadSave():
@@ -41,7 +42,7 @@ def reset():
 
     time.sleep(0.4)
     for _ in range(4):
-        r = pag.locateOnScreen("./images/hive1.png", confidence = 0.9, region = (xo,yo,xt,yt))
+        r = imagesearch.find("hive1.png",0.85, xo, yo, xt, yt)
         if r:
             time.sleep(0.1)
             for _ in range(4):
