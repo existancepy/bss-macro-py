@@ -4,6 +4,8 @@ Made and tested on mac, currently untested for windows/linux
 *Due to  the code, it is unlikely to work on windows/linux thanks to the retina display.*
 I can release a window-compatible one, but ~im lazy~
 
+**Set your display resolution to default and colour profile to colour LCD. Also, play in fullscreen**
+
 **Installation**
 
 
@@ -46,7 +48,7 @@ Natro macro for some of the image assets and techniques
 
 
 Bugs and fixes:
-*Set your display resolution to default
+
 
 1. The character keeps rotating at the hive before walking
    - The code is not able to detect the hive. To fix this, take a screenshot of the hive area under your hotbar. Reset your character, then press "." 4        times, pgup (fn+ up arrow) until you cant go up anymore. Than press "o" until you stop zooming out. 
