@@ -15,11 +15,14 @@ def loadSave():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
 loadSave()
-
+cmd = """
+        osascript -e  'activate application "Roblox"'
+    """
+os.system(cmd)
+time.sleep(0.2)
 pag.moveTo(350,100)
 ww = savedata["ww"]
 wh = savedata["wh"]
-print(ww)
 xo = ww//4
 yo = wh//4*3
 xt = xo*3
@@ -36,6 +39,8 @@ for _ in range(4):
 time.sleep(0.1)
 for _ in range(6):
     pag.press('o')
+for _ in range(4):
+    pag.press(".")
 im = pag.screenshot(region = (xo,yo,xt,yt))
 im.save('hivedebug.png')
 
