@@ -3,7 +3,7 @@ import os
 import tkinter
 import move
 import loadsettings
-
+import time
 savedata = {}
 def loadSave():
     with open('save.txt') as f:
