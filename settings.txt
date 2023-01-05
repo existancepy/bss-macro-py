@@ -1,8 +1,10 @@
 ===Callibration===
-hive_number: 2
+hive_number: 3
 walkspeed: 28
 
 ===Gathering===
+gather_enable: yes
+gather_field: pinetree
 gather_pattern: squares
 gather_size: m
 gather_width: 4
