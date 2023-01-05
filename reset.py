@@ -20,7 +20,6 @@ def reset():
     pag.moveTo(350,100)
     ww = savedata["ww"]
     wh = savedata["wh"]
-    print(ww)
     xo = ww//4
     yo = wh//4*3
     xt = xo*3
