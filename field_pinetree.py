@@ -18,15 +18,15 @@ def apu(k):
     """.format(k)
     os.system(cmd)
 
-def go():
-    apd("d")
-    apd("s")
-    time.sleep(0.5)
-    move.press("space")
-    move.press("space")
-    time.sleep(2.7)
-    pag.keyUp("s")
-    time.sleep(1.9)  
-    pag.keyUp("d")
-    move.press("space")
+
+apd("d")
+apd("s")
+time.sleep(0.5)
+move.press("space")
+move.press("space")
+time.sleep(2.7)
+pag.keyUp("s")
+time.sleep(1.9)  
+pag.keyUp("d")
+move.press("space")
     

@@ -16,16 +16,16 @@ def apu(k):
     """.format(k)
     os.system(cmd)
 
-def go():
-    apd("a")
-    time.sleep(1.15)
-    move.press("space")
-    move.press("space")
-    time.sleep(1)
-    apd("s")
-    time.sleep(0.7)
-    apu("s")
-    time.sleep(2.8)
-    apu("a")
-    move.press("space")
+
+apd("a")
+time.sleep(1.15)
+move.press("space")
+move.press("space")
+time.sleep(1)
+apd("s")
+time.sleep(0.7)
+apu("s")
+time.sleep(2.8)
+apu("a")
+move.press("space")
     

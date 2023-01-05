@@ -4,19 +4,20 @@ import os
 import tkinter
 import move
 import loadsettings
-import field_pinetree
-import field_stump
 import reset
 import gather_elol
 import gather_squares
 import backpack
 import sys
 
-stumpsnail = 1
+stumpsnail = 0
 savedata = {}
 
 def validateSettings():
     msg = ""
+    files = os.listdir("./")
+    validfield = [x.split("_")[1][:-3] for x in files if x.startswith("field_")]
+    print(validfield)
     validgp = ["e_lol","squares"]
     validsize = ["s","m","l"]
     s = loadsettings.load()
@@ -31,6 +32,10 @@ def validateSettings():
         msg += "\nInvalid gather time"
     if s['pack'] < 0 or s['pack'] > 100:
         msg += "\nInvalid pack, it must be between 1-100 (inclusive)"
+    if not s['gather_field'] in validfield:
+        msg += ("Invalid gather_field")
+    if not s['gather_enable'] == 1 and not s['gather_enable'] == 0:
+        msg += ("Invalid gather_enable. Use either 'yes' or 'no'")
     return msg
 
 
@@ -57,9 +62,7 @@ def canon():
     move.hold("d",0.9*(setdat["hive_number"])+1)
     pag.keyDown("d")
     time.sleep(0.5)
-    cmd = """
-        osascript -e  'tell application "System Events" to key code 49'
-    """
+    move.press("space")
     os.system(cmd)
     time.sleep(0.2)
     st = time.perf_counter()
@@ -126,38 +129,46 @@ osascript -e 'activate application "Roblox"'
 """
 os.system(cmd)
 
-reset.reset()
-convert()
-canon()
-field_stump.go()
-time.sleep(0.2)
-move.press(".")
-move.press(".")
-time.sleep(0.2)
-move.press("1")
-pag.click()
-gp = setdat["gather_pattern"]
-timestart = time.perf_counter()
 
 if stumpsnail:
+    reset.reset()
+    convert()
+    canon()
+    execfile("field_stump.py")
+    time.sleep(0.2)
+    move.press("1")
+    pag.click()
     while True:
         time.sleep(10)
         pag.click()
-for _ in range(100):
-    pag.mouseDown()
-    if gp == "squares":
-        gather_squares.gather()
-    elif gp == "elol":
-        gather_elol.gather()
+elif setdat['gather_enable']:
+    reset.reset()
+    convert()
+    canon()
+    execfile("field_{}.py".format(setdat['gather_field']))
+    time.sleep(0.2)
+    move.press(".")
+    move.press(".")
+    time.sleep(0.2)
+    move.press("1")
+    pag.click()
+    gp = setdat["gather_pattern"]
+    timestart = time.perf_counter()
+    for _ in range(100):
+        pag.mouseDown()
+        if gp == "squares":
+            gather_squares.gather()
+        elif gp == "elol":
+            gather_elol.gather()
 
-        
-    pag.mouseUp()
-    if backpack.bpc() > setdat["pack"]:
-        print('backpack')
-        break
-    if (time.perf_counter() - timestart)/60 > setdat["gather_time"]:
-        print('time')
-        break
+            
+        pag.mouseUp()
+        if backpack.bpc() > setdat["pack"]:
+            print('backpack')
+            break
+        if (time.perf_counter() - timestart)/60 > setdat["gather_time"]:
+            print('time')
+            break
     
 
 
