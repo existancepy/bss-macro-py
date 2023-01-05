@@ -22,7 +22,7 @@ def reset():
     wh = savedata["wh"]
     xo = ww//4
     yo = wh//4*3
-    xt = xo*3
+    xt = xo*2
     yt = wh
     time.sleep(2)
     pag.press('esc')
