@@ -4,7 +4,7 @@ Made and tested on mac, currently untested for windows/linux
 *Due to  the code, it is unlikely to work on windows/linux thanks to the retina display.*
 I can release a window-compatible one, but ~im lazy~
 
-**Set your display resolution to default and colour profile to colour LCD. Also, play in fullscreen**
+**Set your display resolution to default and colour profile to colour LCD. For roblox, play in fullscreen and set the graphics quality to 1**
 
 **Installation**
 
