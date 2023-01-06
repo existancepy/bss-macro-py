@@ -52,12 +52,9 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
 **Bugs and fixes:**
 
 
-~1. The player keeps rotating at the hive before walking~
+1. The player keeps rotating at the hive before walking
    - The code is not able to detect the hive. To fix this, take a screenshot of the hive area under your hotbar. Reset your character, then press "." 4        times, pgup (fn+ up arrow) until you cant go up anymore. Than press "o" until you stop zooming out. 
    - Disable your shift lock switch and using cmd+shift+4, take a screenshot of the area under your hotbar. Try to keep the screenshot as small as possible. 
    - Here is an example: https://imgur.com/a/pvWYaWP You can take the screenshot anywhere in the red box
    - Replace hive1.png in the images folder with your new image
 
-1. The player keeps rotating at the hive before walking
- - Run hivedebug.py (Ensure that bee swarm is open and you have a claimed hive)
- *hivedebug.py can be ran in the same way as e_macro.py, check steps 6 and 7 in the "setup" section
