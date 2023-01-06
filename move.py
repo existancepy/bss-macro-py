@@ -17,7 +17,7 @@ def apup(k):
 def hold(k,t):
     ws = loadsettings.load()["walkspeed"]
     pag.keyDown(k)
-    time.sleep(t*ws/28)
+    time.sleep(t*28/ws)
     pag.keyUp(k)
 
 def press(k):
