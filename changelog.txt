@@ -1,0 +1,14 @@
+Changelog:
+
+5/1/23
+- Added debug.py. This doesnt run off the main code, but it helps to give useful outputs to debug the hive.
+
+6/1/23
+- Changed the jumping for canon. This should make it more consistent
+- Implemented a way for users to choose which field they want to gather (stump/pinetree for now)
+- Fixed bugs regarding movement and executing path files
+
+7/1/23
+- Fixed pinetree pathing
+- Code now loops
+- Added option to which direction to turn the camera before gathering and how many times. Directions include left, right and none

@@ -19,14 +19,14 @@ def apu(k):
     os.system(cmd)
 
 
-apd("d")
-apd("s")
-time.sleep(0.5)
+move.apdown("d")
+move.apdown("s")
+time.sleep(0.2)
 move.press("space")
 move.press("space")
-time.sleep(2.7)
-pag.keyUp("s")
-time.sleep(1.9)  
-pag.keyUp("d")
+time.sleep(2.9)
+move.apup("s")
+time.sleep(1.7)  
+move.apup("d")
 move.press("space")
     

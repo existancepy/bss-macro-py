@@ -130,49 +130,54 @@ osascript -e 'activate application "Roblox"'
 os.system(cmd)
 
 
-if stumpsnail:
-    reset.reset()
-    convert()
-    canon()
-    exec(open("field_stump.py").read())
-    time.sleep(0.2)
-    move.press("1")
-    pag.click()
-    while True:
-        time.sleep(10)
+while True:
+    if stumpsnail:
+        reset.reset()
+        convert()
+        canon()
+        exec(open("field_stump.py").read())
+        time.sleep(0.2)
+        move.press("1")
         pag.click()
-elif setdat['gather_enable']:
-    reset.reset()
-    convert()
-    canon()
-    exec(open("field_{}.py".format(setdat['gather_field'])).read())
-    time.sleep(0.2)
-    move.press(".")
-    move.press(".")
-    time.sleep(0.2)
-    move.press("1")
-    pag.click()
-    gp = setdat["gather_pattern"]
-    timestart = time.perf_counter()
-    for _ in range(100):
-        pag.mouseDown()
-        if gp == "squares":
-            gather_squares.gather()
-        elif gp == "elol":
-            gather_elol.gather()
+        while True:
+            time.sleep(10)
+            pag.click()
+    elif setdat['gather_enable']:
+        reset.reset()
+        convert()
+        canon()
+        exec(open("field_{}.py".format(setdat['gather_field'])).read())
+        time.sleep(0.2)
+        if setdat["before_gather_turn"] == "left":
+            for _ in range(setdat["turn_times"]):
+                move.press(",")
+        elif setdat["before_gather_turn"] == "right":
+            for _ in range(setdat["turn_times"]):
+                move.press(".")
+        time.sleep(0.2)
+        move.press("1")
+        pag.click()
+        gp = setdat["gather_pattern"]
+        timestart = time.perf_counter()
+        for _ in range(100):
+            pag.mouseDown()
+            if gp == "squares":
+                gather_squares.gather()
+            elif gp == "elol":
+                gather_elol.gather()
 
-            
-        pag.mouseUp()
-        if backpack.bpc() > setdat["pack"]:
-            print('backpack')
-            break
-        if (time.perf_counter() - timestart)/60 > setdat["gather_time"]:
-            print('time')
-            break
-    
+                
+            pag.mouseUp()
+            if backpack.bpc() > setdat["pack"]:
+                print('backpack')
+                break
+            if (time.perf_counter() - timestart)/60 > setdat["gather_time"]:
+                print('time')
+                break
+        
 
 
-    
+        
 
 
 
