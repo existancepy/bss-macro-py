@@ -58,6 +58,6 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
    - Here is an example: https://imgur.com/a/pvWYaWP You can take the screenshot anywhere in the red box
    - Replace hive1.png in the images folder with your new image
 
-~1. The player keeps rotating at the hive before walking~
+1. The player keeps rotating at the hive before walking
  - Run hivedebug.py (Ensure that bee swarm is open and you have a claimed hive)
  *hivedebug.py can be ran in the same way as e_macro.py, check steps 6 and 7 in the "setup" section
