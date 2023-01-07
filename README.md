@@ -53,6 +53,7 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
 
 - Hive number: Its a number from 1-6 that represents which hive you claimed. 1 is the hive closest to the canon, 6 is the furthest.
 - walkspeed: The player walkspeed (without haste). It can be found in the in-game settings.
+- gifted_vicious_bee: (yes/no). It uses gifted vicious bee's mob respawn time reduction in the calculations
 - gather_enable: if you want to enable gathering. The program will not gather if its set to "no" (yes/no).
 - gather_field: The field you want to gather from.
 - gather_pattern: The movement pattern that you want to gather with.
