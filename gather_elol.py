@@ -14,25 +14,16 @@ elif sizeword.lower() == "m":
 else:
     size = 2
 def gather():
-    move.hold("w",0.5*size)
-    move.hold("d",0.3*width)
-    move.hold("s",0.5*size)
-    le = (0.3*width)/10
-    for _ in range(3):
-        move.hold("a",le)
-        move.hold("w",0.5*size)
-        move.hold("a",le)
-        move.hold("s",0.5*size)
-    move.hold("d",0.3*width)
-    move.hold("w",0.5*size)
-    for _ in range(2):
-        move.hold("a",le)
-        move.hold("s",0.5*size)
-        move.hold("a",le)
-        move.hold("w",0.5*size)
-    move.hold("a",le)
-    move.hold("s",0.5*size)
- 
+    for i in range(2):
+        move.hold("w", 0.72*size)
+        move.hold("a", 0.1*width)
+        move.hold("s", 0.72*size)
+        move.hold("a", 0.1*width)
+    for i in range(2):
+        move.hold("w", 0.72*size)
+        move.hold("d", 0.1*width)
+        move.hold("s", 0.72*size)
+        move.hold("d", 0.1*width)
         
     
     

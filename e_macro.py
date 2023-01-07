@@ -9,8 +9,10 @@ import gather_elol
 import gather_squares
 import backpack
 import sys
+import imagesearch
 
 stumpsnail = 0
+re = "walk"
 savedata = {}
 
 def validateSettings():
@@ -75,7 +77,6 @@ def canon():
         r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
         if r:
             print("canon found")
-            move.press("e")
             return
         if time.perf_counter()  - st > 10/28*setdat["walkspeed"]:
             print('no cannon')
@@ -129,10 +130,9 @@ osascript -e 'activate application "Roblox"'
 """
 os.system(cmd)
 
-
+reset.reset()
 while True:
     if stumpsnail:
-        reset.reset()
         convert()
         canon()
         exec(open("field_stump.py").read())
@@ -143,7 +143,6 @@ while True:
             time.sleep(10)
             pag.click()
     elif setdat['gather_enable']:
-        reset.reset()
         convert()
         canon()
         exec(open("field_{}.py".format(setdat['gather_field'])).read())
@@ -158,14 +157,18 @@ while True:
         move.press("1")
         pag.click()
         gp = setdat["gather_pattern"]
+        cmd = """
+        osascript -e 'activate application "Roblox"' 
+        """
+        os.system(cmd)
         timestart = time.perf_counter()
-        for _ in range(100):
+        
+        while True:
             pag.mouseDown()
             if gp == "squares":
                 gather_squares.gather()
-            elif gp == "elol":
+            elif gp == "e_lol":
                 gather_elol.gather()
-
                 
             pag.mouseUp()
             if backpack.bpc() > setdat["pack"]:
@@ -175,6 +178,32 @@ while True:
                 print('time')
                 break
         
+        if setdat["before_gather_turn"] == "left":
+            for _ in range(setdat["turn_times"]):
+                move.press(".")
+        elif setdat["before_gather_turn"] == "right":
+            for _ in range(setdat["turn_times"]):
+                move.press(",")
+                
+        if setdat['return_to_hive'] == "walk":
+            exec(open("walk_{}.py".format(setdat['gather_field'])).read())
+            st = time.perf_counter()
+            while True:
+                pag.keyDown("a")
+                time.sleep(0.15)
+                pag.keyUp("a")
+                r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+                if r:
+                    print("hive found")
+                    convert()
+                    break
+                if time.perf_counter()  - st > 30/28*setdat["walkspeed"]:
+                    print('cant find hive')
+                    reset.reset()
+                    break
+        elif setdat['return_to_hive'] == "reset":
+            reset.reset()
+       
 
 
         

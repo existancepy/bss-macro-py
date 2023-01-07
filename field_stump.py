@@ -16,7 +16,7 @@ def apu(k):
     """.format(k)
     os.system(cmd)
 
-
+move.press("e")
 apd("a")
 time.sleep(1.15)
 move.press("space")

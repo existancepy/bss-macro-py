@@ -49,6 +49,7 @@ xo = ww//4
 yo = wh//4*3
 xt = xo*2
 yt = wh
+
 time.sleep(2)
 pag.press('esc')
 time.sleep(0.1)
@@ -69,10 +70,11 @@ r = find("hive1.png",0.8, xo, yo, xt, yt)
 print(vals)
 if vals[0] > vals[1]:
     time.sleep(1)
-    print('hi')
     for _ in range(4):
         pag.press('.')
 
+a = pag.screenshot()
+a.save("./hivedebug.png")
 
 im = pag.screenshot(region = (ww//2,wh-50,30,10))
 im.save('./images/hive1.png')

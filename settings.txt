@@ -1,14 +1,15 @@
 ===Callibration===
-hive_number: 3
+hive_number: 2
 walkspeed: 28
 
 ===Gathering===
 gather_enable: yes
 gather_field: pinetree
-gather_pattern: squares
+gather_pattern: e_lol
 gather_size: m
-gather_width: 4
-gather_time:0
+gather_width: 3
+gather_time:10
 pack:95
-before_gather_turn: left
+before_gather_turn: right
 turn_times: 2
+return_to_hive:walk

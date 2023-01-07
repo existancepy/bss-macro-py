@@ -3,6 +3,7 @@ import time
 import os
 import tkinter
 import imagesearch
+from python_imagesearch.imagesearch import imagesearcharea
 
 savedata = {}
 def loadSave():
@@ -21,7 +22,7 @@ def reset():
     ww = savedata["ww"]
     wh = savedata["wh"]
     xo = ww//4
-    yo = wh//4*3
+    yo = wh//100*90
     xt = xo*2
     yt = wh
     time.sleep(2)
