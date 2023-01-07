@@ -19,7 +19,7 @@ def apu(k):
     os.system(cmd)
 
 
-move.hold("s",5)
+move.hold("s",8)
 move.hold("d",6)
 move.hold("w",9)
 move.hold("d",2)
@@ -44,7 +44,7 @@ while True:
     r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
     if r:
         break
-time.sleep(2.5)
+time.sleep(2)
 move.press("e")
 move.hold("w",4)
 move.hold("d",3)

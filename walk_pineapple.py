@@ -19,16 +19,9 @@ def apu(k):
     os.system(cmd)
 
 
-move.hold("s",5)
-move.hold("d",6)
-move.hold("w",9)
-move.hold("d",2)
-pag.keyDown("d")
-time.sleep(0.1)
-move.press("space")
-time.sleep(0.15*28/ws)
-pag.keyUp("d")
-move.hold("w",7)
+move.hold("s",4)
+move.hold("a",6)
+move.hold("w",10)
 move.hold("d",4)
 move.hold("s",0.5)
 move.hold("a",0.1)
@@ -48,7 +41,6 @@ time.sleep(2.5)
 move.press("e")
 move.hold("w",4)
 move.hold("d",3)
-move.hold("s",0.6)
-
+move.hold("s",0.5)
 
     

@@ -50,6 +50,18 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
+
+def loadtimings():
+    tempdict = {}
+    with open('timings.txt') as f:
+        lines = f.read().split("\n")
+    f.close()
+    for s in lines:
+        l = s.replace(" ","").split(":")
+        if l[1].isdigit():
+            l[1] = int(l[1])
+        tempdict[l[0]] = l[1]
+    return tempdic
 loadSave()
 ww = savedata["ww"]
 wh = savedata["wh"]
@@ -122,6 +134,21 @@ def walk_to_hive():
             print('cant find hive, resetting')
             reset.reset()
             break
+    reset.reset()
+def checkRespawn(m,t):
+    timing = loadtimings()[m]
+    respt = int(''.join([x for x in list(t) if x.isdigit()]))
+    if t[-1] == 'h':
+        respt = respt*1000*60*60
+    else:
+        respt = respt*1000*60
+        
+    if setdat['gifted_vicious_bee']:
+        respt = respt/100*85
+    if time.time() - timing > respt:
+        return 1
+    return 0
+    
 '''
 root = tkinter.Tk()
 root.withdraw()
@@ -148,7 +175,8 @@ os.system(cmd)
 
 reset.reset()
 while True:
-    if stumpsnail:
+    timings = loadtimings()
+    if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
         convert()
         canon()
         exec(open("field_stump.py").read())
@@ -158,6 +186,11 @@ while True:
         while True:
             time.sleep(10)
             pag.click()
+            if imagesearch.find("./images/keepold.png",0.9):
+                break
+        print("stump snail killed! Keeping amulet")
+        pag.moveTo(mw//2-30,mh//100*60)
+        pag.click()
     elif setdat['gather_enable']:
         convert()
         canon()

@@ -15,3 +15,6 @@ Changelog:
 - Added option to walk/reset back to hive after gathering
 - Added walking back to hive paths for stump and pine tree
 - Added whirligig option. If the whirligig does not activate, the code will default to walking back to hive
+- Added paths for mountaintop, pumpkin, cactus and pineapple fields
+- Added stump snail kill option. Will afk until stump snail is killed before continuing
+- Decreased the size of area detection for hives. This should hopefully reduce the number of false-positives

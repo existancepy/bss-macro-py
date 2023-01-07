@@ -25,12 +25,14 @@ def loadSave():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
 loadSave()
+ww = savedata["ww"]
+wh = savedata["wh"]
+ms = pag.size()
+mw = ms[0]
+mh = ms[1]
 
-
-
-import gather_elol
-gather_elol.gather()
-
+pag.moveTo(mw//2-30,mh//100*60)
+pag.click()
 
 
 
