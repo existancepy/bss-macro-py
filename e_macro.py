@@ -187,10 +187,10 @@ osascript -e 'activate application "Roblox"'
 os.system(cmd)
 
 reset.reset()
+convert()
 while True:
     timings = loadtimings()
     if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
-        convert()
         canon()
         webhook("","Traveling: Stump snail (stump) ","brown")
         exec(open("field_stump.py").read())
@@ -208,7 +208,6 @@ while True:
         pag.moveTo(mw//2-30,mh//100*60)
         pag.click()
     elif setdat['gather_enable']:
-        convert()
         canon()
         webhook("","Traveling: {}".format(setdat['gather_field']),"dark brown")
         exec(open("field_{}.py".format(setdat['gather_field'])).read())
@@ -254,6 +253,7 @@ while True:
             walk_to_hive()
         elif setdat['return_to_hive'] == "reset":
             reset.reset()
+            convert()
         elif setdat['return_to_hive'] == "whirligig":
             webhook("","Activating whirligig","dark brown")
             move.press(setdat['whirligig'])
