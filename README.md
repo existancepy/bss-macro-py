@@ -20,7 +20,7 @@ I can release a window-compatible one, but ~im lazy~
    
 
 3.Run the following command:
-   *pip install pyautogui pillow opencv-python*
+   *pip install pyautogui pillow opencv-python python-imagesearch*
 
 
 **Setup**
