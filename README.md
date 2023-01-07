@@ -58,3 +58,6 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
    - Here is an example: https://imgur.com/a/pvWYaWP You can take the screenshot anywhere in the red box. Try to keep the screenshot small                    https://imgur.com/a/FlcxKVl
    - Replace hive1.png in the images folder with your new image
 
+2. The dock is brought up during the macro, interrupting the key inputs.
+   - This can be solved by manually clicking on the screen when the macro is ran
+
