@@ -56,6 +56,7 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
 - gifted_vicious_bee: (yes/no). It uses gifted vicious bee's mob respawn time reduction in the calculations
 - enable_discord_webhook: Uses discord webhook to send status updates. (yes/no). Check out [discord webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to setup a discord webhook
 - discord_webhook_url: discord webhook url
+
 - gather_enable: if you want to enable gathering. The program will not gather if its set to "no" (yes/no).
 - gather_field: The field you want to gather from.
 - gather_pattern: The movement pattern that you want to gather with.
@@ -67,6 +68,7 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
 - turn_times: how many times you want to turn in the direction specified by before_gather_turn.
 - return_to_hive: how you want to return to hive (reset/walk/whirligig).
 - whirligig_slot: the hotbar slot your whirligig is in. This is only used if you set the return_to_hive to "whirligig".
+
 - stump_snail: if you want to enable killing stump snail afk. The program will prioritise killing stump snail before doing anything else (yes/no). **Make sure that stump snail is alive when selecting this**
 
 **Bugs and fixes:**
