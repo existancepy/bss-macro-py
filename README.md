@@ -49,6 +49,23 @@ Natro macro for some of the image assets and techniques
 **Exiting the macro:**
 Tab out of roblox and press ctrl z to quit (not cmd z)
 
+**Settings explaination:**
+
+Hive number: Its a number from 1-6 that represents which hive you claimed. 1 is the hive closest to the canon, 6 is the furthest
+walkspeed: The player walkspeed (without haste). It can be found in the in-game settings
+gather_enable: if you want to enable gathering. The program will not gather if its set to "no" (yes/no)
+gather_field: The field you want to gather from
+gather_pattern: The movement pattern that you want to gather with.
+gather_size: Affects the overall area that is covered by the player when gathering (S,M,L)
+gather_width: Affects the overall area that is covered by the player when gathering
+gather_time: How long you want to gather for (in minutes) 
+pack: How full you want your backpack to be (in percentage)
+before_gather_turn: which direction you want to turn upon reaching the field and before gathering
+turn_times: how many times you want to turn in the direction specified by before_gather_turn
+return_to_hive: how you want to return to hive (reset/walk/whirligig)
+whirligig_slot: the hotbar slot your whirligig is in. This is only used if you set the return_to_hive to "whirligig"
+
+
 **Bugs and fixes:**
 
 
@@ -60,4 +77,6 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
 
 2. The dock is brought up during the macro, interrupting the key inputs.
    - This can be solved by manually clicking on the screen when the macro is ran
+
+
 
