@@ -14,3 +14,4 @@ Changelog:
 - Added option to which direction to turn the camera before gathering and how many times. Directions include left, right and none
 - Added option to walk/reset back to hive after gathering
 - Added walking back to hive paths for stump and pine tree
+- Added whirligig option. If the whirligig does not activate, the code will default to walking back to hive

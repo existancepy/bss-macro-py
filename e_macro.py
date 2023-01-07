@@ -106,6 +106,22 @@ def convert():
         else:
             time.sleep(0.25)
     return
+def walk_to_hive():
+    exec(open("walk_{}.py".format(setdat['gather_field'])).read())
+    st = time.perf_counter()
+    while True:
+        pag.keyDown("a")
+        time.sleep(0.15)
+        pag.keyUp("a")
+        r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+        if r:
+            print("hive found")
+            convert()
+            break
+        if time.perf_counter()  - st > 30/28*setdat["walkspeed"]:
+            print('cant find hive, resetting')
+            reset.reset()
+            break
 '''
 root = tkinter.Tk()
 root.withdraw()
@@ -186,24 +202,23 @@ while True:
                 move.press(",")
                 
         if setdat['return_to_hive'] == "walk":
-            exec(open("walk_{}.py".format(setdat['gather_field'])).read())
-            st = time.perf_counter()
-            while True:
-                pag.keyDown("a")
-                time.sleep(0.15)
-                pag.keyUp("a")
-                r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
-                if r:
-                    print("hive found")
-                    convert()
-                    break
-                if time.perf_counter()  - st > 30/28*setdat["walkspeed"]:
-                    print('cant find hive')
-                    reset.reset()
-                    break
+            print("Gather ended, walking back to hive")
+            walk_to_hive()
         elif setdat['return_to_hive'] == "reset":
+            print("Gather ended, resetting")
             reset.reset()
-       
+        elif setdat['return_to_hive'] == "whirligig":
+            print("Gather ended, activating whirligig")
+            move.press(setdat['whirligig'])
+            time.sleep(1)
+            r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+            if not r:
+                walk_to_hive()
+            else:
+                convert()
+            
+            
+            
 
 
         

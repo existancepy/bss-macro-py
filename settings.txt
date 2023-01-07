@@ -13,3 +13,4 @@ pack:95
 before_gather_turn: right
 turn_times: 2
 return_to_hive:walk
+whirligig_slot: 0
