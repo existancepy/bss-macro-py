@@ -5,11 +5,12 @@ import tkinter
 import move
 import loadsettings
 import reset
-import gather_elol
+import gather_e_lol
 import gather_squares
 import backpack
 import sys
 import imagesearch
+from webhook import webhook
 
 stumpsnail = 0
 re = "walk"
@@ -61,7 +62,7 @@ def loadtimings():
         if l[1].isdigit():
             l[1] = int(l[1])
         tempdict[l[0]] = l[1]
-    return tempdic
+    return tempdict
 
 def savetimings(m):
     tempdict = loadtimings()
@@ -82,7 +83,7 @@ mw = ms[0]
 mh = ms[1]
 def canon():
     #Move to canon:
-    print("Moving to canon")
+    webhook("","Moving to canon","dark brown")
     move.hold("w",2)
     move.hold("d",0.9*(setdat["hive_number"])+1)
     pag.keyDown("d")
@@ -99,10 +100,10 @@ def canon():
         pag.keyUp("d")
         r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
         if r:
-            print("canon found")
+            webhook("","Canon found","dark brown")
             return
         if time.perf_counter()  - st > 10/28*setdat["walkspeed"]:
-            print('no cannon')
+            webhook("","Cannon not found, resetting","dark brown")
             break
         
     reset.reset()   
@@ -111,18 +112,18 @@ def convert():
     for _ in range(2):
         r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
         if r:
-            print('starting convert')
+            webhook("","Starting convert","brown")
             move.press("e")
             st = time.perf_counter()
             while True:
                 c = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
             
                 if not c:
-                    print("convert done")
+                    webhook("","Convert done","brown")
                     time.sleep(3)
                     break
                 if time.perf_counter()  - st > 600:
-                    print("converting took too long, moving on")
+                    webhook("","Converting took too long, moving on","brown")
                     break
             
             break
@@ -130,6 +131,7 @@ def convert():
             time.sleep(0.25)
     return
 def walk_to_hive():
+    webhook("","Going back to hive","dark brown")
     exec(open("walk_{}.py".format(setdat['gather_field'])).read())
     st = time.perf_counter()
     while True:
@@ -138,11 +140,10 @@ def walk_to_hive():
         pag.keyUp("a")
         r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
         if r:
-            print("hive found")
             convert()
             break
         if time.perf_counter()  - st > 30/28*setdat["walkspeed"]:
-            print('cant find hive, resetting')
+            webhook("","Cant find hive, resetting","dark brown")
             reset.reset()
             break
     reset.reset()
@@ -174,6 +175,7 @@ updateSave("wh",wh)
 val = validateSettings()
 
 if val:
+    pag.alert(text='Your settings are incorrect! Check the terminal to see what is wrong.', title='Invalid settings', button='OK')
     print(val)
     sys.exit()
     
@@ -190,22 +192,25 @@ while True:
     if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
         convert()
         canon()
+        webhook("","Traveling: Stump snail (stump) ","brown")
         exec(open("field_stump.py").read())
         time.sleep(0.2)
         move.press("1")
         pag.click()
         while True:
+            webhook("","Starting stump snail","brown")
             time.sleep(10)
             pag.click()
             if imagesearch.find("./images/keepold.png",0.9):
                 break
-        print("stump snail killed! Keeping amulet")
+        webhook("","Stump snail killed, keeping amulet","bright green")
         savetimings("stump_snail")
         pag.moveTo(mw//2-30,mh//100*60)
         pag.click()
     elif setdat['gather_enable']:
         convert()
         canon()
+        webhook("","Traveling: {}".format(setdat['gather_field']),"dark brown")
         exec(open("field_{}.py".format(setdat['gather_field'])).read())
         time.sleep(0.2)
         if setdat["before_gather_turn"] == "left":
@@ -218,25 +223,24 @@ while True:
         move.press("1")
         pag.click()
         gp = setdat["gather_pattern"]
-        cmd = """
-        osascript -e 'activate application "Roblox"' 
-        """
         os.system(cmd)
+        webhook("Gathering: {}".format(setdat['gather_field']),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
+        move.apkey("space")
         timestart = time.perf_counter()
-        
         while True:
             pag.mouseDown()
             if gp == "squares":
                 gather_squares.gather()
             elif gp == "e_lol":
-                gather_elol.gather()
+                gather_e_lol.gather()
                 
             pag.mouseUp()
+            timespent = (time.perf_counter() - timestart)/60
             if backpack.bpc() > setdat["pack"]:
-                print('backpack')
+                webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
                 break
-            if (time.perf_counter() - timestart)/60 > setdat["gather_time"]:
-                print('time')
+            if timespent > setdat["gather_time"]:
+                webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
                 break
         
         if setdat["before_gather_turn"] == "left":
@@ -247,17 +251,16 @@ while True:
                 move.press(",")
                 
         if setdat['return_to_hive'] == "walk":
-            print("Gather ended, walking back to hive")
             walk_to_hive()
         elif setdat['return_to_hive'] == "reset":
-            print("Gather ended, resetting")
             reset.reset()
         elif setdat['return_to_hive'] == "whirligig":
-            print("Gather ended, activating whirligig")
+            webhook("","Activating whirligig","dark brown")
             move.press(setdat['whirligig'])
             time.sleep(1)
             r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
             if not r:
+                webhook("","Whirligig failed to activate, walking back","red")
                 walk_to_hive()
             else:
                 convert()

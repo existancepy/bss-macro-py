@@ -18,3 +18,4 @@ Changelog:
 - Added paths for mountaintop, pumpkin, cactus and pineapple fields
 - Added stump snail kill option. Will afk until stump snail is killed before continuing
 - Decreased the size of area detection for hives. This should hopefully reduce the number of false-positives
+- Added discord webhook support

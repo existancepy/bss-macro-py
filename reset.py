@@ -4,6 +4,7 @@ import os
 import tkinter
 import imagesearch
 from python_imagesearch.imagesearch import imagesearcharea
+from webhook import webhook
 
 savedata = {}
 def loadSave():
@@ -18,6 +19,7 @@ def loadSave():
 loadSave()
 
 def reset():
+    webhook("","Resetting character","dark brown")
     pag.moveTo(350,100)
     ww = savedata["ww"]
     wh = savedata["wh"]
