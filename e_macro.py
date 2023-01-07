@@ -62,6 +62,17 @@ def loadtimings():
             l[1] = int(l[1])
         tempdict[l[0]] = l[1]
     return tempdic
+
+def savetimings(m):
+    tempdict = loadtimings()
+    tempdict[m] = time.time()
+    templist = []
+    for i in tempdict:
+        templist.append("{}:{}".format(m,tempdict[m]))
+    with open('timings.txt') as f:
+        f.writelines(templist)
+    f.close()
+    
 loadSave()
 ww = savedata["ww"]
 wh = savedata["wh"]
@@ -189,6 +200,7 @@ while True:
             if imagesearch.find("./images/keepold.png",0.9):
                 break
         print("stump snail killed! Keeping amulet")
+        savetimings("stump_snail")
         pag.moveTo(mw//2-30,mh//100*60)
         pag.click()
     elif setdat['gather_enable']:
