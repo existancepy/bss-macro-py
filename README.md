@@ -64,7 +64,7 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
 - turn_times: how many times you want to turn in the direction specified by before_gather_turn.
 - return_to_hive: how you want to return to hive (reset/walk/whirligig).
 - whirligig_slot: the hotbar slot your whirligig is in. This is only used if you set the return_to_hive to "whirligig".
-- Stump snail: if you want to enable stump snail afk. The program will prioritise killing stump snail before doing anything else (yes/no). **Make sure that stump snail is alive when selecting this**
+-stump_snail: if you want to enable killing stump snail afk. The program will prioritise killing stump snail before doing anything else (yes/no). **Make sure that stump snail is alive when selecting this**
 
 **Bugs and fixes:**
 
