@@ -256,7 +256,7 @@ while True:
             convert()
         elif setdat['return_to_hive'] == "whirligig":
             webhook("","Activating whirligig","dark brown")
-            move.press(setdat['whirligig'])
+            move.press(setdat['whirligig_slot'])
             time.sleep(1)
             r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
             if not r:
