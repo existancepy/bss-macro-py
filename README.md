@@ -85,6 +85,7 @@ Tab out of roblox and press ctrl z to quit (not cmd z)
    - This can be solved by manually clicking on the screen when the macro is ran
 3. *ImportError: dlopen* in the terminal when the code is ran.
    - This is most likely caused by an outdated macOS version. For a work around, check out https://github.com/existancepy/bss-macro-py-no-cv2
+   - A better fix would just be to update your mac OS software
 
 
 
