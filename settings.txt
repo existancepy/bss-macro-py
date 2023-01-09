@@ -1,22 +1,24 @@
-===Calibration===
-hive_number: 2
-walkspeed: 28
-gifted_vicious_bee: yes
-enable_discord_webhook: no
+
+hive_number:1
+walkspeed:28
+gifted_vicious_bee:0
+enable_discord_webhook:0
 discord_webhook_url:
-
-===Gathering===
-gather_enable: yes
-gather_field: pinetree
-gather_pattern: e_lol
-gather_size: m
-gather_width: 2
-gather_time:1
+gather_enable:1
+gather_field:Pine Tree
+gather_pattern:snake
+gather_size:M
+gather_width:2
+gather_time:10
 pack:95
-before_gather_turn: left
-turn_times: 2
-return_to_hive:walk
-whirligig_slot: 0
-
-===Kills===
-stump_snail: no
+before_gather_turn:left
+turn_times:2
+return_to_hive:Walk
+whirligig_slot:none
+stump_snail:0
+ladybug:0
+rhinobeetle:0
+spider:0
+scorpion:0
+werewolf:0
+mantis:0

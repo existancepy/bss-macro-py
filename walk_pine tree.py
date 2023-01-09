@@ -19,29 +19,19 @@ def apu(k):
     os.system(cmd)
 
 
-move.hold("s",3)
-move.hold("w",0.15)
-move.hold("a",6)
-move.hold("w",10)
-move.hold("d",4)
-move.hold("s",0.5)
-move.hold("a",0.1)
-pag.keyDown("s")
-time.sleep(0.1)
+move.hold("d",5)
+move.hold("s",7)
+apd("a")
+time.sleep(12*28/ws)
+apu("a")
+move.apdown("w")
+time.sleep(8*28/ws)
 move.press("space")
-time.sleep(0.15*28/ws)
-pag.keyUp("s")
-while True:
-    pag.keyDown("s")
-    time.sleep(0.15)
-    pag.keyUp("s")
-    r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
-    if r:
-        break
-time.sleep(2.5)
-move.press("e")
+time.sleep(11*28/ws)
+move.apup("w")
+move.hold("d",1)
 move.hold("w",4)
 move.hold("d",3)
-move.hold("s",0.5)
+move.hold("s",0.6)
 
     

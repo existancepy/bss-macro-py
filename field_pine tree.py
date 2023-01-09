@@ -20,18 +20,19 @@ def apu(k):
     
 move.press(".")
 move.press(".")
+move.press(".")
 move.press("e")
 time.sleep(0.08)
 pag.keyDown("w")
+time.sleep(0.5)
 move.press("space")
 move.press("space")
-time.sleep(3.1)
+time.sleep(2.7)
 move.press(",")
-move.press(",")
-time.sleep(0.17)
+time.sleep(1.6)
 pag.keyUp("w")
 move.press("space")
-
+move.press(",")
+move.press(",")
 time.sleep(0.6)
-
     

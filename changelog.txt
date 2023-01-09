@@ -19,3 +19,18 @@ Changelog:
 - Added stump snail kill option. Will afk until stump snail is killed before continuing
 - Decreased the size of area detection for hives. This should hopefully reduce the number of false-positives
 - Added discord webhook support
+
+8/1/23
+- Fixed bugs regarding whirligig
+- Added a GUI
+
+9/1/23
+- Added bamboo,blue flower, dandelion and mushroom field pathing
+- Added bug runs
+- bug fixes
+
+10/1/23
+- Added clover,pepper and coconut field pathing
+- ctrl c is another, better way to stop the macro
+- Edits to the overall flow of the loop so that bug runs wont just loop with the same few mobs
+- Decreased looting time for bug runs

@@ -2,7 +2,8 @@ import time
 import os
 import loadsettings
 from discord_webhook import DiscordWebhook, DiscordEmbed
-settings = loadsettings.load()
+dwurl = loadsettings.load()["discord_webhook_url"]
+
 def webhook(title,desc,colour):
     colours = {
     "red":"D22B2B",
@@ -13,10 +14,11 @@ def webhook(title,desc,colour):
     "brown": "D27D2D"
     
     }
-    if not settings['enable_discord_webhook']: return
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
-    webhook = DiscordWebhook(url=settings["discord_webhook_url"])
+    print("[{}] {} - {}".format(current_time,title,desc))
+    if not dwurl: return
+    webhook = DiscordWebhook(url=dwurl)
     # you can set the color as a decimal (color=242424) or hex (color='03b2f8') number
     if title:
         embed = DiscordEmbed(title="[{}] {}".format(current_time,title), description=desc, color=colours[colour])
@@ -26,6 +28,5 @@ def webhook(title,desc,colour):
     webhook.add_embed(embed)
 
     response = webhook.execute()
-    print("[{}] {} - {}".format(current_time,title,desc))
         
 

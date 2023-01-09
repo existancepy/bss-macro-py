@@ -3,10 +3,18 @@ import time
 import os
 import tkinter
 import move
+import sys
 import cv2
 from PIL import ImageGrab
 import numpy as np
 import imagesearch
+import loadsettings
+import tkinter as tk
+import tty
+from tkinter import ttk
+import pytesseract
+import backpack
+
 
 cmd = """
 osascript -e 'activate application "Roblox"' 
@@ -31,21 +39,63 @@ ms = pag.size()
 mw = ms[0]
 mh = ms[1]
 
-pag.moveTo(mw//2-30,mh//100*60)
-pag.click()
 
 
 
+savedata = {}
+def loadSave():
+    with open('save.txt') as f:
+        lines = f.read().split("\n")
+    f.close()
+    for s in lines:
+        l = s.replace(" ","").split(":")
+        if l[1].isdigit():
+            l[1] = int(l[1])
+        savedata[l[0]] = l[1]
+        
+def savesettings(dictionary):
+    templist = []
+    for i in dictionary:
+        templist.append("\n{}:{}".format(i,dictionary[i]))
+        print(templist)
+    with open('settings.txt', "w") as f:
+        f.writelines(templist)
+    f.close()
+
+size = 1
+width = 1
 
 
+def loadtimings():
+    tempdict = {}
+    with open('timings.txt') as f:
+        lines = f.read().split("\n")
+    f.close()
+    for s in lines:
+        l = s.replace(" ","").split(":")
+        if l[1].isdigit():
+            l[1] = int(l[1])
+        tempdict[l[0]] = l[1]
+    return tempdict
 
+def savetimings(m):
+    tempdict = loadtimings()
+    print(tempdict)
+    tempdict[m] = time.time()
+    templist = []
+    
+    for i in tempdict:
+        templist.append("\n{}:{}".format(i,tempdict[i]))
+    print(templist)
+    with open('timings.txt','w') as f:
+        f.writelines(templist)
+    f.close()
 
-
-
-
-
-
+savetimings("ladybug_strawberry")
 '''
+
+
+
 r = pag.locateCenterOnScreen("./images/saturator.png",confidence=0.97)
 if r:
     print(r)

@@ -3,27 +3,44 @@ import os
 import tkinter
 import move
 import loadsettings
+import time
 setdat = loadsettings.load()
 sizeword = setdat["gather_size"]
-width = setdat["gather_width"]
+width = round(setdat["gather_width"]*1.5)
 size = 0
 if sizeword.lower() == "s":
-    size = 1
+    size = 0.5
 elif sizeword.lower() == "m":
-    size =1.5
+    size =1
 else:
-    size = 2
-def gather():
-    for i in range(2):
-        move.hold("w", 0.72*size)
-        move.hold("a", 0.1*width)
-        move.hold("s", 0.72*size)
-        move.hold("a", 0.1*width)
-    for i in range(2):
-        move.hold("w", 0.72*size)
-        move.hold("d", 0.1*width)
-        move.hold("s", 0.72*size)
-        move.hold("d", 0.1*width)
+    size = 1.5
+cmd = """
+osascript -e 'activate application "Roblox"' 
+"""
+os.system(cmd)
+
+ 
+
+move.hold("w",0.5*size)
+for _ in range(width):
+    move.hold("a",0.125*(width/4))
+    move.hold("a",0.125*(width/4))
+for _ in range(width):
+    move.hold("s",0.5*size)
+    move.hold("d",0.125*(width/4))
+    move.hold("w",0.5*size)
+    move.hold("d",0.125*(width/4))
+move.hold("s",0.5*size)
+for _ in range(width):
+    move.hold("a",0.125*(width/4))
+    move.hold("a",0.125*(width/4))
+for _ in range(width):
+    move.hold("w",0.5*size)
+    move.hold("d",0.125*(width/4))
+    move.hold("s",0.5*size)
+    move.hold("d",0.125*(width/4))
+
+
+
+
         
-    
-    

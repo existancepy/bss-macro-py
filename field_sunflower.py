@@ -25,13 +25,11 @@ time.sleep(0.08)
 pag.keyDown("w")
 move.press("space")
 move.press("space")
-time.sleep(3.1)
+time.sleep(1.15)
 move.press(",")
 move.press(",")
-time.sleep(0.17)
+time.sleep(0.5)
 pag.keyUp("w")
 move.press("space")
-
-time.sleep(0.6)
 
     

@@ -5,8 +5,6 @@ import os
 import tkinter
 import loadsettings
 import move
-
-
 def apd(k):
     cmd = """
         osascript -e  'tell application "System Events" to key down "{}"'
@@ -17,21 +15,7 @@ def apu(k):
         osascript -e  'tell application "System Events" to key up "{}"'
     """.format(k)
     os.system(cmd)
-    
-move.press(".")
-move.press(".")
+
 move.press("e")
-time.sleep(0.08)
-pag.keyDown("w")
-move.press("space")
-move.press("space")
-time.sleep(3.1)
-move.press(",")
-move.press(",")
-time.sleep(0.17)
-pag.keyUp("w")
-move.press("space")
-
-time.sleep(0.6)
-
+time.sleep(2)
     

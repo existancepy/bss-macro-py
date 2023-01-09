@@ -18,20 +18,20 @@ def apu(k):
     """.format(k)
     os.system(cmd)
     
-move.press(".")
-move.press(".")
-move.press("e")
-time.sleep(0.08)
-pag.keyDown("w")
-move.press("space")
-move.press("space")
-time.sleep(3.1)
-move.press(",")
-move.press(",")
-time.sleep(0.17)
-pag.keyUp("w")
-move.press("space")
 
-time.sleep(0.6)
+move.hold("d",4)
+move.hold("s",8)
+move.hold("a",9)
+move.hold("s",7)
+move.press(",")
+move.hold("w",2.5)
+move.press(".")
+move.hold("a",6)
+
+
+
+
+
+
 
     
