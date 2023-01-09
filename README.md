@@ -48,7 +48,7 @@ Credits:
 Natro macro for some of the image assets and techniques
 
 **Exiting the macro:**
-Tab out of roblox and press ctrl z to quit (not cmd z)
+Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 
 **Settings explaination:**
 
