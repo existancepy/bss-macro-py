@@ -236,6 +236,8 @@ def killMob(field,mob):
     currentfield = field.replace(" ","").lower()
     background()
     currentfield = ""
+    reset.reset()
+    convert()
     
     
 '''
@@ -253,6 +255,8 @@ updateSave("wh",wh)
         
 def startLoop():
     global currentfield
+    reset.reset()
+    convert()
     try:
         global started
         val = validateSettings()
@@ -272,8 +276,6 @@ def startLoop():
         while True:
             global bpc
             global currentfield
-            reset.reset()
-            convert()
             timings = loadtimings()
             if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
                 canon()
@@ -282,12 +284,11 @@ def startLoop():
                 time.sleep(0.2)
                 move.press("1")
                 pag.click()
+                webhook("","Starting stump snail","brown")
                 while True:
-                    webhook("","Starting stump snail","brown")
                     time.sleep(10)
                     pag.click()
-                    if imagesearch.find("./images/keepold.png",0.9):
-                        break
+                    if pag.locateOnScreen("./images/keepold.png", confidence = 0.85):break
                 webhook("","Stump snail killed, keeping amulet","bright green")
                 savetimings("stump_snail")
                 pag.moveTo(mw//2-30,mh//100*60)
@@ -377,6 +378,7 @@ def startLoop():
                             walk_to_hive()
                         else:
                             convert()
+                            reset.reset()
 
                             
     except KeyboardInterrupt:
