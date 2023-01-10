@@ -255,8 +255,6 @@ updateSave("wh",wh)
         
 def startLoop():
     global currentfield
-    reset.reset()
-    convert()
     try:
         global started
         val = validateSettings()
@@ -272,6 +270,8 @@ def startLoop():
         osascript -e 'activate application "Roblox"' 
         """
         os.system(cmd)
+        reset.reset()
+        convert()
 
         while True:
             global bpc
