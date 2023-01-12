@@ -62,7 +62,7 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 
 2. The dock is brought up during the macro, interrupting the key inputs.
    - This can be solved by manually clicking on the screen when the macro is ran
-3. *ImportError: dlopen* in the terminal when the code is ran.
+3. *ImportError: dlopen/import cv2* in the terminal when the code is ran.
    - This is most likely caused by an outdated macOS version. For a work around, check out https://github.com/existancepy/bss-macro-py-no-cv2
    - A better fix would just be to update your mac OS software
 
