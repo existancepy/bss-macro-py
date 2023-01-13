@@ -370,7 +370,7 @@ def startLoop():
                         webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
                         walk_to_hive()
                     else:
-                        move.press(setdat['whirligig_slot'])
+                        move.press(str(setdat['whirligig_slot']))
                         time.sleep(1)
                         r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
                         if not r or reject:
