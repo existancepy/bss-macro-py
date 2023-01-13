@@ -68,5 +68,3 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
    - This is most likely caused by an outdated macOS version. For a work around, check out https://github.com/existancepy/bss-macro-py-no-cv2
    - A better fix would just be to update your mac OS software
 
-
-
