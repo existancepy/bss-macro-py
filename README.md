@@ -16,7 +16,7 @@ I can release a window-compatible one, but ~im lazy~
 
 
 2.Open terminal/command line
-   Optional: Create a python venv
+   (Optional: Create a python venv)
    
 
 3.Run the following command:
