@@ -22,7 +22,7 @@ I can release a window-compatible one, but ~im lazy~
 3.Run the following command:
    *pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
 
-   *If you have multiple versions of python installed, use python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
+   *If you have python installed previously, use python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
 
 **Setup**
 
