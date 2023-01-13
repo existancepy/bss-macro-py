@@ -44,6 +44,7 @@ I can release a window-compatible one, but ~im lazy~
    *If you have multiple versions of python installed, use python3 e_macro.py*
 
 *During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
+Currently, it seems like you have to give terminal permissions under the accessibility and screen recording sections. Do let me know if there is any permissions I missed
 
 Credits:
 
