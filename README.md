@@ -48,7 +48,7 @@ Currently, it seems like you have to give terminal permissions under the accessi
 
 Credits:
 
-Natro macro for some of the image assets and techniques
+Natro macro for some of the techniques
 
 **Exiting the macro:**
 Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
