@@ -27,12 +27,14 @@ pag.keyDown("w")
 time.sleep(0.5)
 move.press("space")
 move.press("space")
-time.sleep(2.2)
+time.sleep(1.4)
+move.press(",")
+time.sleep(0.35)
 move.press("space")
+pag.keyUp("w")
+move.press(",")
+move.press(",")
 time.sleep(0.5)
-move.press(",")
-move.press(",")
-move.press(",")
 
 
 

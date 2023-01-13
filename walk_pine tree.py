@@ -21,9 +21,9 @@ def apu(k):
 
 move.hold("d",5)
 move.hold("s",7)
-apd("a")
+pag.keyDown("a")
 time.sleep(12*28/ws)
-apu("a")
+pag.keyUp("a")
 move.apdown("w")
 time.sleep(8*28/ws)
 move.press("space")
