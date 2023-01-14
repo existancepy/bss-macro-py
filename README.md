@@ -57,7 +57,7 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 
 
 1. The player keeps rotating at the hive before walking
-   - The code is not able to detect the hive. To fix this, take a screenshot of the hive area under your hotbar. Reset your character, then press "." 4        times, pgup (fn+ up arrow) until you cant go up anymore. Than press "o" until you stop zooming out. 
+   - The code is not able to detect the hive. To fix this, take a screenshot of the hive area under your hotbar. Reset your character, then press "." 4        times, then press pgup (fn+ up arrow) until you cant go up anymore. Than press "o" until you stop zooming out. 
    - Disable your shift lock switch and using cmd+shift+4, take a screenshot of the area under your hotbar. 
    - Here is an example: https://imgur.com/a/pvWYaWP You can take the screenshot anywhere in the red box. Try to keep the screenshot small                    https://imgur.com/a/FlcxKVl
    - Replace hive1.png in the images folder with your new image
