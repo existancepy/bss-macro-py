@@ -130,7 +130,7 @@ def convert():
             time.sleep(0.25)
     return
 def walk_to_hive():
-    
+    setdat = loadsettings.load()
     webhook("","Going back to hive","dark brown")
     exec(open("walk_{}.py".format(setdat['gather_field'])).read())
     st = time.perf_counter()
