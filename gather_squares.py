@@ -14,7 +14,7 @@ elif sizeword.lower() == "l":
 else:
     size = 1.5
 
-for i in range(width):
+for i in range(round(width)):
     move.hold("w",0.4*(size+i/1.7))
     move.hold("d",0.4*(size+i/1.7))
     move.hold("s",0.4*(size+i/1.7))
