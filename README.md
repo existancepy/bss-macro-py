@@ -73,5 +73,6 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
    - Under Menu Title, input 'Start Dictation…'  without the single quotes of course. The three periods are actually an ellipsis, which is one character which you can type by pressing option and the [ ; ] key, or just copy and paste what I typed above. 
    - I set the shortcut to Option + Command + E for that one.
    - Add it
+   - Sample image: https://imgur.com/a/hzbsM5e
    - Credit: https://www.dofus.com/en/forum/1151-general-problems-solutions/339448-issue-with-macos-keyboard-keys
 
