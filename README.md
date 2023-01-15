@@ -27,16 +27,14 @@ I can release a window-compatible one, but ~im lazy~
 **Setup**
 
 4. Download the files in the git repo into the folder made in step 1.
-5. Go to save.txt and edit the resolution. You can find it by clicking on the apple icon on the top bar menu -> about this mac -> displays
- *if you cant find save.txt, that means that I have updated the code. You can adjust the resolution at settings.txt*
  
  **Launching the program**
 
-6. Navigate to the folder created in step 1 using the "cd" command:
+5. Navigate to the folder created in step 1 using the "cd" command:
 
    *eg cd desktop/bee_swarm_macro*
 
-7. run the program with the following command:
+6. run the program with the following command:
 
    *python e_macro.py*
 
@@ -49,7 +47,9 @@ I can release a window-compatible one, but ~im lazy~
  - System settings permissions: 
    Currently, it seems like you have to give terminal permissions under the accessibility and screen recording sections. Do let me know if there is any  permissions I missed
 
-- Check out 1. and 4. of the "bugs and fixes section" below. I highly recommend doing the fixes even if you may not seem to encounter the problem. 
+- Check out 1. and 4. of the "bugs and fixes section" below. I highly recommend doing the fixes even if you may not seem to encounter the problem.
+  *So far, everyone who has messaged  me has encountered hive issues (whether they realised it or not), so I recommend re-configuring the hive as stated    in 1.*
+
 
 
 Credits:
@@ -81,6 +81,6 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
    - Under Menu Title, input 'Start Dictation…'  without the single quotes of course. The three periods are actually an ellipsis, which is one character which you can type by pressing option and the [ ; ] key, or just copy and paste what I typed above. 
    - I set the shortcut to Option + Command + E for that one.
    - Add it
-   - Sample image: https://imgur.com/a/hzbsM5e
+   - Reference image: https://imgur.com/a/hzbsM5e
    - Credit: https://www.dofus.com/en/forum/1151-general-problems-solutions/339448-issue-with-macos-keyboard-keys
 
