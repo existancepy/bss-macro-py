@@ -20,7 +20,7 @@ I can release a window-compatible one, but ~im lazy~
    
 
 3.Run the following command:
-   *pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
+   *pip install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard*
 
    *If you have python installed previously, use python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
 
@@ -43,7 +43,14 @@ I can release a window-compatible one, but ~im lazy~
    *If you have multiple versions of python installed, use python3 e_macro.py*
 
 *During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
-Currently, it seems like you have to give terminal permissions under the accessibility and screen recording sections. Do let me know if there is any permissions I missed
+
+**Calibration**
+
+ - System settings permissions: 
+   Currently, it seems like you have to give terminal permissions under the accessibility and screen recording sections. Do let me know if there is any  permissions I missed
+
+- Check out 1. and 4. of the "bugs and fixes section" below. I highly recommend doing the fixes even if you may not seem to encounter the problem. 
+
 
 Credits:
 
@@ -61,6 +68,7 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
    - Disable your shift lock switch and using cmd+shift+4, take a screenshot of the area under your hotbar. 
    - Here is an example: https://imgur.com/a/pvWYaWP You can take the screenshot anywhere in the red box. Try to keep the screenshot small                    https://imgur.com/a/FlcxKVl
    - Replace hive1.png in the images folder with your new image
+   - Ensure that you have give terminal permissions to screen recording
 
 2. The dock is brought up during the macro, interrupting the key inputs.
    - This can be solved by manually clicking on the screen when the macro is ran
