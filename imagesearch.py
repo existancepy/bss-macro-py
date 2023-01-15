@@ -55,7 +55,8 @@ def find(img,confi, x1 = 0, y1 = 0, x2 = ww, y2 = wh):
     result = cv2.matchTemplate(small_image, large_image, method)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
     x,y = max_loc
-    print("Trying to find {}. max_val is {} ".format(img,max_val))
+    if not img == "disconnect.png":
+        print("Trying to find {}. max_val is {} ".format(img,max_val))
     if max_val >= confi:
         return [1,x,y]
     return 

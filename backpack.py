@@ -3,16 +3,20 @@ import time
 import os
 import tkinter
 import move
-
+import loadsettings
+ms = pag.size()
+mw = ms[0]
+mh = ms[1]
+dt = loadsettings.load()['display_type']
 def bpc():
     def rgb_to_hex(r, g, b):
       return ('0x{:X}{:X}{:X}').format(r, g, b)
-
-    ms = pag.size()
-    mw = ms[0]
-    mh = ms[1]
-    X1=(round((mw/2+60), 0))*2
-    Y1=14*2
+    X1=mw//2+59+3
+    Y1=6
+    if dt == "built-in retina display":
+        X1=(round((mw/2+60), 0))*2
+        Y1=14*2
+        
     pix = pag.pixel(X1,Y1)
     backpackColor = int(rgb_to_hex(pix[0],pix[1],pix[2]),16)
 

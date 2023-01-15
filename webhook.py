@@ -2,9 +2,13 @@ import time
 import os
 import loadsettings
 from discord_webhook import DiscordWebhook, DiscordEmbed
+import pyautogui
+from io import BytesIO
 dwurl = loadsettings.load()["discord_webhook_url"]
-
-def webhook(title,desc,colour):
+sendscreenshot = loadsettings.load()['send_screenshot']
+enable = loadsettings.load()["enable_discord_webhook"]
+print(dwurl)
+def webhook(title,desc,colour,ss=0):
     colours = {
     "red":"D22B2B",
     "light blue":"89CFF0",
@@ -17,16 +21,22 @@ def webhook(title,desc,colour):
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
     print("[{}] {} - {}".format(current_time,title,desc))
-    if not dwurl: return
-    webhook = DiscordWebhook(url=dwurl)
+    if not enable: return
+    webhook = DiscordWebhook(url=dwurl,rate_limit_retry=True)
     # you can set the color as a decimal (color=242424) or hex (color='03b2f8') number
     if title:
         embed = DiscordEmbed(title="[{}] {}".format(current_time,title), description=desc, color=colours[colour])
     else:
         embed = DiscordEmbed(title=title, description="[{}] {}".format(current_time,desc), color=colours[colour])
-        
+    if ss and set:
+        im = pyautogui.screenshot()
+        im.save("screenshot.png")
+        with open("screenshot.png", "rb") as f:
+            webhook.add_file(file=f.read(), filename='screenshot.png')
+        f.close()
+        embed.set_image(url='attachment://screenshot.png')
+        os.remove('screenshot.png')
     webhook.add_embed(embed)
-
     response = webhook.execute()
         
 

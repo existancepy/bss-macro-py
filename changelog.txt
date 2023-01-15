@@ -24,6 +24,7 @@ Changelog:
 - Fixed bugs regarding whirligig
 - Added a GUI
 
+
 9/1/23
 - Added bamboo,blue flower, dandelion and mushroom field pathing
 - Added bug runs
@@ -34,3 +35,24 @@ Changelog:
 - ctrl c is another, better way to stop the macro
 - Edits to the overall flow of the loop so that bug runs wont just loop with the same few mobs
 - Decreased looting time for bug runs
+
+11/1/23
+ - Forgot to update the image assets, leading to an error. Fixed now
+ - Added collection for wealth clock, blueberry dispenser, strawberry dispenser, royal jelly dispenser
+
+13/1/23
+- Another bug fix
+- Fixed paths for pine tree, pumpkin and cactus
+
+14/1/23
+-QOL changes to the GUI 
+- Improved walk back to hive path for strawberry
+- You can now change the resolution through the GUI instead of the save.txt file
+- Option to send screenshots of the game to the user via discord webhook
+
+15/1/23
+- Fixed bug regarding squares gathering pattern
+- Implemented multi-processing, leading to a Reduction in pause times between gather pattern
+- disconnect check
+- rejoin convert method
+- Added treat dispenser

@@ -106,7 +106,7 @@ def canon():
             webhook("","Canon found","dark brown")
             return
         if time.perf_counter()  - st > 10/28*setdat["walkspeed"]:
-            webhook("","Cannon not found, resetting","dark brown")
+            webhook("","Cannon not found, resetting","dark brown",1)
             break
         
     reset.reset()   

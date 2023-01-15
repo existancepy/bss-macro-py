@@ -24,6 +24,12 @@ def load():
             info[l[0]] = l[1]
     return info
 
-        
-
-
+def save(setting,value):
+    info = load()
+    info[setting] = value
+    out = ''
+    for i in info:
+        out += '\n{}:{}'.format(i,info[i])
+    with open('settings.txt',"w") as f:
+        lines = f.write(out)
+    f.close()

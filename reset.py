@@ -26,7 +26,7 @@ def reset():
     xo = ww//4
     yo = wh//100*90
     xt = xo*2
-    yt = wh
+    yt = wh//100*10
     time.sleep(2)
     pag.press('esc')
     time.sleep(0.1)
@@ -61,5 +61,5 @@ def reset():
     time.sleep(1)
     for _ in range(4):
         pag.press(",")
-    webhook("Notice","Hive not found. Assume that player is facing the right direction","red")
+    webhook("Notice","Hive not found. Assume that player is facing the right direction","red",1)
 
