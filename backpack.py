@@ -12,7 +12,7 @@ def bpc():
     def rgb_to_hex(r, g, b):
       return ('0x{:X}{:X}{:X}').format(r, g, b)
     X1=mw//2+59+3
-    Y1=6
+    Y1=14
     if dt == "built-in retina display":
         X1=(round((mw/2+60), 0))*2
         Y1=14*2

@@ -24,7 +24,6 @@ wh = savedata["wh"]
 '''
 screen = np.array(ImageGrab.grab())
 screen = cv2.cvtColor(src=screen, code=cv2.COLOR_BGR2RGB)
-
 small_image = cv2.imread('./images/saturator.png')
 large_image = screen
 result = cv2.matchTemplate(small_image, large_image, method)
@@ -34,13 +33,10 @@ print(MPx,MPy)
 pag.moveTo(MPx//2,MPy//2)
 # Step 2: Get the size of the template. This is the same size as the match.
 trows,tcols = small_image.shape[:2]
-
 # Step 3: Draw the rectangle on large_image
 cv2.rectangle(large_image, (MPx,MPy),(MPx+tcols,MPy+trows),(0,0,255),2)
-
 # Display the original image with the rectangle around the match.
 cv2.imshow('output',large_image)
-
 # The image is only displayed if we call this
 cv2.waitKey(0)
 '''
@@ -60,7 +56,3 @@ def find(img,confi, x1 = 0, y1 = 0, x2 = ww, y2 = wh):
     if max_val >= confi:
         return [1,x,y]
     return 
-
-
-
-

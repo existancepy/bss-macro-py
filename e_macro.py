@@ -15,14 +15,17 @@ import multiprocessing
 import keyboard
 from webhook import webhook
 import ctypes
+import tty
 global savedata
 global setdat
+import discord
 savedata = {}
 ww = ""
 wh = ""
 ms = pag.size()
 mw = ms[0]
 mh = ms[1]
+stop = 1
 setdat = loadsettings.load()
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
@@ -31,6 +34,38 @@ if __name__ == '__main__':
     bpc = multiprocessing.Value('i', 0)
     gather = multiprocessing.Value('i', 0)
     disconnected = multiprocessing.Value('i', 0)
+
+def discord_bot(dc):
+    setdat = loadsettings.load()
+
+    intents = discord.Intents.default()
+    intents.message_content = True
+
+    client = discord.Client(intents=intents)
+
+    @client.event
+    async def on_ready():
+        print(f'We have logged in as {client.user}')
+
+    @client.event
+    async def on_message(message):
+        if message.author == client.user:
+            return
+
+        if message.content.startswith('!b'):
+            args = message.content.split(" ")[1:]
+            cmd = args[0].lower()
+            if cmd == "rejoin":
+                await message.channel.send("Now attempting to rejoin")
+                dc.value = 1
+                rejoin()
+                dc.value = 0
+            elif cmd == "screenshot":
+                await message.channel.send("Sending a screenshot via webhook")
+                webhook("User Requested: Screenshot","","light blue",1)
+                
+
+    client.run(setdat['discord_bot_token'])
     
 def validateSettings():
     msg = ""
@@ -253,7 +288,7 @@ def background(cf,bpcap,gat,dc):
         if gat.value:
             bpcap.value = backpack.bpc()
             resetMobTimer(cf.value.lower())
-            print(cf.value)
+            
             
 
 def killMob(field,mob,reset):
@@ -266,7 +301,7 @@ def killMob(field,mob,reset):
 def lootMob(field,mob,resetCheck):
     start = time.time()
     move.apkey("space")
-    webhook("","Looting: {} ({})".format(mob.title(), field.title()),"bright green",1)
+    webhook("","Looting: {} ({})".format(mob.title(), field.title()),"bright green")
     while True:
         moblootPattern(1.1,1.4,"none",2)
         if time.time() - start > 15:
@@ -291,7 +326,7 @@ def collect(name):
         if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
             webhook("","Collected: {}".format(dispname),"bright green",1)
             break
-        webhook("","Unable to collect {}".format(dispname),"dark brown",1)
+        webhook("","Unable To Collect: {}".format(dispname),"dark brown",1)
         reset.reset()
     savetimings(usename)
     move.press('e')
@@ -440,169 +475,171 @@ updateSave("wh",wh)
             
     
 def startLoop(cf,bpcap,gat,dc):
-    try:
-        val = validateSettings()
+    val = validateSettings()
 
-        if val:
-            pag.alert(text='Your settings are incorrect! Check the terminal to see what is wrong.', title='Invalid settings', button='OK')
-            print(val)
-            sys.exit()
+    if val:
+        pag.alert(text='Your settings are incorrect! Check the terminal to see what is wrong.', title='Invalid settings', button='OK')
+        print(val)
+        sys.exit()
+        
+    cmd = """
+    osascript -e 'activate application "Roblox"' 
+    """
+    os.system(cmd)
+    reset.reset()
+    convert()
+    savedata = loadRes()
+    ww = savedata['ww']
+    wh = savedata['wh']
+    while True:
+        timings = loadtimings()
+        setdat = loadsettings.load()
+        #Stump snail check
+        if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
+            canon()
+            webhook("","Traveling: Stump snail (stump) ","brown")
+            exec(open("field_stump.py").read())
+            time.sleep(0.2)
+            move.press("1")
+            pag.click()
+            webhook("","Starting stump snail","brown")
+            while True:
+                time.sleep(10)
+                pag.click()
+                if imagesearch.find("keepold.png",0.9):break
+            webhook("","Stump snail killed, keeping amulet","bright green")
+            savetimings("stump_snail")
+            pag.moveTo(mw//2-30,mh//100*60)
+            pag.click()
+            reset.reset()
+        #Collect check
+        if setdat['wealthclock']  and checkRespawn('wealthclock',"1h"):
+            collect("wealth clock")
+        if setdat['blueberrydispenser'] and checkRespawn('blueberrydispenser','4h'):
+            collect('blueberry dispenser')
+        if setdat['strawberrydispenser'] and checkRespawn('strawberrydispenser','4h'):
+            collect('strawberry dispenser')
+        if setdat['royaljellydispenser'] and checkRespawn('royaljellydispenser','22h'):
+            collect('royal jelly dispenser')
+        if setdat['treatdispenser'] and checkRespawn('treatdispenser','1h'):
+            collect('treat dispenser')
+        #Mob run check
+        if setdat['werewolf'] and checkRespawn("werewolf","1h"):
+            killMob("pumpkin","werewolf",1)
+        if setdat["ladybug"] and checkRespawn("ladybug_strawberry","5m"):
             
-        cmd = """
-        osascript -e 'activate application "Roblox"' 
-        """
-        os.system(cmd)
-        reset.reset()
-        convert()
-        savedata = loadRes()
-        ww = savedata['ww']
-        wh = savedata['wh']
-        while True:
-            timings = loadtimings()
-            setdat = loadsettings.load()
-            #Stump snail check
-            if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
-                canon()
-                webhook("","Traveling: Stump snail (stump) ","brown")
-                exec(open("field_stump.py").read())
-                time.sleep(0.2)
-                move.press("1")
-                pag.click()
-                webhook("","Starting stump snail","brown")
-                while True:
-                    time.sleep(10)
-                    pag.click()
-                    if pag.locateOnScreen("./images/keepold.png", confidence = 0.85):break
-                webhook("","Stump snail killed, keeping amulet","bright green")
-                savetimings("stump_snail")
-                pag.moveTo(mw//2-30,mh//100*60)
-                pag.click()
-            #Collect check
-            if setdat['wealthclock']  and checkRespawn('wealthclock',"1h"):
-                collect("wealth clock")
-            if setdat['blueberrydispenser'] and checkRespawn('blueberrydispenser','4h'):
-                collect('blueberry dispenser')
-            if setdat['strawberrydispenser'] and checkRespawn('strawberrydispenser','4h'):
-                collect('strawberry dispenser')
-            if setdat['royaljellydispenser'] and checkRespawn('royaljellydispenser','22h'):
-                collect('royal jelly dispenser')
-            if setdat['treatdispenser'] and checkRespawn('treatdispenser','1h'):
-                collect('treat dispenser')
-            #Mob run check
-            if setdat['werewolf'] and checkRespawn("werewolf","1h"):
-                killMob("pumpkin","werewolf",1)
-            if setdat["ladybug"] and checkRespawn("ladybug_strawberry","5m"):
-                
-                if checkRespawn("ladybug_mushroom","5m"):
-                    killMob("strawberry","ladybug",0)
-                    move.hold("s",4)
-                    move.hold("a",3)
-                    move.hold("w",5.5)
-                    move.hold("s",3)
-                    lootMob("mushroom","ladybug",1)
-                else:
-                    killMob("strawberry","ladybug",1)
-            if setdat["ladybug"] and checkRespawn("ladybug_clover","5m"):
-                killMob("clover","ladybug",1)
-            if setdat["ladybug"] and checkRespawn("ladybug_mushroom","5m"):
-                killMob("mushroom","ladybug",1)
-            if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_clover","5m"):
-                if checkRespawn("rhinobeetle_blueflower","5m"):
-                    webhook("","hi","red")
-                    killMob("clover","rhino beetle",0)
-                    move.hold("s",7)
-                    time.sleep(1)
-                    lootMob("blue flower","rhinobeetle",1)
-                else:
-                    killMob("clover","rhino beetle",1)
-                
-            if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_blueflower","5m"):
-                killMob("blue flower","rhino beetle",1)
-            if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_bamboo","5m"):
-                killMob("bamboo","rhino beetle",1)
-            if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_pineapple","5m"):
-                killMob("pineapple","rhino beetle",1)
-            if setdat["mantis"] and checkRespawn("mantis_pinetree","20m"):
-                killMob("pine tree","mantis",1)
-            if setdat["mantis"] and checkRespawn("mantis_pineapple","20m"):
-                killMob("pineapple","mantis",1)
-            if setdat["scorpion"] and checkRespawn("scorpion_rose","20m"):
-                killMob("rose","scorpion",1)
-            if setdat["spider"] and checkRespawn("spider_spider","30m"):
-                killMob("spider","spider",1)
-            #gather check
-            if setdat['gather_enable']:
-                canon()
-                webhook("","Traveling: {}".format(setdat['gather_field']),"dark brown")
-                exec(open("field_{}.py".format(setdat['gather_field'])).read())
-                cf.value = setdat['gather_field'].replace(" ","").lower()
-                time.sleep(0.2)
-                if setdat["before_gather_turn"] == "left":
-                    for _ in range(setdat["turn_times"]):
-                        move.press(",")
-                elif setdat["before_gather_turn"] == "right":
-                    for _ in range(setdat["turn_times"]):
-                        move.press(".")
-                time.sleep(0.2)
-                move.press("1")
-                pag.click()
-                gp = setdat["gather_pattern"].lower()
-                webhook("Gathering: {}".format(setdat['gather_field']),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
-                move.apkey("space")
-                time.sleep(0.2)
-                timestart = time.perf_counter()
-                gat.value = 1
-                while True:
-                    pag.mouseDown()
-                    exec(open("gather_{}.py".format(gp)).read())
-                    pag.mouseUp()
-                    timespent = (time.perf_counter() - timestart)/60
-                    if bpcap.value > setdat["pack"]:
+            if checkRespawn("ladybug_mushroom","5m"):
+                killMob("strawberry","ladybug",0)
+                move.hold("s",4)
+                move.hold("a",3)
+                move.hold("w",5.5)
+                move.hold("s",3)
+                lootMob("mushroom","ladybug",1)
+            else:
+                killMob("strawberry","ladybug",1)
+        if setdat["ladybug"] and checkRespawn("ladybug_clover","5m"):
+            killMob("clover","ladybug",1)
+        if setdat["ladybug"] and checkRespawn("ladybug_mushroom","5m"):
+            killMob("mushroom","ladybug",1)
+        if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_clover","5m"):
+            if checkRespawn("rhinobeetle_blueflower","5m"):
+                webhook("","hi","red")
+                killMob("clover","rhino beetle",0)
+                move.hold("s",7)
+                time.sleep(1)
+                lootMob("blue flower","rhinobeetle",1)
+            else:
+                killMob("clover","rhino beetle",1)
+            
+        if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_blueflower","5m"):
+            killMob("blue flower","rhino beetle",1)
+        if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_bamboo","5m"):
+            killMob("bamboo","rhino beetle",1)
+        if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_pineapple","5m"):
+            killMob("pineapple","rhino beetle",1)
+        if setdat["mantis"] and checkRespawn("mantis_pinetree","20m"):
+            killMob("pine tree","mantis",1)
+        if setdat["mantis"] and checkRespawn("mantis_pineapple","20m"):
+            killMob("pineapple","mantis",1)
+        if setdat["scorpion"] and checkRespawn("scorpion_rose","20m"):
+            killMob("rose","scorpion",1)
+        if setdat["spider"] and checkRespawn("spider_spider","30m"):
+            killMob("spider","spider",1)
+        #gather check
+        if setdat['gather_enable']:
+            canon()
+            webhook("","Traveling: {}".format(setdat['gather_field']),"dark brown")
+            exec(open("field_{}.py".format(setdat['gather_field'])).read())
+            cf.value = setdat['gather_field'].replace(" ","").lower()
+            time.sleep(0.2)
+            if setdat["before_gather_turn"] == "left":
+                for _ in range(setdat["turn_times"]):
+                    move.press(",")
+            elif setdat["before_gather_turn"] == "right":
+                for _ in range(setdat["turn_times"]):
+                    move.press(".")
+            time.sleep(0.2)
+            move.press("1")
+            pag.click()
+            gp = setdat["gather_pattern"].lower()
+            webhook("Gathering: {}".format(setdat['gather_field']),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
+            move.apkey("space")
+            time.sleep(0.2)
+            timestart = time.perf_counter()
+            gat.value = 1
+            fullTime = 0
+            while True:
+                pag.mouseDown()
+                exec(open("gather_{}.py".format(gp)).read())
+                pag.mouseUp()
+                timespent = (time.perf_counter() - timestart)/60
+                if bpcap.value > setdat["pack"]:
+                    if fullTime == 1:
                         webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
                         break
-                    if timespent > setdat["gather_time"]:
-                        webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
-                        break
-                time.sleep(0.5)
-                gat.value = 0
-                cf.value = ""
-                if setdat["before_gather_turn"] == "left":
-                    for _ in range(setdat["turn_times"]):
-                        move.press(".")
-                elif setdat["before_gather_turn"] == "right":
-                    for _ in range(setdat["turn_times"]):
-                        move.press(",")
-                        
-                if setdat['return_to_hive'] == "walk":
+                    else:
+                        fullTime += 1
+                else:
+                    fullTime = 0
+                    
+                if timespent > setdat["gather_time"]:
+                    webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+                    break
+            time.sleep(0.5)
+            gat.value = 0
+            cf.value = ""
+            if setdat["before_gather_turn"] == "left":
+                for _ in range(setdat["turn_times"]):
+                    move.press(".")
+            elif setdat["before_gather_turn"] == "right":
+                for _ in range(setdat["turn_times"]):
+                    move.press(",")
+                    
+            if setdat['return_to_hive'] == "walk":
+                walk_to_hive()
+            elif setdat['return_to_hive'] == "reset":
+                reset.reset()
+                convert()
+            elif setdat['return_to_hive'] == "rejoin":
+                rejoin()
+                reset.reset()
+            elif setdat['return_to_hive'] == "whirligig":
+                reject = 0
+                webhook("","Activating whirligig","dark brown")
+                if setdat['whirligig_slot'] == "none":
+                    webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
                     walk_to_hive()
-                elif setdat['return_to_hive'] == "reset":
-                    reset.reset()
-                    convert()
-                elif setdat['return_to_hive'] == "rejoin":
-                    rejoin()
-                    reset.reset()
-                elif setdat['return_to_hive'] == "whirligig":
-                    reject = 0
-                    webhook("","Activating whirligig","dark brown")
-                    if setdat['whirligig_slot'] == "none":
-                        webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
+                else:
+                    move.press(str(setdat['whirligig_slot']))
+                    time.sleep(1)
+                    r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+                    if not r or reject:
+                        webhook("Notice","Whirligig failed to activate, walking back","red")
                         walk_to_hive()
                     else:
-                        move.press(str(setdat['whirligig_slot']))
-                        time.sleep(1)
-                        r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
-                        if not r or reject:
-                            webhook("Notice","Whirligig failed to activate, walking back","red")
-                            walk_to_hive()
-                        else:
-                            convert()
-                            reset.reset()
-                            
-
-                            
-    except KeyboardInterrupt:
-        webhook("Macro stopped","","dark brown")
-        started = 0
+                        convert()
+                        reset.reset()
+                    
     
 if __name__ == "__main__":
     
@@ -667,6 +704,8 @@ if __name__ == "__main__":
     display_type = tk.StringVar(root)
     display_type.set(setdat["display_type"].capitalize())
     private_server_link = setdat["private_server_link"]
+    enable_discord_bot = tk.IntVar(value=setdat["enable_discord_bot"])
+    discord_bot_token = setdat['discord_bot_token']
 
     wealthclock = tk.IntVar(value=setdat["wealthclock"])
     blueberrydispenser = tk.IntVar(value=setdat["blueberrydispenser"])
@@ -674,12 +713,14 @@ if __name__ == "__main__":
     royaljellydispenser  = tk.IntVar(value=setdat["royaljellydispenser"])
     treatdispenser = tk.IntVar(value=setdat["treatdispenser"])
 
+    
+
 
     wwa  = savedata['ww']
     wha = savedata['wh']
     def startGo():
         webhook("Macro started","","dark brown")
-        global setdat
+        global setdat, stop
         setdict = {
             "hive_number": hive_number.get(),
             "walkspeed": speedtextbox.get(1.0,"end").replace("\n",""),
@@ -701,6 +742,8 @@ if __name__ == "__main__":
             "whirligig_slot": whirligig_slot.get(),
             "display_type": display_type.get().lower(),
             "private_server_link":linktextbox.get(1.0,"end").replace("\n",""),
+            "enable_discord_bot":enable_discord_bot.get(),
+            "discord_bot_token":tokentextbox.get(1.0,"end").replace("\n",""),
             
             "stump_snail": stump_snail.get(),
             "ladybug": ladybug.get(),
@@ -728,16 +771,22 @@ if __name__ == "__main__":
         startLoop_proc.start()
         background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected))
         background_proc.start()
-        while True:
-            if disconnected.value:
-                startLoop_proc.terminate()
-                while disconnected.value:
-                    pass
-                startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected))
-                startLoop_proc.start()
+        if setdat['enable_discord_bot']:
+            discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,))
+            discord_bot_proc.start()
+        try:
+            while True:
+                if disconnected.value:
+                    startLoop_proc.terminate()
+                    while disconnected.value:
+                        pass
+                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected))
+                    startLoop_proc.start()
+        except KeyboardInterrupt:
+            startLoop_proc.terminate()
+            background_proc.terminate()
+            webhook("Macro Stopped","","dark brown")
         
-    def stopScript():
-        raise KeyboardInterrupt
 
     def disablews(event):
         if return_to_hive.get().lower() == "whirligig":
@@ -838,12 +887,18 @@ if __name__ == "__main__":
     linktextbox = tkinter.Text(frame3, width = 24, height = 1)
     linktextbox.insert("end",private_server_link)
     linktextbox.place(x=150,y=192)
+    tkinter.Checkbutton(frame3, text="Enable Discord Bot", variable=enable_discord_bot, bg = "#E4E4E4").place(x=0, y = 225)
+    tkinter.Label(frame3, text = "Discord Bot Token", bg = "#E4E4E4").place(x = 170, y = 226)
+    tokentextbox = tkinter.Text(frame3, width = 24, height = 1)
+    tokentextbox.insert("end",discord_bot_token)
+    tokentextbox.place(x = 300, y=228)
     #Root
     tkinter.Button(root, text = "Start",command = startGo, height = 2, width = 7 ).place(x=10,y=350)
 
     disablews("1")
     disabledw()
     root.mainloop()
+    
 
 
         

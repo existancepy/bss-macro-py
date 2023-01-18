@@ -1,4 +1,4 @@
-'''
+
 import pyautogui as pag
 import time
 import os
@@ -19,12 +19,12 @@ from webhook import webhook
 import webbrowser
 import reset
 
-
-cmd = """
+'''
+oocmd = """
 osascript -e 'activate application "Roblox"' 
 """
 os.system(cmd)
-
+'''
 time.sleep(1)
 savedata = {}
 def loadSave():
@@ -37,12 +37,17 @@ def loadSave():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
 loadSave()
+setdat = loadsettings.load()
 ww = savedata["ww"]
 wh = savedata["wh"]
 ms = pag.size()
 mw = ms[0]
 mh = ms[1]
 
+
+ #!/usr/bin/env python
+
+'''
 
 
 
@@ -240,33 +245,6 @@ def rejoin():
         updateHive(6)
     convert()
 '''
-
-import multiprocessing
-import time
-import ctypes
-
-
-def f(n):
-    while True:
-        print(n.value)
-        n.value = "i"
-        print('b')
-        
-def a(n):
-    while True:
-        if n.value == "i":
-            print(n.value)
-
-if __name__ == '__main__':
-    manager = multiprocessing.Manager()
-    num = manager.Value(ctypes.c_wchar_p, "test")
-    p = multiprocessing.Process(target=f,args=(num,))
-    
-    p.start()
-    q = multiprocessing.Process(target=a,args=(num,))
-    q.start()
-    while True:
-        pass
 
 
 

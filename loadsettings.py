@@ -13,11 +13,15 @@ def load():
             l = s.strip().split(":",1)
             if l[1].isdigit():
                 l[1] = int(l[1])
+            elif l[1].replace(".","").isdigit():
+                l[1] = float(l[1])
             elif l[1].lower() == "yes":
                 l[1] = 1
             elif l[1].lower()  == "no":
                 l[1] = 0
             elif l[1].lower().startswith("http"):
+                pass
+            elif l[0] == "discord_bot_token":
                 pass
             else:
                 l[1] = l[1].lower()
