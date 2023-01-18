@@ -6,6 +6,11 @@ I can release a window-compatible one, but ~im lazy~
 
 **Set your display resolution to default and colour profile to colour LCD. For roblox, play in fullscreen and set the graphics quality to 1**
 
+There's a discord server now! Thanks to kay ;)#6148 for setting it up
+https://discord.gg/PwUMDp8c
+Better instructions and fixes
+
+
 **Installation**
 
 
