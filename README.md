@@ -67,17 +67,17 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 
 **Setting up a discord bot**
 
-Go to https://discord.com/developers/applications
-Click on “New Application” (top right)
-Put in the name, tick the checkbox and create
-Copy the application id (it is required later)
-In the “settings” sidebar, click on bot -> add bot 
-Scroll down to “Privileged Gateway Intents” and check “Message Content Intent”
-Edit and copy  in the following link into a web browser:
-https://discord.com/oauth2/authorize?client_id=<your application id from step 4>&permissions=68608&scope=bot
-Add your bot to the server and ensure that it has permissions to view the channels you want to use it in
-Returning back to the application page, click on reset token -> copy
-Launch the macro and copy the token into the calibration section.
+1. Go to https://discord.com/developers/applications
+2. Click on “New Application” (top right)
+3. Put in the name, tick the checkbox and create
+4. Copy the application id (it is required later)
+5. In the “settings” sidebar, click on bot -> add bot 
+6. Scroll down to “Privileged Gateway Intents” and check “Message Content Intent”
+7. Edit and copy  in the following link into a web browser:
+8. https://discord.com/oauth2/authorize?client_id=<your application id from step 4>&permissions=68608&scope=bot
+9. Add your bot to the server and ensure that it has permissions to view the channels you want to use it in
+10. Returning back to the application page, click on reset token -> copy
+11. Launch the macro and copy the token into the calibration section.
 
 Discord bot commands:
 
