@@ -153,9 +153,7 @@ def canon():
     r = ""
     pag.keyUp("d")
     while True:
-        pag.keyDown("d")
-        time.sleep(0.15)
-        pag.keyUp("d")
+        move.hold("d",0.15)
         r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
         if r:
             webhook("","Canon found","dark brown")
