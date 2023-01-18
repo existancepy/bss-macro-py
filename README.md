@@ -20,9 +20,9 @@ I can release a window-compatible one, but ~im lazy~
    
 
 3.Run the following command:
-   *pip install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard*
+   *pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard*
 
-   *If you have python installed previously, use python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
+   *Or python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
 
 **Setup**
 
@@ -36,9 +36,8 @@ I can release a window-compatible one, but ~im lazy~
 
 6. run the program with the following command:
 
-   *python e_macro.py*
+   *python3 e_macro.py*
 
-   *If you have multiple versions of python installed, use python3 e_macro.py*
 
 *During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
 
