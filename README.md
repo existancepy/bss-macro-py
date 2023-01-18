@@ -65,6 +65,28 @@ Natro macro for some of the techniques
 **Exiting the macro:**
 Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 
+**Setting up a discord bot**
+
+Go to https://discord.com/developers/applications
+Click on “New Application” (top right)
+Put in the name, tick the checkbox and create
+Copy the application id (it is required later)
+In the “settings” sidebar, click on bot -> add bot 
+Scroll down to “Privileged Gateway Intents” and check “Message Content Intent”
+Edit and copy  in the following link into a web browser:
+https://discord.com/oauth2/authorize?client_id=<your application id from step 4>&permissions=68608&scope=bot
+Add your bot to the server and ensure that it has permissions to view the channels you want to use it in
+Returning back to the application page, click on reset token -> copy
+Launch the macro and copy the token into the calibration section.
+
+Discord bot commands:
+
+Format: <prefix> <command>
+Prefix: !b
+Commands: rejoin (forces the character to rejoin the game), 
+                    screenshot (sends a screenshot of the screen)
+*Example: !b rejoin*
+
 
 **Bugs and fixes:**
 
