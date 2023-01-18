@@ -7,7 +7,9 @@ I can release a window-compatible one, but ~im lazy~
 **Set your display resolution to default and colour profile to colour LCD. For roblox, play in fullscreen and set the graphics quality to 1**
 
 There's a discord server now! Thanks to kay ;)#6148 for setting it up
+
 https://discord.gg/PwUMDp8c
+
 Better instructions and fixes
 
 
@@ -25,9 +27,9 @@ Better instructions and fixes
    
 
 3.Run the following command:
-   *pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard*
+   *pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py*
 
-   *Or python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook*
+   *Or python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py*
 
 **Setup**
 
