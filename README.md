@@ -126,6 +126,8 @@ Commands: rejoin (forces the character to rejoin the game),
 - relaunch terminal
 
 Run the following commands:
+
 *pip3 uninstall opencv-python pillow*
+
 *pip3 install opencv-python pillow*
 
