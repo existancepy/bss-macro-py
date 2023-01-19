@@ -21,7 +21,12 @@ Better instructions and fixes
 
 1. Create a folder anywhere (it will be where the macro files are stored)
 
-
+**For M1 Macs**
+- close terminal
+- Go to finder -> application -> terminal
+- Right click terminal  -> get info 
+- Check the checkbox Open using Rosetta
+- relaunch terminal
 2.Open terminal/command line
    (Optional: Create a python venv)
    
