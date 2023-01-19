@@ -27,6 +27,7 @@ Better instructions and fixes
 - Right click terminal  -> get info 
 - Check the checkbox Open using Rosetta
 - relaunch terminal
+
 2.Open terminal/command line
    (Optional: Create a python venv)
    
