@@ -56,7 +56,11 @@ Better instructions and fixes
 **Calibration**
 
  - System settings permissions: 
-   Currently, it seems like you have to give terminal permissions under the accessibility and screen recording sections. Do let me know if there is any  permissions I missed
+   Security and privacy -> privacy
+   Ensure that terminal has following permissions:
+      - Full Disk Access
+      - Screen Recording
+      - Accessibility
 
 - Check out 1. and 4. of the "bugs and fixes section" below. I highly recommend doing the fixes even if you may not seem to encounter the problem.
   *So far, everyone who has messaged  me has encountered hive issues (whether they realised it or not), so I recommend re-configuring the hive as stated    in 1.*
