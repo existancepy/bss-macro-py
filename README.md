@@ -22,11 +22,10 @@ Better instructions and fixes
 1. Create a folder anywhere (it will be where the macro files are stored)
 
 **For M1 Macs**
-- close terminal
+- ensure terminal is closed
 - Go to finder -> application -> terminal
 - Right click terminal  -> get info 
-- Check the checkbox Open using Rosetta
-- relaunch terminal
+- Check the checkbox "Open using Rosetta"
 
 2.Open terminal/command line
    (Optional: Create a python venv)
@@ -117,4 +116,16 @@ Commands: rejoin (forces the character to rejoin the game),
    - Add it
    - Reference image: https://imgur.com/a/hzbsM5e
    - Credit: https://www.dofus.com/en/forum/1151-general-problems-solutions/339448-issue-with-macos-keyboard-keys
+
+5. "mach-o file, but is an incompatible architecture (have 'x86_64', need 'arm64e')"
+ For M1 Macs,
+ - close terminal
+- Go to finder -> application -> terminal
+- Right click terminal  -> get info 
+- Check the checkbox Open using Rosetta
+- relaunch terminal
+
+Run the following commands:
+*pip3 uninstall opencv-python pillow*
+*pip3 install opencv-python pillow*
 
