@@ -29,6 +29,10 @@ stop = 1
 setdat = loadsettings.load()
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
+    with open('changelog.txt') as f:
+        lines = f.readlines()
+    f.close()
+    print("Your macro version is {}".format(lines[0]))
     manager = multiprocessing.Manager()
     currentfield = manager.Value(ctypes.c_wchar_p, "")
     bpc = multiprocessing.Value('i', 0)

@@ -1,3 +1,4 @@
+v1.13
 Changelog:
 
 5/1/23
@@ -66,4 +67,4 @@ Changelog:
 - Walkspeed can now be in decimals 
 
 20/1/23
-- Changes to stump field and pineapple paths
+- Changes to stump field, pineapple field and strawberry dispenser paths
