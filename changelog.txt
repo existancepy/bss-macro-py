@@ -56,3 +56,14 @@ Changelog:
 - disconnect check
 - rejoin convert method
 - Added treat dispenser
+
+16/1/23
+- If hive aligning fails, the macro attempts it one more time before before assuming that player is facing the right direction. This helps to deal with resetting on spawn
+ 
+18/1/23
+- Added discord bot support to allow for user interaction with the macro
+- Change to the pixel detection coordinate for backpacks of built-in display
+- Walkspeed can now be in decimals 
+
+20/1/23
+- Changes to stump field and pineapple paths
