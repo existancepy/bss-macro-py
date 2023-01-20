@@ -27,7 +27,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = 1.14
+macrov = 1.15
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}".format(macrov))
@@ -163,7 +163,9 @@ def canon():
         if time.perf_counter()  - st > 10/28*setdat["walkspeed"]:
             webhook("","Cannon not found, resetting","dark brown",1)
             break
-        
+    for _ in range(20):
+        pag.click()
+        time.sleep(0.25)
     reset.reset()   
     canon()
 def convert():
@@ -364,7 +366,7 @@ def rejoin():
             pag.click(x//2, y//2)
         else:
             pag.click(x, y)
-    time.sleep(40)
+    time.sleep(50)
     move.hold("w",5)
     move.hold("s",0.55)
     foundHive = 0
@@ -377,31 +379,37 @@ def rejoin():
         if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
             move.press('e')
             foundHive = 1
+            webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 2:
         move.hold('d',1.2)
         if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
                 move.press('e')
                 foundHive = 1
+                webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 1:
         move.hold('d',2.3)
         if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
             move.press('e')
             foundHive = 1
+            webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 4:
         move.hold('a',1.1)
         if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
                 move.press('e')
                 foundHive = 1
+                webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 5:
         move.hold('a',2.3)
         if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
             move.press('e')
             foundHive = 1
+            webhook("","Hive Found","dark brown")
     else:
         move.hold('a',3.3)
         if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
                 move.press('e')
                 foundHive = 1
+                webhook("","Hive Found","dark brown")
     while True:   
         if not foundHive:
             webhook("","Hive already claimed, finding new hive","dark brown")
@@ -897,6 +905,8 @@ if __name__ == "__main__":
     tokentextbox.place(x = 300, y=228)
     #Root
     tkinter.Button(root, text = "Start",command = startGo, height = 2, width = 7 ).place(x=10,y=350)
+    tkinter.Label(root, text = "version {}".format(macrov), bg = wbgc).place(x = 600, y = 350)
+    
 
     disablews("1")
     disabledw()
