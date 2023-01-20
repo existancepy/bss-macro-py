@@ -38,13 +38,13 @@ Better instructions and fixes
 
 **Setup**
 
-4. Download the files in the git repo into the folder made in step 1.
+4. Download the files in the git repo into the folder made in step 1 as a zip. This can be done via the "code button" -> download zip. Save it  in your desktop. Once its downloaded, extract the zip file. You should now have a folder called "bss-macro-py-main" on your desktop
  
  **Launching the program**
 
 5. Navigate to the folder created in step 1 using the "cd" command:
 
-   *eg cd desktop/bee_swarm_macro*
+   *cd desktop/bss-macro-py-main*
 
 6. run the program with the following command:
 
