@@ -115,7 +115,7 @@ Commands: rejoin (forces the character to rejoin the game),
 3. *ImportError:dlopen...Symbol not found/import cv2* in the terminal when the code is ran.
    - This is most likely caused by an outdated macOS version. For a work around, check out https://github.com/existancepy/bss-macro-py-no-cv2
    - A better fix would just be to update your mac OS software
-4. Enable dictionary menu is brought up during the macro
+4. Enable dictation menu is brought up during the macro
    - Fix:  system preferences -> keyboard -> shortcuts -> app shortcuts
    - click the '+' sign and put roblox as the application
    - Under Menu Title, input 'Start Dictation…'  without the single quotes of course. The three periods are actually an ellipsis, which is one character which you can type by pressing option and the [ ; ] key, or just copy and paste what I typed above. 
