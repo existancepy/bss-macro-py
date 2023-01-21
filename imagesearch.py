@@ -54,5 +54,5 @@ def find(img,confi, x1 = 0, y1 = 0, x2 = ww, y2 = wh):
     if not img == "disconnect.png":
         print("Trying to find {}. max_val is {} ".format(img,max_val))
     if max_val >= confi:
-        return [1,x,y]
+        return [1,x,y,max_val]
     return 

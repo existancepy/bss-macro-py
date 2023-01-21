@@ -29,7 +29,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = 1.16
+macrov = 1.17
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}".format(macrov))
@@ -283,8 +283,11 @@ def resetMobTimer(cfield):
             if checkRespawn("rhinobeetle_bamboo","5m"):  savetimings("rhinobeetle_bamboo")
 
 def background(cf,bpcap,gat,dc):
+    savedata = loadRes()
+    ww = savedata['ww']
+    wh = savedata['wh']
     while True:
-        r = imagesearch.find('disconnect.png',0.8)
+        r = imagesearch.find('disconnect.png',0.8,ww//3,wh//2.3,ww//2.3,wh//2.5)
         if r:
             dc.value = 1
             webhook("","Disconnected","red")
@@ -683,7 +686,7 @@ if __name__ == "__main__":
     notebook.add(frame1, text='Gather')
     notebook.add(frame2, text='Bug run')
     notebook.add(frame4, text='Collect')
-    notebook.add(frame3, text='Calibrate')
+    notebook.add(frame3, text='Settings')
 
     #get variables
     gather_enable = tk.IntVar(value=setdat["gather_enable"])
@@ -799,8 +802,8 @@ if __name__ == "__main__":
         startLoop_proc.start()
         background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected))
         background_proc.start()
+        discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,))
         if setdat['enable_discord_bot']:
-            discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,))
             discord_bot_proc.start()
         try:
             while True:
@@ -813,6 +816,8 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             startLoop_proc.terminate()
             background_proc.terminate()
+            if setdat['enable_discord_bot']:
+                discord_bot_proc.terminate()
             webhook("Macro Stopped","","dark brown")
         
 

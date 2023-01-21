@@ -19,12 +19,12 @@ from webhook import webhook
 import webbrowser
 import reset
 
-'''
-oocmd = """
+
+cmd = """
 osascript -e 'activate application "Roblox"' 
 """
 os.system(cmd)
-'''
+
 time.sleep(1)
 savedata = {}
 def loadSave():
@@ -44,6 +44,9 @@ ms = pag.size()
 mw = ms[0]
 mh = ms[1]
 
+
+screen = pag.screenshot(region=(ww//3,wh//2.3,ww//2.3,wh//2.5))
+screen.save("hi.png")
 
  #!/usr/bin/env python
 

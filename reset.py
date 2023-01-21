@@ -90,17 +90,18 @@ def reset():
         time.sleep(0.4)
         for _ in range(4):
             r = imagesearch.find("hive1.png",0, xo, yo, xt, yt)
-            vals.append(r[0])
+            vals.append(r[3])
             for _ in range(4):
                 pag.press(",")
             
             time.sleep(0.5)
         time.sleep(1)
     vals = sorted(vals,reverse=True)
+    print(vals)
     thresh = (vals[1]+vals[2])/2
-    for _ in range(4):
-        pag.press(",")
-        webhook("","Now attempting to find hive","dark brown")
+    webhook("","threshold calculated. Value of {}".format(thresh),"dark brown")
+    webhook("","Now attempting to find hive","dark brown")
+    for _ in range(1):
         pag.moveTo(350,100)
         ww = savedata["ww"]
         wh = savedata["wh"]
@@ -126,7 +127,6 @@ def reset():
         time.sleep(0.4)
         for _ in range(4):
             r = imagesearch.find("hive1.png",thresh, xo, yo, xt, yt)
-            vals.append(r[0])
             if r:
                 time.sleep(0.1)
                 for _ in range(4):
