@@ -29,7 +29,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = 1.17
+macrov = 1.18
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}".format(macrov))
@@ -287,7 +287,7 @@ def background(cf,bpcap,gat,dc):
     ww = savedata['ww']
     wh = savedata['wh']
     while True:
-        r = imagesearch.find('disconnect.png',0.8,ww//3,wh//2.3,ww//2.3,wh//2.5)
+        r = imagesearch.find('disconnect.png',0.8,ww//3,wh//2.8,ww//2.3,wh//2.5)
         if r:
             dc.value = 1
             webhook("","Disconnected","red")
@@ -655,7 +655,7 @@ def startLoop(cf,bpcap,gat,dc):
                         convert()
                         reset.reset()
                     
-    
+   
 if __name__ == "__main__":
     
     loadSave()
@@ -677,16 +677,19 @@ if __name__ == "__main__":
     frame2 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
     frame3 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
     frame4 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
+    frame5 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
 
     frame1.pack(fill='both', expand=True)
     frame2.pack(fill='both', expand=True)
     frame3.pack(fill='both', expand=True)
-    frame4 = ttk.Frame(notebook, width=700, height=400)
+    frame4.pack(fill='both', expand=True)
+    frame5.pack(fill='both', expand=True)
 
     notebook.add(frame1, text='Gather')
     notebook.add(frame2, text='Bug run')
     notebook.add(frame4, text='Collect')
     notebook.add(frame3, text='Settings')
+    notebook.add(frame5, text='Calibration')
 
     #get variables
     gather_enable = tk.IntVar(value=setdat["gather_enable"])
@@ -730,12 +733,11 @@ if __name__ == "__main__":
     strawberrydispenser = tk.IntVar(value=setdat["strawberrydispenser"])
     royaljellydispenser  = tk.IntVar(value=setdat["royaljellydispenser"])
     treatdispenser = tk.IntVar(value=setdat["treatdispenser"])
-
-    
-
-
     wwa  = savedata['ww']
     wha = savedata['wh']
+    
+    def calibratehive():
+        exec(open("calibrate_hive.py").read())
     def updateGo():
         update.update()
         exit()
@@ -751,6 +753,7 @@ if __name__ == "__main__":
          
     def startGo():
         global setdat, stop
+        setdat = loadsettings.load()
         setdict = {
             "hive_number": hive_number.get(),
             "walkspeed": speedtextbox.get(1.0,"end").replace("\n",""),
@@ -787,7 +790,9 @@ if __name__ == "__main__":
             "blueberrydispenser": blueberrydispenser.get(),
             "strawberrydispenser": strawberrydispenser.get(),
             "royaljellydispenser":royaljellydispenser.get(),
-            "treatdispenser":treatdispenser.get()
+            "treatdispenser":treatdispenser.get(),
+
+            "hivethreshold":setdat['hivethreshold']
 
             }
         ww = int(wwatextbox.get(1.0,"end").replace("\n",""))
@@ -925,6 +930,8 @@ if __name__ == "__main__":
     tokentextbox = tkinter.Text(frame3, width = 24, height = 1)
     tokentextbox.insert("end",discord_bot_token)
     tokentextbox.place(x = 300, y=228)
+    #Tab 5
+    tkinter.Button(frame5, text = "Calibrate Hive",command = calibratehive, height = 1, width = 7 ).place(x=0,y=15)
     #Root
     tkinter.Button(root, text = "Start",command = startGo, height = 2, width = 7 ).place(x=10,y=350)
     tkinter.Button(root, text = "Update",command = updateFiles, height = 1, width = 5,).place(x=600,y=370)
