@@ -32,4 +32,4 @@ blueberrydispenser:0
 strawberrydispenser:0
 royaljellydispenser:0
 treatdispenser:0
-hivethreshold:0.6100916564464569
+hivethreshold:0.7
