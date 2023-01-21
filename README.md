@@ -119,7 +119,7 @@ Commands: rejoin (forces the character to rejoin the game),
    - Fix:  system preferences -> keyboard -> shortcuts -> app shortcuts
    - click the '+' sign and put roblox as the application
    - Under Menu Title, input 'Start Dictation…'  without the single quotes of course. The three periods are actually an ellipsis, which is one character which you can type by pressing option and the [ ; ] key, or just copy and paste what I typed above. 
-   - I set the shortcut to Option + Command + E for that one.
+   - I set the shortcut to Option + Command + D for that one.
    - Add it
    - Reference image: https://imgur.com/a/hzbsM5e
    - Credit: https://www.dofus.com/en/forum/1151-general-problems-solutions/339448-issue-with-macos-keyboard-keys
