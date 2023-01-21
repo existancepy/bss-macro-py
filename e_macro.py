@@ -165,6 +165,7 @@ def canon():
         if time.perf_counter()  - st > 10/28*setdat["walkspeed"]:
             webhook("","Cannon not found, resetting","dark brown",1)
             break
+    pag.moveTo(724,674)
     for _ in range(20):
         pag.click()
         time.sleep(0.25)
@@ -419,30 +420,26 @@ def rejoin():
                 webhook("","Hive Found","dark brown")
     while True:   
         if not foundHive:
+            move.hold("d",12)
             webhook("","Hive already claimed, finding new hive","dark brown")
-            rawreset()
-            move.hold("w",5)
-            move.hold("s",0.55)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
-                move.press('e')
-                foundHive = 1
-                updateHive(3)
-                break
-            move.hold('d',1.2)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
-                move.press('e')
-                foundHive = 1
-                updateHive(2)
-                break
-            move.hold('d',1.1)
+            move.hold('a',1)
             if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
                 move.press('e')
                 foundHive = 1
                 updateHive(1)
                 break
-            rawreset()
-            move.hold("w",5)
-            move.hold("s",0.55)
+            move.hold('a',1.1)
+            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+                move.press('e')
+                foundHive = 1
+                updateHive(2)
+                break
+            move.hold("a",1)
+            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+                move.press('e')
+                foundHive = 1
+                updateHive(3)
+                break
             move.hold('a',1.1)
             if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
                 move.press('e')
