@@ -107,6 +107,9 @@ Commands: rejoin (forces the character to rejoin the game),
    - Replace hive1.png in the images folder with your new image
    - Ensure that you have give terminal permissions to screen recording
 
+   **Update**
+    As of version 1.18, there is now an option to automatically configure the hive. You can find the button, called "Configure Hive", in the calibration section of the GUI 
+
 2. The dock is brought up during the macro, interrupting the key inputs.
    - This can be solved by manually clicking on the screen when the macro is ran
 3. *ImportError:dlopen...Symbol not found/import cv2* in the terminal when the code is ran.
