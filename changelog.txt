@@ -72,8 +72,10 @@ Changelog:
 - Added a way to update the macro via the GUI
 
 21/1/23
- - Added a way to update the macro via the GUI
- - Makes the macro autoclick when it cant find the canon, to exit any bear dialog
- - Increased the rejoin time to 50secs. (The macro will wait for 50s for roblox to load when rejoining) 
- - Implemented threshold hive searching. This allows the macro to automatically find the best possible hive orientation if hive searching fails
- - Reduced searching area of disconnect.png to lower chances of false positives
+- Added a way to update the macro via the GUI
+- Makes the macro autoclick when it cant find the canon, to exit any bear dialog
+- Increased the rejoin time to 50secs. (The macro will wait for 50s for roblox to load when rejoining) 
+- Implemented threshold hive searching. This allows the macro to automatically find the best possible hive orientation if hive searching fails
+- Reduced searching area of disconnect.png to lower chances of false positives
+- Added hive calibration
+- Adjusted disconnect check area
