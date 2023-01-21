@@ -19,6 +19,8 @@ import tty
 global savedata
 global setdat
 import discord
+import update
+from tkinter import messagebox
 savedata = {}
 ww = ""
 wh = ""
@@ -27,7 +29,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = 1.15
+macrov = 1.16
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}".format(macrov))
@@ -282,9 +284,11 @@ def resetMobTimer(cfield):
 
 def background(cf,bpcap,gat,dc):
     while True:
-        if imagesearch.find('disconnect.png',0.8):
+        r = imagesearch.find('disconnect.png',0.8)
+        if r:
             dc.value = 1
             webhook("","Disconnected","red")
+
             rejoin()
             dc.value = 0
         if gat.value:
@@ -729,6 +733,19 @@ if __name__ == "__main__":
 
     wwa  = savedata['ww']
     wha = savedata['wh']
+    def updateGo():
+        update.update()
+        exit()
+    def updateFiles():
+        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        window.config(bg=wbgc)
+        label = tk.Label(window, text="Are you sure you want to update the macro?\n(your settings and images will be replaced)",bg=wbgc)
+        button_yes = tk.Button(window, text="Yes", highlightbackground=wbgc,command=updateGo)
+        button_no = tk.Button(window, text="No", highlightbackground=wbgc, command=window.destroy)
+        label.grid(row=0, column=0, columnspan=2)
+        button_yes.grid(row=1, column=0)
+        button_no.grid(row=1, column=1)
+         
     def startGo():
         global setdat, stop
         setdict = {
@@ -905,9 +922,9 @@ if __name__ == "__main__":
     tokentextbox.place(x = 300, y=228)
     #Root
     tkinter.Button(root, text = "Start",command = startGo, height = 2, width = 7 ).place(x=10,y=350)
+    tkinter.Button(root, text = "Update",command = updateFiles, height = 1, width = 5,).place(x=600,y=370)
     tkinter.Label(root, text = "version {}".format(macrov), bg = wbgc).place(x = 600, y = 350)
     
-
     disablews("1")
     disabledw()
     root.mainloop()

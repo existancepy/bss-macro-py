@@ -69,3 +69,4 @@ Changelog:
 - Changes to stump field, pineapple field and strawberry dispenser paths
 - Changes to GUI so that it overrides default theme and works as expected
 - Updated the webhook so that it reads the settings when the macro is started and not when the program is launched
+- Added a way to update the macro via the GUI
