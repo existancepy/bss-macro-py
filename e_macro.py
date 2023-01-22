@@ -305,12 +305,12 @@ def background(cf,bpcap,gat,dc):
             webhook("","Disconnected","red")
             rejoin()
             dc.value = 0
-        '''
-        if imagesearch.find('died.png',0.43,ww//2,wh//2,ww,wh,1):
-            dc.value = 1
-            webhook("","Unexpected Death","red")
-            dc.value = 0
-        '''
+        
+        #if imagesearch.find('died.png',0.43,ww//2,wh//2,ww,wh,1):
+            #dc.value = 1
+            #webhook("","Unexpected Death","red")
+            #dc.value = 0
+        
         if gat.value:
             bpcap.value = backpack.bpc()
             resetMobTimer(cf.value.lower())
