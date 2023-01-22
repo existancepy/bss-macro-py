@@ -12,7 +12,6 @@ import sys
 import imagesearch
 import webbrowser
 import multiprocessing
-import keyboard
 from webhook import webhook
 import ctypes
 import tty
