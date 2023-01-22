@@ -28,7 +28,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = 1.20
+macrov = 1.21
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}".format(macrov))
@@ -140,9 +140,10 @@ def savetimings(m):
         f.writelines(templist)
     f.close()
     
-def ebutton(confidence=0.98):
+def ebutton():
     r =  []
     savedata = loadRes()
+    confidence = loadsettings.load()['ebthreshold']
     ww = savedata['ww']
     wh = savedata['wh']
     setdat = loadsettings.load()
@@ -750,6 +751,8 @@ if __name__ == "__main__":
     strawberrydispenser = tk.IntVar(value=setdat["strawberrydispenser"])
     royaljellydispenser  = tk.IntVar(value=setdat["royaljellydispenser"])
     treatdispenser = tk.IntVar(value=setdat["treatdispenser"])
+
+    ebthreshold =  setdat['ebthreshold']
     wwa  = savedata['ww']
     wha = savedata['wh']
     
@@ -809,7 +812,8 @@ if __name__ == "__main__":
             "royaljellydispenser":royaljellydispenser.get(),
             "treatdispenser":treatdispenser.get(),
 
-            "hivethreshold":setdat['hivethreshold']
+            "hivethreshold":setdat['hivethreshold'],
+            "ebthreshold":ebtextbox.get(1.0,"end").replace("\n","")
 
             }
         ww = int(wwatextbox.get(1.0,"end").replace("\n",""))
@@ -949,6 +953,10 @@ if __name__ == "__main__":
     tokentextbox.place(x = 300, y=228)
     #Tab 5
     tkinter.Button(frame5, text = "Calibrate Hive",command = calibratehive, height = 1, width = 7 ).place(x=0,y=15)
+    tkinter.Label(frame5, text = "E Button Threshold", bg = wbgc).place(x = 0, y = 50)
+    ebtextbox = tkinter.Text(frame5, width = 4, height = 1)
+    ebtextbox.insert("end",ebthreshold)
+    ebtextbox.place(x=130,y=53)
     #Root
     tkinter.Button(root, text = "Start",command = startGo, height = 2, width = 7 ).place(x=10,y=350)
     tkinter.Button(root, text = "Update",command = updateFiles, height = 1, width = 5,).place(x=600,y=370)

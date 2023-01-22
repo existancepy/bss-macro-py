@@ -33,3 +33,4 @@ strawberrydispenser:0
 royaljellydispenser:0
 treatdispenser:0
 hivethreshold:0.7
+ebthreshold:0.99
