@@ -10,10 +10,10 @@ from PIL import ImageGrab
 import numpy as np
 import imagesearch
 import loadsettings
+
 import tkinter as tk
 import tty
 from tkinter import ttk
-import pytesseract
 import backpack
 from webhook import webhook
 import webbrowser
@@ -45,9 +45,10 @@ mw = ms[0]
 mh = ms[1]
 
 
-screen = pag.screenshot(region=(ww//3,wh//2.3,ww//2.3,wh//2.5))
-screen.save("hi.png")
-
+while True:
+    if imagesearch.find('died.png',0.42,ww//2,wh//2,ww,wh,1):
+        print("died")
+        break
  #!/usr/bin/env python
 
 '''

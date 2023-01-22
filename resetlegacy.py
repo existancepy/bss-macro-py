@@ -18,6 +18,7 @@ def loadSave():
 loadSave()
 
 def reset():
+    ths = loadsettings.load()["hivethreshold"]
     for _ in range(2):
         webhook("","Resetting character","dark brown")
         pag.moveTo(350,100)
@@ -44,7 +45,7 @@ def reset():
 
         time.sleep(0.4)
         for _ in range(4):
-            r = imagesearch.find("hive1.png",0.85, xo, yo, xt, yt)
+            r = imagesearch.find("hive1.png",ths, xo, yo, xt, yt)
             if r:
                 time.sleep(0.1)
                 for _ in range(4):

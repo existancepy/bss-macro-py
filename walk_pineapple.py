@@ -31,13 +31,7 @@ time.sleep(0.1)
 move.press("space")
 time.sleep(0.15*28/ws)
 pag.keyUp("s")
-while True:
-    pag.keyDown("s")
-    time.sleep(0.15)
-    pag.keyUp("s")
-    r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
-    if r:
-        break
+move.hold("s",0.05)
 time.sleep(2.5)
 move.press("e")
 move.hold("w",4)

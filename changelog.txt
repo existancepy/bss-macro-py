@@ -79,3 +79,8 @@ Changelog:
 - Reduced searching area of disconnect.png to lower chances of false positives
 - Added hive calibration
 - Adjusted disconnect check area
+
+22/1/23
+- Updated bug regarding hive finding
+- Added death check
+- Rework to ebutton check to be more reliable

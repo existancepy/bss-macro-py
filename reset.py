@@ -20,6 +20,7 @@ loadSave()
 
 def reset():
     ths = loadsettings.load()["hivethreshold"]
+    print("ths is {}".format(ths))
     for _ in range(2):
         webhook("","Resetting character","dark brown")
         pag.moveTo(350,100)

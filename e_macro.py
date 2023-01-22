@@ -37,7 +37,7 @@ if __name__ == '__main__':
     bpc = multiprocessing.Value('i', 0)
     gather = multiprocessing.Value('i', 0)
     disconnected = multiprocessing.Value('i', 0)
-
+    
 def discord_bot(dc):
     setdat = loadsettings.load()
 
@@ -139,7 +139,19 @@ def savetimings(m):
     with open('timings.txt','w') as f:
         f.writelines(templist)
     f.close()
-
+    
+def ebutton(confidence=0.98):
+    r =  []
+    savedata = loadRes()
+    ww = savedata['ww']
+    wh = savedata['wh']
+    setdat = loadsettings.load()
+    if setdat['display_type'] ==  "built-in retina display":
+        r = imagesearch.find("eb.png",confidence,0,0,ww,wh//2)
+    else:
+        r = imagesearch.find("eb.png",confidence,0,0,ww,wh//2)
+    if r:return r
+    return
 def canon():
     savedata = loadRes()
     ww = savedata['ww']
@@ -157,7 +169,7 @@ def canon():
     pag.keyUp("d")
     while True:
         move.hold("d",0.15)
-        r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+        r = ebutton()
         if r:
             webhook("","Canon found","dark brown")
             return
@@ -175,14 +187,14 @@ def convert():
     ww = savedata['ww']
     wh = savedata['wh']
     for _ in range(2):
-        r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+        r = ebutton()
         if r:
+            target = r[3]-0.01
             move.press("e")
             webhook("","Starting convert","brown",1)
             st = time.perf_counter()
             while True:
-                c = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
-            
+                c = ebutton()
                 if not c:
                     webhook("","Convert done","brown")
                     time.sleep(3)
@@ -207,7 +219,7 @@ def walk_to_hive():
         pag.keyDown("a")
         time.sleep(0.15)
         pag.keyUp("a")
-        r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+        r = ebutton()
         if r:
             convert()
             break
@@ -291,8 +303,11 @@ def background(cf,bpcap,gat,dc):
         if r:
             dc.value = 1
             webhook("","Disconnected","red")
-
             rejoin()
+            dc.value = 0
+        if imagesearch.find('died.png',0.43,ww//2,wh//2,ww,wh,1):
+            dc.value = 1
+            webhook("","Unexpected Death","red")
             dc.value = 0
         if gat.value:
             bpcap.value = backpack.bpc()
@@ -332,7 +347,7 @@ def collect(name):
         webhook("","Traveling: {}".format(dispname),"dark brown")
         exec(open("collect_{}.py".format(usename)).read())
         time.sleep(0.5)
-        if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+        if ebutton():
             webhook("","Collected: {}".format(dispname),"bright green",1)
             break
         webhook("","Unable To Collect: {}".format(dispname),"dark brown",1)
@@ -383,37 +398,37 @@ def rejoin():
     
     webhook("","Finding Hive", "dark brown")
     if setdat['hive_number'] == 3:
-        if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+        if ebutton():
             move.press('e')
             foundHive = 1
             webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 2:
         move.hold('d',1.2)
-        if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+        if ebutton():
                 move.press('e')
                 foundHive = 1
                 webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 1:
         move.hold('d',2.3)
-        if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+        if ebutton():
             move.press('e')
             foundHive = 1
             webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 4:
         move.hold('a',1.1)
-        if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+        if ebutton():
                 move.press('e')
                 foundHive = 1
                 webhook("","Hive Found","dark brown")
     elif setdat['hive_number'] == 5:
         move.hold('a',2.3)
-        if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+        if ebutton():
             move.press('e')
             foundHive = 1
             webhook("","Hive Found","dark brown")
     else:
         move.hold('a',3.3)
-        if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+        if ebutton():
                 move.press('e')
                 foundHive = 1
                 webhook("","Hive Found","dark brown")
@@ -422,37 +437,37 @@ def rejoin():
             move.hold("d",12)
             webhook("","Hive already claimed, finding new hive","dark brown")
             move.hold('a',1)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+            if ebutton():
                 move.press('e')
                 foundHive = 1
                 updateHive(1)
                 break
             move.hold('a',1.1)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+            if ebutton():
                 move.press('e')
                 foundHive = 1
                 updateHive(2)
                 break
             move.hold("a",1)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+            if ebutton():
                 move.press('e')
                 foundHive = 1
                 updateHive(3)
                 break
             move.hold('a',1.1)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+            if ebutton():
                 move.press('e')
                 foundHive = 1
                 updateHive(4)
                 break
             move.hold('a',1.1)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+            if ebutton():
                 move.press('e')
                 foundHive = 1
                 updateHive(5)
                 break
             move.hold('a',1)
-            if pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2)):
+            if ebutton():
                 move.press('e')
                 foundHive = 1
                 updateHive(6)
@@ -600,9 +615,13 @@ def startLoop(cf,bpcap,gat,dc):
             gat.value = 1
             fullTime = 0
             while True:
+                time.sleep(0.05)
                 pag.mouseDown()
+                time.sleep(0.05)
                 exec(open("gather_{}.py".format(gp)).read())
+                time.sleep(0.05)
                 pag.mouseUp()
+                time.sleep(0.05)
                 timespent = (time.perf_counter() - timestart)/60
                 if bpcap.value > setdat["pack"]:
                     if fullTime == 1:
@@ -643,7 +662,7 @@ def startLoop(cf,bpcap,gat,dc):
                 else:
                     move.press(str(setdat['whirligig_slot']))
                     time.sleep(1)
-                    r = pag.locateOnScreen("./images/eb.png",region=(0,0,ww,wh//2))
+                    r = ebutton()
                     if not r or reject:
                         webhook("Notice","Whirligig failed to activate, walking back","red")
                         walk_to_hive()

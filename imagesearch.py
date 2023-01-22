@@ -6,6 +6,7 @@ import move
 import cv2
 from PIL import ImageGrab
 import numpy as np
+import loadsettings
 
 savedata = {}
 def loadSave():
@@ -20,6 +21,8 @@ def loadSave():
 loadSave()
 ww = savedata["ww"]
 wh = savedata["wh"]
+display_type = loadsettings.load()['display_type']
+
 
 '''
 screen = np.array(ImageGrab.grab())
@@ -41,12 +44,17 @@ cv2.imshow('output',large_image)
 cv2.waitKey(0)
 '''
 
-def find(img,confi, x1 = 0, y1 = 0, x2 = ww, y2 = wh):
+def find(img,confi, x1 = 0, y1 = 0, x2 = ww, y2 = wh,fast=0):
+    
     method = cv2.TM_CCOEFF_NORMED
-    screen = pag.screenshot(region=(x1,y1,x2,y2))
+    if fast:
+        screen = ImageGrab.grab(bbox=(x1,y1,x2,y2))
+    else:
+        screen = pag.screenshot(region=(x1,y1,x2,y2))
     screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-
-    small_image = cv2.imread('./images/{}'.format(img))
+    small_image = cv2.imread('./images/built-in/{}'.format(img))
+    if display_type == "built-in retina display":
+        small_image = cv2.imread('./images/retina/{}'.format(img))
     large_image = screen
     result = cv2.matchTemplate(small_image, large_image, method)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
