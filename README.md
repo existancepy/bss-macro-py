@@ -61,6 +61,7 @@ Better instructions and fixes
       - Full Disk Access
       - Screen Recording
       - Accessibility
+      - Automation -> tick the "system events" checkbox under "terminal"
 
 - Check out 1. and 4. of the "bugs and fixes section" below. I highly recommend doing the fixes even if you may not seem to encounter the problem.
   *So far, everyone who has messaged  me has encountered hive issues (whether they realised it or not), so I recommend re-configuring the hive as stated    in 1.*
@@ -126,7 +127,7 @@ Commands: rejoin (forces the character to rejoin the game),
 
 5. "mach-o file, but is an incompatible architecture (have 'x86_64', need 'arm64e')"
  For M1 Macs,
- - close terminal
+- close terminal
 - Go to finder -> application -> terminal
 - Right click terminal  -> get info 
 - Check the checkbox Open using Rosetta
@@ -137,4 +138,11 @@ Run the following commands:
 *pip3 uninstall opencv-python pillow*
 
 *pip3 install opencv-python pillow*
+
+6. "Not authorised to send Apple events to System Events"
+-  Select System Preferences (from the Apple Menu)
+- Click Security & Privacy
+- Select the Privacy Tab
+- Select Automation (you may need to scroll down)
+-  Select the checkbox next to the "System Events" for the terminal
 
