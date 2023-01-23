@@ -25,7 +25,7 @@ def update():
     newfiles = os.listdir("./bss-macro-py-main")
     for i in newfiles:
         if i != "images":
-            shutil.copyfile("./bss-macro-py-main/{}".format(i), "./{}".format(i))
+            shutil.copyfile("./bss-macro-py-experimental-main/{}".format(i), "./{}".format(i))
         else:
             copy_tree("./bss-macro-py-main/images", "./images")
     shutil.rmtree('./bss-macro-py-main')
