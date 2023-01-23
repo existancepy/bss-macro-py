@@ -19,6 +19,7 @@ global savedata
 global setdat
 import discord
 import update
+import updateexperiment
 from tkinter import messagebox
 savedata = {}
 ww = ""
@@ -28,7 +29,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = 1.21
+macrov = 1.22
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}".format(macrov))
@@ -761,6 +762,20 @@ if __name__ == "__main__":
     def updateGo():
         update.update()
         exit()
+    def updateExp():
+        updateexperiment.update()
+        exit()
+
+    def expu():
+        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        window.config(bg=wbgc)
+        label = tk.Label(window, text="Are you sure you want to update the macro to experimental version?\n(your settings and images will be replaced)\nYou can click the update button to go back to the main macro",bg=wbgc)
+        button_yes = tk.Button(window, text="Yes", highlightbackground=wbgc,command=updateExp)
+        button_no = tk.Button(window, text="No", highlightbackground=wbgc, command=window.destroy)
+        label.grid(row=0, column=0, columnspan=2)
+        button_yes.grid(row=1, column=0)
+        button_no.grid(row=1, column=1)
+        
     def updateFiles():
         window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
         window.config(bg=wbgc)
@@ -960,6 +975,7 @@ if __name__ == "__main__":
     #Root
     tkinter.Button(root, text = "Start",command = startGo, height = 2, width = 7 ).place(x=10,y=350)
     tkinter.Button(root, text = "Update",command = updateFiles, height = 1, width = 5,).place(x=600,y=370)
+    tkinter.Button(root, text = "Experimental update",command = expu, height = 1, width = 12,).place(x=450,y=370)
     tkinter.Label(root, text = "version {}".format(macrov), bg = wbgc).place(x = 600, y = 350)
     
     disablews("1")
