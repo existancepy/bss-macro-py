@@ -28,4 +28,4 @@ def update():
             shutil.copyfile("./bss-macro-py-experimental-main/{}".format(i), "./{}".format(i))
         else:
             copy_tree("./bss-macro-py-experimental-main/images", "./images")
-    shutil.rmtree('./bss-macro-py-main')
+    shutil.rmtree('./bss-macro-py-experimental-main')
