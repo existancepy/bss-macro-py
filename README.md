@@ -12,14 +12,25 @@ https://discord.gg/PwUMDp8c
 
 Better instructions and fixes
 
-
-**Installation**
-
-
-0. Install python v3.9.5: https://www.python.org/downloads/release/python-395/
+**Installation for macOS  versions lower than 10.13**
+1. (IMPORTANT )Install python v3.8: https://www.python.org/downloads/release/python-380/
 **Check "Add python to path"  in the installation window**
 
-1. Create a folder anywhere (it will be where the macro files are stored)
+2. Open terminal/command line
+
+3. Run the following command:
+   *pip3 install opencv-python==4.1.2.30*
+   then run
+   *pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py*
+
+Continue starting from step 4 in the "Installation for macOS 10.13 and higher" section
+
+**Installation for macOS 10.13 and higher**
+
+
+1. Install python v3.9.5: https://www.python.org/downloads/release/python-395/
+**Check "Add python to path"  in the installation window**
+
 
 **For M1 Macs**
 - ensure terminal is closed
