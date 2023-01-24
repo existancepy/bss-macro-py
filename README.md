@@ -32,11 +32,15 @@ Better instructions and fixes
         pip3 install opencv-python==4.1.2.30
         
     If your macOS version is 10.13 or higher:
-        ```pip3 install opencv-python==4.3.0.36```
+        ```
+        pip3 install opencv-python==4.3.0.36
+        ```
    
    Once installation is complete, run this:
     
-   ```pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py```
+   ```
+    pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
+    ```
 
 Continue starting from step 4 in the "Installation for macOS 10.13 and higher" section
 
