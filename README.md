@@ -13,6 +13,7 @@ https://discord.gg/PwUMDp8c
 Better instructions and fixes
 
 **Installation for macOS versions lower than 12.0**
+If your macOS version is 12.0 and higher, scroll down to see the installation guide
 1. (IMPORTANT )Install python v3.8: https://www.python.org/downloads/release/python-380/
 
 **Check "Add python to path"  in the installation window**
