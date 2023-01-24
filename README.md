@@ -14,13 +14,23 @@ Better instructions and fixes
 
 **Installation for macOS  versions lower than 10.13**
 1. (IMPORTANT )Install python v3.8: https://www.python.org/downloads/release/python-380/
+
 **Check "Add python to path"  in the installation window**
 
 2. Open terminal/command line
 
-3. Run the following command:
+3. Verify that it is python 3.8 by running the following command:
+    
+    *python3 --version*
+    
+    It should return python 3.8
+
+    Next, run the opencv installation command:
+
    *pip3 install opencv-python==4.1.2.30*
-   then run
+   
+   Once installation is complete, run this:
+    
    *pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py*
 
 Continue starting from step 4 in the "Installation for macOS 10.13 and higher" section
