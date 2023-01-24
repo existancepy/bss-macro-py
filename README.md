@@ -58,9 +58,9 @@ Continue starting from step 4 in the "Installation for macOS 10.13 and higher" s
    
 
 3.Run the following command:
-   ```pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py*
+   ```pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py```
 
-   *Or python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py*
+   Or ```python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py```
 
 **Setup**
 
