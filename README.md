@@ -29,18 +29,18 @@ Better instructions and fixes
     
     If your macOS version is lower than 10.13:
 
-        *pip3 install opencv-python==4.1.2.30*
+        pip3 install opencv-python==4.1.2.30
         
     If your macOS version is 10.13 or higher:
-        *pip3 install opencv-python==4.3.0.36*
+        ```pip3 install opencv-python==4.3.0.36```
    
    Once installation is complete, run this:
     
-   *pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py*
+   ```pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py```
 
 Continue starting from step 4 in the "Installation for macOS 10.13 and higher" section
 
-**Installation for macOS 10.13 and higher**
+**Installation for macOS 12.0 and higher**
 
 
 1. Install python v3.9.5: https://www.python.org/downloads/release/python-395/
@@ -58,7 +58,7 @@ Continue starting from step 4 in the "Installation for macOS 10.13 and higher" s
    
 
 3.Run the following command:
-   *pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py*
+   ```pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py*
 
    *Or python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py*
 
