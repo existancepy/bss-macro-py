@@ -33,9 +33,7 @@ Better instructions and fixes
         
     If your macOS version is 10.13 or higher:
 
-        ```
         pip3 install opencv-python==4.3.0.36
-        ```
    
    Once installation is complete, run this:
     
@@ -64,9 +62,7 @@ Continue starting from step 4 in the "Installation for macOS 10.13 and higher" s
 
 3.Run the following command:
 
-    ```
     pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py
-    ```
 
 **Setup**
 
