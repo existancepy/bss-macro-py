@@ -32,6 +32,7 @@ Better instructions and fixes
         pip3 install opencv-python==4.1.2.30
         
     If your macOS version is 10.13 or higher:
+
         ```
         pip3 install opencv-python==4.3.0.36
         ```
@@ -62,9 +63,10 @@ Continue starting from step 4 in the "Installation for macOS 10.13 and higher" s
    
 
 3.Run the following command:
+
    ```pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py```
 
-   Or ```python3 -m pip install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py```
+   Or 
 
 **Setup**
 
@@ -74,11 +76,11 @@ Continue starting from step 4 in the "Installation for macOS 10.13 and higher" s
 
 5. Navigate to the folder created in step 1 using the "cd" command:
 
-   *cd desktop/bss-macro-py-main*
+   ```cd desktop/bss-macro-py-main```
 
 6. run the program with the following command:
 
-   *python3 e_macro.py*
+   ```python3 e_macro.py```
 
 
 *During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
