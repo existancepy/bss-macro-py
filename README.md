@@ -12,7 +12,7 @@ https://discord.gg/PwUMDp8c
 
 Better instructions and fixes
 
-**Installation for macOS  versions lower than 10.13**
+**Installation for macOS versions lower than 12.0**
 1. (IMPORTANT )Install python v3.8: https://www.python.org/downloads/release/python-380/
 
 **Check "Add python to path"  in the installation window**
@@ -26,8 +26,13 @@ Better instructions and fixes
     It should return python 3.8
 
     Next, run the opencv installation command:
+    
+    If your macOS version is lower than 10.13:
 
-   *pip3 install opencv-python==4.1.2.30*
+        *pip3 install opencv-python==4.1.2.30*
+        
+    If your macOS version is 10.13 or higher:
+        *pip3 install opencv-python==4.3.0.36*
    
    Once installation is complete, run this:
     
