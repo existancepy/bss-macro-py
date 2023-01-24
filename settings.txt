@@ -14,7 +14,7 @@ gather_time:15
 pack:95
 before_gather_turn:right
 turn_times:2
-return_to_hive:Rejoin
+return_to_hive:Reset
 whirligig_slot:1
 display_type:built-in retina display
 private_server_link:
