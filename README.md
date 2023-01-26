@@ -39,9 +39,9 @@ If your macOS version is 12.0 and higher, scroll down to see the installation gu
         
    Once installation is complete, run this:
     
-   ```
+
    pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
-   ```
+
 Continue starting from step 4 in the "Setup" section
 
 
