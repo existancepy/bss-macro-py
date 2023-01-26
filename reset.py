@@ -16,20 +16,20 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
-loadSave()
 
 def reset():
     ths = loadsettings.load()["hivethreshold"]
     print("ths is {}".format(ths))
+    loadSave()
     for _ in range(2):
         webhook("","Resetting character","dark brown")
         pag.moveTo(350,100)
         ww = savedata["ww"]
         wh = savedata["wh"]
         xo = ww//4
-        yo = wh//100*90
-        xt = xo*2
-        yt = wh//100*20
+        yo = wh//4*3
+        xt = xo*3-xo
+        yt = wh-yo
         time.sleep(2)
         pag.press('esc')
         time.sleep(0.1)
@@ -69,12 +69,6 @@ def reset():
     for _ in range(1):
         webhook("","Obtaining values","dark brown")
         pag.moveTo(350,100)
-        ww = savedata["ww"]
-        wh = savedata["wh"]
-        xo = ww//4
-        yo = wh//100*90
-        xt = xo*2
-        yt = wh//100*20
         time.sleep(2)
         pag.press('esc')
         time.sleep(0.1)
@@ -106,12 +100,6 @@ def reset():
     webhook("","Now attempting to find hive","dark brown")
     for _ in range(1):
         pag.moveTo(350,100)
-        ww = savedata["ww"]
-        wh = savedata["wh"]
-        xo = ww//4
-        yo = wh//100*90
-        xt = xo*2
-        yt = wh//100*20
         time.sleep(2)
         pag.press('esc')
         time.sleep(0.1)

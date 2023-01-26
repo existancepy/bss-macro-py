@@ -21,6 +21,10 @@ import discord
 import update
 import updateexperiment
 from tkinter import messagebox
+import numpy as np
+from PIL import ImageGrab
+try: import cv2
+except: pass
 savedata = {}
 ww = ""
 wh = ""
@@ -29,7 +33,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = 1.22
+macrov = 1.24
 if __name__ == '__main__':
     print("Your python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}".format(macrov))
@@ -41,35 +45,35 @@ if __name__ == '__main__':
     
 def discord_bot(dc):
     setdat = loadsettings.load()
+    if setdat['enable_discord_bot']:
+        intents = discord.Intents.default()
+        intents.message_content = True
 
-    intents = discord.Intents.default()
-    intents.message_content = True
+        client = discord.Client(intents=intents)
 
-    client = discord.Client(intents=intents)
+        @client.event
+        async def on_ready():
+            print(f'We have logged in as {client.user}')
 
-    @client.event
-    async def on_ready():
-        print(f'We have logged in as {client.user}')
+        @client.event
+        async def on_message(message):
+            if message.author == client.user:
+                return
 
-    @client.event
-    async def on_message(message):
-        if message.author == client.user:
-            return
+            if message.content.startswith('!b'):
+                args = message.content.split(" ")[1:]
+                cmd = args[0].lower()
+                if cmd == "rejoin":
+                    await message.channel.send("Now attempting to rejoin")
+                    dc.value = 1
+                    rejoin()
+                    dc.value = 0
+                elif cmd == "screenshot":
+                    await message.channel.send("Sending a screenshot via webhook")
+                    webhook("User Requested: Screenshot","","light blue",1)
+                    
 
-        if message.content.startswith('!b'):
-            args = message.content.split(" ")[1:]
-            cmd = args[0].lower()
-            if cmd == "rejoin":
-                await message.channel.send("Now attempting to rejoin")
-                dc.value = 1
-                rejoin()
-                dc.value = 0
-            elif cmd == "screenshot":
-                await message.channel.send("Sending a screenshot via webhook")
-                webhook("User Requested: Screenshot","","light blue",1)
-                
-
-    client.run(setdat['discord_bot_token'])
+        client.run(setdat['discord_bot_token'])
     
 def validateSettings():
     msg = ""
@@ -144,14 +148,15 @@ def savetimings(m):
 def ebutton():
     r =  []
     savedata = loadRes()
-    confidence = loadsettings.load()['ebthreshold']
+    c = loadsettings.load()['ebthreshold']
     ww = savedata['ww']
     wh = savedata['wh']
     setdat = loadsettings.load()
-    if setdat['display_type'] ==  "built-in retina display":
-        r = imagesearch.find("eb.png",confidence,0,0,ww,wh//2)
+ 
+    if setdat['ebdetect'] == "pyautogui":
+        r = pag.locateOnScreen("./images/retina/eb.png",region=(0,0,ww,wh//2))
     else:
-        r = imagesearch.find("eb.png",confidence,0,0,ww,wh//2)
+        r = imagesearch.find("eb.png",c,0,0,ww,wh//2)
     if r:return r
     return
 def canon():
@@ -296,6 +301,37 @@ def resetMobTimer(cfield):
         elif cfield == "bamboo":
             if checkRespawn("rhinobeetle_bamboo","5m"):  savetimings("rhinobeetle_bamboo")
 
+sat_image = cv2.imread('./images/retina/saturator.png')
+method = cv2.TM_SQDIFF_NORMED
+
+def fieldDriftCompensation():
+    res = loadRes()
+    ww = res["ww"]
+    wh = res["wh"]
+    winUp = wh/2.1
+    winDown = wh/1.8
+    winLeft = ww/2
+    winRight = ww/1.7
+    for _ in range(4):
+        screen = np.array(ImageGrab.grab())
+        screen = cv2.cvtColor(src=screen, code=cv2.COLOR_BGR2RGB)
+        large_image = screen
+        result = cv2.matchTemplate(sat_image, large_image, method)
+        mn,_,mnLoc,_ = cv2.minMaxLoc(result)
+        x,y = mnLoc
+        if mn < 0.08:
+            if x >= winLeft and x <= winRight and y >= winUp and y <= winDown: break
+            if x < winLeft:
+                move.hold("a",0.1)
+            elif x > winRight:
+                move.hold("d",0.1)
+            if y < winUp:
+                move.hold("w",0.1)
+            elif y > winDown:
+                move.hold("s",0.1)
+        else:
+            break
+        
 def background(cf,bpcap,gat,dc):
     savedata = loadRes()
     ww = savedata['ww']
@@ -386,7 +422,7 @@ def rejoin():
     else:
         webbrowser.open('https://www.roblox.com/games/1537690962/Bee-Swarm-Simulator')
         time.sleep(7)
-        _,x,y = imagesearch.find('playbutton.png',0.8)
+        _,x,y,_ = imagesearch.find('playbutton.png',0.8)
         webhook("","Play Button Found","dark brown")
         if setdat['display_type'] == "built-in retina display":
             pag.click(x//2, y//2)
@@ -639,6 +675,8 @@ def startLoop(cf,bpcap,gat,dc):
                 if timespent > setdat["gather_time"]:
                     webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
                     break
+                if setdat['field_drift_compensation']:
+                    fieldDriftCompensation()
             time.sleep(0.5)
             gat.value = 0
             cf.value = ""
@@ -674,13 +712,21 @@ def startLoop(cf,bpcap,gat,dc):
                         convert()
                         reset.reset()
                     
-   
+def setResolution():
+    wwd = int(pag.size()[0])
+    whd = int(pag.size()[1])
+    dt = loadsettings.load()["display_type"]
+    if dt == "built-in retina display":
+        wwd *=  2
+        whd *= 2
+    with open('save.txt', 'w') as f:
+        f.write('wh:{}\nww:{}'.format(whd,wwd))
+            
 if __name__ == "__main__":
-    
+    setResolution()
     loadSave()
     ww = savedata["ww"]
     wh = savedata["wh"]
-
     root = tk.Tk()
     root.geometry('700x400')
     s = ttk.Style()
@@ -697,16 +743,19 @@ if __name__ == "__main__":
     frame3 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
     frame4 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
     frame5 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
+    frame6 = ttk.Frame(notebook, width=700, height=400,style='frame.TFrame')
 
     frame1.pack(fill='both', expand=True)
     frame2.pack(fill='both', expand=True)
     frame3.pack(fill='both', expand=True)
     frame4.pack(fill='both', expand=True)
     frame5.pack(fill='both', expand=True)
+    frame6.pack(fill='both', expand=True)
 
     notebook.add(frame1, text='Gather')
     notebook.add(frame2, text='Bug run')
     notebook.add(frame4, text='Collect')
+    notebook.add(frame6, text='Planters')
     notebook.add(frame3, text='Settings')
     notebook.add(frame5, text='Calibration')
 
@@ -746,6 +795,7 @@ if __name__ == "__main__":
     private_server_link = setdat["private_server_link"]
     enable_discord_bot = tk.IntVar(value=setdat["enable_discord_bot"])
     discord_bot_token = setdat['discord_bot_token']
+    field_drift_compensation = tk.IntVar(value=setdat["field_drift_compensation"])
 
     wealthclock = tk.IntVar(value=setdat["wealthclock"])
     blueberrydispenser = tk.IntVar(value=setdat["blueberrydispenser"])
@@ -753,7 +803,9 @@ if __name__ == "__main__":
     royaljellydispenser  = tk.IntVar(value=setdat["royaljellydispenser"])
     treatdispenser = tk.IntVar(value=setdat["treatdispenser"])
 
-    ebthreshold =  setdat['ebthreshold']
+    ebthreshold = setdat['ebthreshold']
+    ebdetect = tk.StringVar(root)
+    ebdetect.set(setdat["ebdetect"])
     wwa  = savedata['ww']
     wha = savedata['wh']
     
@@ -812,6 +864,7 @@ if __name__ == "__main__":
             "private_server_link":linktextbox.get(1.0,"end").replace("\n",""),
             "enable_discord_bot":enable_discord_bot.get(),
             "discord_bot_token":tokentextbox.get(1.0,"end").replace("\n",""),
+            "field_drift_compensation": field_drift_compensation.get(),
             
             "stump_snail": stump_snail.get(),
             "ladybug": ladybug.get(),
@@ -828,11 +881,21 @@ if __name__ == "__main__":
             "treatdispenser":treatdispenser.get(),
 
             "hivethreshold":setdat['hivethreshold'],
-            "ebthreshold":ebtextbox.get(1.0,"end").replace("\n","")
+            "ebthreshold":ebtextbox.get(1.0,"end").replace("\n",""),
+            "ebdetect":ebdetect.get()
 
             }
-        ww = int(wwatextbox.get(1.0,"end").replace("\n",""))
-        wh = int(whatextbox.get(1.0,"end").replace("\n",""))
+        #ww = int(wwatextbox.get(1.0,"end").replace("\n",""))
+        #wh = int(whatextbox.get(1.0,"end").replace("\n",""))
+        #if setdict["display_type"] == "built-in retina display":
+            #if ww<2000:
+                #pag.alert(text='The resolution is invalid for a built-in retina display. Check it by going to about this mac -> displays', title='Setting error', button='OK')
+                #return
+        try:
+            a = float(setdict["walkspeed"])
+        except:
+            pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(setdict['walkspeed']),title="Invalid setting",button="OK")
+            return
         with open('save.txt', 'w') as f:
             f.write('wh:{}\nww:{}'.format(wh,ww))
         f.close()
@@ -844,8 +907,7 @@ if __name__ == "__main__":
         background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected))
         background_proc.start()
         discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,))
-        if setdat['enable_discord_bot']:
-            discord_bot_proc.start()
+        discord_bot_proc.start()
         try:
             while True:
                 if disconnected.value:
@@ -861,12 +923,20 @@ if __name__ == "__main__":
                 discord_bot_proc.terminate()
             webhook("Macro Stopped","","dark brown")
         
-
+    def savedisplaytype(event):
+        loadsettings.save("display_type",display_type.get().lower())
+        setResolution()
+        
     def disablews(event):
         if return_to_hive.get().lower() == "whirligig":
             wslotmenu.configure(state="normal")
         else:
             wslotmenu.configure(state="disable")
+    def disableeb(event):
+        if ebdetect.get().lower() == "pyautogui":
+            ebtextbox.configure(state="disable")
+        else:
+            ebtextbox.configure(state="normal")
 
     def disabledw():
         if str(enable_discord_webhook.get()) == "1":
@@ -914,6 +984,9 @@ if __name__ == "__main__":
     wslotmenu = tkinter.OptionMenu(frame1 , whirligig_slot, *[1,2,3,4,5,6,7,"none"])
     wslotmenu.place(width=70,x = 570, y = 155)
 
+    tkinter.Checkbutton(frame1, text="Field Drift Compensation", variable=field_drift_compensation, bg = wbgc).place(x=0, y = 190)
+    
+
     #Tab 2 
     tkinter.Checkbutton(frame2, text="Apply gifted vicious bee hive bonus", variable=gifted_vicious_bee, bg = wbgc).place(x=0, y = 15)
     tkinter.Checkbutton(frame2, text="Stump Snail", variable=stump_snail, bg = wbgc).place(x=0, y = 50)
@@ -931,6 +1004,9 @@ if __name__ == "__main__":
     tkinter.Checkbutton(frame4, text="(Free) Royal Jelly Dispenser", variable=royaljellydispenser, bg = wbgc).place(x=320, y = 50)
     tkinter.Checkbutton(frame4, text="Treat Dispenser", variable=treatdispenser, bg = wbgc).place(x=520, y = 50)
     #Tab 4
+    
+    
+    #Tab 5
     tkinter.Label(frame3, text = "Hive Slot (6-5-4-3-2-1)", bg = wbgc).place(x = 0, y = 15)
     dropField = tkinter.OptionMenu(frame3, hive_number, *[x+1 for x in range(6)] )
     dropField.place(width=60,x = 160, y = 15)
@@ -945,17 +1021,17 @@ if __name__ == "__main__":
     sendss = tkinter.Checkbutton(frame3, text="Send screenshots", variable=send_screenshot, bg = wbgc)
     sendss.place(x=200, y = 85)
     urltextbox.place(x = 500, y=87)
-    tkinter.Label(frame3, text = "Screen Resolution:", bg = wbgc).place(x = 0, y = 120)
-    tkinter.Label(frame3, text = "Width", bg = wbgc).place(x = 150, y = 120)
-    wwatextbox = tkinter.Text(frame3, width = 5, height = 1)
-    wwatextbox.insert("end",wwa)
-    wwatextbox.place(x=200,y=122)
-    tkinter.Label(frame3, text = "Height", bg = wbgc).place(x = 260, y = 120)
-    whatextbox = tkinter.Text(frame3, width = 5, height = 1)
-    whatextbox.insert("end",wha)
-    whatextbox.place(x=310,y=122)
+    tkinter.Label(frame3, text = "Screen Resolution: Currently detected automatically. No need to configure", bg = wbgc).place(x = 0, y = 120)
+    #tkinter.Label(frame3, text = "Width", bg = wbgc).place(x = 150, y = 120)
+    #wwatextbox = tkinter.Text(frame3, width = 5, height = 1)
+    #wwatextbox.insert("end",wwa)
+    #wwatextbox.place(x=200,y=122)
+    #tkinter.Label(frame3, text = "Height", bg = wbgc).place(x = 260, y = 120)
+    #whatextbox = tkinter.Text(frame3, width = 5, height = 1)
+    #whatextbox.insert("end",wha)
+    #whatextbox.place(x=310,y=122)
     tkinter.Label(frame3, text = "Display type", bg = wbgc).place(x = 0, y = 155)
-    dropField = tkinter.OptionMenu(frame3, display_type, *["Built-in retina display","Built-in display"] )
+    dropField = tkinter.OptionMenu(frame3, display_type, command = savedisplaytype, *["Built-in retina display","Built-in display"] )
     dropField.place(width=160,x = 100, y = 155)
     tkinter.Label(frame3, text = "Private Server Link", bg = wbgc).place(x = 0, y = 190)
     linktextbox = tkinter.Text(frame3, width = 24, height = 1)
@@ -966,12 +1042,15 @@ if __name__ == "__main__":
     tokentextbox = tkinter.Text(frame3, width = 24, height = 1)
     tokentextbox.insert("end",discord_bot_token)
     tokentextbox.place(x = 300, y=228)
-    #Tab 5
+    #Tab 6
     tkinter.Button(frame5, text = "Calibrate Hive",command = calibratehive, height = 1, width = 7 ).place(x=0,y=15)
-    tkinter.Label(frame5, text = "E Button Threshold", bg = wbgc).place(x = 0, y = 50)
+    tkinter.Label(frame5, text = "E Button Detection Type", bg = wbgc).place(x = 0, y = 50)
+    dropField = tkinter.OptionMenu(frame5, ebdetect, command = disableeb, *["cv2","pyautogui"] )
+    dropField.place(width=130,x = 158, y = 51)
+    tkinter.Label(frame5, text = " Threshold", bg = wbgc).place(x = 300, y = 50)
     ebtextbox = tkinter.Text(frame5, width = 4, height = 1)
     ebtextbox.insert("end",ebthreshold)
-    ebtextbox.place(x=130,y=53)
+    ebtextbox.place(x=380,y=53)
     #Root
     tkinter.Button(root, text = "Start",command = startGo, height = 2, width = 7 ).place(x=10,y=350)
     tkinter.Button(root, text = "Update",command = updateFiles, height = 1, width = 5,).place(x=600,y=370)
@@ -980,6 +1059,7 @@ if __name__ == "__main__":
     
     disablews("1")
     disabledw()
+    disableeb("1")
     root.mainloop()
     
 

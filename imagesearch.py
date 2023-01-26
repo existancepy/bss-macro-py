@@ -18,10 +18,6 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
-loadSave()
-ww = savedata["ww"]
-wh = savedata["wh"]
-display_type = loadsettings.load()['display_type']
 
 
 '''
@@ -44,11 +40,16 @@ cv2.imshow('output',large_image)
 cv2.waitKey(0)
 '''
 
-def find(img,confi, x1 = 0, y1 = 0, x2 = ww, y2 = wh,fast=0):
-    
+def find(img,confi, x1 = 0, y1 = 0, x2 = 0, y2 = 0,fast=0):
+    loadSave()
+    ww = savedata["ww"]
+    wh = savedata["wh"]
+    if not x2: x2  = ww
+    if not y2: y2 = wh
+    display_type = loadsettings.load()['display_type']
     method = cv2.TM_CCOEFF_NORMED
     if fast:
-        screen = ImageGrab.grab(bbox=(x1,y1,x2,y2))
+        screen = ImageGrab.grab()
     else:
         screen = pag.screenshot(region=(x1,y1,x2,y2))
     screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)

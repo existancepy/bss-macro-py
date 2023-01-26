@@ -43,14 +43,34 @@ wh = savedata["wh"]
 ms = pag.size()
 mw = ms[0]
 mh = ms[1]
+sat_image = cv2.imread('./images/retina/saturator.png')
+method = cv2.TM_SQDIFF_NORMED
 
+winUp = wh/2.1
+winDown = wh/1.8
+winLeft = ww/2
+winRight = ww/1.7 
+for _ in range(4):
+    screen = np.array(ImageGrab.grab())
+    screen = cv2.cvtColor(src=screen, code=cv2.COLOR_BGR2RGB)
+    large_image = screen
+    result = cv2.matchTemplate(sat_image, large_image, method)
+    mn,_,mnLoc,_ = cv2.minMaxLoc(result)
+    x,y = mnLoc
+    if mn < 0.08:
+        if x >= winLeft and x <= winRight and y >= winUp and y <= winDown: break
 
-while True:
-    if imagesearch.find('died.png',0.42,ww//2,wh//2,ww,wh,1):
-        print("died")
+        if x < winLeft:
+            move.hold("a",0.1)
+        elif x > winRight:
+            move.hold("d",0.1)
+        if y < winUp:
+            move.hold("w",0.1)
+        elif y > winDown:
+            move.hold("s",0.1)
+    else:
         break
  #!/usr/bin/env python
-
 '''
 
 
@@ -267,13 +287,7 @@ windown = wh / 1.88
 winleft = ww / 2.14
 winright = wh / 1.88
 
-winup = wh / 2
-windown = wh / 2
-winleft = ww / 2
-winright = wh / 2
-
-
-
+method = cv2.TM_SQDIFF_NORMED
 screen = np.array(ImageGrab.grab())
 screen = cv2.cvtColor(src=screen, code=cv2.COLOR_BGR2RGB)
 
@@ -296,21 +310,8 @@ cv2.imshow('output',large_image)
 # The image is only displayed if we call this
 cv2.waitKey(0)
 
-
-method = cv2.TM_SQDIFF_NORMED
 while True:
-    screen = np.array(ImageGrab.grab())
-    screen = cv2.cvtColor(src=screen, code=cv2.COLOR_BGR2RGB)
-
-    small_image = cv2.imread('./images/saturator4.png')
-    large_image = screen
-    result = cv2.matchTemplate(small_image, large_image, method)
-    mn,_,mnLoc,_ = cv2.minMaxLoc(result)
-    x,y = mnLoc
-
-    print(x,y)
-    print(mn)
-    pag.moveTo(x//2,y//2)
+    r = imagesearch.find("saturator.png",0.9,0,0,ww,wh,1)
 
     if abs(x-winleft) < 50 and abs(y-winup) < 50:
         break

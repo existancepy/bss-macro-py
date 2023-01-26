@@ -14,15 +14,28 @@ time.sleep(2)
     
 webhook("","Calibrating: Hive","dark brown",1)
 vals = []
+def loadSave():
+    info = {}
+    with open('save.txt') as f:
+        lines = f.read().split("\n")
+    f.close()
+    for s in lines:
+        l = s.replace(" ","").split(":")
+        if l[1].isdigit():
+            l[1] = int(l[1])
+        info[l[0]] = l[1]
+    return info
+        
 for _ in range(1):
     webhook("","Obtaining: max_val","dark brown")
+    savedata = loadSave()
     pag.moveTo(350,100)
     ww = savedata["ww"]
     wh = savedata["wh"]
     xo = ww//4
-    yo = wh//100*90
-    xt = xo*2
-    yt = wh//100*20
+    yo = wh//4*3
+    xt = xo*3-xo
+    yt = wh-yo
     time.sleep(2)
     pag.press('esc')
     time.sleep(0.1)
