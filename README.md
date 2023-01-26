@@ -22,22 +22,20 @@ If your macOS version is 12.0 and higher, scroll down to see the installation gu
 
     ```
     python3 --version
-
     ```
+
     It should return python 3.8.
 
     Next, run the opencv installation command:
 
+    If your macOS version is lower than 10.13:
 
-        If your macOS version is lower than 10.13:
-            ```
             pip3 install opencv-python==4.1.2.30
-            ```
         
-       If your macOS version is 10.13 or higher:
-            ```
+    If your macOS version is 10.13 or higher:
+
             pip3 install opencv-python==4.3.0.36
-            ```
+
         
    Once installation is complete, run this:
     
@@ -89,8 +87,11 @@ Continue starting from step 4 in the "Installation for macOS 12.0 and higher" se
   *So far, everyone who has messaged  me has encountered hive issues (whether they realised it or not), so I recommend re-configuring the hive as stated    in 1.*
 Credits:
 Natro macro for some of the techniques
+
 **Exiting the macro:**
 Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
+
+
 **Setting up a discord bot**
 1. Go to https://discord.com/developers/applications
 2. Click on “New Application” (top right)
@@ -107,9 +108,12 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 Discord bot commands:
 
 Format: <prefix> <command>
+
 Prefix: !b
+
 Commands: rejoin (forces the character to rejoin the game), 
                     screenshot (sends a screenshot of the screen)
+
 *Example: !b rejoin*
     
     
