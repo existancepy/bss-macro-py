@@ -62,8 +62,9 @@ Continue starting from step 4 in the "Setup" section
    (Optional: Create a python venv)
    
 3.Run the following command:
+    ```
     pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py
-    
+    ```
     
 **Setup**
 
@@ -91,6 +92,7 @@ Continue starting from step 4 in the "Setup" section
       - Screen Recording
       - Accessibility
       - Automation -> tick the "system events" checkbox under "terminal"
+
 - Check out 1. and 4. of the "bugs and fixes section" below. I highly recommend doing the fixes even if you may not seem to encounter the problem.
   *So far, everyone who has messaged  me has encountered hive issues (whether they realised it or not), so I recommend re-configuring the hive as stated    in 1.*
 Credits:
