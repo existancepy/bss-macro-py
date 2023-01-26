@@ -26,18 +26,20 @@ If your macOS version is 12.0 and higher, scroll down to see the installation gu
     
     If your macOS version is lower than 10.13:
         ```
-        pip3 install opencv-python==4.1.2.30
-        ```
+        pip3 install opencv-python==4.1.2.30```
+        
     If your macOS version is 10.13 or higher:
         ```
-        pip3 install opencv-python==4.3.0.36
-        ```
+        pip3 install opencv-python==4.3.0.36```
+        
    Once installation is complete, run this:
     
-    ```
-    pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
-    ```
-Continue starting from step 4 in the "Installation for macOS 10.13 and higher" section
+   
+    ```pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py```
+
+Continue starting from step 4 in the "Installation for macOS 12.0 and higher" section
+
+
 **Installation for macOS 12.0 and higher**
 1. Install python v3.9.5: https://www.python.org/downloads/release/python-395/
 **Check "Add python to path"  in the installation window**
@@ -51,6 +53,8 @@ Continue starting from step 4 in the "Installation for macOS 10.13 and higher" s
    
 3.Run the following command:
     pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py
+    
+    
 **Setup**
 4. Download the files in the git repo into the folder made in step 1 as a zip. This can be done via the "code button" -> download zip. Save it  in your desktop. Once its downloaded, extract the zip file. You should now have a folder called "bss-macro-py-main" on your desktop
  
@@ -64,6 +68,8 @@ Continue starting from step 4 in the "Installation for macOS 10.13 and higher" s
     python3 e_macro.py
     ```
 *During the runtime, you may be prompted to enable certain permissions in your system and security settings. Do enable those.*
+
+
 **Calibration**
  - System settings permissions: 
    Security and privacy -> privacy
@@ -90,12 +96,16 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 9. Add your bot to the server and ensure that it has permissions to view the channels you want to use it in
 10. Returning back to the application page, click on reset token -> copy
 11. Launch the macro and copy the token into the calibration section.
+
 Discord bot commands:
+
 Format: <prefix> <command>
 Prefix: !b
 Commands: rejoin (forces the character to rejoin the game), 
                     screenshot (sends a screenshot of the screen)
 *Example: !b rejoin*
+    
+    
 **Bugs and fixes:**
 1. The player keeps rotating at the hive before walking
    - The code is not able to detect the hive. To fix this, take a screenshot of the hive area under your hotbar. Reset your character, then press "." 4        times, then press pgup (fn+ up arrow) until you cant go up anymore. Than press "o" until you stop zooming out. 
