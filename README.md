@@ -1,10 +1,14 @@
 **Bee swarm python macro installation and instructions**
+
 Made and tested on mac, currently untested for windows/linux
 *Due to  the code, it is unlikely to work on windows/linux thanks to the retina display.*
 I can release a window-compatible one, but ~im lazy~
+
 **Set your display resolution to default and colour profile to colour LCD. For roblox, play in fullscreen and set the graphics quality to 1**
+
 There's a discord server now! Thanks to kay ;)#6148 for setting it up
 https://discord.gg/PwUMDp8c
+
 Better instructions and fixes
 
 **Installation for macOS versions lower than 12.0**
@@ -14,18 +18,20 @@ If your macOS version is 12.0 and higher, scroll down to see the installation gu
 **Check "Add python to path"  in the installation window**
 2. Open terminal/command line
 3. Verify that it is python 3.8 by running the following command:
-    
-    *python3 --version*
-    
+    ```
+    python3 --version
+    ```
     It should return python 3.8
     Next, run the opencv installation command:
     
     If your macOS version is lower than 10.13:
+        ```
         pip3 install opencv-python==4.1.2.30
-        
+        ```
     If your macOS version is 10.13 or higher:
+        ```
         pip3 install opencv-python==4.3.0.36
-   
+        ```
    Once installation is complete, run this:
     
     ```
