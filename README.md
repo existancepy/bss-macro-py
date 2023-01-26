@@ -12,7 +12,9 @@ https://discord.gg/PwUMDp8c
 Better instructions and fixes
 
 **Installation for macOS versions lower than 12.0**
+
 If your macOS version is 12.0 and higher, scroll down to see the installation guide
+
 1. (IMPORTANT )Install python v3.8: https://www.python.org/downloads/release/python-380/
 
 **Check "Add python to path"  in the installation window**
@@ -40,17 +42,22 @@ If your macOS version is 12.0 and higher, scroll down to see the installation gu
    ```
    pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
    ```
-Continue starting from step 4 in the "Installation for macOS 12.0 and higher" section
+Continue starting from step 4 in the "Setup" section
 
 
 **Installation for macOS 12.0 and higher**
+
+
 1. Install python v3.9.5: https://www.python.org/downloads/release/python-395/
+
 **Check "Add python to path"  in the installation window**
+
 **For M1 Macs**
 - ensure terminal is closed
 - Go to finder -> application -> terminal
 - Right click terminal  -> get info 
 - Check the checkbox "Open using Rosetta"
+
 2.Open terminal/command line
    (Optional: Create a python venv)
    
@@ -59,9 +66,11 @@ Continue starting from step 4 in the "Installation for macOS 12.0 and higher" se
     
     
 **Setup**
+
 4. Download the files in the git repo into the folder made in step 1 as a zip. This can be done via the "code button" -> download zip. Save it  in your desktop. Once its downloaded, extract the zip file. You should now have a folder called "bss-macro-py-main" on your desktop
  
  **Launching the program**
+
 5. Navigate to the folder created in step 1 using the "cd" command:
     ```
     cd desktop/bss-macro-py-main
@@ -74,6 +83,7 @@ Continue starting from step 4 in the "Installation for macOS 12.0 and higher" se
 
 
 **Calibration**
+
  - System settings permissions: 
    Security and privacy -> privacy
    Ensure that terminal has following permissions:
