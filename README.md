@@ -63,6 +63,7 @@ Continue starting from step 4 in the "Setup" section
    
 3.Run the following command:
     ```
+
     pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py
     ```
     
