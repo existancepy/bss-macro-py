@@ -19,10 +19,7 @@ If your macOS version is 12.0 and higher, scroll down to see the installation gu
 2. Open terminal/command line
 3. Verify that it is python 3.8 by running the following command:
 
-
-    ```
     python3 --version
-    ```
 
     It should return python 3.8.
 
@@ -94,15 +91,25 @@ Ensure the terminal window is focused and press ctrl c to quit (not cmd c)
 
 **Setting up a discord bot**
 1. Go to https://discord.com/developers/applications
+
 2. Click on “New Application” (top right)
+
 3. Put in the name, tick the checkbox and create
+
 4. Copy the application id (it is required later)
+
 5. In the “settings” sidebar, click on bot -> add bot 
+
 6. Scroll down to “Privileged Gateway Intents” and check “Message Content Intent”
+
 7. Edit and copy  in the following link into a web browser:
+
 8. https://discord.com/oauth2/authorize?client_id=<your application id from step 4>&permissions=68608&scope=bot
+
 9. Add your bot to the server and ensure that it has permissions to view the channels you want to use it in
+
 10. Returning back to the application page, click on reset token -> copy
+
 11. Launch the macro and copy the token into the calibration section.
 
 Discord bot commands:
@@ -124,13 +131,17 @@ Commands: rejoin (forces the character to rejoin the game),
    - Here is an example: https://imgur.com/a/pvWYaWP You can take the screenshot anywhere in the red box. Try to keep the screenshot small                    https://imgur.com/a/FlcxKVl
    - Replace hive1.png in the images folder with your new image
    - Ensure that you have give terminal permissions to screen recording
+
    **Update**
     As of version 1.18, there is now an option to automatically configure the hive. You can find the button, called "Configure Hive", in the calibration section of the GUI 
+
 2. The dock is brought up during the macro, interrupting the key inputs.
    - This can be solved by manually clicking on the screen when the macro is ran
+
 3. *ImportError:dlopen...Symbol not found/import cv2* in the terminal when the code is ran.
    - This is most likely caused by an outdated macOS version. For a work around, check out https://github.com/existancepy/bss-macro-py-no-cv2
    - A better fix would just be to update your mac OS software
+
 4. Enable dictation menu is brought up during the macro
    - Fix:  system preferences -> keyboard -> shortcuts -> app shortcuts
    - click the '+' sign and put roblox as the application
