@@ -1,4 +1,184 @@
 
+# Bee Swarm Python Macro
+
+Made and tested on mac, currently untested for windows/linux.
+
+
+
+## Features
+
+- Gathering for all fields
+- Gather patterns: e_lol/squares/snake/spiral
+- GUI for setup
+- Automatic calibration
+- Disconnect check + auto reconnect
+- Discord webhook
+- Field Drift Compensation
+- Wealth clock and dispenser collections
+- Bug runs + Stump Snail
+
+## In-Game Requirements
+- Glider 
+- Access to the red canon
+
+
+## Social Links
+- Discord: https://discord.gg/FTB8b2vB6y (Thanks to kay for setting it up)
+
+
+
+## Setting up the environment
+
+### MacOS lower than 10.13
+
+1. Install [python 3.8](https://www.python.org/downloads/release/python-380/)
+
+2. Open Terminal
+**On M1 Macs**
+ - Go to finder -> applications -> utilities -> right click terminal -> get info -> enable "open using rosetta"
+ **You can open terminal through 2 ways:**
+ - cmd + space to bring up spotlight, search "terminal" and hit enter
+ - finder -> applications -> utilities -> terminal
+
+    
+3. In Terminal, enter the following command:
+```bash
+pip3 install opencv-python==4.1.2.30
+```
+Wait for it to finish installing, then enter:
+```bash
+pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
+```
+
+### MacOS lower than 12.0 (10.13 - 12.0)
+
+1. Install [python 3.8](https://www.python.org/downloads/release/python-380/)
+
+2. Open Terminal
+**On M1 Macs**
+
+ - Go to finder -> applications -> utilities -> right click terminal -> get info -> enable "open using rosetta"
+ **You can open terminal through 2 ways:**
+ - cmd + space to bring up spotlight, search "terminal" and hit enter
+ - finder -> applications -> utilities -> terminal
+
+    
+3. In Terminal, enter the following command:
+```bash
+pip3 install opencv-python==4.3.0.36
+```
+Wait for it to finish installing, then enter:
+```bash
+pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
+```
+
+### MacOS 12.0 and higher
+
+1. Install [python 3.9.5](https://www.python.org/downloads/release/python-395/)
+
+2. Open Terminal
+**On M1 Macs**
+
+ - Go to finder -> applications -> utilities -> right click terminal -> get info -> enable "open using rosetta"
+ **You can open terminal through 2 ways:**
+ - cmd + space to bring up spotlight, search "terminal" and hit enter
+ - finder -> applications -> utilities -> terminal
+
+    
+3. In Terminal, enter the following command:
+```bash
+pip3 install pyautogui pillow opencv-python python-imagesearch discord-webhook keyboard discord.py
+```
+
+
+    
+## Macro Installation
+1. Download the files in this github repo (Code -> download zip)
+
+
+
+
+![App Screenshot](https://cdn.discordapp.com/attachments/1065032948119769121/1065033447963373690/Screen_Shot_2023-01-17_at_5.png)
+
+2. Locate the zip file in your finder and drag it to the desktop.
+
+3. Go to the desktop and double click on the zip file. It should create a new folder called *"bss-macro-py-main"*
+
+4. In terminal, enter these two commands one by one:
+
+```bash
+cd desktop/bss-macro-py-main
+python3 e_macro.py
+```
+
+
+
+
+## Permissions
+
+- In system preferences -> Security and privacy -> privacy 
+
+Ensure that terminal has following permissions:
+
+- Full Disk Access
+- Screen Recording
+- Accessibility
+- Automation -> tick the "system events" checkbox under "terminal"
+*Note: Terminal might not show up in automation until the macro is ran*
+
+- Play roblox in fullscreen
+
+
+## Exiting the macro
+1. Tab out/close out of Roblox
+2. Tap on terminal and press Ctrl + C
+
+## Re-running the macro
+Enter the following commands into terminal:
+
+```bash
+cd desktop/bss-macro-py-main
+```
+
+and
+```bash
+python3 e_macro.py
+```
+## Setting up the discord bot
+
+1. Go to [discord applications](https://discord.com/developers/applications)
+
+2. Click on “New Application” (top right)
+
+3. Put in a name, tick the checkbox and create
+
+4. Copy the application id (it is required later)
+
+5. In the “settings” sidebar, click on bot -> add bot
+
+6. Scroll down to “Privileged Gateway Intents” and check “Message Content Intent”
+
+7. Edit and copy in the following link into a web browser:
+
+8. https://discord.com/oauth2/authorize?client_id=<your application id from step 4>&permissions=68608&scope=bot
+
+9. Add your bot to the server and ensure that it has permissions to view the channels you want to use it in
+
+10. Returning back to the application page, click on reset token -> copy
+
+11. Launch the macro and copy the token into the calibration section.
+
+### Discord Bot commands
+
+- Format: <prefix> <command>
+- Prefix: !b
+- Commands:
+    1. rejoin
+    2. screenshot
+
+- *Example: !b rejoin*
+
+
 ## Bugs and Fixes
 
 #### Cannon Not Detected
@@ -62,4 +242,11 @@ pip3 uninstall opencv-python pillow numpy
 pip3 install opencv-python pillow numpy
 ```
 
+
+
+## Acknowledgements
+
+- For the enable dictation fix: https://www.dofus.com/en/forum/1151-general-problems-solutions/339448-issue-with-macos-keyboard-keys
+
+- Natro Macro for inspiration 
 
