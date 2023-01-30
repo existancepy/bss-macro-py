@@ -34,6 +34,7 @@ Made and tested on mac, currently untested for windows/linux.
 1. Install [python 3.8](https://www.python.org/downloads/release/python-380/)
 
 2. Open Terminal
+
 **On M1 Macs**
  - Go to finder -> applications -> utilities -> right click terminal -> get info -> enable "open using rosetta"
  **You can open terminal through 2 ways:**
@@ -55,6 +56,7 @@ pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
 1. Install [python 3.8](https://www.python.org/downloads/release/python-380/)
 
 2. Open Terminal
+
 **On M1 Macs**
 
  - Go to finder -> applications -> utilities -> right click terminal -> get info -> enable "open using rosetta"
@@ -77,6 +79,7 @@ pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py
 1. Install [python 3.9.5](https://www.python.org/downloads/release/python-395/)
 
 2. Open Terminal
+
 **On M1 Macs**
 
  - Go to finder -> applications -> utilities -> right click terminal -> get info -> enable "open using rosetta"
