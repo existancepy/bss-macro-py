@@ -7,7 +7,7 @@ import shutil
 from distutils.dir_util import copy_tree
 
 def update():
-    files = [x for x in os.listdir("./") if x[-2:] ==  "py" and  x!= "update.py" and x!= "updateexperiment.py" ]
+    files = [x for x in os.listdir("./") if x[-2:] ==  "py" and x!= "updateexperiment.py" ]
     print(files)
 
     for f in files:
@@ -24,8 +24,8 @@ def update():
 
     newfiles = os.listdir("./bss-macro-py-experimental-main")
     for i in newfiles:
-        if i != "images":
+        if i not in ['images','theme']:
             shutil.copyfile("./bss-macro-py-experimental-main/{}".format(i), "./{}".format(i))
         else:
-            copy_tree("./bss-macro-py-experimental-main/images", "./images")
+            copy_tree("./bss-macro-py-experimental-main/{}".format(i), "./{}".format(i))
     shutil.rmtree('./bss-macro-py-experimental-main')
