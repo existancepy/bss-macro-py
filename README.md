@@ -127,7 +127,7 @@ python3 e_macro.py
 Ensure that terminal has following permissions:
 
 - Full Disk Access
-- Screen Recording
+- Screen Recording (For Catalina and above)
 - Accessibility
 - Automation -> tick the "system events" checkbox under "terminal"
 *Note: Terminal might not show up in automation until the macro is ran*
