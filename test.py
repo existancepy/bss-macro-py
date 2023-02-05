@@ -19,12 +19,12 @@ from webhook import webhook
 import webbrowser
 import reset
 
-
+'''
 cmd = """
 osascript -e 'activate application "Roblox"' 
 """
 os.system(cmd)
-
+'''
 time.sleep(1)
 savedata = {}
 def loadSave():
@@ -43,48 +43,42 @@ wh = savedata["wh"]
 ms = pag.size()
 mw = ms[0]
 mh = ms[1]
-sat_image = cv2.imread('./images/retina/saturator.png')
-method = cv2.TM_SQDIFF_NORMED
+with open('plantertimings.txt','r') as f:
+    lines = f.read().split('\n')
+f.close()
+tempdict = {}
+for l in lines:
+    if ":" in l:
+        print(l)
+        a,b = l.split(":")
+        tempdict[a] = b
+print(tempdict)
 
-winUp = wh/2.1
-winDown = wh/1.8
-winLeft = ww/2
-winRight = ww/1.7 
-for _ in range(4):
-    screen = np.array(ImageGrab.grab())
-    screen = cv2.cvtColor(src=screen, code=cv2.COLOR_BGR2RGB)
-    large_image = screen
-    result = cv2.matchTemplate(sat_image, large_image, method)
-    mn,_,mnLoc,_ = cv2.minMaxLoc(result)
-    x,y = mnLoc
-    if mn < 0.08:
-        if x >= winLeft and x <= winRight and y >= winUp and y <= winDown: break
 
-        if x < winLeft:
-            move.hold("a",0.1)
-        elif x > winRight:
-            move.hold("d",0.1)
-        if y < winUp:
-            move.hold("w",0.1)
-        elif y > winDown:
-            move.hold("s",0.1)
-    else:
-        break
- #!/usr/bin/env python
+def is_running(app):
+
+    count = int(subprocess.check_output(["osascript",
+                "-e", "tell application \"System Events\"",
+                "-e", "count (every process whose name is \"" + app + "\")",
+                "-e", "end tell"]).strip())
+    return count > 0
+
+print(is_running("Roblox"))
+'''
+# For both Python 2.7 and Python 3.x
+from PIL import Image
+img_data = b'iVBORw0KGgoAAAANSUhEUgAAAJ8AAAAWAQMAAADkatyzAAAABlBMVEUAAAAbKjWMzP1VAAAAAXRSTlMAQObYZgAAAdlJREFUeAEBzgEx/gD4AAAAAAAAAAAAAAAAAAAAAAAAAAD+BgAAAAAADAAAAAHgDAAAAEAAAAD/BgAAAAB+DAAAAAH+DAAAAEAAAACBhgAAAACCDAAAAAECDAAAAEAAAACBhgAAAAGADAAAAAEDDAAAAEAAAACBhjBAAAGADB8MDAEDDB8MAfAAJgCBBjBB8AEADAGEDAEDDAGP4fD4PAD/BjBCCAEADACECAH+DACMEEEEMAD+BjBCCAEADACGGAHgDACMEEEEIAD/BjBD+AEADB+CEAEADB+MEEH8IACBhjBH/AEADCCCEAEADCCMEEP+IACAhjBGAAGADCCDMAEADCCMEEMAIACAhhBCAAGADCCBIAEADCCMEEEAIACBhhBCAACCDCCB4AEADCCMEEEAIAD/Bg/B8AB+DB+AwAEADB+MEHD4IAD4BgAAAAAADAAAwAEADAAMEAAAIAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAFzEPdK0OEUMAAAAAElFTkSuQmCC'
+import base64
+with open("imageToSave.png", "wb") as fh:
+    fh.write(base64.decodebytes(img_data))
+c = Image.open("imageToSave.png")
+d = c.resize((1000,700), resample=Image.BOX)
+d.show()
+'''
+
 '''
 
 
-
-savedata = {}
-def loadSave():
-    with open('save.txt') as f:
-        lines = f.read().split("\n")
-    f.close()
-    for s in lines:
-        l = s.replace(" ","").split(":")
-        if l[1].isdigit():
-            l[1] = int(l[1])
-        savedata[l[0]] = l[1]
         
 def savesettings(dictionary):
     templist = []

@@ -137,3 +137,53 @@ def reset():
     return False
     webhook("Notice","Hive not found. Assume that player is facing the right direction","red",1)
 
+def resetCheck():
+    ths = loadsettings.load()["hivethreshold"]
+    loadSave()
+    for _ in range(2):
+        webhook("","Resetting character","dark brown")
+        pag.moveTo(350,100)
+        ww = savedata["ww"]
+        wh = savedata["wh"]
+        xo = ww//4
+        yo = wh//100*90
+        xt = xo*2
+        yt = wh//100*20
+        time.sleep(2)
+        pag.press('esc')
+        time.sleep(0.1)
+        pag.press('r')
+        time.sleep(0.2)
+        pag.press('enter')
+        time.sleep(8)
+        for _ in range(4):
+            pag.press('pgup')
+        time.sleep(0.1)
+        for _ in range(6):
+            pag.press('o')
+        #im = pag.screenshot(region = (xo,yo,xt,yt))
+        #im.save('a.png')
+
+        time.sleep(0.4)
+        for _ in range(4):
+            r = imagesearch.find("hive1.png",ths, xo, yo, xt, yt)
+            if r:
+                time.sleep(0.1)
+                for _ in range(4):
+                    pag.press(".")
+
+                time.sleep(0.1)
+                for _ in range(4):
+                    pag.press('pgdn')
+                return True
+            for _ in range(4):
+                pag.press(",")
+            
+            time.sleep(0.5)
+        time.sleep(1)
+    for _ in range(4):
+        pag.press(",")
+    webhook("Notice","Hive not found.","red",1)
+    return False
+
+

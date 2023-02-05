@@ -1,18 +1,18 @@
 
 stump_snail:0
-ladybug_strawberry:0
-ladybug_mushroom:0
-ladybug_clover:0
+ladybug_strawberry:1675215898.166479
+ladybug_mushroom:1675215938.033141
+ladybug_clover:1675216049.759945
 mantis_pineapple:0
-mantis_pinetree:1674525515.039041
-scorpion_rose:0
-werewolf:1674525049.4371579
-spider_spider:0
+mantis_pinetree:1675395597.9526742
+scorpion_rose:1675216130.2777119
+werewolf:1675395597.9506612
+spider_spider:1675216211.771091
 rhinobeetle_blueflower:0
 rhinobeetle_bamboo:1674526947.228873
 rhinobeetle_pineapple:0
-rhinobeetle_clover:0
-wealthclock:0
+rhinobeetle_clover:1675216049.762366
+wealthclock:1675215834.826616
 blueberrydispenser:0
 strawberrydispenser:0
 royaljellydispenser:0

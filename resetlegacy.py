@@ -62,5 +62,5 @@ def reset():
         time.sleep(1)
     for _ in range(4):
         pag.press(",")
-    webhook("Notice","Hive not found. Assume that player is facing the right direction","red",1)
+    webhook("Notice","Hive not found.","red",1)
 

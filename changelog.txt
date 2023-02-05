@@ -84,3 +84,13 @@ Changelog:
 - Updated bug regarding hive finding
 - Added death check
 - Rework to ebutton check to be more reliable
+
+- 23/1/23
+
+- Added experimental update.
+- In case the experimental macro is broken, updating via the "update" button will return to the main macro
+
+
+-24/1/23
+- Added field drift compensation. It finds the saturator and moves to it.
+

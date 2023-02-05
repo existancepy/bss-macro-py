@@ -37,6 +37,8 @@ def webhook(title,desc,colour,ss=0):
         embed.set_image(url='attachment://screenshot.jpg')
         os.remove('screenshot.jpg')
     webhook.add_embed(embed)
-    response = webhook.execute()
+    try:
+        response = webhook.execute()
+    except Exception as e: print(e)
         
 

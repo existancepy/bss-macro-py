@@ -1,26 +1,26 @@
 
-hive_number:2
+hive_number:1
 walkspeed:28
 gifted_vicious_bee:0
 enable_discord_webhook:0
 discord_webhook_url:
 send_screenshot:0
 gather_enable:1
-gather_field:Bamboo
-gather_pattern:snake
+gather_field:Pine Tree
+gather_pattern:Snake
 gather_size:S
 gather_width:2
-gather_time:15
+gather_time:20
 pack:95
-before_gather_turn:right
-turn_times:4
+before_gather_turn:Right
+turn_times:2
 return_to_hive:Reset
 whirligig_slot:1
 display_type:built-in retina display
 private_server_link:
 enable_discord_bot:0
 discord_bot_token:
-field_drift_compensation:1
+field_drift_compensation:0
 stump_snail:0
 ladybug:0
 rhinobeetle:0
@@ -33,6 +33,8 @@ blueberrydispenser:0
 strawberrydispenser:0
 royaljellydispenser:0
 treatdispenser:0
-hivethreshold:0.6671689748764038
-ebthreshold:0.98
+hivethreshold:1.0
+ebthreshold:1
 ebdetect:pyautogui
+bploc:[0,0]
+canon_time:10

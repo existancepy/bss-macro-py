@@ -1,0 +1,14 @@
+
+paper:0
+ticket:0
+plastic:0
+candy:0
+blueclay:0
+redclay:0
+tacky:0
+pesticide:0
+heattreated:0
+hydroponic:0
+petal:0
+plenty:0
+festive:0

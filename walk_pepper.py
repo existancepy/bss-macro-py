@@ -20,13 +20,18 @@ def apu(k):
     
 
 move.hold("d",4)
-move.hold("s",8)
+move.hold("s",9)
 move.hold("a",9)
 move.hold("s",7)
 move.press(",")
-move.hold("w",2.5)
+move.hold("w",3)
 move.press(".")
-move.hold("a",6)
+move.hold("a",8)
+move.hold("w",3)
+move.hold("s",0.3)
+move.hold("d",3)
+move.hold("w",1)
+move.hold("s",0.6)
 
 
 

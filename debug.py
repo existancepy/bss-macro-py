@@ -43,6 +43,10 @@ for _ in range(4):
     pag.press(".")
 im = pag.screenshot(region = (xo,yo,xt,yt))
 im.save('hivedebug.png')
+cmd = """
+        osascript -e  'activate application "Terminal"'
+    """
+os.system(cmd)
 
 time.sleep(0.4)
     

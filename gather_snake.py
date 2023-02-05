@@ -8,11 +8,11 @@ sizeword = setdat["gather_size"]
 width = setdat["gather_width"]/2
 size = 0
 if sizeword.lower() == "s":
-    size = 1
+    size = 0.5
 elif sizeword.lower() == "m":
-    size =1.5
+    size =1
 else:
-    size = 2
+    size = 1.5
 
 for i in range(2):
     move.hold("w", 0.72*size)
