@@ -29,3 +29,4 @@ def update():
         else:
             copy_tree("./bss-macro-py-experimental-main/{}".format(i), "./{}".format(i))
     shutil.rmtree('./bss-macro-py-experimental-main')
+    print('Experimental Update complete. You can now relaunch the macro. To return to the main macro, click the "update" button')
