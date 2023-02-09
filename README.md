@@ -7,7 +7,7 @@ Made and tested on mac, currently untested for windows/linux.
 ## Features
 
 - Gathering for all fields
-- Gather patterns: e_lol/squares/snake/spiral
+- Planters
 - GUI for setup
 - Automatic calibration
 - Disconnect check + auto reconnect
