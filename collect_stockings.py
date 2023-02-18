@@ -5,7 +5,7 @@ import os
 import tkinter
 import loadsettings
 import move
-ws = loadsettings.load()["walkspeed"]
+ct = loadsettings.load()["canon_time"]
 
 def apd(k):
     cmd = """
@@ -18,13 +18,24 @@ def apu(k):
     """.format(k)
     os.system(cmd)
 
+def sleep(duration, get_now=time.perf_counter):
+    now = get_now()
+    end = now + duration
+    while now < end:
+        now = get_now()
 
-
-exec(open("field_blue flower.py").read())
-move.apkey("space")
-move.hold("s",3)
-move.hold("a",5)
-move.hold("w",1.5)
-move.hold('d',0.1)
 move.press(",")
-move.hold("w",7)
+move.press(",")
+move.press("e")
+time.sleep(0.8)
+pag.keyDown("w")
+move.press("space")
+move.press("space")
+sleep(2.6*ct)
+move.press(".")
+move.press(".")
+sleep(3.55*ct)
+pag.keyUp("w")
+move.press("space")
+
+    

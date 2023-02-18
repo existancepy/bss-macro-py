@@ -7,13 +7,13 @@ import loadsettings
 ms = pag.size()
 mw = ms[0]
 mh = ms[1]
-dt = loadsettings.load()['display_type']
 #0% 7697781
 #31% 8381831
 #52% 8502900
 #84% 11231045
 #100% 14889259
 def bpc():
+    dt = loadsettings.load()['display_type']
     def rgb_to_hex(r, g, b):
       return ('0x{:X}{:X}{:X}').format(r, g, b)
     X1=mw//2+63

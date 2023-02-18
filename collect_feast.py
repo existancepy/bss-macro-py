@@ -18,23 +18,28 @@ def apu(k):
     """.format(k)
     os.system(cmd)
 
-start = time.time()
+def sleep(duration, get_now=time.perf_counter):
+    now = get_now()
+    end = now + duration
+    while now < end:
+        now = get_now()
+
+move.press(",")
+move.press(",")
+move.press(",")
 move.press(",")
 move.press("e")
-time.sleep(1)
 pag.keyDown("w")
+sleep(0.4)
 move.press("space")
 move.press("space")
-time.sleep(10)
+sleep(0.5)
+move.press(",")
+move.press(",")
+move.press(".")
+move.press(".")
+sleep(0.2)
 pag.keyUp("w")
 move.press("space")
-print(time.time()-start)
-time.sleep(0.8)
-move.press(",")
-move.hold("w",1)
-move.press(",")
-move.press(",")
-move.hold("w",2.5)
-move.press(",")
-move.press(",")
-print(time.time()-start)
+
+    

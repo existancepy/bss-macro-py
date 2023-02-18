@@ -24,10 +24,12 @@ def load():
                 pass
             elif l[0] == "discord_bot_token":
                 pass
-            elif isinstance(l[1], list):
-                l[1]  = list(l[1])[0]
             else:
-                l[1] = l[1].lower()
+                if l[1].startswith("[") and "]" in l[1]:
+                    l[1]  = ast.literal_eval(l[1])
+                else:
+                    l[1] = l[1].lower()
+                
             info[l[0]] = l[1]
     return info
 

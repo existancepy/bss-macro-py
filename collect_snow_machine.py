@@ -18,13 +18,24 @@ def apu(k):
     """.format(k)
     os.system(cmd)
 
+def sleep(duration, get_now=time.perf_counter):
+    now = get_now()
+    end = now + duration
+    while now < end:
+        now = get_now()
 
-
-exec(open("field_blue flower.py").read())
-move.apkey("space")
-move.hold("s",3)
-move.hold("a",5)
-move.hold("w",1.5)
-move.hold('d',0.1)
 move.press(",")
-move.hold("w",7)
+move.press(",")
+move.press("e")
+pag.keyDown("w")
+sleep(0.4)
+move.press("space")
+move.press("space")
+sleep(3.9)
+move.press(".")
+move.press(".")
+sleep(0.5)
+pag.keyUp("w")
+
+
+    

@@ -8,7 +8,6 @@ from distutils.dir_util import copy_tree
 
 def update():
     files = [x for x in os.listdir("./") if x[-2:] ==  "py" and  x!= "update.py" ]
-    print(files)
 
     for f in files:
         os.remove("./{}".format(f))
@@ -29,3 +28,4 @@ def update():
         else:
             copy_tree("./bss-macro-py-main/{}", "./{}".format(i))
     shutil.rmtree('./bss-macro-py-main')
+    print('Update complete. You can now relaunch the macro')

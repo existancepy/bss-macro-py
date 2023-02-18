@@ -8,8 +8,8 @@ from PIL import ImageGrab
 import numpy as np
 import loadsettings
 
-savedata = {}
 def loadSave():
+    savedata = {}
     with open('save.txt') as f:
         lines = f.read().split("\n")
     f.close()
@@ -18,7 +18,7 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
-
+    return savedata
 
 '''
 screen = np.array(ImageGrab.grab())
@@ -41,7 +41,7 @@ cv2.waitKey(0)
 '''
 
 def find(img,confi, x1 = 0, y1 = 0, x2 = 0, y2 = 0,fast=0):
-    loadSave()
+    savedata = loadSave()
     ww = savedata["ww"]
     wh = savedata["wh"]
     if not x2: x2  = ww

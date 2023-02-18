@@ -1,4 +1,3 @@
-
 import pyautogui as pag
 import time
 import os
@@ -19,6 +18,7 @@ def loadSave():
             l[1] = int(l[1])
         info[l[0]] = l[1]
     return info
+
 
 def calibrate():
     cmd = """
@@ -65,7 +65,7 @@ def calibrate():
     vals = sorted(vals,reverse=True)
     print(vals)
     thresh = (vals[1]+vals[2])/2
-    webhook("","Calculated: Threshold\nValue: {}".format(thresh),"dark brown")
+    webhook("","Calculated: Hive Threshold\nValue: {}".format(thresh),"dark brown")
     if thresh == 1.0 or thresh == 0.0 or vals[1] == vals[2]:
             loadsettings.save('hivethreshold',1.0)
             return False

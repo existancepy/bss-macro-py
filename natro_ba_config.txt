@@ -228,3 +228,4 @@ SunflowerPlanters:=[["PetalPlanter", 1.5, 1.3415, 10.44] ; 2.01225
 	, ["CandyPlanter", 1, 1, 4] ; 1
 	, ["PaperPlanter", .75, 1, 1] ; 0.75
 	, ["TicketPlanter", 2, 1, 2]] ; 2
+endPlanters:= Finished

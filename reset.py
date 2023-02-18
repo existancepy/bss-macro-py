@@ -18,7 +18,9 @@ def loadSave():
         savedata[l[0]] = l[1]
 
 def reset():
-    ths = loadsettings.load()["hivethreshold"]
+    setdat = loadsettings.load()
+    ths = setdat["hivethreshold"]
+    rhd = setdat["reverse_hive_direction"]
     print("ths is {}".format(ths))
     loadSave()
     for _ in range(2):
@@ -50,8 +52,9 @@ def reset():
             r = imagesearch.find("hive1.png",ths, xo, yo, xt, yt)
             if r:
                 time.sleep(0.1)
-                for _ in range(4):
-                    pag.press(".")
+                if not rhd:
+                    for _ in range(4):
+                        pag.press(".")
 
                 time.sleep(0.1)
                 for _ in range(4):
@@ -120,8 +123,9 @@ def reset():
             r = imagesearch.find("hive1.png",thresh, xo, yo, xt, yt)
             if r:
                 time.sleep(0.1)
-                for _ in range(4):
-                    pag.press(".")
+                if not rhd:
+                    for _ in range(4):
+                        pag.press(".")
 
                 time.sleep(0.1)
                 for _ in range(4):

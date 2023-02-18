@@ -51,7 +51,13 @@ def aphold(k,t):
     
     
 def hold(k,t):
-    ws = loadsettings.load()["walkspeed"]
+    try:
+        with open("haste.txt","r") as f:
+            ws = float(f.read())
+        f.close()
+    except Exception as e:
+        print(e)
+        ws = loadsettings.load()['ws']
     pag.keyDown(k)
     time.sleep(t*ws/28)
     pag.keyUp(k)

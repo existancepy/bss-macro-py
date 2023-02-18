@@ -7,7 +7,7 @@ import time
 import Quartz
 setdat = loadsettings.load()
 sizeword = setdat["gather_size"]
-width = round(setdat["gather_width"]*1.5)
+width = setdat["gather_width"]//2
 size = 0
 if sizeword.lower() == "s":
     size = 0.25
