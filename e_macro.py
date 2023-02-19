@@ -52,7 +52,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.31"
+macrov = "1.30.1"
 planterInfo = loadsettings.planterInfo()
 
 if __name__ == '__main__':
@@ -225,7 +225,7 @@ def canon():
     wh = savedata['wh']
     #Move to canon:
     webhook("","Moving to canon","dark brown")
-    move.hold("w",1.5)
+    move.hold("w",0.8)
     move.hold("d",0.9*(setdat["hive_number"])+1)
     pag.keyDown("d")
     time.sleep(0.5)
@@ -1208,13 +1208,6 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
             time.sleep(0.5)
             gat.value = 0
             cf.value = ""
-            gfid += 1
-            while True:
-                if gfid >= len(setdat['gather_field']):
-                    gfid = 0
-                if setdat["gather_field"][gfid].lower() == "none":
-                    gfid += 1
-                else: break
             if setdat["before_gather_turn"] == "left":
                 for _ in range(setdat["turn_times"]):
                     move.press(".")
@@ -1246,6 +1239,13 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
                     else:
                         convert()
                         reset.reset()
+            gfid += 1
+            while True:
+                if gfid >= len(setdat['gather_field']):
+                    gfid = 0
+                if setdat["gather_field"][gfid].lower() == "none":
+                    gfid += 1
+                else: break
                     
 def setResolution():
     wwd = int(pag.size()[0])
