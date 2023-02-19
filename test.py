@@ -44,7 +44,7 @@ roblox()
 savedata = loadRes()
 ww = savedata['ww']
 wh = savedata['wh']
-im = pag.screenshot(region=(ww//3,wh//2.8,ww//2.3,wh//2.5))
+im = pag.screenshot(region=(ww//3,0,ww//3,wh//3))
 im.save('test.png')
 
 

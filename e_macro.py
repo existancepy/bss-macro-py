@@ -52,7 +52,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.30"
+macrov = "1.31"
 planterInfo = loadsettings.planterInfo()
 
 if __name__ == '__main__':
@@ -207,12 +207,12 @@ def ebutton(pagmode=0):
     setdat = loadsettings.load()
     if setdat['ebdetect'] == "pyautogui" or pagmode:
         if setdat['display_type'] == "built-in retina display":
-            r = pag.locateOnScreen("./images/retina/eb.png",confidence = 0.99,region=(0,0,ww,wh//2))
+            r = pag.locateOnScreen("./images/retina/eb.png",confidence = 0.99,region=(ww//3,0,ww//3,wh//3))
         else:
-            r = pag.locateOnScreen("./images/built-in/eb.png",confidence = 0.99,region=(0,0,ww,wh//2))
+            r = pag.locateOnScreen("./images/built-in/eb.png",confidence = 0.99,region=(ww//3,0,ww//3,wh//3))
     else:
         print("ebutton threshold: {}".format(c))
-        r = imagesearch.find("eb.png",c,0,0,ww,wh//2)
+        r = imagesearch.find("eb.png",c,ww//3,0,ww//3,wh//3)
     if r:return r
     return
 
@@ -1594,7 +1594,7 @@ if __name__ == "__main__":
         pag.keyUp("d")
         for _ in range(7):
             move.hold("d",0.15)
-            vals.append(imagesearch.find("eb.png",0,0,0,ww,wh//2)[3])
+            vals.append(imagesearch.find("eb.png",0,ww//3,0,ww//3,wh//3)[3])
             
         webhook("","Done obtaining vals","dark brown")
             
