@@ -26,6 +26,6 @@ def update():
         if not i in ['images','theme']:
             shutil.copyfile("./bss-macro-py-main/{}".format(i), "./{}".format(i))
         else:
-            copy_tree("./bss-macro-py-main/{}", "./{}".format(i))
+            copy_tree("./bss-macro-py-main/{}".format(i), "./{}".format(i))
     shutil.rmtree('./bss-macro-py-main')
     print('Update complete. You can now relaunch the macro')
