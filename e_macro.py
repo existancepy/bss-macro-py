@@ -967,7 +967,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
             webhook("","Traveling: Stump snail (stump) ","brown")
             exec(open("field_stump.py").read())
             time.sleep(0.2)
-            move.press(setdat['sprinkler_slot'])
+            move.press(str(setdat['sprinkler_slot']))
             pag.click()
             webhook("","Starting stump snail","brown")
             while True:
