@@ -57,7 +57,7 @@ def hold(k,t):
         f.close()
     except Exception as e:
         print(e)
-        ws = loadsettings.load()['ws']
+        ws = loadsettings.load()['walkspeed']
     pag.keyDown(k)
     time.sleep(t*ws/28)
     pag.keyUp(k)
