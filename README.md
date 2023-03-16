@@ -94,6 +94,7 @@ pip3 install "paddleocr>=2.0.1" protobuf==3.20.0
 Install the .zip file in https://github.com/existancepy/bss-macro-py (Press the green button that says code and look for download zip)
 
 Download it into the downloads folder, or move the zip into the downloads folder.
+
 ![App Screenshot](https://media.discordapp.net/attachments/1065032948119769121/1065033447963373690/Screen_Shot_2023-01-17_at_5.png?width=810&height=720)
 
 Extract/Open the .zip file (double click on the .zip file installed)
