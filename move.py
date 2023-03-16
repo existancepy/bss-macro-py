@@ -3,6 +3,9 @@ import time
 import os
 import tkinter
 import loadsettings
+from pynput.keyboard import Key,Controller
+from delay import sleep
+keyboard = Controller()
 def apdown(k):
     cmd = """
         osascript -e  'tell application "System Events" to key down "{}"'
@@ -57,10 +60,11 @@ def hold(k,t):
         f.close()
     except Exception as e:
         print(e)
-        ws = loadsettings.load()['ws']
-    pag.keyDown(k)
-    time.sleep(t*ws/28)
-    pag.keyUp(k)
+        ws = loadsettings.load()['walkspeed']
+    print(ws)
+    keyboard.press(k)
+    sleep(t*28/ws)
+    keyboard.release(k)
 
 def press(k):
     pag.keyDown(k)

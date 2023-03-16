@@ -17,20 +17,26 @@ def apu(k):
         osascript -e  'tell application "System Events" to key up "{}"'
     """.format(k)
     os.system(cmd)
-    
+def sleep(duration, get_now=time.perf_counter):
+    now = get_now()
+    end = now + duration
+    while now < end:
+        now = get_now()
+
+        
 move.press(",")
 move.press(",")
 move.press("e")
-time.sleep(0.08)
+sleep(0.08)
 pag.keyDown("w")
 move.press("space")
 move.press("space")
-time.sleep(3)
+sleep(3)
 move.press(".")
 move.press(".")
-time.sleep(0.8)
+sleep(0.8)
 pag.keyUp("w")
 move.press("space")
-time.sleep(0.6)
+sleep(0.6)
 
     

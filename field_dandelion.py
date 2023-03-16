@@ -5,7 +5,7 @@ import os
 import tkinter
 import loadsettings
 import move
-
+from delay import sleep
 
 def apd(k):
     cmd = """
@@ -24,13 +24,13 @@ move.press("e")
 pag.keyDown("w")
 move.press("space")
 move.press("space")
-time.sleep(0.2)
+sleep(0.45)
 move.press(".")
 move.press(".")
-time.sleep(1)
+sleep(0.9)
 pag.keyUp("w")
 move.press("space")
-time.sleep(0.6)
+sleep(0.6)
 
 
     

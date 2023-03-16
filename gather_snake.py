@@ -3,9 +3,10 @@ import os
 import tkinter
 import move
 import loadsettings
+
 setdat = loadsettings.load()
 sizeword = setdat["gather_size"]
-width = setdat["gather_width"]/2
+width = setdat["gather_width"]
 size = 0
 if sizeword.lower() == "s":
     size = 0.5

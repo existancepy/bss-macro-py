@@ -7,7 +7,7 @@ import cv2
 from PIL import ImageGrab
 import numpy as np
 import loadsettings
-
+from logpy import log
 def loadSave():
     savedata = {}
     with open('save.txt') as f:
@@ -62,7 +62,7 @@ def find(img,confi, x1 = 0, y1 = 0, x2 = 0, y2 = 0,fast=0):
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
     x,y = max_loc
     if not img == "disconnect.png":
-        print("Trying to find {}. max_val is {} ".format(img,max_val))
+        log("Trying to find {}. max_val is {} ".format(img,max_val))
     if max_val >= confi:
         return [1,x,y,max_val]
     return 

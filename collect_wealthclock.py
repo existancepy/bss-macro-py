@@ -21,7 +21,7 @@ def apu(k):
 start = time.time()
 move.press(",")
 move.press("e")
-time.sleep(1)
+time.sleep(0.95)
 pag.keyDown("w")
 move.press("space")
 move.press("space")

@@ -20,11 +20,12 @@ def apu(k):
 
 
 move.hold("s",4.5)
-move.hold("d",6)
-move.hold("w",6)
-move.hold("a",1.2)
-move.hold("w",6)
-move.hold("d",3)
+time.sleep(0.5)
+move.apkey("space")
+move.hold("a",6)
+move.hold("w",10)
+move.hold("d",12)
+move.hold("w",1.4)
 move.hold("s",0.6)
 
     

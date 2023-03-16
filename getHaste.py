@@ -43,15 +43,18 @@ def fastimgsearch():
         min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
         vals.append((max_val,1+(i*0.1)))
         q.task_done()
+        return
 
 def getHaste():
     global vals, ww,wh, REGION
     ws = loadsettings.load()["walkspeed"]
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     savedat = loadRes()
     ww = savedat['ww']
     wh = savedat['wh']
     hasteFound = 0
-    REGION = (0,wh//30,ww//2,wh//8)
+    REGION = (0,wh//(30*ysm),ww//2,wh//8)
     vals = []
     i = -1
     for _ in range(2):
@@ -72,8 +75,10 @@ def getHastelp():
     savedat = loadRes()
     ww = savedat['ww']
     wh = savedat['wh']
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     hasteFound = 0
-    REGION = (0,wh//30,ww//2,wh//8)
+    REGION = (0,wh//(30*ysm),ww//2,wh//8)
     vals = []
     i = -1
     for x in range(5):

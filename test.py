@@ -6,7 +6,7 @@ import tkinter
 import move
 import sys
 import cv2
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 import numpy as np
 import imagesearch
 import loadsettings
@@ -21,7 +21,23 @@ import reset
 import _darwinmouse as mouse
 import ast
 import getHaste
-
+from datetime import datetime
+import matplotlib.pyplot as plt
+import random
+from matplotlib.colors import from_levels_and_colors
+from matplotlib.collections import LineCollection
+import math
+from pynput.keyboard import Key, Controller
+import pynput
+from pynput.mouse import Button
+import Quartz.CoreGraphics as CG
+import struct
+import reset
+from pixelcolour import getPixelColor
+from paddleocr import PaddleOCR,draw_ocr
+keyboard = Controller()
+mouse = pynput.mouse.Controller()
+#import easyocr
 def roblox():
     cmd = """
     osascript -e 'activate application "Roblox"' 
@@ -40,13 +56,51 @@ def loadRes():
         outdict[l[0]] = l[1]
     return outdict
 
-roblox()
+
 savedata = loadRes()
 ww = savedata['ww']
 wh = savedata['wh']
-im = pag.screenshot(region=(ww//3,0,ww//3,wh//3))
-im.save('test.png')
 
+    
+#roblox()
+times = []
+ocr = PaddleOCR(use_angle_cls=True, lang='en')
+for _ in range(5):
+    st = time.time()
+    pag.screenshot().save("hi.png")
+    img_path = "hi.png"
+    result = ocr.ocr(img_path, cls=True)
+    print(result)
+    times.append(time.time()-st)
+print(sum(times)/len(times))
+
+                
+                    
+'''
+screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
+small_image = cv2.imread('./images/general/nightsky.png')
+large_image = screen
+res = cv2.matchTemplate(small_image, large_image, method)
+min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+x,y = max_loc
+print("Trying to find night sky. max_val is {} ".format(max_val))
+MPx,MPy = min_loc
+
+print(MPx,MPy)
+pag.moveTo(MPx//2,MPy//2)
+# Step 2: Get the size of the template. This is the same size as the match.
+trows,tcols = small_image.shape[:2]
+# Step 3: Draw the rectangle on large_image
+cv2.rectangle(large_image, (MPx,MPy),(MPx+tcols,MPy+trows),(0,0,255),2)
+# Display the original image with the rectangle around the match.
+cv2.imshow('output',large_image)
+# The image is only displayed if we call this
+cv2.waitKey(0)
+
+if max_val >= 0.5:
+    return [1,x,y,max_val]
+return
+'''
 
 '''
 

@@ -2,47 +2,44 @@ try:
     import pyautogui as pag
 except Exception as e:
     print(e)
-    print("There is an import error here! This is most likely caused by an incorrect installation process. Ensure that you have done the 'pip3 install...' steps")
+    print("\033[0;31mThere is an import error here! This is most likely caused by an incorrect installation process. Ensure that you have done the 'pip3 install...steps'\033[00m")
     quit()
-import time
-import os
+import time, os, ctypes, tty
 import tkinter
 import tkinter as tk
 from tkinter import ttk
-import move
-import loadsettings
-import reset
-import backpack
-import sys
-import imagesearch
-import webbrowser
-import multiprocessing
+import backpack, reset, loadsettings, move,update,updateexperiment
+import multiprocessing, webbrowser, imagesearch, sys, discord, subprocess
 from webhook import webhook
-import ctypes
-import tty
 global savedata
 global setdat
-import discord
-import update
-import updateexperiment
 from tkinter import messagebox
 import numpy as np
-from PIL import ImageGrab
-import subprocess
+import asyncio
+from logpy import log
+import logging
+import pynput
+from pynput.keyboard import Key
+from pynput.mouse import Button
+try:
+    import matplotlib.pyplot as plt
+except Exception as e:
+    print("\033[0;31mThere is an import error here! Enter `pip3 install matplotlib` in terminal'\033[00m")
+from PIL import ImageGrab, Image
+
 try:
     import cv2
 except Exception as e:
     print(e)
-    print("There is a import error here! Check out ImportError: dlopen in #common-fixes in the discord server or 'bugs and fixes' section in the github")
+    print("\033[0;31mThere is a import error here! Check out ImportError: dlopen in #common-fixes in the discord server or 'bugs and fixes' section in the github\033[00m")
     quit()
+
+from ocrpy import imToString,customOCR
 import sv_ttk
 import math
 import ast
 import calibrate_hive
-import _darwinmouse as mouse
 from datetime import datetime
-from getHaste import getHaste, getHastelp
-
 
 savedata = {}
 ww = ""
@@ -52,8 +49,10 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.31.1"
+macrov = "1.36.6"
 planterInfo = loadsettings.planterInfo()
+mouse = pynput.mouse.Controller()
+keyboard = pynput.keyboard.Controller()
 
 if __name__ == '__main__':
     planterTypes_prev = []
@@ -68,6 +67,7 @@ if __name__ == '__main__':
     manager = multiprocessing.Manager()
     currentfield = manager.Value(ctypes.c_wchar_p, "")
     bpc = multiprocessing.Value('i', 0)
+    rejoinval = multiprocessing.Value('i', 0)
     gather = multiprocessing.Value('i', 0)
     disconnected = multiprocessing.Value('i', 0)
 
@@ -77,38 +77,55 @@ def boolToInt(condition):
 def is_running(app):
     tmp = os.popen("ps -Af").read()
     return app in tmp[:]
-
-def discord_bot(dc):
+def pagmove(k,t):
+    pag.keyDown(k)
+    time.sleep(t)
+    pag.keyUp(k)
+def fullscreen():
+    keyboard.press(Key.cmd)
+    time.sleep(0.05)
+    keyboard.press(Key.ctrl)
+    time.sleep(0.05)
+    keyboard.press("f")
+    time.sleep(0.1)
+    keyboard.release(Key.cmd)
+    keyboard.release(Key.ctrl)
+    keyboard.release("f")
+def discord_bot(dc,rejoinval):
     setdat = loadsettings.load()
-    if setdat['enable_discord_bot']:
-        intents = discord.Intents.default()
-        intents.message_content = True
+    intents = discord.Intents.default()
+    intents.message_content = True
 
-        client = discord.Client(intents=intents)
+    client = discord.Client(intents=intents)
 
-        @client.event
-        async def on_ready():
-            print(f'We have logged in as {client.user}')
+    @client.event
+    async def on_ready():
+        print(f'Logged in as {client.user}')
 
-        @client.event
-        async def on_message(message):
-            if message.author == client.user:
-                return
+    @client.event
+    async def on_message(message):
+        if message.author == client.user:
+            return
 
-            if message.content.startswith('!b'):
-                args = message.content.split(" ")[1:]
-                cmd = args[0].lower()
-                if cmd == "rejoin":
-                    await message.channel.send("Now attempting to rejoin")
-                    dc.value = 1
-                    rejoin()
-                    dc.value = 0
-                elif cmd == "screenshot":
-                    await message.channel.send("Sending a screenshot via webhook")
-                    webhook("User Requested: Screenshot","","light blue",1)
-                    
-
-        client.run(setdat['discord_bot_token'])
+        if message.content.startswith('!b'):
+            args = message.content.split(" ")[1:]
+            cmd = args[0].lower()
+            if cmd == "rejoin":
+                await message.channel.send("Now attempting to rejoin")
+                dc.value = 1
+                await asyncRejoin()
+                dc.value = 0
+            elif cmd == "screenshot":
+                await message.channel.send("Sending a screenshot via webhook")
+                webhook("User Requested: Screenshot","","light blue",1)
+            elif cmd == "report":
+                await message.channel.send("Sending Hourly Report")
+                hourlyReport(0)
+                
+                #honeyHist = []
+                #savehoney_history(honeyHist)
+    handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+    client.run(setdat['discord_bot_token'], log_handler=handler)
     
 def validateSettings():
     msg = ""
@@ -143,6 +160,7 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
+
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -197,8 +215,27 @@ def savePlanterTimings(p):
     with open('plantertimings.txt','w') as f:
         f.writelines(templist)
     f.close()
+
+
+
+def checkwithOCR(m):
+    text = imToString(m).lower()
+    if m == "bee bear":
+        if "bear" in text:
+            return True
+    elif m == "egg shop":
+        if "bee egg" in text or "basic bee" in text or "small bag" in text or ("blue" in text and "bubble" in text):
+            return True
+    elif m == "disconnect":
+        if "disconnected" in text or "join error" in text:
+            return True
+    elif m == "dialog":
+        if "bear" in text:
+            return True
+    return False
     
 def ebutton(pagmode=0):
+    '''
     r =  []
     savedata = loadRes()
     c = loadsettings.load()['ebthreshold']
@@ -215,6 +252,172 @@ def ebutton(pagmode=0):
         r = imagesearch.find("eb.png",c,ww//3,0,ww//3,wh//3)
     if r:return r
     return
+    '''
+    ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
+    log(ocrval)
+    return ocrval == "E"
+def detectNight():
+    savedat = loadRes()
+    ww = savedat['ww']
+    wh = savedat['wh']
+    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
+    screen = np.array(pag.screenshot(region=(0,0,round((ww/3.4)*xlm),round((wh/25)*ylm))))
+    w,h = screen.shape[:2]
+    rgb = screen[0,0][:3]
+    for x in range(w):
+        for y in range(h):
+            if list(screen[x,y][:3]) == [0,0,0]:
+                success = True
+                for x1 in range(5):
+                    for y1 in range(5):
+                        if not x1 < w and y1 < h:
+                            if screen[x1,y1][:3] != (0,0,0):
+                                success = False
+                if success:
+                    webhook("","Night Detected","light green")
+                    return True
+    return False
+
+def millify(n):
+    if not n: return 0
+    millnames = ['',' K',' M',' B',' T', 'Qd']
+    n = float(n)
+    millidx = max(0,min(len(millnames)-1,
+                        int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
+
+    return '{:.2f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
+
+def hourlyReport(hourly=1):
+    try:
+        with open('honey_history.txt','r') as f:
+            honeyHist = ast.literal_eval(f.read())
+        f.close()
+        
+        setdat = loadsettings.load()
+        log(honeyHist)
+        if hourly == 0:
+            setdat['prev_honey'] = honeyHist[-1]
+        digitCounts = []
+        for i, e in enumerate(honeyHist[:]):
+            if len(str(e)) <= 4:
+                honeyHist.pop(i)
+        if honeyHist.count(honeyHist[0]) != len(honeyHist):
+            for i, e in reversed(list(enumerate(honeyHist[:]))):
+                if e != setdat['prev_honey']:
+                    break
+                else:
+                    honeyHist.pop(i)
+        log('prev honey: {}'.format(setdat['prev_honey']))
+        log(honeyHist)
+        
+        while True:
+            compList = [x for x in honeyHist if x]
+            sortedHoney = sorted(compList)
+            if sortedHoney == compList:
+                break
+            else:
+                removeELE = sortedHoney[-1]
+                honeyHist.remove(removeELE)
+        log(honeyHist)
+        currHoney = honeyHist[-1]
+        session_honey = currHoney - setdat['start_honey']
+        hourly_honey = currHoney - setdat['prev_honey']
+        if hourly:
+            loadsettings.save('prev_honey',currHoney)
+            timehour = int(datetime.now().hour) - 1
+        else:
+            timehour = int(datetime.now().hour)
+            
+        stime = time.time() - setdat['start_time']
+        day = stime // (24 * 3600)
+        stime = stime % (24 * 3600)
+        hour = stime // 3600
+        stime %= 3600
+        minutes = stime // 60
+        stime %= 60
+        seconds = round(stime)
+        session_time = "{}d {}h {}m".format(round(day),round(hour),round(minutes))
+        yvals = []
+        for i in range(len(honeyHist)):
+            if i != 0:
+                hf, hb = honeyHist[i], honeyHist[i-1]
+                yvals.append(int(hf) - int(hb))
+        #yvals = [1,2,3,4,5,6,7,8]
+        xvals = [x+1 for x in range(len(yvals))]
+
+
+        fig = plt.figure(figsize=(12,12), dpi=60,constrained_layout=True)
+        gs = fig.add_gridspec(12,12)
+        fig.patch.set_facecolor('#121212')
+
+        axText = fig.add_subplot(gs[0:12, 8:12])
+        axText.get_xaxis().set_visible(False)
+        axText.get_yaxis().set_visible(False)
+        axText.patch.set_facecolor('#121212')
+        axText.spines['bottom'].set_color('#121212')
+        axText.spines['top'].set_color('#121212')
+        axText.spines['left'].set_color('#121212')
+        axText.spines['right'].set_color('#121212')
+
+        plt.text(0.3,1,"Report", fontsize=20,color="white")
+        plt.text(0,0.95,"Session Time: {}".format(session_time), fontsize=15,color="white")
+        plt.text(0,0.90,"Session Honey: {}".format(millify(session_honey)), fontsize=15,color="white")
+        plt.text(0,0.85,"Honey/Hr: {}".format(millify(hourly_honey)), fontsize=15,color="white")
+
+        ax1 = fig.add_subplot(gs[0:3, 0:7])
+        if not yvals:
+            yvals = honeyHist.copy()
+        if max(yvals) == 0:
+            yticks = [0]
+        else:
+            yticks = np.arange(0, max(yvals)+1, max(yvals)/4)
+        yticksDisplay = [millify(x) if x else x for x in yticks]
+
+        xticks = np.arange(0,max(xvals)+1, 10)
+        xticksDisplay = ["{}:{}".format(timehour,x) if x else "{}:00".format(timehour) for x in xticks]
+
+        ax1.set_yticks(yticks,yticksDisplay,fontsize=16)
+        ax1.set_xticks(xticks,xticksDisplay,fontsize=16)
+        ax1.set_title('Honey/min',color='white',fontsize=19)
+        ax1.patch.set_facecolor('#121212')
+        ax1.spines['bottom'].set_color('white')
+        ax1.spines['top'].set_color('white')
+        ax1.spines['left'].set_color('white')
+        ax1.spines['right'].set_color('white')
+        ax1.tick_params(axis='x', colors='white')
+        ax1.tick_params(axis='y', colors='white')
+        ax1.plot(xvals, yvals,color="#BB86FC")
+        #ax1.fill_between(xvals, 0, yvals)
+        '''
+        ax2 = fig.add_subplot(gs[4:7, 0:7])
+        y2ticks = np.linspace(setdat['start_honey'], max(honeyHist), num = 4)
+        y2ticksDisplay = [millify(x) if x else x for x in y2ticks]
+        ax2.set_xticks(xticks,xticksDisplay,fontsize=16)
+        ax2.set_yticks(y2ticks,y2ticksDisplay,fontsize=16)
+        ax2.set_title('Session honey',color='white',fontsize=19)
+        ax2.patch.set_facecolor('#121212')
+        ax2.spines['bottom'].set_color('white')
+        ax2.spines['top'].set_color('white')
+        ax2.spines['left'].set_color('white')
+        ax2.spines['right'].set_color('white')
+        ax2.tick_params(axis='x', colors='black')
+        ax2.tick_params(axis='y', colors='white')
+        ax2.plot(xvals, honeyHist[1:],color="#BB86FC")
+        #ax2.fill_between(xvals, setdat['start_honey'], honeyHist[1:])
+        '''
+        plt.grid(alpha=0.08)
+        plt.savefig("hourlyReport.png", bbox_inches='tight')    
+        c = Image.open("hourlyReport.png")
+        d = c.resize((1452,1452),resample = Image.BOX)
+        d.save("hourlyReport-resized.png")
+        webhook("**Hourly Report**","","light blue",0,1)
+    except Exception as e:
+        log(e)
+        webhook("","Hourly Report has an error that has been caught. The error can be found in macroLogs.log","red")
+
+
+        
 
 
 
@@ -233,20 +436,40 @@ def canon():
     time.sleep(0.2)
     r = ""
     pag.keyUp("d")
-    for _ in range(6):
-        move.hold("d",0.15)
+    move.hold("d",0.3)
+    for _ in range(4):
+        move.hold("d",0.2)
+        time.sleep(0.05)
         r = ebutton()
         if r:
-            webhook("","Canon found","dark brown")
-            return
+            if checkwithOCR('bee bear'):
+                webhook("","Bee Bear detected","dark brown")
+                break
+            else:
+                webhook("","Canon found","dark brown")
+                with open('canonfails.txt', 'w') as f:
+                    f.write('0')
+                f.close()
+                return
+    mouse.position = (mw//2,mh//5*4)
     webhook("","Cannon not found, resetting","dark brown",1)
-    mouse.move_to(mw//2,mh//5*4)
-    for _ in range(20):
-        mouse.press()
-        sleep(0.25)
-        mouse.release()
+    with open('canonfails.txt','r') as f:
+        cfCount = int(f.read())
+        cfCount += 1
+    f.close()
+    with open('canonfails.txt','w') as f:
+        f.write(str(cfCount))
+    f.close()
+        
     reset.reset()   
     canon()
+    '''
+        for _ in range(20):
+            mouse.press()
+            sleep(0.25)
+            mouse.release()
+    '''
+        
 
 def sleep(duration, get_now=time.perf_counter):
     now = get_now()
@@ -321,27 +544,31 @@ def convert():
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
+    setdat = loadsettings.load()
+    r = False
     for _ in range(2):
         r = ebutton()
-        if r:
-            target = r[3]-0.01
-            move.press("e")
-            webhook("","Starting convert","brown",1)
-            st = time.perf_counter()
-            while True:
-                c = ebutton()
-                if not c:
-                    webhook("","Convert done","brown")
-                    time.sleep(3)
-                    break
-                if time.perf_counter()  - st > 600:
-                    webhook("","Converting took too long, moving on","brown")
-                    break
-            
+        if r: break
+        time.sleep(0.25)
+    if not r: return
+    move.press("e")
+    if setdat['stinger']:
+        move.press(",")
+    webhook("","Starting convert","brown",1)
+    st = time.perf_counter()
+    while True:
+        if stingerHunt(): return
+        c = ebutton()
+        if not c:
+            webhook("","Convert done","brown")
+            time.sleep(3)
             break
-        else:
-            time.sleep(0.25)
-    return
+        if time.perf_counter()  - st > 600:
+            webhook("","Converting took too long, moving on","brown")
+            break
+    if setdat['stinger']:
+        move.press(".")
+        
 def walk_to_hive(gfid):
     savedata = loadRes()
     ww = savedata['ww']
@@ -361,6 +588,7 @@ def walk_to_hive(gfid):
         
     webhook("","Cant find hive, resetting","dark brown",1)
     reset.reset()
+    convert()
 def checkRespawn(m,t):
     timing = float(loadtimings()[m])
     respt = int(''.join([x for x in list(t) if x.isdigit()]))
@@ -391,15 +619,15 @@ def moblootPattern(f,s,r,t):
         for _ in range(t):
             move.press(",")
     for i in range(2):
-        move.hold("w", 0.72*f)
-        move.hold("a", 0.1*s)
-        move.hold("s", 0.72*f)
-        move.hold("a", 0.1*s)
+        pagmove("w", 0.72*f)
+        pagmove("a", 0.1*s)
+        pagmove("s", 0.72*f)
+        pagmove("a", 0.1*s)
     for i in range(2):
-        move.hold("w", 0.72*f)
-        move.hold("d", 0.1*s)
-        move.hold("s", 0.72*f)
-        move.hold("d", 0.1*s)
+        pagmove("w", 0.72*f)
+        pagmove("d", 0.1*s)
+        pagmove("s", 0.72*f)
+        pagmove("d", 0.1*s)
     
 def resetMobTimer(cfield):
     if cfield:
@@ -427,7 +655,11 @@ def resetMobTimer(cfield):
             if checkRespawn("rhinobeetle_blueflower","5m"):  savetimings("rhinobeetle_blueflower")
         elif cfield == "bamboo":
             if checkRespawn("rhinobeetle_bamboo","5m"):  savetimings("rhinobeetle_bamboo")
-
+def stingerHunt():
+    setdat = loadsettings.load()
+    if not setdat['stinger']: return False
+    if not detectNight(): return False
+            
 sat_image = cv2.imread('./images/retina/saturator.png')
 method = cv2.TM_SQDIFF_NORMED
 def displayPlanterName(planter):
@@ -490,15 +722,14 @@ def getBestPlanter(field,occus,avils):
                 if i == j[0]:
                     validPlanter = 0
                     break
-            if validPlanter: return i
-    
+            if validPlanter: return i   
 def placePlanter(planter):
     res = loadRes()
     plantdat = loadsettings.planterLoad()
     ww = res['ww']
     wh = res['wh']
     planterSlot = str(plantdat['{}_slot'.format(planter)])
-    print(planterSlot)
+    log(planterSlot)
     if planterSlot != "none":
         move.press(planterSlot)
     else:
@@ -546,8 +777,8 @@ def placePlanter(planter):
                     clickYes()
 
                 break
-        pag.moveTo(27,102)
-        pag.click()
+        mouse.click(27,102)
+        mouse.click(Button.left, 2)
     savePlanterTimings(planter)
     webhook("","Placed Planter: {}".format(displayPlanterName(planter)),"bright green",1)
     reset.reset()
@@ -558,21 +789,21 @@ def clickYes():
     ww = res['ww']
     wh = res['wh']
     setdat = loadsettings.load()
-    a = imagesearch.find("yes.png",0.5,0,0,ww,wh)
+    a = imagesearch.find("yes.png",0.2,0,0,ww,wh)
     if setdat['display_type'] == "built-in retina display":
         if a:
-            pag.moveTo(a[1]//2+urows//4,a[2]//2+ucols//4)
-            pag.click()
+            mouse.position = (a[1]//2+urows//4,a[2]//2+ucols//4)
+            mouse.click(Button.left, 1)
         else:
-            pag.moveTo(ww//4-70,wh//3.2)
-            pag.click()
+            mouse.position = (ww//4-70,wh//3.2)
+            mouse.click(Button.left, 1)
     else:
         if a:
-            pag.moveTo(a[1]+urows//2,a[2]+ucols//2)
-            pag.click()
+            mouse.position = (a[1]+urows//2,a[2]+ucols//2)
+            mouse.click(Button.left, 1)
         else:
-            pag.moveTo(ww//2-50,wh//1.6)
-            pag.click()
+            mouse.position= (ww//2-50,wh//1.6)
+            mouse.click(Button.left, 1)
     
 def goToPlanter(field,place=0):
     canon()
@@ -580,13 +811,13 @@ def goToPlanter(field,place=0):
     if field == "pine tree":
         move.hold("d",3)
         move.hold("s",4)
-        if place: move.hold("w",0.07)
+        move.hold("w",0.25)
     elif field == "pumpkin":
         move.hold("s",3)
         move.press(",")
         move.press(",")
         move.hold("w",4)
-        if place: move.hold("s",0.07)
+        move.hold("s",0.25)
     elif field  == "strawberry":
         move.hold("d",3)
         move.hold("s",4)
@@ -595,7 +826,7 @@ def goToPlanter(field,place=0):
         move.press(",")
         move.press(",")
         move.hold("w",4)
-        if place: move.hold("s",0.07)
+        move.hold("s",0.25)
     elif field  == "pineapple":
         move.hold("d",3)
         move.hold("s",4)
@@ -604,12 +835,13 @@ def goToPlanter(field,place=0):
         move.press(",")
         move.press(",")
         move.hold("w",4)
-        if place: move.hold("s",0.07)
+        move.hold("s",0.25)
     elif field == "coconut":
         move.hold("d",5)
         move.hold("s")
     else:
-        time.sleep(1)
+        time.sleep(0.8)
+    time.sleep(0.2)
         
 def fieldDriftCompensation():
     res = loadRes()
@@ -617,8 +849,8 @@ def fieldDriftCompensation():
     wh = res["wh"]
     winUp = wh/2.1
     winDown = wh/1.8
-    winLeft = ww/2
-    winRight = ww/1.7
+    winLeft = ww/2.05
+    winRight = ww/1.8
     for _ in range(4):
         screen = np.array(ImageGrab.grab())
         screen = cv2.cvtColor(src=screen, code=cv2.COLOR_BGR2RGB)
@@ -626,64 +858,141 @@ def fieldDriftCompensation():
         result = cv2.matchTemplate(sat_image, large_image, method)
         mn,_,mnLoc,_ = cv2.minMaxLoc(result)
         x,y = mnLoc
-        if mn < 0.08:
+        if mn < 0.075:
             if x >= winLeft and x <= winRight and y >= winUp and y <= winDown: break
             if x < winLeft:
-                move.hold("a",0.1)
+                move.hold("a",0.32)
             elif x > winRight:
-                move.hold("d",0.1)
+                move.hold("d",0.32)
             if y < winUp:
-                move.hold("w",0.1)
+                move.hold("w",0.32)
             elif y > winDown:
-                move.hold("s",0.1)
+                move.hold("s",0.32)
         else:
             break
-        
-def background(cf,bpcap,gat,dc):
+
+def savehoney_history(saveinfo):
+    with open("honey_history.txt","w") as f:
+        f.write(str(saveinfo))
+    f.close()
+    
+def background(cf,bpcap,gat,dc, rejoinval):
+    time.sleep(20)
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
     setdat = loadsettings.load()
+    prevHour = datetime.now().hour
+    prevMin = datetime.now().minute
+    honeyHist = [setdat['prev_honey']]*60
+    log(honeyHist)
+    invalid_prev_honey = 0
+    if honeyHist[0] == 0:
+        invalid_prev_honey = 1
     while True:
-        r = imagesearch.find('disconnect.png',0.8,ww//3,wh//2.8,ww//2.3,wh//2.5)
-        if r:
-            dc.value = 1
-            webhook("","Disconnected","red")
-            rejoin()
-            dc.value = 0
-        
-        if gat.value:
-            bpcap.value = backpack.bpc()
-            resetMobTimer(cf.value.lower())
-            if imagesearch.find('died.png',0.8,ww//2,wh//2,ww,wh,1):
+        try:
+            start_time = time.time()
+            
+            #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
+            if checkwithOCR("disconnect"):
                 dc.value = 1
-                webhook("","Unexpected Death","red")
-                dc.value = 0
-                gat.value = 0
-        if not is_running("Roblox") and dc.value == 0:
-            dc.value = 1
-            webhook("","Roblox unexpectedly closed","red")
-            rejoin()
-            dc.value = 0
-        if setdat['haste_compensation']:
-            if setdat['low_performance_haste_compensation']:
-                getHastelp()
-            else:
-                getHaste()
-        if setdat['rejoin_every_enabled']:
-            with open('timings.txt', 'r') as f:
-                prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
-            if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
-                dc.value = 1
+                webhook("","Disconnected","red")
                 rejoin()
                 dc.value = 0
-                savetimings('rejoin_every')
-
+            
+            if gat.value:
+                bpcap.value = backpack.bpc()
+                resetMobTimer(cf.value.lower())
+                '''
+                if imagesearch.find('died.png',0.8,ww//2,wh//2,ww,wh,1):
+                    dc.value = 1
+                    webhook("","Unexpected Death","red")
+                    dc.value = 0
+                    gat.value = 0
+                '''
+            '''
+            if not is_running("Roblox") and dc.value == 0 and rejoinval == 0:
+                dc.value = 1
+                webhook("","Roblox unexpectedly closed","red")
+                rejoin()
+                dc.value = 0
+            '''
+            if setdat['rejoin_every_enabled']:
+                with open('timings.txt', 'r') as f:
+                    prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
+                log("{}, {}".format((time.time() - prevTime)/3600, setdat['rejoin_every']))
+                if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
+                    dc.value = 1
+                    rejoin()
+                    dc.value = 0
+                    savetimings('rejoin_every')
+            '''
+            if checkwithOCR('egg shop'):
+                dc.value = 1
+                webhook("","Shop detected","red")
+                if ebutton():
+                    move.press('e')
+                else:
+                    rejoin()
+                dc.value = 0
+            if checkwithOCR("dialog"):
+                webhook("","Stuck in dialog","red")
+                dc.value = 1
+                move.hold("w",1)
+                mouse.move_to(mw//2,mh//5*4)
+                for _ in range(20):
+                    mouse.press()
+                    sleep(0.25)
+                    mouse.release()
+                dc.value = 0
+            '''
+            with open('canonfails.txt', 'r') as f:
+                cfCount = int(f.read())
+            f.close()
+            if cfCount >= 3:
+                with open('canonfails.txt', 'w') as f:
+                    f.write('0')
+                f.close()
+                dc.value = 1
+                webhook("","Canon failed too many times, rejoining","red")
+                rejoin()
+                dc.value = 0
+            if setdat['enable_discord_webhook']:
+                sysTime = datetime.now()
+                sysHour = sysTime.hour
+                sysMin = sysTime.minute
+                if sysMin != prevMin:
+                    prevMin = sysMin
+                    ch = imToString('honey')
+                    if invalid_prev_honey and ch:
+                        invalid_prev_honey = 0
+                        honeyHist = [ch]*60
+                    else:
+                        if ch:
+                            honeyHist[sysMin] = int(ch)
+                        else:
+                            honeyHist[sysMin] = honeyHist[sysMin-1]
+                    log(ch)
+                    savehoney_history(honeyHist)
+                if sysMin == 0 and sysHour != prevHour:
+                    
+                    hourlyReport()
+                    prev_honey = loadsettings.load()['prev_honey']
+                    honeyHist = [prev_honey]*60
+                    prevHour = sysHour
+                    #savehoney_history(honeyHist)
+            if setdat['enable_discord_webhook']:
+                detectNight()
+           #print(time.time()-start_time)
+        except Exception as err:
+            webhook("","An error has been caught in the background process. It can be found in either the terminal or the macroLogs.log file","red")
+            log(err)
+            print(err)
 def killMob(field,mob,reset):
     webhook("","Traveling: {} ({})".format(mob.title(),field.title()),"dark brown")
     convert()
     canon()
-    time.sleep(3)
+    time.sleep(1)
     exec(open("field_{}.py".format(field)).read())
     if mob == "spider":
         for _ in range(4):
@@ -716,27 +1025,42 @@ def collect(name,beesmas=0):
         webhook("","Traveling: {}".format(dispname),"dark brown")
         exec(open("collect_{}.py".format(usename)).read())
         if usename == "wealthclock" or usename == "samovar":
-            for _ in range(7):
-                move.hold("w",0.1)
+            for _ in range(6):
+                move.hold("w",0.2)
                 if ebutton():
                     break
+        elif usename == "candles":
+            for _ in range(7):
+                    move.hold("w",0.2)
+                    if ebutton():
+                        break
         elif usename == "lid_art" or usename == "feast":
             for _ in range(7):
-                move.hold("s",0.1)
+                move.hold("s",0.2)
                 if ebutton():
                     break
         time.sleep(0.5)
-        if ebutton():
-            webhook("","Collected: {}".format(dispname),"bright green",1)
-            claimLoot =  1
-            break
+        if usename == "feast":
+            if checkwithOCR("bee bear"):
+                pag.keyDown("w")
+                time.sleep(1)
+                move.apkey("space")
+                time.sleep(1.5)
+                pag.keyUp("w")
+        for _ in range(2):
+            if ebutton():
+                webhook("","Collected: {}".format(dispname),"bright green",1)
+                claimLoot =  1
+                break
+        if claimLoot: break
         webhook("","Unable To Collect: {}".format(dispname),"dark brown",1)
         reset.reset()
     savetimings(usename)
     move.press('e')
     time.sleep(0.5)
     if claimLoot and beesmas:
-        sleep(4)
+        if name != "stockings":
+            sleep(4)
         move.apkey("space")
         exec(open("claim_{}.py".format(usename)).read())
     reset.reset()
@@ -751,8 +1075,111 @@ def updateHive(h):
     global setdat
     webhook("","Found Hive: {}".format(h),"bright green")
     loadsettings.save('hive_number',h)
+
+def openSettings():
+    savedat = loadRes()
+    mw, mh = pag.size()
+    ww = savedat['ww']
+    wh = savedat['wh']
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    webhook('','Opening Stats',"brown")
     
-def rejoin():
+    promoCode = ''.join([x[1][0] for x in customOCR(0,wh/7,ww/3,wh/8)]).lower()
+    if not "code" in promoCode:
+        pag.typewrite("\\")
+        for _ in range(30):
+            keyboard.press(Key.right)
+            time.sleep(0.05)
+            keyboard.release(Key.right)
+            time.sleep(0.1)
+        for _ in range(15):
+            keyboard.press(Key.left)
+            time.sleep(0.05)
+            keyboard.release(Key.left)
+        for _ in range(4):
+            keyboard.press(Key.right)
+            time.sleep(0.05)
+            keyboard.release(Key.right)
+        move.press('enter')
+        promoCode = ''.join([x[1][0] for x in customOCR(0,wh/7,ww/3,wh/8)]).lower()
+        if not "code" in promoCode:
+            move.press('enter')
+    keyboard.press(Key.down)
+    time.sleep(0.05)
+    keyboard.release(Key.down)
+    for _ in range(20):
+        keyboard.press(Key.page_down)
+        time.sleep(0.02)
+        keyboard.release(Key.page_down)
+    time.sleep(0.5)
+    for _ in range(5):
+        keyboard.press(Key.page_up)
+        time.sleep(0.02)
+        keyboard.release(Key.page_up)
+    pag.scroll(100)
+    for _ in range(10):
+        statData = customOCR(0,wh/7,ww/7,wh/2)
+        statNames = ''.join([x[1][0] for x in statData]).lower()
+        if 'speed'in statNames:
+            pag.typewrite("\\")
+            break
+        keyboard.press(Key.page_up)
+        time.sleep(0.02)
+        keyboard.release(Key.page_up)
+    else:
+        pag.typewrite("\\")
+        return
+    time.sleep(0.3)
+    check = customOCR(0,0,ww/7,wh)
+    for i, e in enumerate(check):
+        if 'speed' in e[1][0]:
+            movespeedInfo = e
+    print(movespeedInfo)
+    coords = movespeedInfo[0]
+    start,_,end,_ = coords
+    x,y, = start[0],start[1]-20
+    h = end[1] - y+20
+    
+    im = pag.screenshot(region=(ww/8,y,ww/10,h))
+    im.save('test.png')
+    loadsettings.save("msh",h,"multipliers.txt")
+    loadsettings.save("msy",y,"multipliers.txt")
+
+
+def getHaste():
+    ws = float(loadsettings.load()['walkspeed'])
+    msh = loadsettings.load('multipliers.txt')['msh']
+    msy = loadsettings.load('multipliers.txt')['msy']
+    ww = loadRes()['ww']
+    ocr = customOCR(ww/8,msy,ww/10,msh)
+    print(ocr)
+    if not ocr:return
+    filtered = [x for x in ocr if "." in x[1][0] or x[1][0].replace("_","").replace(" ","").isdigit()]
+    if not filtered:return
+    text = filtered[0][1][0].replace(" ","")
+    if not text:return
+    num = ""
+    currms = ws
+    for i in text:
+        if i == "." or i.isdigit():
+            num += i
+    try:
+        num = float(num)
+        if num > ws:
+            with open("haste.txt","w") as f:
+                f.write(str(num))
+            f.close()
+            return
+    except Exception as e:
+        print(e)
+        pass
+    with open("haste.txt","w") as f:
+        f.write(str(ws))
+    f.close()
+    
+async def asyncRejoin():
+    setdat = loadsettings.load()
     for i in range(2):
         cmd = """
             osascript -e 'tell application "Roblox" to quit' 
@@ -762,22 +1189,315 @@ def rejoin():
         ww = savedata['ww']
         wh = savedata['wh']
         webhook("","Rejoining","dark brown")
-        time.sleep(3)
+        await asyncio.sleep(5)
+        if is_running("roblox"):
+                cmd = """
+                    osascript -e 'tell application "Roblox" to quit' 
+                    """
+                os.system(cmd)
+                await asyncio.sleep(3)
+        link  = ""
         if setdat["private_server_link"]:
-            webbrowser.open(setdat['private_server_link'])
+            link = setdat['private_server_link']
         else:
-            if i == 0:
-                webbrowser.open('https://www.roblox.com/games/1537690962/Bee-Swarm-Simulator')
-                time.sleep(7)
-                _,x,y,_ = imagesearch.find('playbutton.png',0.8)
-                webhook("","Play Button Found","dark brown")
-                if setdat['display_type'] == "built-in retina display":
-                    pag.click(x//2, y//2)
-                else:
-                    pag.click(x, y)
-            else:
-                webbrowser.open('https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129')
-                time.sleep(6)
+            link = 'https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129'
+        rm = loadsettings.load()['rejoin_method']
+        if rm == "new tab":
+            webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True)
+            await asyncio.sleep(1)
+            with keyboard.pressed(Key.cmd):
+                keyboard.press('t')
+                keyboard.release('t')
+            keyboard.type(link)
+            keyboard.press(Key.enter)
+        else:
+            webbrowser.open(link)
+        if not setdat['private_server_link']:
+            await asyncio.sleep(10)
+        await asyncio.sleep(setdat['rejoin_delay']*(i+1))
+        cmd = """
+            osascript -e 'activate application "Roblox"' 
+        """
+        os.system(cmd)
+        
+        await asyncio.sleep(0.5)
+        keyboard.press(Key.cmd)
+        await asyncio.sleep(0.05)
+        keyboard.press(Key.ctrl)
+        await asyncio.sleep(0.05)
+        keyboard.press("f")
+        await asyncio.sleep(0.1)
+        keyboard.release(Key.cmd)
+        keyboard.release(Key.ctrl)
+        keyboard.release("f")
+        
+        await asyncio.sleep(2)
+        pag.keyDown("w")
+        await asyncio.sleep(5)
+        pag.keyUp("w")
+        pag.keyDown("s")
+        await asyncio.sleep(0.55)
+        pag.keyUp("s")
+        foundHive = 0
+        move.apkey('space')
+        await asyncio.sleep(0.5)
+        webhook("","Finding Hive", "dark brown",1)
+        if setdat['hive_number'] == 3:
+            if ebutton():
+                move.press('e')
+                foundHive = 1
+                webhook("","Hive Found: 3","dark brown",1)
+                break
+        elif setdat['hive_number'] == 2:
+            pag.keyDown("d")
+            await asyncio.sleep(0.8)
+            pag.keyUp("d")
+            for _ in range(4):
+                pag.keyDown("d")
+                await asyncio.sleep(0.1)
+                pag.keyUp("d")
+                if ebutton():
+                    move.press('e')
+                    foundHive = 1
+                    webhook("","Hive Found: 2","dark brown",1)
+                    break
+        elif setdat['hive_number'] == 1:
+            pag.keyDown("d")
+            await asyncio.sleep(2)
+            pag.keyUp("d")
+            for _ in range(4):
+                pag.keyDown("d")
+                await asyncio.sleep(0.1)
+                pag.keyUp("d")
+                if ebutton():
+                    move.press('e')
+                    foundHive = 1
+                    webhook("","Hive Found: 1","dark brown",1)
+                    break
+        elif setdat['hive_number'] == 4:
+            pag.keyDown("a")
+            await asyncio.sleep(0.4)
+            pag.keyUp("a")
+            for _ in range(4):
+                pag.keyDown("a")
+                await asyncio.sleep(0.1)
+                pag.keyUp("a")
+                if ebutton():
+                    move.press('e')
+                    foundHive = 1
+                    webhook("","Hive Found: 4","dark brown",1)
+                    break
+        elif setdat['hive_number'] == 5:
+            pag.keyDown("a")
+            await asyncio.sleep(1.7)
+            pag.keyUp("a")
+            for _ in range(4):
+                pag.keyDown("a")
+                await asyncio.sleep(0.1)
+                pag.keyUp("a")
+                if ebutton():
+                    move.press('e')
+                    foundHive = 1
+                    webhook("","Hive Found: 5","dark brown",1)
+                    break
+        else:
+            pag.keyDown("a")
+            await asyncio.sleep(3.3)
+            pag.keyUp("a")
+            if ebutton():
+                    move.press('e')
+                    foundHive = 1
+                    webhook("","Hive Found: 6","dark brown",1)
+                    break
+        while True:   
+            if not foundHive:
+                pag.keyDown("d")
+                await asyncio.sleep(12)
+                pag.keyUp("d")
+                webhook("","Hive already claimed, finding new hive","dark brown",1)
+                pag.keyDown("a")
+                await asyncio.sleep(0.2)
+                pag.keyUp("a")
+                for _ in range(3):
+                    pag.keyDown("a")
+                    await asyncio.sleep(0.1)
+                    pag.keyUp("a")
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(1)
+                        break
+                if foundHive: break
+                pag.keyDown("a")
+                await asyncio.sleep(0.4)
+                pag.keyUp("a")
+                for _ in range(3):
+                    pag.keyDown("a")
+                    await asyncio.sleep(0.1)
+                    pag.keyUp("a")
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(2)
+                        break
+                if foundHive: break
+                pag.keyDown("a")
+                await asyncio.sleep(0.5)
+                pag.keyUp("a")
+                for _ in range(3):
+                    pag.keyDown("a")
+                    await asyncio.sleep(0.1)
+                    pag.keyUp("a")
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(3)
+                        break
+                if foundHive: break
+                pag.keyDown("a")
+                await asyncio.sleep(0.7)
+                pag.keyUp("a")
+                for _ in range(3):
+                    pag.keyDown("a")
+                    await asyncio.sleep(0.1)
+                    pag.keyUp("a")
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(4)
+                        break
+                if foundHive: break
+                pag.keyDown("a")
+                await asyncio.sleep(0.7)
+                pag.keyUp("a")
+                for _ in range(3):
+                    pag.keyDown("a")
+                    await asyncio.sleep(0.1)
+                    pag.keyUp("a")
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(5)
+                        break
+                if foundHive: break
+                move.hold('a',0.7)
+                for _ in range(3):
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(6)
+                        break
+                break
+            else: break
+        if not foundHive:
+            rawreset()
+            webhook("","Unable to claim hive, using final resort method","dark brown",1)
+            move.hold("w",5)
+            move.hold("s",0.55)
+            move.hold('d',4)
+            starttime = time.time()
+            for _ in range(4):
+                move.press(",")
+            pag.keyDown("d")
+            while time.time()-starttime < 10:
+                move.press("e")
+            pag.keyUp("d")
+            updateHive(6)
+        convert()
+        resetCheck = 0
+        ths = loadsettings.load()["hivethreshold"]
+        loadSave()
+        ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+        xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+        for _ in range(2):
+            webhook("","Reset Check","dark brown")
+            mouse.position = (mw/(4.11*xsm),mh/(9*ysm))
+            ww = savedata["ww"]
+            wh = savedata["wh"]
+            xo = ww//4
+            yo = wh//100*90
+            xt = xo*2
+            yt = wh//100*20
+            await asyncio.sleep(2)
+            pag.press('esc')
+            await asyncio.sleep(0.1)
+            pag.press('r')
+            await asyncio.sleep(0.2)
+            pag.press('enter')
+            await asyncio.sleep(8)
+            for _ in range(4):
+                pag.press('pgup')
+            await asyncio.sleep(0.1)
+            for _ in range(6):
+                pag.press('o')
+            #im = pag.screenshot(region = (xo,yo,xt,yt))
+            #im.save('a.png')
+
+            await asyncio.sleep(0.4)
+            for _ in range(4):
+                r = imagesearch.find("hive1.png",ths, xo, yo, xt, yt)
+                if r:
+                    await asyncio.sleep(0.1)
+                    for _ in range(4):
+                        pag.press(".")
+
+                    await asyncio.sleep(0.1)
+                    for _ in range(4):
+                        pag.press('pgdn')
+                    resetCheck = 1
+                    break
+                for _ in range(4):
+                    pag.press(",")
+                    
+                await asyncio.sleep(0.5)
+            await asyncio.sleep(1)
+        for _ in range(4):
+            pag.press(",")
+        webhook("Notice","Hive not found.","red",1)
+        if resetCheck:
+            webhook("","Rejoin successful","dark brown")
+            break
+        webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
+    
+
+def openRoblox(link):
+    rm = loadsettings.load()['rejoin_method']
+    if rm == "new tab":
+        webbrowser.open(link)
+    else:
+        webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True)
+        time.sleep(3)
+        with keyboard.pressed(Key.cmd):
+            keyboard.press('t')
+            keyboard.release('t')
+        time.sleep(1)
+        keyboard.type(link)
+        time.sleep(0.5)
+        keyboard.press(Key.enter)
+    
+def rejoin():
+    setdat = loadsettings.load()
+    for i in range(2):
+        cmd = """
+            osascript -e 'tell application "Roblox" to quit' 
+            """
+        os.system(cmd)
+        savedata = loadRes()
+        ww = savedata['ww']
+        wh = savedata['wh']
+        webhook("","Rejoining","dark brown",1)
+        time.sleep(3)
+        if is_running("roblox"):
+                cmd = """
+                    osascript -e 'tell application "Roblox" to quit' 
+                    """
+                os.system(cmd)
+                time.sleep(3)
+        if setdat["private_server_link"]:
+            openRoblox(setdat["private_server_link"])
+        else:
+            openRoblox('https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129')
+            time.sleep(10)
                 
         time.sleep(setdat['rejoin_delay']*(i+1))
         cmd = """
@@ -785,91 +1505,127 @@ def rejoin():
         """
         
         os.system(cmd)
+        time.sleep(1)
+        if setdat['manual_fullscreen']:
+            fullscreen()
         time.sleep(2)
         move.hold("w",5)
-        move.hold("s",0.55)
+        move.hold("s",0.6)
         foundHive = 0
         move.apkey('space')
+        time.sleep(0.5)
         webhook("","Finding Hive", "dark brown",1)
         if setdat['hive_number'] == 3:
             if ebutton():
                 move.press('e')
                 foundHive = 1
-                webhook("","Hive Found","dark brown",1)
+                webhook("","Hive Found: 3","dark brown",1)
+                break
         elif setdat['hive_number'] == 2:
-            move.hold('d',1.2)
-            if ebutton():
+            move.hold('d',1)
+            for _ in range(4):
+                move.hold('d',0.1)
+                if ebutton():
                     move.press('e')
                     foundHive = 1
-                    webhook("","Hive Found","dark brown",1)
+                    webhook("","Hive Found: 2","dark brown",1)
+                    break
         elif setdat['hive_number'] == 1:
-            move.hold('d',1.9)
-            if ebutton():
-                move.press('e')
-                foundHive = 1
-                webhook("","Hive Found","dark brown",1)
-        elif setdat['hive_number'] == 4:
-            move.hold('a',1.1)
-            if ebutton():
+            move.hold('d',2)
+            for _ in range(4):
+                move.hold('d',0.1)
+                if ebutton():
                     move.press('e')
                     foundHive = 1
-                    webhook("","Hive Found","dark brown",1)
+                    webhook("","Hive Found: 1","dark brown",1)
+                    break
+        elif setdat['hive_number'] == 4:
+            move.hold('a',0.6)
+            for _ in range(4):
+                move.hold('a',0.1)
+                if ebutton():
+                    move.press('e')
+                    foundHive = 1
+                    webhook("","Hive Found: 4","dark brown",1)
+                    break
         elif setdat['hive_number'] == 5:
-            move.hold('a',2.3)
-            if ebutton():
-                move.press('e')
-                foundHive = 1
-                webhook("","Hive Found","dark brown",1)
+            move.hold('a',1.9)
+            for _ in range(4):
+                move.hold('a',0.1)
+                if ebutton():
+                    move.press('e')
+                    foundHive = 1
+                    webhook("","Hive Found: 5","dark brown",1)
+                    break
         else:
             move.hold('a',3.3)
             if ebutton():
                     move.press('e')
                     foundHive = 1
-                    webhook("","Hive Found","dark brown",1)
+                    webhook("","Hive Found: 6","dark brown",1)
+                    break
         while True:   
             if not foundHive:
                 move.hold("d",12)
                 webhook("","Hive already claimed, finding new hive","dark brown",1)
-                move.hold('a',1)
-                if ebutton():
-                    move.press('e')
-                    foundHive = 1
-                    updateHive(1)
-                    break
-                move.hold('a',1.1)
-                if ebutton():
-                    move.press('e')
-                    foundHive = 1
-                    updateHive(2)
-                    break
-                move.hold("a",1)
-                if ebutton():
-                    move.press('e')
-                    foundHive = 1
-                    updateHive(3)
-                    break
-                move.hold('a',1.1)
-                if ebutton():
-                    move.press('e')
-                    foundHive = 1
-                    updateHive(4)
-                    break
-                move.hold('a',1.1)
-                if ebutton():
-                    move.press('e')
-                    foundHive = 1
-                    updateHive(5)
-                    break
-                move.hold('a',1)
-                if ebutton():
-                    move.press('e')
-                    foundHive = 1
-                    updateHive(6)
-                    break
+                move.hold('a',0.2)
+                for _ in range(3):
+                    move.hold('a',0.1)
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(1)
+                        break
+                if foundHive: break
+                move.hold('a',0.9)
+                for _ in range(3):
+                    move.hold('a',0.1)
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(2)
+                        break
+                if foundHive: break
+                move.hold("a",0.9)
+                for _ in range(3):
+                    move.hold('a',0.1)
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(3)
+                        break
+                if foundHive: break
+                move.hold('a',0.8)
+                for _ in range(3):
+                    move.hold('a',0.1)
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(4)
+                        break
+                if foundHive: break
+                move.hold('a',0.9)
+                for _ in range(3):
+                    move.hold('a',0.1)
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(5)
+                        break
+                if foundHive: break
+                move.hold('a',0.9)
+                for _ in range(3):
+                    move.hold('a',0.1)
+                    if ebutton():
+                        move.press('e')
+                        foundHive = 1
+                        updateHive(6)
+                        break
                 break
             else: break
         if not foundHive:
             rawreset()
+            webhook("","Unable to claim hive, using final resort method","dark brown",1)
             move.hold("w",5)
             move.hold("s",0.55)
             move.hold('d',4)
@@ -885,8 +1641,10 @@ def rejoin():
         
         if reset.resetCheck():
             webhook("","Rejoin successful","dark brown")
+            if setdat['haste_compensation']: openSettings()
             break
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
+        
     
 
     
@@ -901,6 +1659,8 @@ updateSave("ww",ww)
 updateSave("wh",wh)
 '''
             
+    
+
 
 def placeSprinkler():
     sprinklerCount = {
@@ -914,13 +1674,16 @@ def placeSprinkler():
     setdat = loadsettings.load()
     move.press(str(setdat['sprinkler_slot']))
     for _ in range(sprinklerCount[setdat['sprinkler_type']]):
-        move.apkey("space")
-        time.sleep(0.05)
         move.press(str(setdat['sprinkler_slot']))
-        time.sleep(0.5)
-def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
-        
+        time.sleep(0.3)
+        move.apkey("space")
+        time.sleep(0.13)
+def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_start):
+    setdat = loadsettings.load()   
     val = validateSettings()
+    with open('canonfails.txt', 'w') as f:
+        f.write('0')
+    f.close()
     if val:
         pag.alert(text='Your settings are incorrect! Check the terminal to see what is wrong.', title='Invalid settings', button='OK')
         print(val)
@@ -930,6 +1693,21 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
         """
     savetimings('rejoin_every')
     os.system(cmd)
+    continuePlanters = 1
+    with open('firstRun.txt', 'r') as f:
+        if int(f.read()) == 1:
+            continuePlanters = 0
+    f.close()
+    with open('firstRun.txt', 'w') as f:
+        f.write("0")
+    f.close()
+    if session_start:
+        log("Session Start")
+        rawreset()
+        currHoney = imToString('honey')
+        loadsettings.save('start_honey',currHoney)
+        loadsettings.save('prev_honey',currHoney)
+        if setdat['haste_compensation']: openSettings()
     reset.reset()
     convert()
     savedata = loadRes()
@@ -937,16 +1715,16 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
     ww = savedata['ww']
     wh = savedata['wh']
     gfid = 0
-    continuePlanters = 0
     if planterset['enable_planters']:
         with open("planterdata.txt","r") as f:
             lines = f.read().split("\n")
         f.close()
         occupiedStuff = ast.literal_eval(lines[0])
+        print(occupiedStuff)
         planterTypes = ast.literal_eval(lines[1])
         planterFields = ast.literal_eval(lines[2])
-        if planterTypes == planterTypes_prev and planterFields == planterFields_prev:
-            continuePlanters = 1
+        #if planterTypes == planterTypes_prev and planterFields == planterFields_prev:
+            #continuePlanters = 1
         maxPlanters = planterset['planter_count']
         if len(planterTypes) < maxPlanters:
             maxPlanters = len(planterTypes)
@@ -957,17 +1735,15 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
         cmd = """
         osascript -e 'activate application "Roblox"' 
         """
-        
         os.system(cmd)
         timings = loadtimings()
-        setdat = loadsettings.load()
         #Stump snail check
         if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
             canon()
             webhook("","Traveling: Stump snail (stump) ","brown")
             exec(open("field_stump.py").read())
             time.sleep(0.2)
-            move.press(str(setdat['sprinkler_slot']))
+            placeSprinkler()
             pag.click()
             webhook("","Starting stump snail","brown")
             while True:
@@ -977,7 +1753,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
                     savetimings("stump_snail")
                     if setdat['continue_after_stump_snail']:break
             webhook("","Stump snail killed, keeping amulet","bright green")
-            pag.moveTo(mw//2-30,mh//100*60)
+            mouse.move(mw//2-30,mh//100*60)
             pag.click()
             reset.reset()
         #Collect check
@@ -1003,13 +1779,15 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
             collect('snow_machine')
         if setdat['lid_art'] and checkRespawn('lid_art','8h'):
             collect('lid_art',1)
+        if setdat['candles'] and checkRespawn('candles','4h'):
+            collect('candles',1)
         if setdat['mondo_buff']:
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
             hour,minute,_ = [int(x) for x in current_time.split(":")]
-            if minute < 10 and checkRespawn('mondo_buff','1h'):
+            if minute < 10 and checkRespawn('mondo_buff','20m'):
                 tempdict = loadtimings()
-                tempdict[m] = time.time()//3600
+                tempdict['mondo_buff'] = time.time()//3600
                 templist = []
                 
                 for i in tempdict:
@@ -1018,13 +1796,16 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
                     f.writelines(templist)
                 f.close()
                 mondo_buff()
-                webhook("","Collected: Mondo Buff","bright green")
+                webhook("","Collected: Mondo Buff","bright green",1)
+                reset.reset()
+                convert()
             
         
         #Planter check
         
         if planterset['enable_planters']:
             if not continuePlanters or not occupiedStuff:
+                
                 occupiedStuff = []
                 for i in range(maxPlanters):
                     bestPlanter = getBestPlanter(planterFields[i],occupiedStuff,planterTypes)
@@ -1034,7 +1815,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
                     placePlanter(bestPlanter)
                     occupiedStuff.append((bestPlanter,planterFields[i]))
                 continuePlanters = 1
-                print(occupiedStuff)
+                log(occupiedStuff)
                 with open("planterdata.txt","w") as f:
                     f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
                 f.close()
@@ -1067,26 +1848,32 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
                     if time.time() - planterTimes[currPlanter] > growTime*60*60:
                         collectAnyPlanters += 1
                         time.sleep(2)
-                        goToPlanter(currField)
-                        webhook('',"Traveling: {} ({})\nObjective: Collect Planter".format(displayPlanterName(currPlanter),currField.title()),"dark brown")
-                        move.press('e')
-                        clickYes()
-                        if currField == "pumpkin":
-                            for _ in range(4):
-                                move.press(",")
-                        elif currField == "pine tree" or currField == "strawberry" or currField == "pineapple":
-                                move.press(".")
-                                move.press(".")
-                        starttime = time.time()
-                        move.apkey("space")
-                        while True:
-                            if time.time() - starttime > 20:
+                        for i in range(2):
+                            goToPlanter(currField)
+                            webhook('',"Traveling: {} ({})\nObjective: Collect Planter, Attempt: {}".format(displayPlanterName(currPlanter),currField.title(),i+1),"dark brown")
+                            if ebutton():
+                                move.press('e')
+                                clickYes()
+                                if currField == "pumpkin":
+                                    for _ in range(4):
+                                        move.press(",")
+                                elif currField == "pine tree" or currField == "strawberry" or currField == "pineapple":
+                                        move.press(".")
+                                        move.press(".")
+                                starttime = time.time()
+                                move.apkey("space")
+                                while True:
+                                    if time.time() - starttime > 20:
+                                        break
+                                    moblootPattern(1.1,1.4,"none",2)
+                                reset.reset()
+                                cycleFields.remove(currField)
+                                cycleFields.append(currField)
+                                removeFromOccupied.append((currPlanter,currField))
                                 break
-                            moblootPattern(1.1,1.4,"none",2)
-                        reset.reset()
-                        cycleFields.remove(currField)
-                        cycleFields.append(currField)
-                        removeFromOccupied.append((currPlanter,currField))
+                            else:
+                                webhook("","Cant find Planter","red",1)
+                                reset.reset()
                     else:
                         occupiedFields.append(currField)
                 if collectAnyPlanters > 0 and planterFields == cycleFields:
@@ -1096,16 +1883,16 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
                 planterFields = cycleFields.copy()
                 for i in removeFromOccupied:
                     occupiedStuff.remove(i)
-                print(occupiedStuff)
-                print(occupiedFields)
-                print(planterFields)
+                log(occupiedStuff)
+                log(occupiedFields)
+                log(planterFields)
                 for _ in range(maxPlanters-len(occupiedStuff)):
                     for i in planterFields:
                         if i not in fieldsToPlace and i not in occupiedFields:
                             fieldsToPlace.append(i)
                             break
                     
-                print(fieldsToPlace)
+                log(fieldsToPlace)
                 for i in fieldsToPlace:
                     bestPlanter = getBestPlanter(i,occupiedStuff,planterTypes)
                     webhook('',"Traveling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),i.title()),"dark brown")
@@ -1137,7 +1924,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
             killMob("mushroom","ladybug",1)
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_clover","5m"):
             if checkRespawn("rhinobeetle_blueflower","5m"):
-                webhook("","hi","red")
+                #webhook("","hi","red")
                 killMob("clover","rhino beetle",0)
                 move.hold("s",7)
                 time.sleep(1)
@@ -1166,6 +1953,37 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
             exec(open("field_{}.py".format(setdat['gather_field'][gfid])).read())
             cf.value = setdat['gather_field'][gfid].replace(" ","").lower()
             time.sleep(0.2)
+            s_l = setdat['start_location'].lower()
+            rotTowards = []
+            rotBack = []
+            if s_l != 'center':
+                if s_l == "upper right":
+                    rotTowards = ["."]
+                elif s_l == "right":
+                    rotTowards = ["."]*2
+                elif s_l == "lower right":
+                    rotTowards = ["."]*3
+                elif s_l == "bottom":
+                    rotTowards = ["."]*4
+                elif s_l == "lower left":
+                    rotTowards = [","]*3
+                elif s_l == "left":
+                    rotTowards = [","]*2
+                elif s_l == "upper left":
+                    rotTowards = [","]
+                for i in rotTowards:
+                    move.press(i)
+                    if i == ".":
+                        rotBack.append(",")
+                    elif i:
+                        rotBack.append(".")
+                
+                move.hold("w",setdat['distance_from_center']/2.5)
+                
+                for i in rotBack:
+                    move.press(i)
+
+                
             if setdat["before_gather_turn"] == "left":
                 for _ in range(setdat["turn_times"]):
                     move.press(",")
@@ -1177,36 +1995,31 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
             pag.click()
             gp = setdat["gather_pattern"].lower()
             webhook("Gathering: {}".format(setdat['gather_field'][gfid]),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
-            move.apkey("space")
             time.sleep(0.2)
             timestart = time.perf_counter()
             gat.value = 1
             fullTime = 0
             while True:
                 time.sleep(0.05)
-                mouse.press()
+                mouse.press(Button.left)
                 time.sleep(0.05)
                 exec(open("gather_{}.py".format(gp)).read())
                 time.sleep(0.05)
-                mouse.release()
                 time.sleep(0.05)
                 timespent = (time.perf_counter() - timestart)/60
                 if bpcap.value >= setdat["pack"]:
-                    if fullTime == 1:
-                        webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
-                        break
-                    else:
-                        fullTime += 1
-                else:
-                    fullTime = 0
+                    webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+                    break
                     
                 if timespent > setdat["gather_time"]:
                     webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
                     break
                 if setdat['field_drift_compensation']:
                     fieldDriftCompensation()
+                mouse.release(Button.left)
             time.sleep(0.5)
             gat.value = 0
+            bpcap.value = 0
             cf.value = ""
             if setdat["before_gather_turn"] == "left":
                 for _ in range(setdat["turn_times"]):
@@ -1246,32 +2059,77 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev):
                 if setdat["gather_field"][gfid].lower() == "none":
                     gfid += 1
                 else: break
-                    
+        else:
+            mouse.click(Button.left, 1)
+        
+
+            
+
+def haste_comp():
+    while True:
+        getHaste()
+        time.sleep(1)
+        print('a')
 def setResolution():
     wwd = int(pag.size()[0])
     whd = int(pag.size()[1])
     if subprocess.call("system_profiler SPDisplaysDataType | grep -i 'retina'", shell=True) == 0:
+        retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
+        retout = retout.decode().split("\n")[1].strip().split("x")
+        nww = ''.join([x for x in retout[0] if x.isdigit()])
+        nwh = ''.join([x for x in retout[1] if x.isdigit()])
         loadsettings.save('display_type', 'built-in retina display')
         print("display type: retina")
+        log("display type: retina")
         wwd *=2
         whd *=2
     else:
         loadsettings.save('display_type',"built-in display")
         print("display type: built-in")
+        log("display type: built-in")
+        nww = wwd
+        nwh = whd
     print("Screen coordinates: {}x{}".format(wwd,whd))
+    log("Screen coordinates: {}x{}".format(wwd,whd))
     with open('save.txt', 'w') as f:
-        f.write('wh:{}\nww:{}'.format(whd,wwd))
-            
+        f.write('wh:{}\nww:{}\nnww:{}\nnwh:{}'.format(whd,wwd,nww,nwh))
+    ndisplay = "{}x{}".format(wwd,whd)
+
+    multiInfo = {
+        "2880x1800": [1,1,1,1],
+        "2940x1912": [0.666666666666666,1,1,1],
+        "1920x1080": [1.3,0.94,1,1],
+        "1440x900": [1,1,1,1],
+        "4096x2304": [1.45,0.91,1.32,1.5]
+
+        }
+    if ndisplay in multiInfo:
+        loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
+        loadsettings.save("x_screenshot_multiplier",multiInfo[ndisplay][1],"multipliers.txt")
+        loadsettings.save("y_length_multiplier",multiInfo[ndisplay][2],"multipliers.txt")
+        loadsettings.save("x_length_multiplier",multiInfo[ndisplay][3],"multipliers.txt")
+    else:
+        print("Resolution not found in supported list")
 if __name__ == "__main__":
+    with open('macroLogs.log', 'w'):
+        pass
+    with open('firstRun.txt', 'w') as f:
+        f.write("1")
+    f.close()
     cmd = 'defaults read -g AppleInterfaceStyle'
     p = bool(subprocess.Popen(cmd, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True).communicate()[0])
-    print("\n\nTo launch the macro manually, enter the following 2 commands in terminal:\ncd path/to/macro-folder\npython3 e_macro.py\n\nTo stop the macro, \ntab out of roblox, make sure terminal is in focus and press ctrl c\nor,\nright click the macro app in the dock and force quit")
+    print("\033[0;32m\n\nTo launch the macro manually, enter the following 2 commands in terminal:\033[00m")
+    print("cd path/to/macro-folder\npython3 e_macro.py\n")
+    print("\033[0;32mTo stop the macro\033[00m")
+    print("tab out of roblox, make sure terminal is in focus and press ctrl c\nor,\nright click the macro app in the dock and force quit")
     print("\n\nYour python version is {}".format(sys.version_info[0]))
     print("Your macro version is {}\n\n".format(macrov))
+    log("Your macro version is {}\n\n".format(macrov))
     setResolution()
     loadSave()
     plantdat = loadsettings.planterLoad()
+    firstRun = 1
     ww = savedata["ww"]
     wh = savedata["wh"]
     root = tk.Tk(className='exih_macro')
@@ -1299,6 +2157,7 @@ if __name__ == "__main__":
     frame4 = ttk.Frame(notebook, width=780, height=400)
     frame5 = ttk.Frame(notebook, width=780, height=400)
     frame6 = ttk.Frame(notebook, width=780, height=400)
+    frame7 = ttk.Frame(notebook, width=780, height=400)
 
     frame1.pack(fill='both', expand=True)
     frame2.pack(fill='both', expand=True)
@@ -1306,12 +2165,14 @@ if __name__ == "__main__":
     frame4.pack(fill='both', expand=True)
     frame5.pack(fill='both', expand=True)
     frame6.pack(fill='both', expand=True)
+    frame7.pack(fill='both', expand=True)
 
     notebook.add(frame1, text='Gather')
     notebook.add(frame2, text='Bug run')
     notebook.add(frame4, text='Collect')
     notebook.add(frame6, text='Planters')
-    notebook.add(frame3, text='Settings')
+    notebook.add(frame3, text='In Game Settings')
+    notebook.add(frame7, text='Other Settings')
     notebook.add(frame5, text='Calibration')
 
     #get variables
@@ -1334,6 +2195,10 @@ if __name__ == "__main__":
     before_gather_turn = tk.StringVar(root)
     before_gather_turn.set(setdat["before_gather_turn"])
     turn_times = tk.IntVar(value=setdat["turn_times"])
+    start_location = tk.StringVar(root)
+    start_location.set(setdat["start_location"].title())
+    distance_from_center = tk.StringVar(root)
+    distance_from_center.set(setdat["distance_from_center"])
     whirligig_slot = tk.StringVar(root)
     whirligig_slot.set(setdat["whirligig_slot"])
     stump_snail = tk.IntVar(value=setdat["stump_snail"])
@@ -1344,6 +2209,7 @@ if __name__ == "__main__":
     scorpion = tk.IntVar(value=setdat["scorpion"])
     spider = tk.IntVar(value=setdat["spider"])
     mantis = tk.IntVar(value=setdat["mantis"])
+    stinger = tk.IntVar(value=setdat["stinger"])
     gifted_vicious_bee = tk.IntVar(value=setdat["gifted_vicious_bee"])
     enable_discord_webhook = tk.IntVar(value=setdat["enable_discord_webhook"])
     discord_webhook_url= setdat["discord_webhook_url"]
@@ -1365,6 +2231,9 @@ if __name__ == "__main__":
     rejoin_every_enabled = tk.IntVar(value=setdat["rejoin_every_enabled"])
     rejoin_every = setdat['rejoin_every']
     rejoin_delay = setdat['rejoin_delay']
+    rejoin_method = tk.StringVar(root)
+    rejoin_method.set(setdat['rejoin_method'])
+    manual_fullscreen = tk.IntVar(value=setdat['manual_fullscreen'])
     
     wealthclock = tk.IntVar(value=setdat["wealthclock"])
     blueberrydispenser = tk.IntVar(value=setdat["blueberrydispenser"])
@@ -1378,10 +2247,8 @@ if __name__ == "__main__":
     snow_machine = tk.IntVar(value=setdat["snow_machine"])
     mondo_buff = tk.IntVar(value=setdat["mondo_buff"])
     lid_art = tk.IntVar(value=setdat["lid_art"])
+    candles = tk.IntVar(value=setdat["candles"])
     
-    ebthreshold = setdat['ebthreshold']
-    ebdetect = tk.StringVar(root)
-    ebdetect.set(setdat["ebdetect"])
     canon_time = setdat['canon_time']
     reverse_hive_direction = tk.IntVar(value=setdat['reverse_hive_direction'])
 
@@ -1436,6 +2303,8 @@ if __name__ == "__main__":
     gather_fields.insert(0,"None")
     field_options = tk.Variable(value=[x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")])
     planter_fields =  plantdat['planter_fields']
+
+    multipliers = loadsettings.load('multipliers.txt')
 
 
 
@@ -1539,18 +2408,18 @@ if __name__ == "__main__":
         timestart = time.perf_counter()
         while True:
             time.sleep(0.05)
-            pag.mouseDown()
+            mouse.press(Button.left)
             time.sleep(0.05)
             exec(open("gather_{}.py".format(setdat['gather_pattern'])).read())
             time.sleep(0.05)
-            pag.mouseUp()
             time.sleep(0.05)
             timespent = (time.perf_counter() - timestart)/60
             if timespent > 20:
                 webhook("Gathering: ended","Time: {:.2f}".format(timespent),"light green")
                 break
-            if setdat['field_drift_compensation']:
+            if setdat['field_drift_compensation'] and setdat['gather_pattern'] != "stationary":
                 fieldDriftCompensation()
+            mouse.release(Button.left)
         time.sleep(0.5)
         webhook("","Finding coordinates of backpack","dark brown")
         for x in range(ww//2+50,ww//2+200):
@@ -1599,7 +2468,7 @@ if __name__ == "__main__":
         webhook("","Done obtaining vals","dark brown")
             
         vals = sorted(vals,reverse=True)
-        print(vals)
+        log(vals)
         gap = vals[0] - 0.05
         truemin = 0
         for i in range(len(vals)):
@@ -1626,7 +2495,7 @@ if __name__ == "__main__":
 
     def calibrate():
         if calibratehive(0):
-            calibrateebutton()
+            #calibrateebutton()
             webhook("","Calibration Complete","light green")
             cmd = """
                     osascript -e  'activate application "Terminal"'
@@ -1692,6 +2561,8 @@ if __name__ == "__main__":
             "rejoin_every_enabled": rejoin_every_enabled.get(),
             "rejoin_every": rejoinetextbox.get(1.0,"end").replace("\n",""),
             "rejoin_delay": rejoindelaytextbox.get(1.0,"end").replace("\n",""),
+            "rejoin_method": rejoin_method.get(),
+            "manual_fullscreen": manual_fullscreen.get(),
             
             "gather_enable": gather_enable.get(),
             "gather_field": [gather_field_one.get(),gather_field_two.get(),gather_field_three.get()],
@@ -1704,6 +2575,8 @@ if __name__ == "__main__":
             "turn_times": turn_times.get(),
             "return_to_hive": return_to_hive.get(),
             "whirligig_slot": whirligig_slot.get(),
+            "start_location": start_location.get(),
+            "distance_from_center": distance_from_center.get(),
                 
             "stump_snail": stump_snail.get(),
             "continue_after_stump_snail": continue_after_stump_snail.get(),
@@ -1713,6 +2586,7 @@ if __name__ == "__main__":
             "scorpion": scorpion.get(),
             "werewolf": werewolf.get(),
             "mantis": mantis.get(),
+            "stinger": stinger.get(),
 
             "wealthclock": wealthclock.get(),
             "blueberrydispenser": blueberrydispenser.get(),
@@ -1726,11 +2600,11 @@ if __name__ == "__main__":
             "snow_machine": snow_machine.get(),
             "mondo_buff": mondo_buff.get(),
             "lid_art":lid_art.get(),
+            "candles": candles.get(),
 
-            "hivethreshold":setdat['hivethreshold'],
-            "ebthreshold":ebtextbox.get(1.0,"end").replace("\n",""),
-            "ebdetect":ebdetect.get(),
-            "bploc":setdat['bploc'],
+            "start_honey":0,
+            "prev_honey":0,
+            "start_time":time.time(),
             "canon_time":cttextbox.get(1.0,"end").replace("\n",""),
             "reverse_hive_direction": reverse_hive_direction.get()
 
@@ -1771,6 +2645,7 @@ if __name__ == "__main__":
             "harvest": harvesttextbox.get(1.0,"end").replace("\n","")
         
             }
+
                 
 
         
@@ -1804,13 +2679,9 @@ if __name__ == "__main__":
         except:
             pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(setdict['walkspeed']),title="Invalid setting",button="OK")
             return
-        with open('save.txt', 'w') as f:
-            f.write('wh:{}\nww:{}'.format(wh,ww))
-        f.close()
         
         savesettings(setdict,"settings.txt")
         savesettings(planterdict,"plantersettings.txt")
-        
         with open("haste.txt","w") as a:
             a.write(setdict["walkspeed"])
         a.close()
@@ -1824,24 +2695,26 @@ if __name__ == "__main__":
                         planterTypes_set.append(info)
 
             if sorted(planterFields_set) != sorted(planterFields_prev) or sorted(planterTypes_prev) != sorted(planterTypes_set):
-                with open("planterdata.txt","w") as f:
-                    f.write("[]\n{}\n{}".format(planterTypes_set,planterFields_set))
-                f.close()
-                with open("plantertimings.txt","r") as f:
-                    lines = f.read().split("\n")
-                f.close()
-                with open("plantertimings.txt","w") as f:
+                
+                with open("planterdata.txt","w") as a:
+                    a.write("[]\n{}\n{}".format(planterTypes_set,planterFields_set))
+                a.close()
+                with open("plantertimings.txt","r") as b:
+                    lines = b.read().split("\n")
+                b.close()
+                with open("plantertimings.txt","w") as c:
                     writeStuff = []
                     for i in lines:
                         if ":" in i:
                             k,_ = i.split(':')
                             writeStuff.append("{}:0".format(k))
                     print(writeStuff)
-                    f.write('\n'.join(writeStuff))
-                f.close()
+                    c.write('\n'.join(writeStuff))
+                c.close()
+                planterTypes_prev, planterFields_prev = planterTypes_set, planterFields_set
                 
                             
-            
+        '''
         if int(setdict['hivethreshold']) == 1:
             window = tk.Toplevel() 
             label = tk.Label(window,text="You have not calibrated your macro yet. Do you want to calibrate it automatically?")
@@ -1850,29 +2723,51 @@ if __name__ == "__main__":
             label.grid(row=0, column=0, columnspan=2)
             button_yes.grid(row=1, column=0)
             button_no.grid(row=1, column=1)
+        
         else:
-            macro()
-            pass
-
+        '''
+        macro()
     def macro():
         webhook("Macro started","exih_macro {}".format(macrov),"dark brown")
         setdat = loadsettings.load()
         if not is_running("roblox"):
             rejoin()
-        startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev))
+        cmd = """
+            osascript -e 'activate application "Roblox"' 
+        """
+        os.system(cmd)
+        time.sleep(0.5)
+        #fullscreen()
+        gather.value = 0
+        time.sleep(0.5)
+        startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,1))
         startLoop_proc.start()
-        background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected))
+        background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected,rejoinval))
+        discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,rejoinval))
         background_proc.start()
-        discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,))
-        discord_bot_proc.start()
+        if setdat['enable_discord_bot']:
+            discord_bot_proc.start()
         try:
             while True:
                 if disconnected.value:
                     startLoop_proc.terminate()
                     while disconnected.value:
                         pass
-                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev))
+                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0))
                     startLoop_proc.start()
+                if rejoinval.value:
+                    print("rejoin received")
+                    startLoop_proc.terminate()
+                    rejoin()
+                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0))
+                    startLoop_proc.start()
+                    rejoinval.value = 0
+                if setdat['haste_compensation']:
+                    getHaste()
+                    time.sleep(0.1)
+                #if keyboard.is_pressed('q'):
+                    #raise KeyboardInterrupt
+
                     
         except KeyboardInterrupt:
             startLoop_proc.terminate()
@@ -1890,11 +2785,13 @@ if __name__ == "__main__":
         else:
             wslotmenu.configure(state="disable")
     def disableeb(event):
+        pass
+        '''
         if ebdetect.get().lower() == "pyautogui":
             ebtextbox.configure(state="disable")
         else:
             ebtextbox.configure(state="normal")
-
+        '''
     def disabledw():
         if str(enable_discord_webhook.get()) == "1":
             sendss.configure(state="normal")
@@ -1965,7 +2862,14 @@ if __name__ == "__main__":
     wslotmenu = ttk.OptionMenu(frame1 , whirligig_slot,setdat['whirligig_slot'], *[1,2,3,4,5,6,7,"none"],style='my.TMenubutton')
     wslotmenu.place(width=70,x = 570, y = 155,height=24)
 
-    tkinter.Checkbutton(frame1, text="Field Drift Compensation", variable=field_drift_compensation).place(x=0, y = 190)
+    tkinter.Label(frame1, text = "Start Location").place(x = 0, y = 190)
+    dropField = ttk.OptionMenu(frame1, start_location,setdat['start_location'].title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='my.TMenubutton' )
+    dropField.place(width=100,x = 100, y = 190,height=24)
+    tkinter.Label(frame1, text = "Distance From Center").place(x = 210, y = 190)
+    dropField = ttk.OptionMenu(frame1, distance_from_center,setdat['distance_from_center'], *[(x+1) for x in range(10)],style='my.TMenubutton' )
+    dropField.place(width=50,x = 360, y = 190,height=24)
+
+    tkinter.Checkbutton(frame1, text="Field Drift Compensation", variable=field_drift_compensation).place(x=0, y = 225)
     
 
     #Tab 2 
@@ -1992,6 +2896,7 @@ if __name__ == "__main__":
     tkinter.Checkbutton(frame4, text="Snow Machine", variable=snow_machine).place(x=265, y = 85)
     tkinter.Checkbutton(frame4, text="Lid Art", variable=lid_art).place(x=390, y = 85)
     tkinter.Checkbutton(frame4, text="Honey Wreath", variable=wreath).place(x=470, y = 85)
+    tkinter.Checkbutton(frame4, text="Candles", variable=candles).place(x=595, y = 85)
     #Tab 4
     tkinter.Checkbutton(frame6, text="Enable Planters", variable=enable_planters).place(x=545, y = 20)
     tkinter.Label(frame6, text = "Allowed Planters").place(x = 120, y = 15)
@@ -2073,72 +2978,66 @@ if __name__ == "__main__":
     speedtextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
     speedtextbox.insert("end",walkspeed)
     speedtextbox.place(x = 185, y=52)
-    tkinter.Checkbutton(frame3, text="Enable Discord Webhook", command = disabledw,variable=enable_discord_webhook).place(x=0, y = 85)
-    tkinter.Label(frame3, text = "Discord Webhook Link").place(x = 350, y = 85)
-    urltextbox = tkinter.Text(frame3, width = 24, height = 1, yscrollcommand = True, bg= wbgc)
-    urltextbox.insert("end",discord_webhook_url)
-    sendss = tkinter.Checkbutton(frame3, text="Send screenshots", variable=send_screenshot)
-    sendss.place(x=200, y = 85)
-    urltextbox.place(x = 500, y=87)
 
-    tkinter.Label(frame3, text = "Sprinkler Type").place(x = 0, y = 120)
+    tkinter.Label(frame3, text = "Sprinkler Type").place(x = 0, y = 85)
     dropField = ttk.OptionMenu(frame3, sprinkler_type, setdat['sprinkler_type'], *["Basic","Silver","Golden","Diamond","Saturator"],style='my.TMenubutton' )
-    dropField.place(width=90,x = 100, y = 120,height=24)
+    dropField.place(width=90,x = 100, y = 85,height=24)
 
-    tkinter.Label(frame3, text = "Slot").place(x = 205, y = 120)
+    tkinter.Label(frame3, text = "Slot").place(x = 205, y = 85)
     dropField = ttk.OptionMenu(frame3, sprinkler_slot, setdat['sprinkler_slot'], *[x+1 for x in range(6)],style='my.TMenubutton' )
-    dropField.place(width=60,x = 245, y = 120,height=24)
-    
+    dropField.place(width=60,x = 245, y = 85,height=24)
 
-    #tkinter.Label(frame3, text = "Width", bg = wbgc).place(x = 150, y = 120)
-    #wwatextbox = tkinter.Text(frame3, width = 5, height = 1)
-    #wwatextbox.insert("end",wwa)
-    #wwatextbox.place(x=200,y=122)
-    #tkinter.Label(frame3, text = "Height", bg = wbgc).place(x = 260, y = 120)
-    #whatextbox = tkinter.Text(frame3, width = 5, height = 1)
-    #whatextbox.insert("end",wha)
-    #whatextbox.place(x=310,y=122)
-    tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation).place(x=0, y = 155)
-    tkinter.Checkbutton(frame3, text="Low Performance Haste Compensation", variable=low_performance_haste_compensation).place(x=210, y = 155)
-    #dropField = ttk.OptionMenu(frame3, display_type, setdat['display_type'], command = savedisplaytype, *["Built-in retina display","Built-in display"],style='my.TMenubutton' )
-    #dropField.place(width=160,x = 100, y = 155,height=24)
-    tkinter.Label(frame3, text = "Private Server Link (optional)").place(x = 0, y = 190)
-    linktextbox = tkinter.Text(frame3, width = 24, height = 1, bg= wbgc)
-    linktextbox.insert("end",private_server_link)
-    linktextbox.place(x=190,y=192)
-    
-    tkinter.Checkbutton(frame3, text="Enable Discord Bot", variable=enable_discord_bot).place(x=0, y = 225)
-    tkinter.Label(frame3, text = "Discord Bot Token").place(x = 170, y = 226)
-    tokentextbox = tkinter.Text(frame3, width = 24, height = 1, bg= wbgc)
-    tokentextbox.insert("end",discord_bot_token)
-    tokentextbox.place(x = 300, y=228)
-    
-    tkinter.Label(frame3, text = "Slot").place(x = 205, y = 120)
-    dropField = ttk.OptionMenu(frame3, sprinkler_slot, setdat['sprinkler_slot'], *[x+1 for x in range(6)],style='my.TMenubutton' )
-    dropField.place(width=60,x = 245, y = 120,height=24)
+    tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation).place(x=0, y = 120)
+    tkinter.Checkbutton(frame3, text="Low Performance Haste Compensation", variable=low_performance_haste_compensation).place(x=210, y = 120)
 
-    tkinter.Checkbutton(frame3, text="Rejoin every", variable=rejoin_every_enabled).place(x=0, y = 260)
-    rejoinetextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
-    rejoinetextbox.insert("end",rejoin_every)
-    rejoinetextbox.place(x=104,y=263)
-    tkinter.Label(frame3, text = "hours").place(x = 140, y = 260)
 
-    tkinter.Label(frame3, text = "Wait for").place(x = 0, y = 290)
-    rejoindelaytextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
-    rejoindelaytextbox.insert("end",rejoin_delay)
-    rejoindelaytextbox.place(x=55,y=293)
-    tkinter.Label(frame3, text = "secs when rejoining").place(x = 90, y = 290)
-    
     #Tab 6
+    tkinter.Checkbutton(frame7, text="Enable Discord Webhook", command = disabledw,variable=enable_discord_webhook).place(x=0, y = 15)
+    tkinter.Label(frame7, text = "Discord Webhook Link").place(x = 350, y = 15)
+    urltextbox = tkinter.Text(frame7, width = 24, height = 1, yscrollcommand = True, bg= wbgc)
+    urltextbox.insert("end",discord_webhook_url)
+    sendss = tkinter.Checkbutton(frame7, text="Send screenshots", variable=send_screenshot)
+    sendss.place(x=200, y = 15)
+    urltextbox.place(x = 500, y=17)
+    
+    tkinter.Label(frame7, text = "Private Server Link (optional)").place(x = 0, y = 85)
+    linktextbox = tkinter.Text(frame7, width = 24, height = 1, bg= wbgc)
+    linktextbox.insert("end",private_server_link)
+    linktextbox.place(x=190,y=87)
+    
+    tkinter.Checkbutton(frame7, text="Enable Discord Bot", variable=enable_discord_bot).place(x=0, y = 50)
+    tkinter.Label(frame7, text = "Discord Bot Token").place(x = 170, y = 50)
+    tokentextbox = tkinter.Text(frame7, width = 24, height = 1, bg= wbgc)
+    tokentextbox.insert("end",discord_bot_token)
+    tokentextbox.place(x = 300, y=52)
+    
+
+    tkinter.Checkbutton(frame7, text="Rejoin every", variable=rejoin_every_enabled).place(x=0, y = 120)
+    rejoinetextbox = tkinter.Text(frame7, width = 4, height = 1, bg= wbgc)
+    rejoinetextbox.insert("end",rejoin_every)
+    rejoinetextbox.place(x=104,y=123)
+    tkinter.Label(frame7, text = "hours").place(x = 140, y = 120)
+
+    tkinter.Label(frame7, text = "Wait for").place(x = 0, y = 155)
+    rejoindelaytextbox = tkinter.Text(frame7, width = 4, height = 1, bg= wbgc)
+    rejoindelaytextbox.insert("end",rejoin_delay)
+    rejoindelaytextbox.place(x=55,y=158)
+    tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
+    tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen).place(x=0, y = 190)
+    tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
+    dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link"],style='my.TMenubutton' )
+    dropField.place(width=90,x = 360, y = 155,height=24)
+    
+    #Tab 7
     ttk.Button(frame5, text = "Calibrate Hive", command = calibratehive, width = 10).place(x=0,y=13)
     tkinter.Checkbutton(frame5, text="Reverse Hive Direction", variable=reverse_hive_direction).place(x=140, y = 15)
-    tkinter.Label(frame5, text = "E Button Detection Type").place(x = 0, y = 50)
-    dropField = ttk.OptionMenu(frame5, ebdetect,setdat['ebdetect'], command = disableeb, *["cv2","pyautogui"],style='my.TMenubutton' )
-    dropField.place(width=130,x = 158, y = 51,height=24)
-    tkinter.Label(frame5, text = " Threshold").place(x = 300, y = 50)
-    ebtextbox = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
-    ebtextbox.insert("end",ebthreshold)
-    ebtextbox.place(x=380,y=53)
+    tkinter.Label(frame5, text = "Screenshot multiplier").place(x = 0, y = 50)
+    #dropField = ttk.OptionMenu(frame5, ebdetect,setdat['ebdetect'], command = disableeb, *["cv2","pyautogui"],style='my.TMenubutton' )
+    #dropField.place(width=130,x = 158, y = 51,height=24)
+    #tkinter.Label(frame5, text = " Threshold").place(x = 300, y = 50)
+    #smtextbox = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
+    #smtextbox.insert("end",multipliers['screenshot_multiplier'])
+    #smtextbox.place(x=158,y=53)
     tkinter.Label(frame5, text = "Flight Multiplier").place(x = 0, y = 85)
     cttextbox = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     cttextbox.insert("end",canon_time)
