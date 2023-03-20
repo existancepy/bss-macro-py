@@ -72,7 +72,9 @@ In terminal, enter these two commands:
 ```
 xcode-select --install
 ```
-then
+This will install the xcode command line tools
+
+After that,
 ```bash
 pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py pynput matplotlib "numpy<1.24.0" protobuf==3.20.0 pymupdf
 ```
