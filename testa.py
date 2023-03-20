@@ -21,7 +21,6 @@ import reset
 import _darwinmouse as mouse
 import ast
 import getHaste
-import pytesseract
 
 def roblox():
     cmd = """

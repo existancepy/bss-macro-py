@@ -1,5 +1,5 @@
 
-hive_number:3
+hive_number:2
 walkspeed:28
 gifted_vicious_bee:0
 enable_discord_webhook:0
@@ -11,7 +11,6 @@ display_type:built-in retina display
 private_server_link:
 enable_discord_bot:0
 discord_bot_token:
-field_drift_compensation:1
 haste_compensation:1
 low_performance_haste_compensation:0
 rejoin_every_enabled:0
@@ -20,42 +19,45 @@ rejoin_delay:50
 rejoin_method:new tab
 manual_fullscreen:0
 gather_enable:1
-gather_field:['Pine Tree', 'None', 'None']
-gather_pattern:e_lol
-gather_size:m
-gather_width:3
-gather_time:15
-pack:95
-before_gather_turn:right
-turn_times:2
-return_to_hive:reset
-whirligig_slot:1
-start_location:lower right
-distance_from_center:3
+gather_field:['pine tree', 'none', 'none']
+gather_pattern:['e_lol', 'stationary', 'snake']
+gather_size:['m', 's', 'l']
+gather_width:[3, 4, 5]
+gather_time:[15, 5, 10]
+pack:[95, 0, 1]
+before_gather_turn:['right', 'right', 'left']
+turn_times:[2, 1, 3]
+return_to_hive:['reset', 'whirligig', 'rejoin']
+whirligig_slot:[1, 2, 3]
+start_location:['lower right', 'upper left', 'left']
+distance_from_center:[3, 2, 4]
+field_drift_compensation:[1, 0, 1]
 stump_snail:0
 continue_after_stump_snail:0
 ladybug:0
 rhinobeetle:0
-spider:0
+spider:1
 scorpion:0
 werewolf:0
 mantis:0
-wealthclock:0
+stinger:0
+wealthclock:1
 blueberrydispenser:0
 strawberrydispenser:0
 royaljellydispenser:0
 treatdispenser:0
+gluedispenser:0
+gumdrop_slot:3
 stockings:0
 feast:0
-samovar:0
+samovar:1
 wreath:0
 snow_machine:0
 mondo_buff:0
 lid_art:0
 candles:0
-start_honey:8022751155040
-prev_honey:8115109520026
-start_time:1678527882.004333
+start_honey:11649463909746
+prev_honey:11649463909746
+start_time:1679311532.838424
 canon_time:1.0
 reverse_hive_direction:0
-stinger:0

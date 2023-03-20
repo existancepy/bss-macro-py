@@ -17,7 +17,15 @@ def loadRes():
         outdict[l[0]] = l[1]
     return outdict
 
-ocr = PaddleOCR(use_angle_cls=True, lang='en')
+ocr = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
+
+def millify(n):
+    if not n: return 0
+    millnames = ['',' K',' M',' B',' T', 'Qd']
+    n = float(n)
+    millidx = max(0,min(len(millnames)-1,
+                        int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
+
 def imToString(m):
     savedata = loadRes()
     ww = savedata['ww']
@@ -38,7 +46,7 @@ def imToString(m):
     elif m == "ebutton":
         cap = pag.screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
         cap.save("{}.png".format(sn))  
-        result = ocr.ocr("{}.png".format(sn), cls=True)[0]
+        result = ocr.ocr("{}.png".format(sn),cls=False)[0]
         result = sorted(result, key = lambda x: x[1][1], reverse = True)
         os.remove("{}.png".format(sn))
         try:
@@ -48,8 +56,8 @@ def imToString(m):
     elif m == "honey":
         cap = pag.screenshot(region=(ww//(3*xsm),0,ww//(6.5*xlm),wh//(ylm*25)))
         cap.save("{}.png".format(sn))  
-        ocrres = ocr.ocr("{}.png".format(sn), cls=True)[0]
-        print(ocrres)
+        ocrres = ocr.ocr("{}.png".format(sn),cls=False)[0]
+        #print(ocrres)
         result = [x[1][0] for x in ocrres]
         honey = 0
         for i in result:
@@ -59,7 +67,7 @@ def imToString(m):
         try:
             honey = int(''.join([x for x in honey if x.isdigit()]))
             log(millify(honey))
-        except:
+        except Exception as e:
             print(honey)
         os.remove("{}.png".format(sn))
         return honey
@@ -68,21 +76,24 @@ def imToString(m):
     elif m == "dialog":
         cap = pag.screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
     cap.save("{}.png".format(sn))  
-    result = ocr.ocr("{}.png".format(sn), cls=True)[0]
+    result = ocr.ocr("{}.png".format(sn),cls=False)[0]
     result = sorted(result, key = lambda x: x[1][1], reverse = True)
     out = ''.join([x[1][0] for x in result])
     os.remove("{}.png".format(sn))
     log("OCR for {}\n\n{}".format(m,out))
     return out
-def customOCR(X1,Y1,W1,H1,**k):
+def customOCR(X1,Y1,W1,H1,applym=1):
     sn = time.time()
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    cap = pag.screenshot(region=(X1*xsm,Y1*ysm,W1*xlm,H1*ylm))
+    if applym:
+        cap = pag.screenshot(region=(X1/xsm,Y1/ysm,W1/xlm,H1/ylm))
+    else:
+        cap = pag.screenshot(region=(X1,Y1,W1,H1))
     cap.save("{}.png".format(sn)) 
-    out = ocr.ocr("{}.png".format(sn), cls=True)
+    out = ocr.ocr("{}.png".format(sn),cls=False)
     log("OCR for Custom\n{}".format(out))
     os.remove("{}.png".format(sn))
     return out[0]

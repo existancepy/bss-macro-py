@@ -49,7 +49,9 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.36.6"
+macrov = "1.38"
+sv_i = sys.version_info
+python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -126,8 +128,19 @@ def discord_bot(dc,rejoinval):
                 #savehoney_history(honeyHist)
     handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
     client.run(setdat['discord_bot_token'], log_handler=handler)
-    
+def setStatus(msg="none"):
+    with open("status.txt","w") as f:
+        f.write(msg)
+    f.close()
+
+def getStatus():
+    with open("status.txt","r") as f:
+        out = f.read()
+    f.close()
+    return out
 def validateSettings():
+    return False
+    '''
     msg = ""
     files = os.listdir("./")
     validfield = [x.split("_")[1][:-3] for x in files if x.startswith("field_")]
@@ -149,6 +162,7 @@ def validateSettings():
     if not s['gather_enable'] == 1 and not s['gather_enable'] == 0:
         msg += ("Invalid gather_enable. Use either 'yes' or 'no'")
     return msg
+    '''
 
 def loadSave():
     global savedata
@@ -256,6 +270,7 @@ def ebutton(pagmode=0):
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
     log(ocrval)
     return ocrval == "E"
+
 def detectNight():
     savedat = loadRes()
     ww = savedat['ww']
@@ -265,17 +280,20 @@ def detectNight():
     screen = np.array(pag.screenshot(region=(0,0,round((ww/3.4)*xlm),round((wh/25)*ylm))))
     w,h = screen.shape[:2]
     rgb = screen[0,0][:3]
+    if not checkRespawn("night","10m"): return False
     for x in range(w):
         for y in range(h):
-            if list(screen[x,y][:3]) == [0,0,0]:
+            if list(screen[x,y]) == [0,0,0,255]:
                 success = True
-                for x1 in range(5):
-                    for y1 in range(5):
-                        if not x1 < w and y1 < h:
-                            if screen[x1,y1][:3] != (0,0,0):
+                for x1 in range(9):
+                    for y1 in range(9):
+                        if x+x1+1 < w and y1+y+1 < h:
+                            if list(screen[x+x1+1,y+y1+1]) != [0,0,0,255]:
                                 success = False
                 if success:
+                    print(x,y)
                     webhook("","Night Detected","light green")
+                    savetimings("night")
                     return True
     return False
 
@@ -289,6 +307,13 @@ def millify(n):
     return '{:.2f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
 
 def hourlyReport(hourly=1):
+    savedata = loadRes()
+    ww = savedata['ww']
+    wh = savedata['wh']
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
     try:
         with open('honey_history.txt','r') as f:
             honeyHist = ast.literal_eval(f.read())
@@ -347,7 +372,7 @@ def hourlyReport(hourly=1):
         xvals = [x+1 for x in range(len(yvals))]
 
 
-        fig = plt.figure(figsize=(12,12), dpi=60,constrained_layout=True)
+        fig = plt.figure(figsize=(12,12), dpi=300,constrained_layout=True)
         gs = fig.add_gridspec(12,12)
         fig.patch.set_facecolor('#121212')
 
@@ -362,8 +387,9 @@ def hourlyReport(hourly=1):
 
         plt.text(0.3,1,"Report", fontsize=20,color="white")
         plt.text(0,0.95,"Session Time: {}".format(session_time), fontsize=15,color="white")
-        plt.text(0,0.90,"Session Honey: {}".format(millify(session_honey)), fontsize=15,color="white")
-        plt.text(0,0.85,"Honey/Hr: {}".format(millify(hourly_honey)), fontsize=15,color="white")
+        plt.text(0,0.9,"Current Honey: {}".format(millify(currHoney)), fontsize=15,color="white")
+        plt.text(0,0.85,"Session Honey: {}".format(millify(session_honey)), fontsize=15,color="white")
+        plt.text(0,0.8,"Honey/Hr: {}".format(millify(hourly_honey)), fontsize=15,color="white")
 
         ax1 = fig.add_subplot(gs[0:3, 0:7])
         if not yvals:
@@ -388,32 +414,24 @@ def hourlyReport(hourly=1):
         ax1.tick_params(axis='x', colors='white')
         ax1.tick_params(axis='y', colors='white')
         ax1.plot(xvals, yvals,color="#BB86FC")
-        #ax1.fill_between(xvals, 0, yvals)
-        '''
-        ax2 = fig.add_subplot(gs[4:7, 0:7])
-        y2ticks = np.linspace(setdat['start_honey'], max(honeyHist), num = 4)
-        y2ticksDisplay = [millify(x) if x else x for x in y2ticks]
-        ax2.set_xticks(xticks,xticksDisplay,fontsize=16)
-        ax2.set_yticks(y2ticks,y2ticksDisplay,fontsize=16)
-        ax2.set_title('Session honey',color='white',fontsize=19)
+        
+        
+        buffim = pag.screenshot(region = (0,wh/(30*ysm),ww/2,wh/(16*ylm)))
+        buffim.save("buffs.png")
+        buffim = plt.imread('buffs.png')
+        ax2 = fig.add_subplot(gs[4:6, 0:7])
+        ax2.set_title('Buffs',color='white',fontsize=19)
+        ax2.get_xaxis().set_visible(False)
+        ax2.get_yaxis().set_visible(False)
         ax2.patch.set_facecolor('#121212')
-        ax2.spines['bottom'].set_color('white')
-        ax2.spines['top'].set_color('white')
-        ax2.spines['left'].set_color('white')
-        ax2.spines['right'].set_color('white')
-        ax2.tick_params(axis='x', colors='black')
-        ax2.tick_params(axis='y', colors='white')
-        ax2.plot(xvals, honeyHist[1:],color="#BB86FC")
-        #ax2.fill_between(xvals, setdat['start_honey'], honeyHist[1:])
-        '''
+        ax2.imshow(buffim)
+        
         plt.grid(alpha=0.08)
-        plt.savefig("hourlyReport.png", bbox_inches='tight')    
-        c = Image.open("hourlyReport.png")
-        d = c.resize((1452,1452),resample = Image.BOX)
-        d.save("hourlyReport-resized.png")
+        plt.savefig("hourlyReport-resized.png", bbox_inches='tight')    
         webhook("**Hourly Report**","","light blue",0,1)
     except Exception as e:
         log(e)
+        print(e)
         webhook("","Hourly Report has an error that has been caught. The error can be found in macroLogs.log","red")
 
 
@@ -557,7 +575,8 @@ def convert():
     webhook("","Starting convert","brown",1)
     st = time.perf_counter()
     while True:
-        if stingerHunt(): return
+        if stingerHunt():
+            break
         c = ebutton()
         if not c:
             webhook("","Convert done","brown")
@@ -597,12 +616,12 @@ def checkRespawn(m,t):
     else:
         respt = respt*60
     collectList = [x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("collect_")]
-    collectList.append("mondo_buff")
+    collectList+=["mondo_buff","night"]
     if setdat['gifted_vicious_bee'] and m not in collectList:
         respt = respt/100*85
     if time.time() - timing > respt:
-        return 1
-    return 0
+        return True
+    return False
 
 def savesettings(dictionary,filename):
     templist = []
@@ -949,7 +968,7 @@ def background(cf,bpcap,gat,dc, rejoinval):
             with open('canonfails.txt', 'r') as f:
                 cfCount = int(f.read())
             f.close()
-            if cfCount >= 3:
+            if cfCount >= 4:
                 with open('canonfails.txt', 'w') as f:
                     f.write('0')
                 f.close()
@@ -967,6 +986,7 @@ def background(cf,bpcap,gat,dc, rejoinval):
                     if invalid_prev_honey and ch:
                         invalid_prev_honey = 0
                         honeyHist = [ch]*60
+                        loadsettings.save("prev_honey",ch)
                     else:
                         if ch:
                             honeyHist[sysMin] = int(ch)
@@ -1039,6 +1059,11 @@ def collect(name,beesmas=0):
                 move.hold("s",0.2)
                 if ebutton():
                     break
+        elif usename == "gluedispenser":
+            time.sleep(1)
+            move.press(str(setdat['gumdrop_slot']))
+            time.sleep(2)
+            move.hold("w",2.5)
         time.sleep(0.5)
         if usename == "feast":
             if checkwithOCR("bee bear"):
@@ -1086,14 +1111,17 @@ def openSettings():
     webhook('','Opening Stats',"brown")
     
     promoCode = ''.join([x[1][0] for x in customOCR(0,wh/7,ww/3,wh/8)]).lower()
+    pag.typewrite("\\")
     if not "code" in promoCode:
-        pag.typewrite("\\")
-        for _ in range(30):
-            keyboard.press(Key.right)
+        for _ in range(5):
+            keyboard.press(Key.up)
             time.sleep(0.05)
-            keyboard.release(Key.right)
+            keyboard.release(Key.up)
             time.sleep(0.1)
-        for _ in range(15):
+        keyboard.press(Key.down)
+        time.sleep(0.05)
+        keyboard.release(Key.down)
+        for _ in range(9):
             keyboard.press(Key.left)
             time.sleep(0.05)
             keyboard.release(Key.left)
@@ -1108,19 +1136,20 @@ def openSettings():
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
-    for _ in range(20):
+    for _ in range(24):
         keyboard.press(Key.page_down)
         time.sleep(0.02)
         keyboard.release(Key.page_down)
     time.sleep(0.5)
-    for _ in range(5):
+    for _ in range(3):
         keyboard.press(Key.page_up)
         time.sleep(0.02)
         keyboard.release(Key.page_up)
     pag.scroll(100)
-    for _ in range(10):
+    for _ in range(5):
         statData = customOCR(0,wh/7,ww/7,wh/2)
         statNames = ''.join([x[1][0] for x in statData]).lower()
+        print(statNames)
         if 'speed'in statNames:
             pag.typewrite("\\")
             break
@@ -1129,6 +1158,9 @@ def openSettings():
         keyboard.release(Key.page_up)
     else:
         pag.typewrite("\\")
+        webhook("","Unable to locate the walkspeed stat, haste compensation is disabled","res")
+        loadsettings.save("msh","-1","multipliers.txt")
+        loadsettings.save("msy","-1","multipliers.txt")
         return
     time.sleep(0.3)
     check = customOCR(0,0,ww/7,wh)
@@ -1152,8 +1184,9 @@ def getHaste():
     msh = loadsettings.load('multipliers.txt')['msh']
     msy = loadsettings.load('multipliers.txt')['msy']
     ww = loadRes()['ww']
-    ocr = customOCR(ww/8,msy,ww/10,msh)
-    print(ocr)
+    ocr = customOCR(ww/8,msy,ww/10,msh,0)
+    #print(ocr)
+    if str(msh) == "-1": return
     if not ocr:return
     filtered = [x for x in ocr if "." in x[1][0] or x[1][0].replace("_","").replace(" ","").isdigit()]
     if not filtered:return
@@ -1172,7 +1205,7 @@ def getHaste():
             f.close()
             return
     except Exception as e:
-        print(e)
+        #print(e)
         pass
     with open("haste.txt","w") as f:
         f.write(str(ws))
@@ -1781,6 +1814,9 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
             collect('lid_art',1)
         if setdat['candles'] and checkRespawn('candles','4h'):
             collect('candles',1)
+        if setdat['gluedispenser'] and checkRespawn('gluedispenser','22h'):
+            collect('glue dispenser')
+            
         if setdat['mondo_buff']:
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
@@ -1799,6 +1835,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 webhook("","Collected: Mondo Buff","bright green",1)
                 reset.reset()
                 convert()
+        
             
         
         #Planter check
@@ -1953,7 +1990,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
             exec(open("field_{}.py".format(setdat['gather_field'][gfid])).read())
             cf.value = setdat['gather_field'][gfid].replace(" ","").lower()
             time.sleep(0.2)
-            s_l = setdat['start_location'].lower()
+            s_l = setdat['start_location'][gfid].lower()
             rotTowards = []
             rotBack = []
             if s_l != 'center':
@@ -1978,23 +2015,25 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                     elif i:
                         rotBack.append(".")
                 
-                move.hold("w",setdat['distance_from_center']/2.5)
+                move.hold("w",setdat['distance_from_center'][gfid]/2.5)
                 
                 for i in rotBack:
                     move.press(i)
 
-                
-            if setdat["before_gather_turn"] == "left":
-                for _ in range(setdat["turn_times"]):
+            print(setdat["before_gather_turn"][gfid])
+               
+            if setdat["before_gather_turn"][gfid] == "left":
+                for _ in range(setdat["turn_times"][gfid]):
                     move.press(",")
-            elif setdat["before_gather_turn"] == "right":
-                for _ in range(setdat["turn_times"]):
+            elif setdat["before_gather_turn"][gfid] == "right":
+                for _ in range(setdat["turn_times"][gfid]):
                     move.press(".")
+            
             time.sleep(0.2)
             placeSprinkler()
             pag.click()
-            gp = setdat["gather_pattern"].lower()
-            webhook("Gathering: {}".format(setdat['gather_field'][gfid]),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
+            gp = setdat["gather_pattern"][gfid].lower()
+            webhook("Gathering: {}".format(setdat['gather_field'][gfid]),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"][gfid],setdat["gather_pattern"][gfid],setdat["pack"][gfid]),"light green")
             time.sleep(0.2)
             timestart = time.perf_counter()
             gat.value = 1
@@ -2007,46 +2046,50 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 time.sleep(0.05)
                 time.sleep(0.05)
                 timespent = (time.perf_counter() - timestart)/60
-                if bpcap.value >= setdat["pack"]:
-                    webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+                if bpcap.value >= setdat["pack"][gfid]:
+                    webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"][gfid]),"light green")
                     break
                     
-                if timespent > setdat["gather_time"]:
-                    webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+                if timespent > setdat["gather_time"][gfid]:
+                    webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"][gfid]),"light green")
                     break
-                if setdat['field_drift_compensation']:
+                if setdat['field_drift_compensation'][gfid]:
                     fieldDriftCompensation()
                 mouse.release(Button.left)
             time.sleep(0.5)
             gat.value = 0
             bpcap.value = 0
             cf.value = ""
-            if setdat["before_gather_turn"] == "left":
-                for _ in range(setdat["turn_times"]):
+            if setdat["before_gather_turn"][gfid] == "left":
+                for _ in range(setdat["turn_times"][gfid]):
                     move.press(".")
-            elif setdat["before_gather_turn"] == "right":
-                for _ in range(setdat["turn_times"]):
+            elif setdat["before_gather_turn"][gfid] == "right":
+                for _ in range(setdat["turn_times"][gfid]):
                     move.press(",")
                     
-            if setdat['return_to_hive'] == "walk":
+            if setdat['return_to_hive'][gfid] == "walk":
                 walk_to_hive(gfid)
-            elif setdat['return_to_hive'] == "reset":
+            elif setdat['return_to_hive'][gfid] == "reset":
                 reset.reset()
                 convert()
-            elif setdat['return_to_hive'] == "rejoin":
+            elif setdat['return_to_hive'][gfid] == "rejoin":
                 rejoin()
                 reset.reset()
-            elif setdat['return_to_hive'] == "whirligig":
+            elif setdat['return_to_hive'][gfid] == "whirligig":
                 reject = 0
                 webhook("","Activating whirligig","dark brown")
-                if setdat['whirligig_slot'] == "none":
+                if setdat['whirligig_slot'][gfid] == "none":
                     webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
                     walk_to_hive(gfid)
                 else:
-                    move.press(str(setdat['whirligig_slot']))
+                    move.press(str(setdat['whirligig_slot'][gfid]))
                     time.sleep(1)
-                    r = ebutton()
-                    if not r or reject:
+                    r = 0
+                    for _ in range(2):
+                        re = ebutton()
+                        if re:
+                            r = 1
+                    if r or reject:
                         webhook("Notice","Whirligig failed to activate, walking back","red")
                         walk_to_hive()
                     else:
@@ -2096,12 +2139,14 @@ def setResolution():
     ndisplay = "{}x{}".format(wwd,whd)
 
     multiInfo = {
+        #ysm, xsm, ylm,  xlm
         "2880x1800": [1,1,1,1],
         "2940x1912": [0.666666666666666,1,1,1],
         "1920x1080": [1.3,0.94,1,1],
         "1440x900": [1,1,1,1],
-        "4096x2304": [1.45,0.91,1.32,1.5]
-
+        "4096x2304": [1.45,0.91,1.32,1.5],
+        "3024x1964": [1,0.98, 1.2, 1.2],
+        "3360x2100": [1.2,0.95,1.2,1.3]
         }
     if ndisplay in multiInfo:
         loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
@@ -2109,7 +2154,7 @@ def setResolution():
         loadsettings.save("y_length_multiplier",multiInfo[ndisplay][2],"multipliers.txt")
         loadsettings.save("x_length_multiplier",multiInfo[ndisplay][3],"multipliers.txt")
     else:
-        print("Resolution not found in supported list")
+        print("\033[0;31mScreen Coordinates not found in supported list\033[00m")
 if __name__ == "__main__":
     with open('macroLogs.log', 'w'):
         pass
@@ -2123,7 +2168,7 @@ if __name__ == "__main__":
     print("cd path/to/macro-folder\npython3 e_macro.py\n")
     print("\033[0;32mTo stop the macro\033[00m")
     print("tab out of roblox, make sure terminal is in focus and press ctrl c\nor,\nright click the macro app in the dock and force quit")
-    print("\n\nYour python version is {}".format(sys.version_info[0]))
+    print("\n\nYour python version is {}".format(python_ver))
     print("Your macro version is {}\n\n".format(macrov))
     log("Your macro version is {}\n\n".format(macrov))
     setResolution()
@@ -2133,7 +2178,7 @@ if __name__ == "__main__":
     ww = savedata["ww"]
     wh = savedata["wh"]
     root = tk.Tk(className='exih_macro')
-    root.geometry('780x400')
+    root.geometry('780x460')
     s = ttk.Style()
     if p:
         sv_ttk.set_theme("dark")
@@ -2151,13 +2196,13 @@ if __name__ == "__main__":
     s.configure('smaller.TMenubutton', font=('Helvetica', 10))
     
     # create frames
-    frame1 = ttk.Frame(notebook, width=780, height=400)
-    frame2 = ttk.Frame(notebook, width=780, height=400)
-    frame3 = ttk.Frame(notebook, width=780, height=400)
-    frame4 = ttk.Frame(notebook, width=780, height=400)
-    frame5 = ttk.Frame(notebook, width=780, height=400)
-    frame6 = ttk.Frame(notebook, width=780, height=400)
-    frame7 = ttk.Frame(notebook, width=780, height=400)
+    frame1 = ttk.Frame(notebook, width=780, height=460)
+    frame2 = ttk.Frame(notebook, width=780, height=460)
+    frame3 = ttk.Frame(notebook, width=780, height=460)
+    frame4 = ttk.Frame(notebook, width=780, height=460)
+    frame5 = ttk.Frame(notebook, width=780, height=460)
+    frame6 = ttk.Frame(notebook, width=780, height=460)
+    frame7 = ttk.Frame(notebook, width=780, height=460)
 
     frame1.pack(fill='both', expand=True)
     frame2.pack(fill='both', expand=True)
@@ -2183,24 +2228,78 @@ if __name__ == "__main__":
     gather_field_two.set(setdat["gather_field"][1].title())
     gather_field_three = tk.StringVar(root)
     gather_field_three.set(setdat["gather_field"][2].title())
-    return_to_hive = tk.StringVar(root)
-    return_to_hive.set(setdat["return_to_hive"].title())
-    gather_pattern = tk.StringVar(root)
-    gather_pattern.set(setdat["gather_pattern"])
-    gather_size = tk.StringVar(root)
-    gather_size.set(setdat["gather_size"].title())
-    gather_width = tk.IntVar(value=setdat["gather_width"])
-    gather_time = setdat["gather_time"]
-    pack =setdat["pack"]
-    before_gather_turn = tk.StringVar(root)
-    before_gather_turn.set(setdat["before_gather_turn"])
-    turn_times = tk.IntVar(value=setdat["turn_times"])
-    start_location = tk.StringVar(root)
-    start_location.set(setdat["start_location"].title())
-    distance_from_center = tk.StringVar(root)
-    distance_from_center.set(setdat["distance_from_center"])
-    whirligig_slot = tk.StringVar(root)
-    whirligig_slot.set(setdat["whirligig_slot"])
+    
+    return_to_hive_one = tk.StringVar(root)
+    return_to_hive_one.set(setdat["return_to_hive"][0].title())
+    return_to_hive_two = tk.StringVar(root)
+    return_to_hive_two.set(setdat["return_to_hive"][1].title())
+    return_to_hive_three = tk.StringVar(root)
+    return_to_hive_three.set(setdat["return_to_hive"][2].title())
+    
+    gather_pattern_one = tk.StringVar(root)
+    gather_pattern_one.set(setdat["gather_pattern"][0])
+    gather_pattern_two = tk.StringVar(root)
+    gather_pattern_two.set(setdat["gather_pattern"][1])
+    gather_pattern_three = tk.StringVar(root)
+    gather_pattern_three.set(setdat["gather_pattern"][2])
+    
+    gather_size_one = tk.StringVar(root)
+    gather_size_one.set(setdat["gather_size"][0].title())
+    gather_size_two = tk.StringVar(root)
+    gather_size_two.set(setdat["gather_size"][1].title())
+    gather_size_three = tk.StringVar(root)
+    gather_size_three.set(setdat["gather_size"][2].title())
+
+    
+    gather_width_one = tk.IntVar(value=setdat["gather_width"][0])
+    gather_width_two = tk.IntVar(value=setdat["gather_width"][1])
+    gather_width_three = tk.IntVar(value=setdat["gather_width"][2])
+    
+    gather_time_one = setdat["gather_time"][0]
+    gather_time_two = setdat["gather_time"][1]
+    gather_time_three = setdat["gather_time"][2]
+    
+    pack_one =setdat["pack"][0]
+    pack_two =setdat["pack"][1]
+    pack_three =setdat["pack"][2]
+    
+    before_gather_turn_one = tk.StringVar(root)
+    before_gather_turn_one.set(setdat["before_gather_turn"][0])
+    before_gather_turn_two = tk.StringVar(root)
+    before_gather_turn_two.set(setdat["before_gather_turn"][1])
+    before_gather_turn_three = tk.StringVar(root)
+    before_gather_turn_three.set(setdat["before_gather_turn"][2])
+    
+    turn_times_one = tk.IntVar(value=setdat["turn_times"][0])
+    turn_times_two = tk.IntVar(value=setdat["turn_times"][1])
+    turn_times_three = tk.IntVar(value=setdat["turn_times"][2])
+      
+    start_location_one = tk.StringVar(root)
+    start_location_one.set(setdat["start_location"][0].title())
+    start_location_two = tk.StringVar(root)
+    start_location_two.set(setdat["start_location"][1].title())
+    start_location_three = tk.StringVar(root)
+    start_location_three.set(setdat["start_location"][2].title())
+    
+    distance_from_center_one = tk.StringVar(root)
+    distance_from_center_one.set(setdat["distance_from_center"][0])
+    distance_from_center_two = tk.StringVar(root)
+    distance_from_center_two.set(setdat["distance_from_center"][1])
+    distance_from_center_three = tk.StringVar(root)
+    distance_from_center_three.set(setdat["distance_from_center"][2])
+    
+    whirligig_slot_one = tk.StringVar(root)
+    whirligig_slot_one.set(setdat["whirligig_slot"][0])
+    whirligig_slot_two = tk.StringVar(root)
+    whirligig_slot_two.set(setdat["whirligig_slot"][1])
+    whirligig_slot_three = tk.StringVar(root)
+    whirligig_slot_three.set(setdat["whirligig_slot"][2])
+    
+    field_drift_compensation_one = tk.IntVar(value=setdat["field_drift_compensation"][0])
+    field_drift_compensation_two = tk.IntVar(value=setdat["field_drift_compensation"][1])
+    field_drift_compensation_three = tk.IntVar(value=setdat["field_drift_compensation"][2])
+    
+    
     stump_snail = tk.IntVar(value=setdat["stump_snail"])
     continue_after_stump_snail = tk.IntVar(value=setdat["continue_after_stump_snail"])
     ladybug = tk.IntVar(value=setdat["ladybug"])
@@ -2225,7 +2324,6 @@ if __name__ == "__main__":
     sprinkler_type = tk.StringVar(root)
     sprinkler_type.set(setdat["sprinkler_type"].title())
     discord_bot_token = setdat['discord_bot_token']
-    field_drift_compensation = tk.IntVar(value=setdat["field_drift_compensation"])
     haste_compensation = tk.IntVar(value=setdat["haste_compensation"])
     low_performance_haste_compensation = tk.IntVar(value=setdat["low_performance_haste_compensation"])
     rejoin_every_enabled = tk.IntVar(value=setdat["rejoin_every_enabled"])
@@ -2240,6 +2338,9 @@ if __name__ == "__main__":
     strawberrydispenser = tk.IntVar(value=setdat["strawberrydispenser"])
     royaljellydispenser  = tk.IntVar(value=setdat["royaljellydispenser"])
     treatdispenser = tk.IntVar(value=setdat["treatdispenser"])
+    gluedispenser = tk.IntVar(value=setdat["gluedispenser"])
+    gumdrop_slot = tk.StringVar(root)
+    gumdrop_slot.set(setdat["gumdrop_slot"])
     stockings = tk.IntVar(value=setdat["stockings"])
     feast = tk.IntVar(value=setdat["feast"])
     samovar = tk.IntVar(value=setdat["samovar"])
@@ -2555,7 +2656,6 @@ if __name__ == "__main__":
             "private_server_link":linktextbox.get(1.0,"end").replace("\n",""),
             "enable_discord_bot":enable_discord_bot.get(),
             "discord_bot_token":tokentextbox.get(1.0,"end").replace("\n",""),
-            "field_drift_compensation": field_drift_compensation.get(),
             "haste_compensation": haste_compensation.get(),
             "low_performance_haste_compensation": low_performance_haste_compensation.get(),
             "rejoin_every_enabled": rejoin_every_enabled.get(),
@@ -2566,17 +2666,18 @@ if __name__ == "__main__":
             
             "gather_enable": gather_enable.get(),
             "gather_field": [gather_field_one.get(),gather_field_two.get(),gather_field_three.get()],
-            "gather_pattern": gather_pattern.get(),
-            "gather_size": gather_size.get(),
-            "gather_width": gather_width.get(),
-            "gather_time": timetextbox.get(1.0,"end").replace("\n",""),
-            "pack": packtextbox.get(1.0,"end").replace("\n",""),
-            "before_gather_turn": before_gather_turn.get(),
-            "turn_times": turn_times.get(),
-            "return_to_hive": return_to_hive.get(),
-            "whirligig_slot": whirligig_slot.get(),
-            "start_location": start_location.get(),
-            "distance_from_center": distance_from_center.get(),
+            "gather_pattern": [gather_pattern_one.get(), gather_pattern_two.get(), gather_pattern_three.get()],
+            "gather_size": [gather_size_one.get(), gather_size_two.get(), gather_size_three.get()],
+            "gather_width": [gather_width_one.get(), gather_width_two.get(), gather_width_three.get()],
+            "gather_time": [timetextbox_one.get(1.0,"end").replace("\n",""), timetextbox_two.get(1.0,"end").replace("\n",""), timetextbox_three.get(1.0,"end").replace("\n","")],
+            "pack": [packtextbox_one.get(1.0,"end").replace("\n",""), packtextbox_two.get(1.0,"end").replace("\n",""), packtextbox_three.get(1.0,"end").replace("\n","")],
+            "before_gather_turn": [before_gather_turn_one.get(), before_gather_turn_two.get(), before_gather_turn_three.get()],  
+            "turn_times": [turn_times_one.get(), turn_times_two.get(), turn_times_three.get()],
+            "return_to_hive": [return_to_hive_one.get(), return_to_hive_two.get(), return_to_hive_three.get()],
+            "whirligig_slot": [whirligig_slot_one.get(), whirligig_slot_two.get(), whirligig_slot_three.get()],
+            "start_location": [start_location_one.get(), start_location_two.get(), start_location_three.get()],
+            "distance_from_center": [distance_from_center_one.get(), distance_from_center_two.get(), distance_from_center_three.get()],
+            "field_drift_compensation": [field_drift_compensation_one.get(), field_drift_compensation_two.get(), field_drift_compensation_three.get()],
                 
             "stump_snail": stump_snail.get(),
             "continue_after_stump_snail": continue_after_stump_snail.get(),
@@ -2593,6 +2694,8 @@ if __name__ == "__main__":
             "strawberrydispenser": strawberrydispenser.get(),
             "royaljellydispenser":royaljellydispenser.get(),
             "treatdispenser":treatdispenser.get(),
+            "gluedispenser":gluedispenser.get(),
+            "gumdrop_slot":gumdrop_slot.get(),
             "stockings":stockings.get(),
             "feast": feast.get(),
             "samovar": samovar.get(),
@@ -2728,7 +2831,10 @@ if __name__ == "__main__":
         '''
         macro()
     def macro():
-        webhook("Macro started","exih_macro {}".format(macrov),"dark brown")
+        savedat = loadRes()
+        ww = savedat['ww']
+        wh = savedat['wh']
+        webhook("Macro started - Report","exih_macro {}\nScreen Coordinates: {}x{}\nPython Version: {}".format(macrov,ww,wh,python_ver),"dark brown")
         setdat = loadsettings.load()
         if not is_running("roblox"):
             rejoin()
@@ -2779,11 +2885,24 @@ if __name__ == "__main__":
         loadsettings.save("display_type",display_type.get().lower())
         setResolution()
         
-    def disablews(event):
-        if return_to_hive.get().lower() == "whirligig":
-            wslotmenu.configure(state="normal")
+    def disablews_one(event):
+        if return_to_hive_one.get().lower() == "whirligig":
+            wslotmenu_one.configure(state="normal")
         else:
-            wslotmenu.configure(state="disable")
+            wslotmenu_one.configure(state="disable")
+            
+    def disablews_two(event):
+        if return_to_hive_two.get().lower() == "whirligig":
+            wslotmenu_two.configure(state="normal")
+        else:
+            wslotmenu_two.configure(state="disable")
+            
+    def disablews_three(event):
+        if return_to_hive_three.get().lower() == "whirligig":
+            wslotmenu_three.configure(state="normal")
+        else:
+            wslotmenu_three.configure(state="disable")
+
     def disableeb(event):
         pass
         '''
@@ -2821,55 +2940,137 @@ if __name__ == "__main__":
             harvesttextbox.insert("end",harvest_int)
             
     #Tab 1
+            
     tkinter.Checkbutton(frame1, text="Enable Gathering", variable=gather_enable).place(x=0, y = 15)
-    dropField = ttk.OptionMenu(frame1, gather_field_one,setdat['gather_field'][0].title(), *gather_fields[1:],style='my.TMenubutton' )
-    dropField.place(x = 120, y = 50,height=24,width=120)
-    dropField = ttk.OptionMenu(frame1, gather_field_two,setdat['gather_field'][1].title(), *gather_fields,style='my.TMenubutton' )
-    dropField.place(x = 260, y = 50,height=24,width=120)
-    dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields,style='my.TMenubutton' )
-    dropField.place(x = 400, y = 50,height=24,width=120)
-    tkinter.Label(frame1, text = "Gathering Fields").place(x = 0, y = 50)
 
-    tkinter.Label(frame1, text = "Gathering Pattern").place(x = 0, y = 85)
-    dropField = ttk.OptionMenu(frame1, gather_pattern,setdat['gather_pattern'], *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='my.TMenubutton')
-    dropField.place(width=110,x = 120, y = 85,height=24)
-    tkinter.Label(frame1, text = "Size").place(x = 250, y = 85)
-    dropField = ttk.OptionMenu(frame1, gather_size,setdat['gather_size'].title(), *["S","M","L"],style='my.TMenubutton' )
-    dropField.place(width=50,x = 290, y = 85,height = 24)
-    tkinter.Label(frame1, text = "Width").place(x = 360, y = 85)
-    dropField = ttk.OptionMenu(frame1, gather_width,setdat['gather_width'], *[(x+1) for x in range(10)],style='my.TMenubutton' )
-    dropField.place(width=50,x = 410, y = 85,height=24)
+    tkinter.Label(frame1, text = "Pattern").place(x = 230, y = 15)
+    tkinter.Label(frame1, text = "Gather Until").place(x = 450, y = 15) 
+    tkinter.Label(frame1, text = "Fields").place(x = 35, y = 50)
+    tkinter.Label(frame1, text = "Shape").place(x = 160, y = 50)
+    tkinter.Label(frame1, text = "Size").place(x = 260, y = 50)
+    tkinter.Label(frame1, text = "Width").place(x = 320, y = 50)
+    tkinter.Label(frame1, text = "Start Location").place(x = 625, y = 50)
+    tkinter.Label(frame1, text = "Mins").place(x = 400, y = 50)
+    tkinter.Label(frame1, text = "Backpack%").place(x = 440, y = 50)
+    tkinter.Label(frame1, text = "To Hive By").place(x = 520, y = 50)
+    tkinter.Label(frame1, text = "Start Location").place(x = 625, y = 50)
+    ttk.Separator(frame1,orient="vertical").place(x=610, y=30, width=2, height=310)    
+    ttk.Separator(frame1,orient="vertical").place(x=386, y=30, width=2, height=310)
+    ttk.Separator(frame1,orient="vertical").place(x=130, y=30, width=2, height=310)
+    ttk.Separator(frame1,orient="horizontal").place(x=15, y=75, width=700, height=2)
+    ttk.Separator(frame1,orient="horizontal").place(x=15, y=160, width=700, height=2)
+    ttk.Separator(frame1,orient="horizontal").place(x=15, y=250, width=700, height=2)
+    
+    ylevel = 50
+    dropField = ttk.OptionMenu(frame1, gather_field_one,setdat['gather_field'][0].title(), *gather_fields[1:],style='smaller.TMenubutton' )
+    dropField.place(x = 10, y = ylevel+35,height=22,width=100)
+    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_one).place(x=10, y = ylevel+65)
 
-    tkinter.Label(frame1, text = "Before Gathering, Rotate Camera").place(x = 0, y = 120)
-    dropField = ttk.OptionMenu(frame1, before_gather_turn,setdat['before_gather_turn'].title(), *["None","Left","Right"],style='my.TMenubutton' )
-    dropField.place(width=70,x = 215, y = 120,height=24)
-    dropField = ttk.OptionMenu(frame1, turn_times,setdat['turn_times'], *[(x+1) for x in range(4)],style='my.TMenubutton' )
-    dropField.place(width=50,x = 295, y = 120,height=24)
+    dropField = ttk.OptionMenu(frame1, gather_pattern_one,setdat['gather_pattern'][0], *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton')
+    dropField.place(width=90,x = 145, y = ylevel+35,height=22)
+    dropField = ttk.OptionMenu(frame1, gather_size_one,setdat['gather_size'][0].title(), *["S","M","L"],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
+    dropField = ttk.OptionMenu(frame1, gather_width_one,setdat['gather_width'][0], *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 320, y = ylevel+35,height=22)
 
-    tkinter.Label(frame1, text = "Gather Until:").place(x = 0, y = 155)
-    tkinter.Label(frame1, text = "Mins").place(x = 90, y = 155)
-    timetextbox = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
-    timetextbox.insert("end",gather_time)
-    timetextbox.place(x = 130, y=158)
-    tkinter.Label(frame1, text = "Backpack%").place(x = 175, y = 155)
-    packtextbox = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
-    packtextbox.insert("end",pack)
-    packtextbox.place(x = 260, y=158)
-    tkinter.Label(frame1, text = "To Hive By").place(x = 305, y = 155)
-    dropConvert = ttk.OptionMenu(frame1 , return_to_hive,setdat['return_to_hive'].title(), command = disablews, *["Walk","Reset","Rejoin","Whirligig"],style='my.TMenubutton')
-    dropConvert.place(width=85,x = 380, y = 155,height=24)
-    tkinter.Label(frame1, text = "Whirligig Slot").place(x = 480, y = 155)
-    wslotmenu = ttk.OptionMenu(frame1 , whirligig_slot,setdat['whirligig_slot'], *[1,2,3,4,5,6,7,"none"],style='my.TMenubutton')
-    wslotmenu.place(width=70,x = 570, y = 155,height=24)
+    tkinter.Label(frame1, text = "Before Gathering,\nRotate Camera").place(x = 140, y = ylevel+65)
+    dropField = ttk.OptionMenu(frame1, before_gather_turn_one,setdat['before_gather_turn'][0].title(), *["None","Left","Right"],style='smaller.TMenubutton' )
+    dropField.place(width=60,x = 255, y = ylevel+75,height=22)
+    dropField = ttk.OptionMenu(frame1, turn_times_one,setdat['turn_times'][0], *[(x+1) for x in range(4)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 325, y = ylevel+75,height=22)
 
-    tkinter.Label(frame1, text = "Start Location").place(x = 0, y = 190)
-    dropField = ttk.OptionMenu(frame1, start_location,setdat['start_location'].title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='my.TMenubutton' )
-    dropField.place(width=100,x = 100, y = 190,height=24)
-    tkinter.Label(frame1, text = "Distance From Center").place(x = 210, y = 190)
-    dropField = ttk.OptionMenu(frame1, distance_from_center,setdat['distance_from_center'], *[(x+1) for x in range(10)],style='my.TMenubutton' )
-    dropField.place(width=50,x = 360, y = 190,height=24)
+    timetextbox_one = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
+    timetextbox_one.insert("end",gather_time_one)
+    timetextbox_one.place(x = 400, y=ylevel+35)
+    packtextbox_one = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
+    packtextbox_one.insert("end",pack_one)
+    packtextbox_one.place(x = 460, y=ylevel+35)
+    dropConvert = ttk.OptionMenu(frame1 , return_to_hive_one,setdat['return_to_hive'][0].title(), command = disablews_one, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
+    dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
+    tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
+    wslotmenu_one = ttk.OptionMenu(frame1 , whirligig_slot_one,setdat['whirligig_slot'][0], *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton')
+    wslotmenu_one.place(width=50,x = 542, y = ylevel+65,height=22)
 
-    tkinter.Checkbutton(frame1, text="Field Drift Compensation", variable=field_drift_compensation).place(x=0, y = 225)
+
+    dropField = ttk.OptionMenu(frame1, start_location_one,setdat['start_location'][0].title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton' )
+    dropField.place(width=100,x = 625, y = ylevel+35,height=22)
+    tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
+    dropField = ttk.OptionMenu(frame1, distance_from_center_one,setdat['distance_from_center'][0], *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 695, y = ylevel+65,height=22)
+
+    ylevel = 140
+    dropField = ttk.OptionMenu(frame1, gather_field_two,setdat['gather_field'][1].title(), *gather_fields[1:],style='smaller.TMenubutton' )
+    dropField.place(x = 10, y = ylevel+35,height=22,width=100)
+    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_two).place(x=10, y = ylevel+65)
+
+    dropField = ttk.OptionMenu(frame1, gather_pattern_two,setdat['gather_pattern'][1], *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton')
+    dropField.place(width=90,x = 145, y = ylevel+35,height=22)
+    dropField = ttk.OptionMenu(frame1, gather_size_two,setdat['gather_size'][1].title(), *["S","M","L"],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
+    dropField = ttk.OptionMenu(frame1, gather_width_two,setdat['gather_width'][1], *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 320, y = ylevel+35,height=22)
+
+    tkinter.Label(frame1, text = "Before Gathering,\nRotate Camera").place(x = 140, y = ylevel+65)
+    dropField = ttk.OptionMenu(frame1, before_gather_turn_two,setdat['before_gather_turn'][1].title(), *["None","Left","Right"],style='smaller.TMenubutton' )
+    dropField.place(width=60,x = 255, y = ylevel+75,height=22)
+    dropField = ttk.OptionMenu(frame1, turn_times_two,setdat['turn_times'][1], *[(x+1) for x in range(4)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 325, y = ylevel+75,height=22)
+
+    timetextbox_two = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
+    timetextbox_two.insert("end",gather_time_two)
+    timetextbox_two.place(x = 400, y=ylevel+35)
+    packtextbox_two = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
+    packtextbox_two.insert("end",pack_two)
+    packtextbox_two.place(x = 460, y=ylevel+35)
+    dropConvert = ttk.OptionMenu(frame1 , return_to_hive_two,setdat['return_to_hive'][1].title(), command = disablews_two, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
+    dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
+    tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
+    wslotmenu_two = ttk.OptionMenu(frame1 , whirligig_slot_two,setdat['whirligig_slot'][1], *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton')
+    wslotmenu_two.place(width=50,x = 542, y = ylevel+65,height=22)
+
+
+    dropField = ttk.OptionMenu(frame1, start_location_two,setdat['start_location'][1].title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton' )
+    dropField.place(width=100,x = 625, y = ylevel+35,height=22)
+    tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
+    dropField = ttk.OptionMenu(frame1, distance_from_center_two,setdat['distance_from_center'][1], *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 695, y = ylevel+65,height=22)
+
+    ylevel = 230
+    dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields[1:],style='smaller.TMenubutton' )
+    dropField.place(x = 10, y = ylevel+35,height=22,width=100)
+    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_three).place(x=10, y = ylevel+65)
+
+    dropField = ttk.OptionMenu(frame1, gather_pattern_three,setdat['gather_pattern'][2], *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton')
+    dropField.place(width=90,x = 145, y = ylevel+35,height=22)
+    dropField = ttk.OptionMenu(frame1, gather_size_three,setdat['gather_size'][2].title(), *["S","M","L"],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
+    dropField = ttk.OptionMenu(frame1, gather_width_three,setdat['gather_width'][2], *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 320, y = ylevel+35,height=22)
+
+    tkinter.Label(frame1, text = "Before Gathering,\nRotate Camera").place(x = 140, y = ylevel+65)
+    dropField = ttk.OptionMenu(frame1, before_gather_turn_three,setdat['before_gather_turn'][2].title(), *["None","Left","Right"],style='smaller.TMenubutton' )
+    dropField.place(width=60,x = 255, y = ylevel+75,height=22)
+    dropField = ttk.OptionMenu(frame1, turn_times_three,setdat['turn_times'][2], *[(x+1) for x in range(4)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 325, y = ylevel+75,height=22)
+
+    timetextbox_three = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
+    timetextbox_three.insert("end",gather_time_three)
+    timetextbox_three.place(x = 400, y=ylevel+35)
+    packtextbox_three = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
+    packtextbox_three.insert("end",pack_three)
+    packtextbox_three.place(x = 460, y=ylevel+35)
+    dropConvert = ttk.OptionMenu(frame1 , return_to_hive_three,setdat['return_to_hive'][2].title(), command = disablews_three, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
+    dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
+    tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
+    wslotmenu_three = ttk.OptionMenu(frame1 , whirligig_slot_three,setdat['whirligig_slot'][2], *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton')
+    wslotmenu_three.place(width=50,x = 542, y = ylevel+65,height=22)
+
+
+    dropField = ttk.OptionMenu(frame1, start_location_three,setdat['start_location'][2].title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton' )
+    dropField.place(width=100,x = 625, y = ylevel+35,height=22)
+    tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
+    dropField = ttk.OptionMenu(frame1, distance_from_center_three,setdat['distance_from_center'][2], *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField.place(width=50,x = 695, y = ylevel+65,height=22)
     
 
     #Tab 2 
@@ -2897,6 +3098,11 @@ if __name__ == "__main__":
     tkinter.Checkbutton(frame4, text="Lid Art", variable=lid_art).place(x=390, y = 85)
     tkinter.Checkbutton(frame4, text="Honey Wreath", variable=wreath).place(x=470, y = 85)
     tkinter.Checkbutton(frame4, text="Candles", variable=candles).place(x=595, y = 85)
+    tkinter.Checkbutton(frame4, text="Glue Dispenser", variable=gluedispenser).place(x=0, y = 120)
+    tkinter.Label(frame4, text = "Gumdrop Slot").place(x = 130, y = 122)
+    dropField = ttk.OptionMenu(frame4, gumdrop_slot,setdat['gumdrop_slot'], *[x for x in range(1,8)],style='smaller.TMenubutton')
+    dropField.place(width=65,x = 225, y = 124,height=20)
+    
     #Tab 4
     tkinter.Checkbutton(frame6, text="Enable Planters", variable=enable_planters).place(x=545, y = 20)
     tkinter.Label(frame6, text = "Allowed Planters").place(x = 120, y = 15)
@@ -3043,12 +3249,14 @@ if __name__ == "__main__":
     cttextbox.insert("end",canon_time)
     cttextbox.place(x=110,y=88)
     #Root
-    ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=360)
-    ttk.Button(root, text = "Update",command = updateFiles, width = 9,).place(x=150,y=360)
-    ttk.Button(root, text = "Experimental update",command = expu, width = 16,).place(x=300,y=360)
-    ttk.Label(root, text = "version {}".format(macrov)).place(x = 630, y = 370)
+    ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=420)
+    ttk.Button(root, text = "Update",command = updateFiles, width = 9,).place(x=150,y=420)
+    ttk.Button(root, text = "Experimental update",command = expu, width = 16,).place(x=300,y=420)
+    ttk.Label(root, text = "version {}".format(macrov)).place(x = 680, y = 440)
 
-    disablews("1")
+    disablews_one("1")
+    disablews_two("1")
+    disablews_three("1")
     disabledw()
     disableeb("1")
     root.mainloop()
