@@ -69,7 +69,7 @@ cmd + space to bring up spotlight -> search “terminal”
 
 In terminal, enter this command:
 ```bash
-pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py pynput matplotlib "numpy<1.24.0" protobuf==3.20.0 pymudpdf
+pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py pynput matplotlib "numpy<1.24.0" protobuf==3.20.0 pymupdf
 ```
 
 After the installation is complete, run these commands one by one
