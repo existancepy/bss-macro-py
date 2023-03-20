@@ -67,9 +67,15 @@ cmd + space to bring up spotlight -> search “terminal”
 
 ### 4. Installing python packages
 
-In terminal, enter this command:
+In terminal, enter these two commands:
+
+```
+xcode-select --install
+```
+
+After that,
 ```bash
-pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py pynput matplotlib 
+pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py pynput matplotlib "numpy<1.24.0" pymupdf
 ```
 
 After the installation is complete, run these commands one by one
@@ -77,7 +83,7 @@ After the installation is complete, run these commands one by one
 *For M1/M2 Macs*
 
 ```bash
-pip3 install paddlepaddle==2.3.2 "numpy<1.24.0" protobuf==3.20.0
+pip3 install paddlepaddle==2.3.2 "numpy<1.24.0" 
 
 pip3 install paddleocr==2.6.1.0
 
@@ -87,8 +93,13 @@ pip3 install opencv-python==4.5.5.64
 ```bash
 python3 -m pip install paddlepaddle==2.4.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-pip3 install "paddleocr>=2.0.1" protobuf==3.20.0
+pip3 install "paddleocr>=2.0.1" 
 ```
+Finally, enter this
+```
+pip3 install protobuf==3.20.0
+```
+
 ### 5. Installing the macro files
 
 Install the .zip file in https://github.com/existancepy/bss-macro-py (Press the green button that says code and look for download zip)
