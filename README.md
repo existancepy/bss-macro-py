@@ -72,7 +72,7 @@ In terminal, enter these two commands:
 ```
 xcode-select --install
 ```
-This will install the xcode command line tools
+If a popup appears asking you to install xcode, install it, then close and re-open terminal and enter the command in again
 
 After that,
 ```bash
