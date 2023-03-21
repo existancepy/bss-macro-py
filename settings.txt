@@ -36,12 +36,12 @@ stump_snail:0
 continue_after_stump_snail:0
 ladybug:0
 rhinobeetle:0
-spider:1
+spider:0
 scorpion:0
 werewolf:0
 mantis:0
 stinger:0
-wealthclock:1
+wealthclock:0
 blueberrydispenser:0
 strawberrydispenser:0
 royaljellydispenser:0
@@ -50,7 +50,7 @@ gluedispenser:0
 gumdrop_slot:3
 stockings:0
 feast:0
-samovar:1
+samovar:0
 wreath:0
 snow_machine:0
 mondo_buff:0
