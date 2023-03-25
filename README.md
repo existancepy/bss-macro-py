@@ -33,22 +33,24 @@ Installation guide for  macro
 
 Check your macOS version. This will determine which installation step to follow. To see your macOS version, apple logo -> about this mac
 
-### 1. Install python 3.8/3.9.5
+For M1/M2 Macs, I highly recommend updating your macOS version to ventura (13.0) and above. The macro is highly unlikely to work on older versions
+
+For Intel Macs (Basically any mac that isnt M1/M2), macOS 12.0 and above is recommended. Older versions are not likely to work
+
+### 1. Install python 3.9.5
 For macOS versions 12.0 and higher:
 [python 3.9](https://www.python.org/downloads/release/python-395/) (Scroll down)
-
-For macOS versions lower than 12.0:
-[python 3.8](https://www.python.org/downloads/release/python-395/) (Scroll down)
-
-![App Screenshot](https://media.discordapp.net/attachments/1081742326860349580/1081749143262875819/sadboiubasd.png?width=1866&height=962)
+*Note: The installers are found near the bottom of the webpage*
 
 Download and run the universal installer if you are on M1/M2, else download the intel installer
 
+![App Screenshot](https://media.discordapp.net/attachments/1081742326860349580/1081749143262875819/sadboiubasd.png?width=1866&height=962)
+
 ### 2. Installing certificates
 
-Once python has been installed, it should automatically launch a finder window with a folder called "python 3.9", or  "python 3.8". 
+Once python has been installed, it should automatically launch a finder window with a folder called "python 3.9"
 
-Alternatively, you can go to applications -> python 3.9 or python 3.8
+Alternatively, you can go to applications -> python 3.9
 
 In the folder, double click on "Install Certificates.command" and let it run 
 ![App Screenshot](https://media.discordapp.net/attachments/1081742326860349580/1081750296411246652/sdguosaubod.png?width=2160&height=580)
@@ -68,36 +70,48 @@ cmd + space to bring up spotlight -> search “terminal”
 ### 4. Installing python packages
 
 In terminal, enter these two commands:
-
-```
+```bash
 xcode-select --install
 ```
+Install the xcode command line tools when prompted, else you can ignore the message if it says that command line tools are already installed
+
+Next,
+```bash
+sudo xcode-select --switch /Library/Developer/CommandLineTools
+```
+Enter in your password
 
 After that,
 ```bash
-pip3 install pyautogui pillow python-imagesearch discord-webhook discord.py pynput matplotlib "numpy<1.24.0" pymupdf
+pip3 install pyautogui pillow discord-webhook discord.py pynput matplotlib pymupdf
 ```
 
 After the installation is complete, run these commands one by one
 
 *For M1/M2 Macs*
-
 ```bash
-pip3 install paddlepaddle==2.3.2 "numpy<1.24.0" 
+arch
+```
+Terminal should display "arm64"
+```bash
+pip3 install paddlepaddle==2.3.2
 
-pip3 install paddleocr==2.6.1.0
-
-pip3 install opencv-python==4.5.5.64
+pip3 install --no-deps paddleocr==2.6.1.0
+```
+```bash
+pip3 install attrdict beautifulsoup4 cython fire fonttools imgaug lanms-neo==1.0.2 lmdb lxml opencv-contrib-python opencv-python==4.5.5.64 openpyxl pdf2docx Polygon3 premailer pyclipper pymupdf python-docx rapidfuzz scikit-image shapely tqdm visualdl
 ```
 *For other Macs (intel cpu)*
 ```bash
 python3 -m pip install paddlepaddle==2.4.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-pip3 install "paddleocr>=2.0.1" 
+pip3 install "paddleocr>=2.0.1"
 ```
+*Note: you can ignore the error " ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts."*
+
 Finally, enter this
-```
-pip3 install protobuf==3.20.0
+```bash
+pip3 install "numpy<1.24.0"
 ```
 
 ### 5. Installing the macro files
