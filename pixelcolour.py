@@ -1,6 +1,8 @@
 
 import Quartz.CoreGraphics as CG
 import struct
+import numpy as np
+import pyautogui as pag
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -82,10 +84,15 @@ def rgb_to_hex(r, g, b):
       return ('0x{:X}{:X}{:X}').format(r, g, b)
 
 def getPixelColor(X1,Y1):
+    im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
+    col = tuple(im[0,0])
+    return col
+    '''
     sp = ScreenPixel()
     sp.capture()
     col = sp.pixel(X1, Y1)
     return (col[0],col[1],col[2])
+    '''
 
 '''
 

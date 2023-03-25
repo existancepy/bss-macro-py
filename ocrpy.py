@@ -43,6 +43,8 @@ def imToString(m):
         cap = pag.screenshot(region=(ww//(3*xsm),wh//(20*ysm),ww//(3*xlm),wh//(7*ylm)))
     elif m == "egg shop":
         cap = pag.screenshot(region=(ww//(1.2*xsm),wh//(3*ysm),ww-ww//1.2,wh//5))
+    elif m == "blue":
+        cap = pag.screenshot(region=(ww*3//4, wh//3*2, ww//4,wh//3))
     elif m == "ebutton":
         cap = pag.screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
         cap.save("{}.png".format(sn))  

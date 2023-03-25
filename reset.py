@@ -67,7 +67,7 @@ def reset():
             r = getPixelColor(ww//2,wh-2)
             log(r)
             passed = 1
-            for i in range(len(r)):
+            for i in range(len(tar)):
                 if tar[i]-var <= r[i] <= tar[i]+var:
                     pass
                 elif i == 2 and tar[2] == 0:
@@ -203,7 +203,7 @@ def resetCheck():
         for _ in range(4):
             r = getPixelColor(ww//2,wh-2)
             passed = 1
-            for i in range(len(r)):
+            for i in range(len(tar)):
                 if tar[i]-var <= r[i] <= tar[i]+var:
                     pass
                 elif i == 2 and tar[2] == 0:

@@ -49,7 +49,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.38.1"
+macrov = "1.38.2"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -268,8 +268,9 @@ def ebutton(pagmode=0):
     return
     '''
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
+    
     log(ocrval)
-    return ocrval == "E"
+    return "E" in ocrval and len(ocrval) <= 3
 
 def detectNight():
     savedat = loadRes()
@@ -909,105 +910,100 @@ def background(cf,bpcap,gat,dc, rejoinval):
     if honeyHist[0] == 0:
         invalid_prev_honey = 1
     while True:
-        try:
-            start_time = time.time()
-            
-            #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
-            if checkwithOCR("disconnect"):
+        start_time = time.time()
+        
+        #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
+        if checkwithOCR("disconnect"):
+            dc.value = 1
+            webhook("","Disconnected","red")
+            rejoin()
+            dc.value = 0
+        
+        if gat.value:
+            bpcap.value = backpack.bpc()
+            resetMobTimer(cf.value.lower())
+            '''
+            if imagesearch.find('died.png',0.8,ww//2,wh//2,ww,wh,1):
                 dc.value = 1
-                webhook("","Disconnected","red")
+                webhook("","Unexpected Death","red")
+                dc.value = 0
+                gat.value = 0
+            '''
+        '''
+        if not is_running("Roblox") and dc.value == 0 and rejoinval == 0:
+            dc.value = 1
+            webhook("","Roblox unexpectedly closed","red")
+            rejoin()
+            dc.value = 0
+        '''
+        if setdat['rejoin_every_enabled']:
+            with open('timings.txt', 'r') as f:
+                prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
+            log("{}, {}".format((time.time() - prevTime)/3600, setdat['rejoin_every']))
+            if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
+                dc.value = 1
                 rejoin()
                 dc.value = 0
-            
-            if gat.value:
-                bpcap.value = backpack.bpc()
-                resetMobTimer(cf.value.lower())
-                '''
-                if imagesearch.find('died.png',0.8,ww//2,wh//2,ww,wh,1):
-                    dc.value = 1
-                    webhook("","Unexpected Death","red")
-                    dc.value = 0
-                    gat.value = 0
-                '''
-            '''
-            if not is_running("Roblox") and dc.value == 0 and rejoinval == 0:
-                dc.value = 1
-                webhook("","Roblox unexpectedly closed","red")
+                savetimings('rejoin_every')
+        '''
+        if checkwithOCR('egg shop'):
+            dc.value = 1
+            webhook("","Shop detected","red")
+            if ebutton():
+                move.press('e')
+            else:
                 rejoin()
-                dc.value = 0
-            '''
-            if setdat['rejoin_every_enabled']:
-                with open('timings.txt', 'r') as f:
-                    prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
-                log("{}, {}".format((time.time() - prevTime)/3600, setdat['rejoin_every']))
-                if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
-                    dc.value = 1
-                    rejoin()
-                    dc.value = 0
-                    savetimings('rejoin_every')
-            '''
-            if checkwithOCR('egg shop'):
-                dc.value = 1
-                webhook("","Shop detected","red")
-                if ebutton():
-                    move.press('e')
-                else:
-                    rejoin()
-                dc.value = 0
-            if checkwithOCR("dialog"):
-                webhook("","Stuck in dialog","red")
-                dc.value = 1
-                move.hold("w",1)
-                mouse.move_to(mw//2,mh//5*4)
-                for _ in range(20):
-                    mouse.press()
-                    sleep(0.25)
-                    mouse.release()
-                dc.value = 0
-            '''
-            with open('canonfails.txt', 'r') as f:
-                cfCount = int(f.read())
+            dc.value = 0
+        if checkwithOCR("dialog"):
+            webhook("","Stuck in dialog","red")
+            dc.value = 1
+            move.hold("w",1)
+            mouse.move_to(mw//2,mh//5*4)
+            for _ in range(20):
+                mouse.press()
+                sleep(0.25)
+                mouse.release()
+            dc.value = 0
+        '''
+        with open('canonfails.txt', 'r') as f:
+            cfCount = int(f.read())
+        f.close()
+        if cfCount >= 4:
+            with open('canonfails.txt', 'w') as f:
+                f.write('0')
             f.close()
-            if cfCount >= 4:
-                with open('canonfails.txt', 'w') as f:
-                    f.write('0')
-                f.close()
-                dc.value = 1
-                webhook("","Canon failed too many times, rejoining","red")
-                rejoin()
-                dc.value = 0
-            if setdat['enable_discord_webhook']:
-                sysTime = datetime.now()
-                sysHour = sysTime.hour
-                sysMin = sysTime.minute
-                if sysMin != prevMin:
-                    prevMin = sysMin
-                    ch = imToString('honey')
-                    if invalid_prev_honey and ch:
-                        invalid_prev_honey = 0
-                        honeyHist = [ch]*60
-                        loadsettings.save("prev_honey",ch)
+            dc.value = 1
+            webhook("","Canon failed too many times, rejoining","red")
+            rejoin()
+            dc.value = 0
+        if setdat['enable_discord_webhook']:
+            sysTime = datetime.now()
+            sysHour = sysTime.hour
+            sysMin = sysTime.minute
+            if sysMin != prevMin:
+                prevMin = sysMin
+                ch = imToString('honey')
+                if invalid_prev_honey and ch:
+                    invalid_prev_honey = 0
+                    honeyHist = [ch]*60
+                    loadsettings.save("prev_honey",ch)
+                else:
+                    if ch:
+                        honeyHist[sysMin] = int(ch)
                     else:
-                        if ch:
-                            honeyHist[sysMin] = int(ch)
-                        else:
-                            honeyHist[sysMin] = honeyHist[sysMin-1]
-                    log(ch)
-                    savehoney_history(honeyHist)
-                if sysMin == 0 and sysHour != prevHour:
-                    
-                    hourlyReport()
-                    prev_honey = loadsettings.load()['prev_honey']
-                    honeyHist = [prev_honey]*60
-                    prevHour = sysHour
-                    #savehoney_history(honeyHist)
-            if setdat['enable_discord_webhook']:
-                detectNight()
-           #print(time.time()-start_time)
-        except Exception as err:
-            webhook("","An error has been caught in the background process. It can be found in either the terminal or the macroLogs.log file","red")
-            log(err)
-            print(err)
+                        honeyHist[sysMin] = honeyHist[sysMin-1]
+                log(ch)
+                savehoney_history(honeyHist)
+            if sysMin == 0 and sysHour != prevHour:
+                
+                hourlyReport()
+                prev_honey = loadsettings.load()['prev_honey']
+                honeyHist = [prev_honey]*60
+                prevHour = sysHour
+                #savehoney_history(honeyHist)
+        if setdat['enable_discord_webhook']:
+            detectNight()
+       #print(time.time()-start_time)
 def killMob(field,mob,reset):
     webhook("","Traveling: {} ({})".format(mob.title(),field.title()),"dark brown")
     convert()
@@ -2141,7 +2137,7 @@ def setResolution():
     multiInfo = {
         #ysm, xsm, ylm,  xlm
         "2880x1800": [1,1,1,1],
-        "2940x1912": [0.666666666666666,1,1,1],
+        "2940x1912": [1.1,0.98,1,1.2],
         "1920x1080": [1.3,0.94,1,1],
         "1440x900": [1,1,1,1],
         "4096x2304": [1.45,0.91,1.32,1.5],

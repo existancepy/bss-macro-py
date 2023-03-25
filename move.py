@@ -53,13 +53,16 @@ def aphold(k,t):
 
     
     
-def hold(k,t):
-    try:
-        with open("haste.txt","r") as f:
-            ws = float(f.read())
-        f.close()
-    except Exception as e:
-        print(e)
+def hold(k,t,hastecomp=1):
+    if hastecomp:
+        try:
+            with open("haste.txt","r") as f:
+                ws = float(f.read())
+            f.close()
+        except Exception as e:
+            print(e)
+            ws = loadsettings.load()['walkspeed']
+    else:
         ws = loadsettings.load()['walkspeed']
     keyboard.press(k)
     sleep(t*28/ws)
