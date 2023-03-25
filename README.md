@@ -88,7 +88,7 @@ pip3 install pyautogui pillow discord-webhook discord.py pynput matplotlib pymup
 
 After the installation is complete, run these commands one by one
 
-*For M1/M2 Macs*
+#For M1/M2 Macs
 ```bash
 arch
 ```
@@ -101,7 +101,7 @@ pip3 install --no-deps paddleocr==2.6.1.0
 ```bash
 pip3 install attrdict beautifulsoup4 cython fire fonttools imgaug lanms-neo==1.0.2 lmdb lxml opencv-contrib-python opencv-python==4.5.5.64 openpyxl pdf2docx Polygon3 premailer pyclipper pymupdf python-docx rapidfuzz scikit-image shapely tqdm visualdl
 ```
-*For other Macs (intel cpu)*
+#For other Macs (intel cpu)
 ```bash
 python3 -m pip install paddlepaddle==2.4.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
 
