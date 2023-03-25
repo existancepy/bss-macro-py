@@ -153,7 +153,20 @@ Check "terminal" for these categories:
 
 *Note that on older macOS versions, some of these categories will not show up, that's to be expected*
 
-### 9. Running the macro
+### 9. Enable roblox's scaling (Only applicable for macs with a notch)
+
+A notch refers to the built-in camera being attached on the screen. It is typically found on macbook pros (see image below) 
+![App Screenshot](https://cdn.discordapp.com/attachments/1081742326860349580/1087240354857754694/macbook-pro-2021-notch-feature.jpeg) 
+
+If your mac does have a notch,
+- Close roblox
+- In finder -> applications -> right click roblox -> get info -> enable "scale to fit below built-in camera" 
+
+![App Screenshot](https://media.discordapp.net/attachments/1081742326860349580/1087240838230327428/Screenshot_2023-03-19_at_9.png?width=300&height=632) 
+
+- You can now re-open roblox. Roblox should now take up the whole screen, meaning that the camera should block off a part of the app
+
+### 10. Running the macro
 
  Open terminal and run the command: 
 ```bash
