@@ -70,7 +70,7 @@ def reset():
             for i in range(len(tar)):
                 if tar[i]-var <= r[i] <= tar[i]+var:
                     pass
-                elif i == 2 and tar[2] == 0:
+                elif i == 2 and r[2] == 0:
                     pass
                 else:           
                     passed = 0
@@ -206,7 +206,7 @@ def resetCheck():
             for i in range(len(tar)):
                 if tar[i]-var <= r[i] <= tar[i]+var:
                     pass
-                elif i == 2 and tar[2] == 0:
+                elif i == 2 and r[2] == 0:
                     pass
                 else:           
                     passed = 0
