@@ -2113,15 +2113,18 @@ def setResolution():
     wwd = int(pag.size()[0])
     whd = int(pag.size()[1])
     if subprocess.call("system_profiler SPDisplaysDataType | grep -i 'retina'", shell=True) == 0:
-        retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
-        retout = retout.decode().split("\n")[1].strip().split("x")
-        nww = ''.join([x for x in retout[0] if x.isdigit()])
-        nwh = ''.join([x for x in retout[1] if x.isdigit()])
-        loadsettings.save('display_type', 'built-in retina display')
         print("display type: retina")
         log("display type: retina")
-        wwd *=2
-        whd *=2
+        loadsettings.save('display_type', 'built-in retina display')
+        try:
+            retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
+            retout = retout.decode().split("\n")[1].strip().split("x")
+            nww = ''.join([x for x in retout[0] if x.isdigit()])
+            nwh = ''.join([x for x in retout[1] if x.isdigit()])
+            wwd *=2
+            whd *=2
+        except:
+            pass
     else:
         loadsettings.save('display_type',"built-in display")
         print("display type: built-in")
