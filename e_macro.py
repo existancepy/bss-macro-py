@@ -49,7 +49,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.38.2"
+macrov = "1.38.3"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -2112,17 +2112,19 @@ def haste_comp():
 def setResolution():
     wwd = int(pag.size()[0])
     whd = int(pag.size()[1])
+    nww = 0
+    nwh = 0
     if subprocess.call("system_profiler SPDisplaysDataType | grep -i 'retina'", shell=True) == 0:
         print("display type: retina")
         log("display type: retina")
         loadsettings.save('display_type', 'built-in retina display')
+        wwd *=2
+        whd *=2
         try:
             retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
             retout = retout.decode().split("\n")[1].strip().split("x")
             nww = ''.join([x for x in retout[0] if x.isdigit()])
             nwh = ''.join([x for x in retout[1] if x.isdigit()])
-            wwd *=2
-            whd *=2
         except:
             pass
     else:
@@ -2141,11 +2143,12 @@ def setResolution():
         #ysm, xsm, ylm,  xlm
         "2880x1800": [1,1,1,1],
         "2940x1912": [1.1,0.98,1,1.2],
-        "1920x1080": [1.3,0.94,1,1],
+        "1920x1080": [1.2,0.92,1.3,1.5],
         "1440x900": [1,1,1,1],
         "4096x2304": [1.45,0.91,1.32,1.5],
         "3024x1964": [1,0.98, 1.2, 1.2],
-        "3360x2100": [1.2,0.95,1.2,1.3]
+        "3360x2100": [1.2,0.95,1.2,1.3],
+        "4480x2520": [1.4,0.89,1.4,1.9]
         }
     if ndisplay in multiInfo:
         loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
@@ -2153,7 +2156,7 @@ def setResolution():
         loadsettings.save("y_length_multiplier",multiInfo[ndisplay][2],"multipliers.txt")
         loadsettings.save("x_length_multiplier",multiInfo[ndisplay][3],"multipliers.txt")
     else:
-        print("\033[0;31mScreen Coordinates not found in supported list\033[00m")
+        print("\033[0;31mScreen Coordinates not found in supported list. Contact Existance to get it supported\033[00m")
 if __name__ == "__main__":
     with open('macroLogs.log', 'w'):
         pass
