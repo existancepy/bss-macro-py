@@ -45,6 +45,8 @@ def imToString(m):
         cap = pag.screenshot(region=(ww//(1.2*xsm),wh//(3*ysm),ww-ww//1.2,wh//5))
     elif m == "blue":
         cap = pag.screenshot(region=(ww*3//4, wh//3*2, ww//4,wh//3))
+    elif m == "chat":
+        cap = pag.screenshot(region=(ww*3//4, 0, ww//4,wh//3))
     elif m == "ebutton":
         cap = pag.screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
         cap.save("{}.png".format(sn))  
@@ -74,7 +76,7 @@ def imToString(m):
         os.remove("{}.png".format(sn))
         return honey
     elif m == "disconnect":
-        cap = pag.screenshot(region=(ww//(3*xsm),wh//(2.8*ysm),ww//(2.3*xlm),wh//(ylm*5)))
+        cap = pag.screenshot(region=(ww//(3),wh//(2.8),ww//(2.3),wh//(5)))
     elif m == "dialog":
         cap = pag.screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
     cap.save("{}.png".format(sn))  

@@ -4,4 +4,4 @@ x_screenshot_multiplier:1
 y_length_multiplier:1
 x_length_multiplier:1
 msh:80.0
-msy:846.0
+msy:546.0

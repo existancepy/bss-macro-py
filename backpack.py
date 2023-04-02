@@ -45,6 +45,6 @@ def bpc():
     else:
         perc = 0
     #print("Pixel Colour: {}, Backpack Percentage: {}.".format(backpackColor, perc))
-    print("Pixel Colour: {}, Backpack Percentage: {}.".format(backpackColor, perc))
+    print("Pixel Colour: {}, Backpack Percentage: {}.".format(col, perc))
     return perc
 

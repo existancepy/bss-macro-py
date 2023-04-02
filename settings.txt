@@ -4,7 +4,7 @@ walkspeed:28
 gifted_vicious_bee:0
 enable_discord_webhook:0
 discord_webhook_url:
-send_screenshot:1
+send_screenshot:0
 sprinkler_slot:1
 sprinkler_type:saturator
 display_type:built-in retina display
@@ -14,15 +14,15 @@ discord_bot_token:
 haste_compensation:1
 low_performance_haste_compensation:0
 rejoin_every_enabled:0
-rejoin_every:0
+rejoin_every:1
 rejoin_delay:50
 rejoin_method:new tab
 manual_fullscreen:0
 gather_enable:1
 gather_field:['pine tree', 'none', 'none']
-gather_pattern:['e_lol', 'stationary', 'snake']
+gather_pattern:['typewriter', 'stationary', 'snake']
 gather_size:['m', 's', 'l']
-gather_width:[3, 4, 5]
+gather_width:[2, 4, 5]
 gather_time:[15, 5, 10]
 pack:[95, 0, 1]
 before_gather_turn:['right', 'right', 'left']
@@ -56,8 +56,8 @@ snow_machine:0
 mondo_buff:0
 lid_art:0
 candles:0
-start_honey:11649463909746
-prev_honey:11649463909746
-start_time:1679311532.838424
+start_honey:12559849144529
+prev_honey:12568421055914
+start_time:1679749185.70386
 canon_time:1.0
 reverse_hive_direction:0

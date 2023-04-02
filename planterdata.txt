@@ -1,3 +1,3 @@
-[('candy', 'bamboo'), ('redclay', 'sunflower'), ('blueclay', 'pine tree')]
+[('redclay', 'sunflower'), ('blueclay', 'pine tree'), ('candy', 'bamboo')]
 ['candy', 'blueclay', 'redclay']
 ['sunflower', 'pine tree', 'bamboo', 'stump']

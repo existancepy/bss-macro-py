@@ -26,6 +26,6 @@ hydroponic_slot:None
 petal_slot:None
 plenty_slot:None
 festive_slot:None
-planter_fields:['bamboo', 'pine tree', 'stump', 'sunflower']
+planter_fields:[]
 planter_count:3
-harvest:full
+harvest:2

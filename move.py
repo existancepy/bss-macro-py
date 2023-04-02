@@ -53,7 +53,7 @@ def aphold(k,t):
 
     
     
-def hold(k,t,hastecomp=1):
+def hold(k,t,hastecomp = 1):
     if hastecomp:
         try:
             with open("haste.txt","r") as f:

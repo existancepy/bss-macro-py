@@ -19,7 +19,6 @@ else:
     size = 2
 wm = 0.2*size
 sm = 0.65*size
-sleep(2)
 move.hold("a",width*wm*2)
 move.hold("s",sm)
 for _ in range(width):

@@ -49,7 +49,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.38.3"
+macrov = "1.39.2"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -72,6 +72,8 @@ if __name__ == '__main__':
     rejoinval = multiprocessing.Value('i', 0)
     gather = multiprocessing.Value('i', 0)
     disconnected = multiprocessing.Value('i', 0)
+    timeupdate = multiprocessing.Value('i', 0)
+    night = manager.Value(ctypes.c_wchar_p, "")
 
 def boolToInt(condition):
     if condition: return 1
@@ -249,30 +251,11 @@ def checkwithOCR(m):
     return False
     
 def ebutton(pagmode=0):
-    '''
-    r =  []
-    savedata = loadRes()
-    c = loadsettings.load()['ebthreshold']
-    ww = savedata['ww']
-    wh = savedata['wh']
-    setdat = loadsettings.load()
-    if setdat['ebdetect'] == "pyautogui" or pagmode:
-        if setdat['display_type'] == "built-in retina display":
-            r = pag.locateOnScreen("./images/retina/eb.png",confidence = 0.99,region=(ww//3,0,ww//3,wh//3))
-        else:
-            r = pag.locateOnScreen("./images/built-in/eb.png",confidence = 0.99,region=(ww//3,0,ww//3,wh//3))
-    else:
-        print("ebutton threshold: {}".format(c))
-        r = imagesearch.find("eb.png",c,ww//3,0,ww//3,wh//3)
-    if r:return r
-    return
-    '''
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
-    
     log(ocrval)
     return "E" in ocrval and len(ocrval) <= 3
 
-def detectNight():
+def detectNight(bypasstime=0):
     savedat = loadRes()
     ww = savedat['ww']
     wh = savedat['wh']
@@ -281,7 +264,9 @@ def detectNight():
     screen = np.array(pag.screenshot(region=(0,0,round((ww/3.4)*xlm),round((wh/25)*ylm))))
     w,h = screen.shape[:2]
     rgb = screen[0,0][:3]
-    if not checkRespawn("night","10m"): return False
+    if not setdat['stinger']: return False
+    if not checkRespawn("night","10m") and not bypasstime:
+        return False
     for x in range(w):
         for y in range(h):
             if list(screen[x,y]) == [0,0,0,255]:
@@ -293,7 +278,7 @@ def detectNight():
                                 success = False
                 if success:
                     print(x,y)
-                    webhook("","Night Detected","light green")
+                    webhook("","Night Detected","dark brown")
                     savetimings("night")
                     return True
     return False
@@ -440,13 +425,13 @@ def hourlyReport(hourly=1):
 
 
 
-def canon():
+def canon(fast=0):
     savedata = loadRes()
     setdat = loadsettings.load()
     ww = savedata['ww']
     wh = savedata['wh']
     #Move to canon:
-    webhook("","Moving to canon","dark brown")
+    if not fast: webhook("","Moving to canon","dark brown")
     move.hold("w",0.8)
     move.hold("d",0.9*(setdat["hive_number"])+1)
     pag.keyDown("d")
@@ -455,6 +440,10 @@ def canon():
     time.sleep(0.2)
     r = ""
     pag.keyUp("d")
+    if fast:
+        move.hold("d",0.9)
+        time.sleep(0.1)
+        return
     move.hold("d",0.3)
     for _ in range(4):
         move.hold("d",0.2)
@@ -471,11 +460,11 @@ def canon():
                 f.close()
                 return
     mouse.position = (mw//2,mh//5*4)
-    webhook("","Cannon not found, resetting","dark brown",1)
     with open('canonfails.txt','r') as f:
         cfCount = int(f.read())
         cfCount += 1
     f.close()
+    webhook("","Cannon not found, attempt: {},resetting".format(cfCount),"dark brown",1)
     with open('canonfails.txt','w') as f:
         f.write(str(cfCount))
     f.close()
@@ -576,7 +565,7 @@ def convert():
     webhook("","Starting convert","brown",1)
     st = time.perf_counter()
     while True:
-        if stingerHunt():
+        if stingerHunt(1,1):
             break
         c = ebutton()
         if not c:
@@ -586,8 +575,6 @@ def convert():
         if time.perf_counter()  - st > 600:
             webhook("","Converting took too long, moving on","brown")
             break
-    if setdat['stinger']:
-        move.press(".")
         
 def walk_to_hive(gfid):
     savedata = loadRes()
@@ -602,9 +589,13 @@ def walk_to_hive(gfid):
         pag.keyUp("a")
         r = ebutton()
         if r:
-            convert()
-            reset.reset()
-            return
+            if checkwithOCR('bee bear'):
+                
+                break
+            else:
+                convert()
+                reset.reset()
+                return
         
     webhook("","Cant find hive, resetting","dark brown",1)
     reset.reset()
@@ -675,11 +666,67 @@ def resetMobTimer(cfield):
             if checkRespawn("rhinobeetle_blueflower","5m"):  savetimings("rhinobeetle_blueflower")
         elif cfield == "bamboo":
             if checkRespawn("rhinobeetle_bamboo","5m"):  savetimings("rhinobeetle_bamboo")
-def stingerHunt():
+def stingerHunt(night,convert=0,gathering=0):
     setdat = loadsettings.load()
-    if not setdat['stinger']: return False
-    if not detectNight(): return False
-            
+    fields = ['pepper','mountain top','rose','cactus','spider','clover']
+    if not night: return False
+    if convert:
+        dn = detectNight(1)
+        if dn:
+            move.press(".")
+        else:
+            return False
+    if gathering: reset.reset()
+    for field in fields:
+        status = getStatus()
+        fieldGoTo = field
+        killvb = 0
+        if not "vb_found" in status: #Status might update after resetting
+            canon(1)
+            exec(open("field_{}.py".format(field)).read())
+            webhook("","Finding Vicious Bee ({})".format(field),"dark brown")
+            setStatus("finding_vb_{}".format(field))
+            exec(open("vb_{}.py".format(field)).read())
+            status = getStatus()
+        else:
+            fi = fields.index(field)
+            if fi > 0:
+                prev_field = fields[fi-1]
+            else:
+                prev_field = fields[fi]
+            status = "vb_found_wrong_field_{}".format(prev_field)
+        print(status)
+        if "vb_found_right_field" in status:
+            killvb = 1
+        elif "vb_found_wrong_field" in status:
+            reset.reset()
+            canon(1)
+            fieldGoTo = status.split("_")[-1]
+            exec(open("field_{}.py".format(fieldGoTo)).read())
+            exec(open("vb_{}.py".format(fieldGoTo)).read())
+            killvb = 1
+        if killvb:
+            setStatus("killing_vb")
+            st = time.time()
+            while True:
+                exec(open("killvb_{}.py".format(fieldGoTo)).read())
+                status = getStatus()
+                if status == "vb_killed":
+                    webhook("","Vicious Bee Killed","bright green")
+                    break
+                if time.time()-st > 300:
+                    webhook("","Took too long to kill vicious bee, leaving","red")
+                    break
+                if status == "killing_vb_died":
+                    reset.reset()
+                    canon(1)
+                    exec(open("field_{}.py".format(fieldGoTo)).read())
+                    setStatus("killing_vb")
+            reset.reset()
+            break
+        reset.reset()
+    setStatus("none")
+    return True
 sat_image = cv2.imread('./images/retina/saturator.png')
 method = cv2.TM_SQDIFF_NORMED
 def displayPlanterName(planter):
@@ -803,6 +850,7 @@ def placePlanter(planter):
     webhook("","Placed Planter: {}".format(displayPlanterName(planter)),"bright green",1)
     reset.reset()
 
+
 urows,ucols = cv2.imread('./images/retina/yes.png').shape[:2]
 def clickYes():
     res = loadRes()
@@ -824,6 +872,7 @@ def clickYes():
         else:
             mouse.position= (ww//2-50,wh//1.6)
             mouse.click(Button.left, 1)
+            
     
 def goToPlanter(field,place=0):
     canon()
@@ -896,7 +945,7 @@ def savehoney_history(saveinfo):
         f.write(str(saveinfo))
     f.close()
     
-def background(cf,bpcap,gat,dc, rejoinval):
+def background(cf,bpcap,gat,dc, rejoinval,nt,tu):
     time.sleep(20)
     savedata = loadRes()
     ww = savedata['ww']
@@ -907,64 +956,62 @@ def background(cf,bpcap,gat,dc, rejoinval):
     honeyHist = [setdat['prev_honey']]*60
     log(honeyHist)
     invalid_prev_honey = 0
+    fields = ['pepper','mountain','rose','cactus','spider','clover']
     if honeyHist[0] == 0:
         invalid_prev_honey = 1
     while True:
-        start_time = time.time()
+        tu.value = int(time.time())
+        status = getStatus()
         
         #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
-        if checkwithOCR("disconnect"):
-            dc.value = 1
-            webhook("","Disconnected","red")
-            rejoin()
-            dc.value = 0
         
-        if gat.value:
-            bpcap.value = backpack.bpc()
-            resetMobTimer(cf.value.lower())
-            '''
-            if imagesearch.find('died.png',0.8,ww//2,wh//2,ww,wh,1):
+        if "vb" in status:
+            nt.value = 0
+            bluetexts = imToString("blue").lower()
+            print(bluetexts)
+            if "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
+                currField = status.split("_")[2]
+                targetField = "none"
+                for fd in fields:
+                    if fd in bluetexts:
+                        if fd == "mountain":
+                            targetField = "mountain top"
+                        else:
+                            targetField = fd
+                        break
+                webhook("","Found Vicious Bee In {} Field".format(fd.title()),"light green")
+                if currField.lower() == targetField.lower():
+                    setStatus("vb_found_right_field")
+                else:
+                    setStatus("vb_found_wrong_field_{}".format(targetField))
+            elif "killing_vb" in status:
+                if "vicious" in bluetexts and "defeated" in bluetexts:
+                    setStatus("vb_killed")
+                elif "died" in bluetexts:
+                    setStatus("killing_vb_died")
+        else:
+            if checkwithOCR("disconnect"):
                 dc.value = 1
-                webhook("","Unexpected Death","red")
-                dc.value = 0
-                gat.value = 0
-            '''
-        '''
-        if not is_running("Roblox") and dc.value == 0 and rejoinval == 0:
-            dc.value = 1
-            webhook("","Roblox unexpectedly closed","red")
-            rejoin()
-            dc.value = 0
-        '''
-        if setdat['rejoin_every_enabled']:
-            with open('timings.txt', 'r') as f:
-                prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
-            log("{}, {}".format((time.time() - prevTime)/3600, setdat['rejoin_every']))
-            if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
-                dc.value = 1
+                webhook("","Disconnected","red")
                 rejoin()
                 dc.value = 0
-                savetimings('rejoin_every')
-        '''
-        if checkwithOCR('egg shop'):
-            dc.value = 1
-            webhook("","Shop detected","red")
-            if ebutton():
-                move.press('e')
-            else:
-                rejoin()
-            dc.value = 0
-        if checkwithOCR("dialog"):
-            webhook("","Stuck in dialog","red")
-            dc.value = 1
-            move.hold("w",1)
-            mouse.move_to(mw//2,mh//5*4)
-            for _ in range(20):
-                mouse.press()
-                sleep(0.25)
-                mouse.release()
-            dc.value = 0
-        '''
+        
+            if gat.value:
+                bpcap.value = backpack.bpc()
+                resetMobTimer(cf.value.lower())
+            if setdat['stinger']:
+                if detectNight():
+                    nt.value = 1
+            if setdat['rejoin_every_enabled']:
+                with open('timings.txt', 'r') as f:
+                    prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
+                log("{}, {}".format((time.time() - prevTime)/3600, setdat['rejoin_every']))
+                if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
+                    dc.value = 1
+                    rejoin()
+                    dc.value = 0
+                    savetimings('rejoin_every')
+                    
         with open('canonfails.txt', 'r') as f:
             cfCount = int(f.read())
         f.close()
@@ -1001,9 +1048,14 @@ def background(cf,bpcap,gat,dc, rejoinval):
                 honeyHist = [prev_honey]*60
                 prevHour = sysHour
                 #savehoney_history(honeyHist)
-        if setdat['enable_discord_webhook']:
-            detectNight()
-       #print(time.time()-start_time)
+        
+        
+    
+        #webhook("","An error has been caught in the background process. It can be found in either the terminal or the macroLogs.log file","red")
+        #msg = "error: {}".format(err)
+        #log(msg)
+            #print(msg)
+        
 def killMob(field,mob,reset):
     webhook("","Traveling: {} ({})".format(mob.title(),field.title()),"dark brown")
     convert()
@@ -1085,12 +1137,13 @@ def collect(name,beesmas=0):
         move.apkey("space")
         exec(open("claim_{}.py".format(usename)).read())
     reset.reset()
-def rawreset():
+def rawreset(nowait=0):
     pag.press('esc')
     time.sleep(0.1)
     pag.press('r')
     time.sleep(0.2)
     pag.press('enter')
+    if nowait: return
     time.sleep(8) 
 def updateHive(h):
     global setdat
@@ -1154,7 +1207,7 @@ def openSettings():
         keyboard.release(Key.page_up)
     else:
         pag.typewrite("\\")
-        webhook("","Unable to locate the walkspeed stat, haste compensation is disabled","res")
+        webhook("","Unable to locate the walkspeed stat, haste compensation is disabled","red")
         loadsettings.save("msh","-1","multipliers.txt")
         loadsettings.save("msy","-1","multipliers.txt")
         return
@@ -1180,9 +1233,8 @@ def getHaste():
     msh = loadsettings.load('multipliers.txt')['msh']
     msy = loadsettings.load('multipliers.txt')['msy']
     ww = loadRes()['ww']
-    ocr = customOCR(ww/8,msy,ww/10,msh,0)
-    #print(ocr)
     if str(msh) == "-1": return
+    ocr = customOCR(ww/8,msy,ww/10,msh,0)
     if not ocr:return
     filtered = [x for x in ocr if "." in x[1][0] or x[1][0].replace("_","").replace(" ","").isdigit()]
     if not filtered:return
@@ -1506,7 +1558,7 @@ def openRoblox(link):
     
 def rejoin():
     setdat = loadsettings.load()
-    for i in range(2):
+    for i in range(3):
         cmd = """
             osascript -e 'tell application "Roblox" to quit' 
             """
@@ -1538,8 +1590,9 @@ def rejoin():
         if setdat['manual_fullscreen']:
             fullscreen()
         time.sleep(2)
-        move.hold("w",5)
-        move.hold("s",0.6)
+        move.hold("w",5,0)
+        move.hold("w",i*2,0)
+        move.hold("s",0.6,0)
         foundHive = 0
         move.apkey('space')
         time.sleep(0.5)
@@ -1551,7 +1604,7 @@ def rejoin():
                 webhook("","Hive Found: 3","dark brown",1)
                 break
         elif setdat['hive_number'] == 2:
-            move.hold('d',1)
+            move.hold('d',1,0)
             for _ in range(4):
                 move.hold('d',0.1)
                 if ebutton():
@@ -1560,34 +1613,34 @@ def rejoin():
                     webhook("","Hive Found: 2","dark brown",1)
                     break
         elif setdat['hive_number'] == 1:
-            move.hold('d',2)
+            move.hold('d',2,0)
             for _ in range(4):
-                move.hold('d',0.1)
+                move.hold('d',0.1,0)
                 if ebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 1","dark brown",1)
                     break
         elif setdat['hive_number'] == 4:
-            move.hold('a',0.6)
+            move.hold('a',0.6,0)
             for _ in range(4):
-                move.hold('a',0.1)
+                move.hold('a',0.1,0)
                 if ebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 4","dark brown",1)
                     break
         elif setdat['hive_number'] == 5:
-            move.hold('a',1.9)
+            move.hold('a',1.9,0)
             for _ in range(4):
-                move.hold('a',0.1)
+                move.hold('a',0.1,0)
                 if ebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 5","dark brown",1)
                     break
         else:
-            move.hold('a',3.3)
+            move.hold('a',3.3,0)
             if ebutton():
                     move.press('e')
                     foundHive = 1
@@ -1595,56 +1648,56 @@ def rejoin():
                     break
         while True:   
             if not foundHive:
-                move.hold("d",12)
+                move.hold("d",12,0)
                 webhook("","Hive already claimed, finding new hive","dark brown",1)
                 move.hold('a',0.2)
                 for _ in range(3):
-                    move.hold('a',0.1)
+                    move.hold('a',0.1,0)
                     if ebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(1)
                         break
                 if foundHive: break
-                move.hold('a',0.9)
+                move.hold('a',0.9,0)
                 for _ in range(3):
-                    move.hold('a',0.1)
+                    move.hold('a',0.1,0)
                     if ebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(2)
                         break
                 if foundHive: break
-                move.hold("a",0.9)
+                move.hold("a",0.9,0)
                 for _ in range(3):
-                    move.hold('a',0.1)
+                    move.hold('a',0.1,0)
                     if ebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(3)
                         break
                 if foundHive: break
-                move.hold('a',0.8)
+                move.hold('a',0.8,0)
                 for _ in range(3):
-                    move.hold('a',0.1)
+                    move.hold('a',0.1,0)
                     if ebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(4)
                         break
                 if foundHive: break
-                move.hold('a',0.9)
+                move.hold('a',0.9,0)
                 for _ in range(3):
-                    move.hold('a',0.1)
+                    move.hold('a',0.1,0)
                     if ebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(5)
                         break
                 if foundHive: break
-                move.hold('a',0.9)
+                move.hold('a',0.9,0)
                 for _ in range(3):
-                    move.hold('a',0.1)
+                    move.hold('a',0.1,0)
                     if ebutton():
                         move.press('e')
                         foundHive = 1
@@ -1666,11 +1719,11 @@ def rejoin():
                 move.press("e")
             pag.keyUp("d")
             updateHive(6)
+        if setdat['haste_compensation']: openSettings()
         convert()
         
         if reset.resetCheck():
             webhook("","Rejoin successful","dark brown")
-            if setdat['haste_compensation']: openSettings()
             break
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
         
@@ -1707,9 +1760,11 @@ def placeSprinkler():
         time.sleep(0.3)
         move.apkey("space")
         time.sleep(0.13)
-def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_start):
+def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_start,nt):
+    nt.value = 0
     setdat = loadsettings.load()   
     val = validateSettings()
+    setStatus()
     with open('canonfails.txt', 'w') as f:
         f.write('0')
     f.close()
@@ -1732,11 +1787,11 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
     f.close()
     if session_start:
         log("Session Start")
-        rawreset()
+        rawreset(1)
         currHoney = imToString('honey')
         loadsettings.save('start_honey',currHoney)
         loadsettings.save('prev_honey',currHoney)
-        if setdat['haste_compensation']: openSettings()
+    if setdat['haste_compensation']: openSettings()
     reset.reset()
     convert()
     savedata = loadRes()
@@ -1785,34 +1840,47 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
             mouse.move(mw//2-30,mh//100*60)
             pag.click()
             reset.reset()
+            
         #Collect check
+        stingerHunt(nt.value)
         if setdat['wealthclock']  and checkRespawn('wealthclock',"1h"):
             collect("wealth clock")
+        stingerHunt(nt.value)
         if setdat['blueberrydispenser'] and checkRespawn('blueberrydispenser','4h'):
             collect('blueberry dispenser')
+        stingerHunt(nt.value)
         if setdat['strawberrydispenser'] and checkRespawn('strawberrydispenser','4h'):
             collect('strawberry dispenser')
+        stingerHunt(nt.value)
         if setdat['royaljellydispenser'] and checkRespawn('royaljellydispenser','22h'):
             collect('royal jelly dispenser')
+        stingerHunt(nt.value)
         if setdat['treatdispenser'] and checkRespawn('treatdispenser','1h'):
             collect('treat dispenser')
+        stingerHunt(nt.value)
         if setdat['stockings'] and checkRespawn('stockings','1h'):
             collect('stockings',1)
+        stingerHunt(nt.value)
         if setdat['wreath'] and checkRespawn('wreath','30m'):
             wreath()
         if setdat['feast'] and checkRespawn('feast','90m'):
             collect('feast',1)
+        stingerHunt(nt.value)
         if setdat['samovar'] and checkRespawn('samovar','6h'):
             collect('samovar',1)
+        stingerHunt(nt.value)
         if setdat['snow_machine'] and checkRespawn('snow_machine','2h'):
             collect('snow_machine')
+        stingerHunt(nt.value)
         if setdat['lid_art'] and checkRespawn('lid_art','8h'):
             collect('lid_art',1)
+        stingerHunt(nt.value)
         if setdat['candles'] and checkRespawn('candles','4h'):
             collect('candles',1)
+        stingerHunt(nt.value)
         if setdat['gluedispenser'] and checkRespawn('gluedispenser','22h'):
             collect('glue dispenser')
-            
+        stingerHunt(nt.value)
         if setdat['mondo_buff']:
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
@@ -1921,7 +1989,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 log(planterFields)
                 for _ in range(maxPlanters-len(occupiedStuff)):
                     for i in planterFields:
-                        if i not in fieldsToPlace and i not in occupiedFields:
+                        if not i in fieldsToPlace and not i in occupiedFields:
                             fieldsToPlace.append(i)
                             break
                     
@@ -1938,6 +2006,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 f.close()             
                                                                                         
         #Mob run check
+        stingerHunt(nt.value)
         if setdat['werewolf'] and checkRespawn("werewolf","1h"):
             killMob("pumpkin","werewolf",1)
         if setdat["ladybug"] and checkRespawn("ladybug_strawberry","5m"):
@@ -1951,10 +2020,13 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 lootMob("mushroom","ladybug",1)
             else:
                 killMob("strawberry","ladybug",1)
+        stingerHunt(nt.value)
         if setdat["ladybug"] and checkRespawn("ladybug_clover","5m"):
             killMob("clover","ladybug",1)
+        stingerHunt(nt.value)
         if setdat["ladybug"] and checkRespawn("ladybug_mushroom","5m"):
             killMob("mushroom","ladybug",1)
+        stingerHunt(nt.value)
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_clover","5m"):
             if checkRespawn("rhinobeetle_blueflower","5m"):
                 #webhook("","hi","red")
@@ -1964,22 +2036,29 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 lootMob("blue flower","rhinobeetle",1)
             else:
                 killMob("clover","rhino beetle",1)
-            
+        stingerHunt(nt.value)
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_blueflower","5m"):
             killMob("blue flower","rhino beetle",1)
+        stingerHunt(nt.value)
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_bamboo","5m"):
             killMob("bamboo","rhino beetle",1)
+        stingerHunt(nt.value)
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_pineapple","5m"):
             killMob("pineapple","rhino beetle",1)
+        stingerHunt(nt.value)
         if setdat["mantis"] and checkRespawn("mantis_pinetree","20m"):
             killMob("pine tree","mantis",1)
+        stingerHunt(nt.value)
         if setdat["mantis"] and checkRespawn("mantis_pineapple","20m"):
             killMob("pineapple","mantis",1)
+        stingerHunt(nt.value)
         if setdat["scorpion"] and checkRespawn("scorpion_rose","20m"):
             killMob("rose","scorpion",1)
+        stingerHunt(nt.value)
         if setdat["spider"] and checkRespawn("spider_spider","30m"):
             killMob("spider","spider",1)
         #gather check
+        stingerHunt(nt.value)
         if setdat['gather_enable']:
             canon()
             webhook("","Traveling: {}".format(setdat['gather_field'][gfid]),"dark brown")
@@ -2034,6 +2113,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
             timestart = time.perf_counter()
             gat.value = 1
             fullTime = 0
+            stingerFound = 0
             while True:
                 time.sleep(0.05)
                 mouse.press(Button.left)
@@ -2051,45 +2131,52 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                     break
                 if setdat['field_drift_compensation'][gfid]:
                     fieldDriftCompensation()
+                shv = nt.value
+                if shv:
+                    stingerHunt(shv,0,1)
+                    stingerFound = 1
+                    break
+                    
                 mouse.release(Button.left)
             time.sleep(0.5)
             gat.value = 0
             bpcap.value = 0
             cf.value = ""
-            if setdat["before_gather_turn"][gfid] == "left":
-                for _ in range(setdat["turn_times"][gfid]):
-                    move.press(".")
-            elif setdat["before_gather_turn"][gfid] == "right":
-                for _ in range(setdat["turn_times"][gfid]):
-                    move.press(",")
-                    
-            if setdat['return_to_hive'][gfid] == "walk":
-                walk_to_hive(gfid)
-            elif setdat['return_to_hive'][gfid] == "reset":
-                reset.reset()
-                convert()
-            elif setdat['return_to_hive'][gfid] == "rejoin":
-                rejoin()
-                reset.reset()
-            elif setdat['return_to_hive'][gfid] == "whirligig":
-                reject = 0
-                webhook("","Activating whirligig","dark brown")
-                if setdat['whirligig_slot'][gfid] == "none":
-                    webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
+            if not stingerFound:
+                if setdat["before_gather_turn"][gfid] == "left":
+                    for _ in range(setdat["turn_times"][gfid]):
+                        move.press(".")
+                elif setdat["before_gather_turn"][gfid] == "right":
+                    for _ in range(setdat["turn_times"][gfid]):
+                        move.press(",")
+                        
+                if setdat['return_to_hive'][gfid] == "walk":
                     walk_to_hive(gfid)
-                else:
-                    move.press(str(setdat['whirligig_slot'][gfid]))
-                    time.sleep(1)
-                    r = 0
-                    for _ in range(2):
-                        re = ebutton()
-                        if re:
-                            r = 1
-                    if r or reject:
-                        webhook("Notice","Whirligig failed to activate, walking back","red")
-                        walk_to_hive()
+                elif setdat['return_to_hive'][gfid] == "reset":
+                    reset.reset()
+                    convert()
+                elif setdat['return_to_hive'][gfid] == "rejoin":
+                    rejoin()
+                    reset.reset()
+                elif setdat['return_to_hive'][gfid] == "whirligig":
+                    reject = 0
+                    webhook("","Activating whirligig","dark brown")
+                    if setdat['whirligig_slot'][gfid] == "none":
+                        webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
+                        walk_to_hive(gfid)
                     else:
-                        convert()
+                        move.press(str(setdat['whirligig_slot'][gfid]))
+                        time.sleep(1)
+                        r = 0
+                        for _ in range(2):
+                            re = ebutton()
+                            if re:
+                                r = 1
+                        if r or reject:
+                            webhook("Notice","Whirligig failed to activate, walking back","red")
+                            walk_to_hive()
+                        else:
+                            convert()
                         reset.reset()
             gfid += 1
             while True:
@@ -2112,21 +2199,21 @@ def haste_comp():
 def setResolution():
     wwd = int(pag.size()[0])
     whd = int(pag.size()[1])
-    nww = 0
-    nwh = 0
-    if subprocess.call("system_profiler SPDisplaysDataType | grep -i 'retina'", shell=True) == 0:
-        print("display type: retina")
-        log("display type: retina")
-        loadsettings.save('display_type', 'built-in retina display')
-        wwd *=2
-        whd *=2
+    info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
+    if "retina" in info or "m1" in info:
         try:
             retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
             retout = retout.decode().split("\n")[1].strip().split("x")
             nww = ''.join([x for x in retout[0] if x.isdigit()])
             nwh = ''.join([x for x in retout[1] if x.isdigit()])
         except:
-            pass
+            nww = 0
+            nwh = 0
+        loadsettings.save('display_type', 'built-in retina display')
+        print("display type: retina")
+        log("display type: retina")
+        wwd *=2
+        whd *=2
     else:
         loadsettings.save('display_type',"built-in display")
         print("display type: built-in")
@@ -2836,7 +2923,7 @@ if __name__ == "__main__":
         savedat = loadRes()
         ww = savedat['ww']
         wh = savedat['wh']
-        webhook("Macro started - Report","exih_macro {}\nScreen Coordinates: {}x{}\nPython Version: {}".format(macrov,ww,wh,python_ver),"dark brown")
+        webhook("Macro started - Report","exih_macro\nVersion {}\nScreen Coordinates: {}x{}\nPython {}".format(macrov,ww,wh,python_ver),"dark brown")
         setdat = loadsettings.load()
         if not is_running("roblox"):
             rejoin()
@@ -2847,10 +2934,11 @@ if __name__ == "__main__":
         time.sleep(0.5)
         #fullscreen()
         gather.value = 0
+        timeupdate.value = int(time.time())
         time.sleep(0.5)
-        startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,1))
+        startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,1,night))
         startLoop_proc.start()
-        background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected,rejoinval))
+        background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected,rejoinval,night,timeupdate))
         discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,rejoinval))
         background_proc.start()
         if setdat['enable_discord_bot']:
@@ -2860,14 +2948,14 @@ if __name__ == "__main__":
                 if disconnected.value:
                     startLoop_proc.terminate()
                     while disconnected.value:
-                        pass
-                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0))
+                        timeupdate.value = int(time.time())
+                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0,night))
                     startLoop_proc.start()
                 if rejoinval.value:
                     print("rejoin received")
                     startLoop_proc.terminate()
                     rejoin()
-                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0))
+                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0,night))
                     startLoop_proc.start()
                     rejoinval.value = 0
                 if setdat['haste_compensation']:
@@ -2875,6 +2963,14 @@ if __name__ == "__main__":
                     time.sleep(0.1)
                 #if keyboard.is_pressed('q'):
                     #raise KeyboardInterrupt
+                
+                if int(time.time())-timeupdate.value > 180:
+                    webhook("","Starting new background process","red")
+                    background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected,rejoinval,night,timeupdate))
+                    time.sleep(1)
+                    background_proc.start()
+                    timeupdate.value = int(time.time())
+                
 
                     
         except KeyboardInterrupt:
@@ -3001,7 +3097,7 @@ if __name__ == "__main__":
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
 
     ylevel = 140
-    dropField = ttk.OptionMenu(frame1, gather_field_two,setdat['gather_field'][1].title(), *gather_fields[1:],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, gather_field_two,setdat['gather_field'][1].title(), *gather_fields,style='smaller.TMenubutton' )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
     tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_two).place(x=10, y = ylevel+65)
 
@@ -3038,7 +3134,7 @@ if __name__ == "__main__":
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
 
     ylevel = 230
-    dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields[1:],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields,style='smaller.TMenubutton' )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
     tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_three).place(x=10, y = ylevel+65)
 
@@ -3104,6 +3200,7 @@ if __name__ == "__main__":
     tkinter.Label(frame4, text = "Gumdrop Slot").place(x = 130, y = 122)
     dropField = ttk.OptionMenu(frame4, gumdrop_slot,setdat['gumdrop_slot'], *[x for x in range(1,8)],style='smaller.TMenubutton')
     dropField.place(width=65,x = 225, y = 124,height=20)
+    tkinter.Checkbutton(frame4, text="Stinger Hunt", variable=stinger).place(x=0, y = 155)
     
     #Tab 4
     tkinter.Checkbutton(frame6, text="Enable Planters", variable=enable_planters).place(x=545, y = 20)
@@ -3196,7 +3293,7 @@ if __name__ == "__main__":
     dropField.place(width=60,x = 245, y = 85,height=24)
 
     tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation).place(x=0, y = 120)
-    tkinter.Checkbutton(frame3, text="Low Performance Haste Compensation", variable=low_performance_haste_compensation).place(x=210, y = 120)
+    
 
 
     #Tab 6
