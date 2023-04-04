@@ -49,7 +49,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.39.3"
+macrov = "1.40"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -95,7 +95,7 @@ def fullscreen():
     keyboard.release(Key.cmd)
     keyboard.release(Key.ctrl)
     keyboard.release("f")
-def discord_bot(dc,rejoinval):
+def discord_bot():
     setdat = loadsettings.load()
     intents = discord.Intents.default()
     intents.message_content = True
@@ -116,9 +116,7 @@ def discord_bot(dc,rejoinval):
             cmd = args[0].lower()
             if cmd == "rejoin":
                 await message.channel.send("Now attempting to rejoin")
-                dc.value = 1
                 await asyncRejoin()
-                dc.value = 0
             elif cmd == "screenshot":
                 await message.channel.send("Sending a screenshot via webhook")
                 webhook("User Requested: Screenshot","","light blue",1)
@@ -244,6 +242,8 @@ def checkwithOCR(m):
             return True
     elif m == "disconnect":
         if "disconnected" in text or "join error" in text:
+            setStatus("disconnect")
+            webhook("","disconnected","red")
             return True
     elif m == "dialog":
         if "bear" in text:
@@ -430,47 +430,47 @@ def canon(fast=0):
     setdat = loadsettings.load()
     ww = savedata['ww']
     wh = savedata['wh']
-    #Move to canon:
-    if not fast: webhook("","Moving to canon","dark brown")
-    move.hold("w",0.8)
-    move.hold("d",0.9*(setdat["hive_number"])+1)
-    pag.keyDown("d")
-    time.sleep(0.5)
-    move.press("space")
-    time.sleep(0.2)
-    r = ""
-    pag.keyUp("d")
-    if fast:
-        move.hold("d",0.9)
-        time.sleep(0.1)
-        return
-    move.hold("d",0.3)
-    for _ in range(4):
-        move.hold("d",0.2)
-        time.sleep(0.05)
-        r = ebutton()
-        if r:
-            if checkwithOCR('bee bear'):
-                webhook("","Bee Bear detected","dark brown")
-                break
-            else:
-                webhook("","Canon found","dark brown")
-                with open('canonfails.txt', 'w') as f:
-                    f.write('0')
-                f.close()
-                return
-    mouse.position = (mw//2,mh//5*4)
-    with open('canonfails.txt','r') as f:
-        cfCount = int(f.read())
-        cfCount += 1
-    f.close()
-    webhook("","Cannon not found, attempt: {},resetting".format(cfCount),"dark brown",1)
-    with open('canonfails.txt','w') as f:
-        f.write(str(cfCount))
-    f.close()
-        
-    reset.reset()   
-    canon()
+    for i in range(4):
+        if checkwithOCR("disconnect"):
+            return "dc"
+        #Move to canon:
+        if not fast: webhook("","Moving to canon","dark brown")
+        move.apkey("space")
+        time.sleep(1)
+        move.hold("w",0.8)
+        move.hold("d",0.9*(setdat["hive_number"])+1)
+        pag.keyDown("d")
+        time.sleep(0.5)
+        move.press("space")
+        time.sleep(0.2)
+        r = ""
+        pag.keyUp("d")
+        if fast:
+            move.hold("d",0.9)
+            time.sleep(0.1)
+            return
+        move.hold("d",0.3)
+        for _ in range(4):
+            move.hold("d",0.2)
+            time.sleep(0.05)
+            r = ebutton()
+            if r:
+                if checkwithOCR('bee bear'):
+                    webhook("","Bee Bear detected","dark brown")
+                    break
+                else:
+                    webhook("","Canon found","dark brown")
+                    with open('canonfails.txt', 'w') as f:
+                        f.write('0')
+                    f.close()
+                    return
+        mouse.position = (mw//2,mh//5*4)
+        reset.reset()
+    else:
+        webhook("","Canon failed too many times, rejoining", "red")
+        setStatus("disconnect")
+        time.sleep(1)
+        return "dc"
     '''
         for _ in range(20):
             mouse.press()
@@ -565,12 +565,13 @@ def convert():
     webhook("","Starting convert","brown",1)
     st = time.perf_counter()
     while True:
-        if stingerHunt(1,1):
+        sh = stingerHunt(1,1)
+        if sh == "dc" or sh == "success":
             break
         c = ebutton()
         if not c:
             webhook("","Convert done","brown")
-            time.sleep(3)
+            time.sleep(2)
             break
         if time.perf_counter()  - st > 600:
             webhook("","Converting took too long, moving on","brown")
@@ -666,12 +667,48 @@ def resetMobTimer(cfield):
             if checkRespawn("rhinobeetle_blueflower","5m"):  savetimings("rhinobeetle_blueflower")
         elif cfield == "bamboo":
             if checkRespawn("rhinobeetle_bamboo","5m"):  savetimings("rhinobeetle_bamboo")
-def stingerHunt(night,convert=0,gathering=0):
+def stingerHunt(convert=0,gathering=0):
     setdat = loadsettings.load()
     fields = ['pepper','mountain top','rose','cactus','spider','clover']
-    if not night: return False
+    if checkwithOCR("disconnect"):
+        time.sleep(1)
+        return "dc"
+    if setdat['rejoin_every_enabled']:
+        with open('timings.txt', 'r') as f:
+            prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
+        log("{}, {}".format((time.time() - prevTime)/3600, setdat['rejoin_every']))
+        if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
+            setStatus("disconnect")
+            time.sleep(1)
+            return "dc"
+    global honeyHist, prevHour, prevMin, invalid_prev_honey
+    if setdat['enable_discord_webhook']:
+            sysTime = datetime.now()
+            sysHour = sysTime.hour
+            sysMin = sysTime.minute
+            if sysMin != prevMin:
+                prevMin = sysMin
+                ch = imToString('honey')
+                if invalid_prev_honey and ch:
+                    invalid_prev_honey = 0
+                    honeyHist = [ch]*60
+                    loadsettings.save("prev_honey",ch)
+                else:
+                    if ch:
+                        honeyHist[sysMin] = int(ch)
+                    else:
+                        honeyHist[sysMin] = honeyHist[sysMin-1]
+                log(ch)
+                savehoney_history(honeyHist)
+            if sysMin == 0 and sysHour != prevHour:
+                
+                hourlyReport()
+                prev_honey = loadsettings.load()['prev_honey']
+                honeyHist = [prev_honey]*60
+                prevHour = sysHour
+    status = getStatus()         
+    if status != "night": return False
     if convert:
-        dn = detectNight(1)
         if dn:
             move.press(".")
         else:
@@ -682,7 +719,7 @@ def stingerHunt(night,convert=0,gathering=0):
         fieldGoTo = field
         killvb = 0
         if not "vb_found" in status: #Status might update after resetting
-            canon(1)
+            if canon(1) == "dc": return "dc"
             exec(open("field_{}.py".format(field)).read())
             webhook("","Finding Vicious Bee ({})".format(field),"dark brown")
             setStatus("finding_vb_{}".format(field))
@@ -700,7 +737,7 @@ def stingerHunt(night,convert=0,gathering=0):
             killvb = 1
         elif "vb_found_wrong_field" in status:
             reset.reset()
-            canon(1)
+            if canon(1) == "dc": return "dc"
             fieldGoTo = status.split("_")[-1]
             exec(open("field_{}.py".format(fieldGoTo)).read())
             exec(open("vb_{}.py".format(fieldGoTo)).read())
@@ -719,14 +756,15 @@ def stingerHunt(night,convert=0,gathering=0):
                     break
                 if status == "killing_vb_died":
                     reset.reset()
-                    canon(1)
+                    if canon(1) == "dc": return "dc"
+                    fieldGoTo = status.split("_")[4]
                     exec(open("field_{}.py".format(fieldGoTo)).read())
                     setStatus("killing_vb")
             reset.reset()
             break
         reset.reset()
     setStatus("none")
-    return True
+    return "success"
 sat_image = cv2.imread('./images/retina/saturator.png')
 method = cv2.TM_SQDIFF_NORMED
 def displayPlanterName(planter):
@@ -797,6 +835,8 @@ def placePlanter(planter):
     wh = res['wh']
     planterSlot = str(plantdat['{}_slot'.format(planter)])
     log(planterSlot)
+    if checkwithOCR("disconnect"):
+        return
     if planterSlot != "none":
         move.press(planterSlot)
     else:
@@ -875,7 +915,7 @@ def clickYes():
             
     
 def goToPlanter(field,place=0):
-    canon()
+    if canon() == "dc": return
     exec(open("field_{}.py".format(field)).read())
     if field == "pine tree":
         move.hold("d",3)
@@ -945,28 +985,23 @@ def savehoney_history(saveinfo):
         f.write(str(saveinfo))
     f.close()
     
-def background(cf,bpcap,gat,dc, rejoinval,nt,tu):
-    time.sleep(20)
+def hastecompbg():
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
     setdat = loadsettings.load()
-    prevHour = datetime.now().hour
-    prevMin = datetime.now().minute
-    honeyHist = [setdat['prev_honey']]*60
-    log(honeyHist)
-    invalid_prev_honey = 0
-    fields = ['pepper','mountain','rose','cactus','spider','clover']
-    if honeyHist[0] == 0:
-        invalid_prev_honey = 1
+    print("hastecomp activated")
     while True:
-        tu.value = int(time.time())
+        getHaste()
+
+def vic():
+    fields = ['pepper','mountain','rose','cactus','spider','clover']
+    while True:
         status = getStatus()
         
         #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
         
         if "vb" in status:
-            nt.value = 0
             bluetexts = imToString("blue").lower()
             print(bluetexts)
             if "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
@@ -990,76 +1025,13 @@ def background(cf,bpcap,gat,dc, rejoinval,nt,tu):
                 elif "died" in bluetexts:
                     setStatus("killing_vb_died")
         else:
-            if checkwithOCR("disconnect"):
-                dc.value = 1
-                webhook("","Disconnected","red")
-                rejoin()
-                dc.value = 0
-        
-            if gat.value:
-                bpcap.value = backpack.bpc()
-                resetMobTimer(cf.value.lower())
-            if setdat['stinger']:
-                if detectNight():
-                    nt.value = 1
-            if setdat['rejoin_every_enabled']:
-                with open('timings.txt', 'r') as f:
-                    prevTime = float([x for x in f.read().split('\n') if x.startswith('rejoin_every')][0].split(":")[1])
-                log("{}, {}".format((time.time() - prevTime)/3600, setdat['rejoin_every']))
-                if (time.time() - prevTime)/3600 > setdat['rejoin_every']:
-                    dc.value = 1
-                    rejoin()
-                    dc.value = 0
-                    savetimings('rejoin_every')
-                    
-        with open('canonfails.txt', 'r') as f:
-            cfCount = int(f.read())
-        f.close()
-        if cfCount >= 4:
-            with open('canonfails.txt', 'w') as f:
-                f.write('0')
-            f.close()
-            dc.value = 1
-            webhook("","Canon failed too many times, rejoining","red")
-            rejoin()
-            dc.value = 0
-        if setdat['enable_discord_webhook']:
-            sysTime = datetime.now()
-            sysHour = sysTime.hour
-            sysMin = sysTime.minute
-            if sysMin != prevMin:
-                prevMin = sysMin
-                ch = imToString('honey')
-                if invalid_prev_honey and ch:
-                    invalid_prev_honey = 0
-                    honeyHist = [ch]*60
-                    loadsettings.save("prev_honey",ch)
-                else:
-                    if ch:
-                        honeyHist[sysMin] = int(ch)
-                    else:
-                        honeyHist[sysMin] = honeyHist[sysMin-1]
-                log(ch)
-                savehoney_history(honeyHist)
-            if sysMin == 0 and sysHour != prevHour:
-                
-                hourlyReport()
-                prev_honey = loadsettings.load()['prev_honey']
-                honeyHist = [prev_honey]*60
-                prevHour = sysHour
-                #savehoney_history(honeyHist)
-        
-        
-    
-        #webhook("","An error has been caught in the background process. It can be found in either the terminal or the macroLogs.log file","red")
-        #msg = "error: {}".format(err)
-        #log(msg)
-            #print(msg)
+            if detectNight():
+                setStatus("night")
         
 def killMob(field,mob,reset):
     webhook("","Traveling: {} ({})".format(mob.title(),field.title()),"dark brown")
     convert()
-    canon()
+    if canon() == "dc": return
     time.sleep(1)
     exec(open("field_{}.py".format(field)).read())
     if mob == "spider":
@@ -1089,7 +1061,7 @@ def collect(name,beesmas=0):
     claimLoot = 0
     for _ in range(2):
         convert()
-        canon()
+        if canon() == "dc": return
         webhook("","Traveling: {}".format(dispname),"dark brown")
         exec(open("collect_{}.py".format(usename)).read())
         if usename == "wealthclock" or usename == "samovar":
@@ -1208,8 +1180,8 @@ def openSettings():
     else:
         pag.typewrite("\\")
         webhook("","Unable to locate the walkspeed stat, haste compensation is disabled","red")
-        loadsettings.save("msh","-1","multipliers.txt")
-        loadsettings.save("msy","-1","multipliers.txt")
+        loadsettings.save("msh",-1,"multipliers.txt")
+        loadsettings.save("msy",-1,"multipliers.txt")
         return
     time.sleep(0.3)
     check = customOCR(0,0,ww/7,wh)
@@ -1726,7 +1698,6 @@ def rejoin():
             webhook("","Rejoin successful","dark brown")
             break
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
-        
     
 
     
@@ -1742,7 +1713,128 @@ updateSave("wh",wh)
 '''
             
     
+def gather(gfid):
+    if str(gfid).isdigit():
+        gfid = int(gfid)
+        setdat = loadsettings.load()
+    else:
+        gfid = str(gfid)
+    canon()
+    webhook("","Traveling: {}".format(setdat['gather_field'][gfid]),"dark brown")
+    exec(open("field_{}.py".format(setdat['gather_field'][gfid])).read())
+    cf = setdat['gather_field'][gfid].replace(" ","").lower()
+    time.sleep(0.2)
+    s_l = setdat['start_location'][gfid].lower()
+    rotTowards = []
+    rotBack = []
+    if s_l != 'center':
+        if s_l == "upper right":
+            rotTowards = ["."]
+        elif s_l == "right":
+            rotTowards = ["."]*2
+        elif s_l == "lower right":
+            rotTowards = ["."]*3
+        elif s_l == "bottom":
+            rotTowards = ["."]*4
+        elif s_l == "lower left":
+            rotTowards = [","]*3
+        elif s_l == "left":
+            rotTowards = [","]*2
+        elif s_l == "upper left":
+            rotTowards = [","]
+        for i in rotTowards:
+            move.press(i)
+            if i == ".":
+                rotBack.append(",")
+            elif i:
+                rotBack.append(".")
+        
+        move.hold("w",setdat['distance_from_center'][gfid]/2.5)
+        
+        for i in rotBack:
+            move.press(i)
 
+    print(setdat["before_gather_turn"][gfid])
+       
+    if setdat["before_gather_turn"][gfid] == "left":
+        for _ in range(setdat["turn_times"][gfid]):
+            move.press(",")
+    elif setdat["before_gather_turn"][gfid] == "right":
+        for _ in range(setdat["turn_times"][gfid]):
+            move.press(".")
+    
+    time.sleep(0.2)
+    placeSprinkler()
+    pag.click()
+    gp = setdat["gather_pattern"][gfid].lower()
+    webhook("Gathering: {}".format(setdat['gather_field'][gfid]),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"][gfid],setdat["gather_pattern"][gfid],setdat["pack"][gfid]),"light green")
+    time.sleep(0.2)
+    timestart = time.perf_counter()
+    fullTime = 0
+    stingerFound = 0
+    while True:
+        time.sleep(0.05)
+        mouse.press(Button.left)
+        time.sleep(0.05)
+        exec(open("gather_{}.py".format(gp)).read())
+        bpcap = backpack.bpc()
+        resetMobTimer(cf.lower())
+        timespent = (time.perf_counter() - timestart)/60
+        if bpcap >= setdat["pack"][gfid]:
+            webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"][gfid]),"light green")
+            break
+            
+        if timespent > setdat["gather_time"][gfid]:
+            webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"][gfid]),"light green")
+            break
+        if setdat['field_drift_compensation'][gfid]:
+            print("field drift comp")
+            fieldDriftCompensation()
+        shv = stingerHunt(0,1)
+        if  shv == "success":
+            stingerFound = 1
+            break
+        elif shv == "dc":
+            return
+            
+        mouse.release(Button.left)
+    time.sleep(0.5)
+    if not stingerFound:
+        if setdat["before_gather_turn"][gfid] == "left":
+            for _ in range(setdat["turn_times"][gfid]):
+                move.press(".")
+        elif setdat["before_gather_turn"][gfid] == "right":
+            for _ in range(setdat["turn_times"][gfid]):
+                move.press(",")
+                
+        if setdat['return_to_hive'][gfid] == "walk":
+            walk_to_hive(gfid)
+        elif setdat['return_to_hive'][gfid] == "reset":
+            reset.reset()
+            convert()
+        elif setdat['return_to_hive'][gfid] == "rejoin":
+            rejoin()
+            reset.reset()
+        elif setdat['return_to_hive'][gfid] == "whirligig":
+            reject = 0
+            webhook("","Activating whirligig","dark brown")
+            if setdat['whirligig_slot'][gfid] == "none":
+                webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
+                walk_to_hive(gfid)
+            else:
+                move.press(str(setdat['whirligig_slot'][gfid]))
+                time.sleep(1)
+                r = 0
+                for _ in range(2):
+                    re = ebutton()
+                    if re:
+                        r = 1
+                if r or reject:
+                    webhook("Notice","Whirligig failed to activate, walking back","red")
+                    walk_to_hive()
+                else:
+                    convert()
+                reset.reset()
 
 def placeSprinkler():
     sprinklerCount = {
@@ -1760,8 +1852,9 @@ def placeSprinkler():
         time.sleep(0.3)
         move.apkey("space")
         time.sleep(0.13)
-def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_start,nt):
-    nt.value = 0
+def startLoop(planterTypes_prev, planterFields_prev,session_start):
+    global invalid_prev_honey
+    setStatus()
     setdat = loadsettings.load()   
     val = validateSettings()
     setStatus()
@@ -1785,13 +1878,18 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
     with open('firstRun.txt', 'w') as f:
         f.write("0")
     f.close()
+    invalid_prev_honey = 0
     if session_start:
         log("Session Start")
-        rawreset(1)
+        if setdat['haste_compensation']:
+            rawreset(1)
+            openSettings()
+        else: rawreset()
         currHoney = imToString('honey')
         loadsettings.save('start_honey',currHoney)
         loadsettings.save('prev_honey',currHoney)
-    if setdat['haste_compensation']: openSettings()
+        if honeyHist[0] == 0:
+            invalid_prev_honey = 1
     reset.reset()
     convert()
     savedata = loadRes()
@@ -1833,6 +1931,8 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
             while True:
                 time.sleep(10)
                 pag.click()
+                if checkwithOCR("disconnect"):
+                    return
                 if imagesearch.find("keepold.png",0.9):
                     savetimings("stump_snail")
                     if setdat['continue_after_stump_snail']:break
@@ -1842,45 +1942,77 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
             reset.reset()
             
         #Collect check
-        stingerHunt(nt.value)
+        stingerHunt()
+        if getStatus() == "disconnect":
+            print("aaaa")
+            return
+        
         if setdat['wealthclock']  and checkRespawn('wealthclock',"1h"):
             collect("wealth clock")
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['blueberrydispenser'] and checkRespawn('blueberrydispenser','4h'):
             collect('blueberry dispenser')
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
+        
         if setdat['strawberrydispenser'] and checkRespawn('strawberrydispenser','4h'):
             collect('strawberry dispenser')
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['royaljellydispenser'] and checkRespawn('royaljellydispenser','22h'):
             collect('royal jelly dispenser')
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+            
         if setdat['treatdispenser'] and checkRespawn('treatdispenser','1h'):
             collect('treat dispenser')
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['stockings'] and checkRespawn('stockings','1h'):
             collect('stockings',1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['wreath'] and checkRespawn('wreath','30m'):
             wreath()
+            stingerHunt()
+            if getStatus() == "disconnect": return
+            
         if setdat['feast'] and checkRespawn('feast','90m'):
             collect('feast',1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['samovar'] and checkRespawn('samovar','6h'):
             collect('samovar',1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['snow_machine'] and checkRespawn('snow_machine','2h'):
             collect('snow_machine')
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['lid_art'] and checkRespawn('lid_art','8h'):
             collect('lid_art',1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['candles'] and checkRespawn('candles','4h'):
             collect('candles',1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['gluedispenser'] and checkRespawn('gluedispenser','22h'):
             collect('glue dispenser')
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat['mondo_buff']:
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
@@ -1899,6 +2031,8 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 webhook("","Collected: Mondo Buff","bright green",1)
                 reset.reset()
                 convert()
+                stingerHunt()
+                if getStatus() == "disconnect": return
         
             
         
@@ -1912,7 +2046,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                     bestPlanter = getBestPlanter(planterFields[i],occupiedStuff,planterTypes)
                     webhook('',"Traveling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),planterFields[i].title()),"dark brown")
                     goToPlanter(planterFields[i],1)
-    
+                    if getStatus() == "disconnect": return
                     placePlanter(bestPlanter)
                     occupiedStuff.append((bestPlanter,planterFields[i]))
                 continuePlanters = 1
@@ -1951,6 +2085,7 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                         time.sleep(2)
                         for i in range(2):
                             goToPlanter(currField)
+                            if getStatus() == "disconnect": return
                             webhook('',"Traveling: {} ({})\nObjective: Collect Planter, Attempt: {}".format(displayPlanterName(currPlanter),currField.title(),i+1),"dark brown")
                             if ebutton():
                                 move.press('e')
@@ -1975,6 +2110,10 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                             else:
                                 webhook("","Cant find Planter","red",1)
                                 reset.reset()
+                        else:
+                            cycleFields.remove(currField)
+                            cycleFields.append(currField)
+                            removeFromOccupied.append((currPlanter,currField))
                     else:
                         occupiedFields.append(currField)
                 if collectAnyPlanters > 0 and planterFields == cycleFields:
@@ -1997,7 +2136,8 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 for i in fieldsToPlace:
                     bestPlanter = getBestPlanter(i,occupiedStuff,planterTypes)
                     webhook('',"Traveling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),i.title()),"dark brown")
-                    goToPlanter(i,1) 
+                    goToPlanter(i,1)
+                    if getStatus() == "disconnect": return
                     placePlanter(bestPlanter)
                     occupiedStuff.append((bestPlanter,i))
                     
@@ -2006,13 +2146,16 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 f.close()             
                                                                                         
         #Mob run check
-        stingerHunt(nt.value)
+        stingerHunt()
+        if getStatus() == "disconnect": return
         if setdat['werewolf'] and checkRespawn("werewolf","1h"):
             killMob("pumpkin","werewolf",1)
         if setdat["ladybug"] and checkRespawn("ladybug_strawberry","5m"):
             
             if checkRespawn("ladybug_mushroom","5m"):
                 killMob("strawberry","ladybug",0)
+                stingerHunt()
+                if getStatus() == "disconnect": return
                 move.hold("s",4)
                 move.hold("a",3)
                 move.hold("w",5.5)
@@ -2020,164 +2163,68 @@ def startLoop(cf,bpcap,gat,dc,planterTypes_prev, planterFields_prev,session_star
                 lootMob("mushroom","ladybug",1)
             else:
                 killMob("strawberry","ladybug",1)
-        stingerHunt(nt.value)
+        stingerHunt()
+        if getStatus() == "disconnect": return
         if setdat["ladybug"] and checkRespawn("ladybug_clover","5m"):
             killMob("clover","ladybug",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat["ladybug"] and checkRespawn("ladybug_mushroom","5m"):
             killMob("mushroom","ladybug",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+       
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_clover","5m"):
             if checkRespawn("rhinobeetle_blueflower","5m"):
                 #webhook("","hi","red")
                 killMob("clover","rhino beetle",0)
+                stingerHunt()
+                if getStatus() == "disconnect": return
                 move.hold("s",7)
                 time.sleep(1)
                 lootMob("blue flower","rhinobeetle",1)
             else:
                 killMob("clover","rhino beetle",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_blueflower","5m"):
             killMob("blue flower","rhino beetle",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+            
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_bamboo","5m"):
             killMob("bamboo","rhino beetle",1)
-        stingerHunt(nt.value)
+            stingerHunt()
         if setdat["rhinobeetle"] and checkRespawn("rhinobeetle_pineapple","5m"):
             killMob("pineapple","rhino beetle",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat["mantis"] and checkRespawn("mantis_pinetree","20m"):
             killMob("pine tree","mantis",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat["mantis"] and checkRespawn("mantis_pineapple","20m"):
             killMob("pineapple","mantis",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat["scorpion"] and checkRespawn("scorpion_rose","20m"):
             killMob("rose","scorpion",1)
-        stingerHunt(nt.value)
+            stingerHunt()
+            if getStatus() == "disconnect": return
+        
         if setdat["spider"] and checkRespawn("spider_spider","30m"):
             killMob("spider","spider",1)
         #gather check
-        stingerHunt(nt.value)
+        stingerHunt()
+        if getStatus() == "disconnect": return
+        
         if setdat['gather_enable']:
-            canon()
-            webhook("","Traveling: {}".format(setdat['gather_field'][gfid]),"dark brown")
-            exec(open("field_{}.py".format(setdat['gather_field'][gfid])).read())
-            cf.value = setdat['gather_field'][gfid].replace(" ","").lower()
-            time.sleep(0.2)
-            s_l = setdat['start_location'][gfid].lower()
-            rotTowards = []
-            rotBack = []
-            if s_l != 'center':
-                if s_l == "upper right":
-                    rotTowards = ["."]
-                elif s_l == "right":
-                    rotTowards = ["."]*2
-                elif s_l == "lower right":
-                    rotTowards = ["."]*3
-                elif s_l == "bottom":
-                    rotTowards = ["."]*4
-                elif s_l == "lower left":
-                    rotTowards = [","]*3
-                elif s_l == "left":
-                    rotTowards = [","]*2
-                elif s_l == "upper left":
-                    rotTowards = [","]
-                for i in rotTowards:
-                    move.press(i)
-                    if i == ".":
-                        rotBack.append(",")
-                    elif i:
-                        rotBack.append(".")
-                
-                move.hold("w",setdat['distance_from_center'][gfid]/2.5)
-                
-                for i in rotBack:
-                    move.press(i)
-
-            print(setdat["before_gather_turn"][gfid])
-               
-            if setdat["before_gather_turn"][gfid] == "left":
-                for _ in range(setdat["turn_times"][gfid]):
-                    move.press(",")
-            elif setdat["before_gather_turn"][gfid] == "right":
-                for _ in range(setdat["turn_times"][gfid]):
-                    move.press(".")
-            
-            time.sleep(0.2)
-            placeSprinkler()
-            pag.click()
-            gp = setdat["gather_pattern"][gfid].lower()
-            webhook("Gathering: {}".format(setdat['gather_field'][gfid]),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"][gfid],setdat["gather_pattern"][gfid],setdat["pack"][gfid]),"light green")
-            time.sleep(0.2)
-            timestart = time.perf_counter()
-            gat.value = 1
-            fullTime = 0
-            stingerFound = 0
-            while True:
-                time.sleep(0.05)
-                mouse.press(Button.left)
-                time.sleep(0.05)
-                exec(open("gather_{}.py".format(gp)).read())
-                time.sleep(0.05)
-                time.sleep(0.05)
-                timespent = (time.perf_counter() - timestart)/60
-                if bpcap.value >= setdat["pack"][gfid]:
-                    webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"][gfid]),"light green")
-                    break
-                    
-                if timespent > setdat["gather_time"][gfid]:
-                    webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"][gfid]),"light green")
-                    break
-                if setdat['field_drift_compensation'][gfid]:
-                    fieldDriftCompensation()
-                shv = nt.value
-                if shv:
-                    stingerHunt(shv,0,1)
-                    stingerFound = 1
-                    break
-                    
-                mouse.release(Button.left)
-            time.sleep(0.5)
-            gat.value = 0
-            bpcap.value = 0
-            cf.value = ""
-            if not stingerFound:
-                if setdat["before_gather_turn"][gfid] == "left":
-                    for _ in range(setdat["turn_times"][gfid]):
-                        move.press(".")
-                elif setdat["before_gather_turn"][gfid] == "right":
-                    for _ in range(setdat["turn_times"][gfid]):
-                        move.press(",")
-                        
-                if setdat['return_to_hive'][gfid] == "walk":
-                    walk_to_hive(gfid)
-                elif setdat['return_to_hive'][gfid] == "reset":
-                    reset.reset()
-                    convert()
-                elif setdat['return_to_hive'][gfid] == "rejoin":
-                    rejoin()
-                    reset.reset()
-                elif setdat['return_to_hive'][gfid] == "whirligig":
-                    reject = 0
-                    webhook("","Activating whirligig","dark brown")
-                    if setdat['whirligig_slot'][gfid] == "none":
-                        webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
-                        walk_to_hive(gfid)
-                    else:
-                        move.press(str(setdat['whirligig_slot'][gfid]))
-                        time.sleep(1)
-                        r = 0
-                        for _ in range(2):
-                            re = ebutton()
-                            if re:
-                                r = 1
-                        if r or reject:
-                            webhook("Notice","Whirligig failed to activate, walking back","red")
-                            walk_to_hive()
-                        else:
-                            convert()
-                        reset.reset()
+            gather(gfid)
             gfid += 1
             while True:
                 if gfid >= len(setdat['gather_field']):
@@ -2199,8 +2246,9 @@ def haste_comp():
 def setResolution():
     wwd = int(pag.size()[0])
     whd = int(pag.size()[1])
+    warnings = []
     info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
-    if "retina" in info or "m1" in info:
+    if "retina" in info or "m1" in info or "m2" in info:
         try:
             retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
             retout = retout.decode().split("\n")[1].strip().split("x")
@@ -2232,6 +2280,7 @@ def setResolution():
         "2940x1912": [1.1,0.98,1,1.2],
         "1920x1080": [1.2,0.92,1.3,1.5],
         "1440x900": [1,1,1,1],
+        "1366x768": [0.8,1,1,1.2],
         "4096x2304": [1.45,0.91,1.32,1.5],
         "3024x1964": [1,0.98, 1.2, 1.2],
         "3360x2100": [1.2,0.95,1.2,1.3],
@@ -2243,7 +2292,9 @@ def setResolution():
         loadsettings.save("y_length_multiplier",multiInfo[ndisplay][2],"multipliers.txt")
         loadsettings.save("x_length_multiplier",multiInfo[ndisplay][3],"multipliers.txt")
     else:
-        print("\033[0;31mScreen Coordinates not found in supported list. Contact Existance to get it supported\033[00m")
+        warnings.append("\nScreen Coordinates not found in supported list. Contact Existance to get it supported")
+    if warnings:
+        print("\033[0;31mWarnings:\n{}\033[00m".format(warnings))
 if __name__ == "__main__":
     with open('macroLogs.log', 'w'):
         pass
@@ -2797,7 +2848,7 @@ if __name__ == "__main__":
             "start_honey":0,
             "prev_honey":0,
             "start_time":time.time(),
-            "canon_time":cttextbox.get(1.0,"end").replace("\n",""),
+            "canon_time":1.0,#cttextbox.get(1.0,"end").replace("\n",""),
             "reverse_hive_direction": reverse_hive_direction.get()
 
 
@@ -2920,6 +2971,7 @@ if __name__ == "__main__":
         '''
         macro()
     def macro():
+        global  prevHour, prevMin, honeyHist
         savedat = loadRes()
         ww = savedat['ww']
         wh = savedat['wh']
@@ -2936,47 +2988,33 @@ if __name__ == "__main__":
         gather.value = 0
         timeupdate.value = int(time.time())
         time.sleep(0.5)
-        startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,1,night))
-        startLoop_proc.start()
-        background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected,rejoinval,night,timeupdate))
-        discord_bot_proc = multiprocessing.Process(target=discord_bot,args=(disconnected,rejoinval))
-        background_proc.start()
+        prevHour = datetime.now().hour
+        prevMin = datetime.now().minute
+        honeyHist = [setdat['prev_honey']]*60
+        hastecompbg_proc = multiprocessing.Process(target=hastecompbg)
+        vic_proc = multiprocessing.Process(target=vic)
+        discord_bot_proc = multiprocessing.Process(target=discord_bot)
         if setdat['enable_discord_bot']:
             discord_bot_proc.start()
+        if setdat['haste_compensation']:
+            hastecompbg_proc.start()
+        if setdat['stinger']:
+            vic_proc.start()
         try:
+            ses_start = 1
             while True:
-                if disconnected.value:
-                    startLoop_proc.terminate()
-                    while disconnected.value:
-                        timeupdate.value = int(time.time())
-                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0,night))
-                    startLoop_proc.start()
-                if rejoinval.value:
-                    print("rejoin received")
-                    startLoop_proc.terminate()
-                    rejoin()
-                    startLoop_proc = multiprocessing.Process(target=startLoop,args=(currentfield,bpc,gather,disconnected,planterTypes_prev, planterFields_prev,0,night))
-                    startLoop_proc.start()
-                    rejoinval.value = 0
-                if setdat['haste_compensation']:
-                    getHaste()
-                    time.sleep(0.1)
                 #if keyboard.is_pressed('q'):
                     #raise KeyboardInterrupt
-                
-                if int(time.time())-timeupdate.value > 180:
-                    webhook("","Starting new background process","red")
-                    background_proc = multiprocessing.Process(target=background,args=(currentfield,bpc,gather,disconnected,rejoinval,night,timeupdate))
-                    time.sleep(1)
-                    background_proc.start()
-                    timeupdate.value = int(time.time())
+               startLoop(planterTypes_prev, planterFields_prev,ses_start) 
+               rejoin()
+               ses_start = 0
                 
 
                     
         except KeyboardInterrupt:
-            startLoop_proc.terminate()
-            background_proc.terminate()
+            hastecompbg_proc.terminate()
             discord_bot_proc.terminate()
+            vic_proc.terminate()
             webhook("Macro Stopped","","dark brown")
     
     def savedisplaytype(event):
@@ -3334,6 +3372,7 @@ if __name__ == "__main__":
     dropField.place(width=90,x = 360, y = 155,height=24)
     
     #Tab 7
+    '''
     ttk.Button(frame5, text = "Calibrate Hive", command = calibratehive, width = 10).place(x=0,y=13)
     tkinter.Checkbutton(frame5, text="Reverse Hive Direction", variable=reverse_hive_direction).place(x=140, y = 15)
     tkinter.Label(frame5, text = "Screenshot multiplier").place(x = 0, y = 50)
@@ -3347,6 +3386,7 @@ if __name__ == "__main__":
     cttextbox = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     cttextbox.insert("end",canon_time)
     cttextbox.place(x=110,y=88)
+    '''
     #Root
     ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=420)
     ttk.Button(root, text = "Update",command = updateFiles, width = 9,).place(x=150,y=420)

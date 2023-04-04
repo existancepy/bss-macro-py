@@ -64,6 +64,7 @@ def hold(k,t,hastecomp = 1):
             ws = loadsettings.load()['walkspeed']
     else:
         ws = loadsettings.load()['walkspeed']
+    #print(ws)
     keyboard.press(k)
     sleep(t*28/ws)
     keyboard.release(k)

@@ -42,6 +42,7 @@ xo = ww//4
 yo = wh//4*3
 xt = xo*3-xo
 yt = wh-yo
+imgid = 0
 time.sleep(0.5)
 def roblox():
     cmd = """
@@ -65,8 +66,8 @@ def reset():
     time.sleep(0.1)
     pag.press('enter')
     sleep(8.5)
-
 def spin(fast):
+    global imgid
     out = []
     if fast:
         for _ in range(4):
@@ -95,10 +96,17 @@ def spin(fast):
             out.append(r)
             for _ in range(4):
                 pag.press(',')
+            print(imgid)
+            if imgid == 0 or imgid == 1:
+                im = pag.screenshot(region=(ww//2, wh-2, 30, 2))
+                im.save("hive - {}.png".format(imgid))
+                imgid+=1
     return out
 roblox()
 print("trying slower reset")
 reset()
+im = pag.screenshot(region=(ww//2,wh//2,ww//2,wh//2))
+im.save("screen.png")
 vals = spin(0)
 print("Color values: {}".format(vals))
 if vals[0] == vals[1] == vals[2]:

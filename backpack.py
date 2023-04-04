@@ -28,7 +28,7 @@ def bpc():
         Y1*=2 #14*2
     im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
     col = tuple(im[0,0])
-    print(col)
+    #print(col)
     backpackColor = int(rgb_to_hex(col[0],col[1],col[2]),16)
     #gm = 0.00001284664 #100/(14889259-7105124)
     #gc = -91.276 #100- gm*14889259
