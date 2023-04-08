@@ -21,6 +21,7 @@ import logging
 import pynput
 from pynput.keyboard import Key
 from pynput.mouse import Button
+
 try:
     import matplotlib.pyplot as plt
 except Exception as e:
@@ -49,7 +50,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.40"
+macrov = "1.40.1"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -584,14 +585,13 @@ def walk_to_hive(gfid):
     setdat = loadsettings.load()
     webhook("","Going back to hive: {}".format(setdat['gather_field'][gfid]),"dark brown")
     exec(open("walk_{}.py".format(setdat['gather_field'][gfid])).read())
-    for _ in range(23):
+    for _ in range(30):
         pag.keyDown("a")
         time.sleep(0.15)
         pag.keyUp("a")
         r = ebutton()
         if r:
             if checkwithOCR('bee bear'):
-                
                 break
             else:
                 convert()
@@ -681,38 +681,10 @@ def stingerHunt(convert=0,gathering=0):
             setStatus("disconnect")
             time.sleep(1)
             return "dc"
-    global honeyHist, prevHour, prevMin, invalid_prev_honey
-    if setdat['enable_discord_webhook']:
-            sysTime = datetime.now()
-            sysHour = sysTime.hour
-            sysMin = sysTime.minute
-            if sysMin != prevMin:
-                prevMin = sysMin
-                ch = imToString('honey')
-                if invalid_prev_honey and ch:
-                    invalid_prev_honey = 0
-                    honeyHist = [ch]*60
-                    loadsettings.save("prev_honey",ch)
-                else:
-                    if ch:
-                        honeyHist[sysMin] = int(ch)
-                    else:
-                        honeyHist[sysMin] = honeyHist[sysMin-1]
-                log(ch)
-                savehoney_history(honeyHist)
-            if sysMin == 0 and sysHour != prevHour:
-                
-                hourlyReport()
-                prev_honey = loadsettings.load()['prev_honey']
-                honeyHist = [prev_honey]*60
-                prevHour = sysHour
     status = getStatus()         
     if status != "night": return False
     if convert:
-        if dn:
-            move.press(".")
-        else:
-            return False
+        move.press(".")
     if gathering: reset.reset()
     for field in fields:
         status = getStatus()
@@ -996,6 +968,10 @@ def hastecompbg():
 
 def vic():
     fields = ['pepper','mountain','rose','cactus','spider','clover']
+    prevHour = datetime.now().hour
+    prevMin = datetime.now().minute
+    invalid_prev_honey = 1
+    honeyHist = [0]*60
     while True:
         status = getStatus()
         
@@ -1025,8 +1001,35 @@ def vic():
                 elif "died" in bluetexts:
                     setStatus("killing_vb_died")
         else:
-            if detectNight():
-                setStatus("night")
+            if setdat['stinger']:
+                if detectNight():
+                    setStatus("night")
+            if setdat['enable_discord_webhook'] and setdat['send_screenshot']:
+                sysTime = datetime.now()
+                sysHour = sysTime.hour
+                sysMin = sysTime.minute
+                if sysMin != prevMin:
+                    prevMin = sysMin
+                    ch = imToString('honey')
+                    if invalid_prev_honey and ch:
+                        invalid_prev_honey = 0
+                        honeyHist = [ch]*60
+                        loadsettings.save("prev_honey",ch)
+                        webhook("","First Honey detected: {}".format(millify(ch)),"light blue")
+                    else:
+                        if ch:
+                            honeyHist[sysMin] = int(ch)
+                        else:
+                            honeyHist[sysMin] = honeyHist[sysMin-1]
+                            print("failed to detect honey")
+                    log(ch)
+                    savehoney_history(honeyHist)
+                if sysMin == 0 and sysHour != prevHour:
+                    
+                    hourlyReport()
+                    prev_honey = loadsettings.load()['prev_honey']
+                    honeyHist = [prev_honey]*60
+                    prevHour = sysHour
         
 def killMob(field,mob,reset):
     webhook("","Traveling: {} ({})".format(mob.title(),field.title()),"dark brown")
@@ -1130,7 +1133,6 @@ def openSettings():
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     webhook('','Opening Stats',"brown")
-    
     promoCode = ''.join([x[1][0] for x in customOCR(0,wh/7,ww/3,wh/8)]).lower()
     pag.typewrite("\\")
     if not "code" in promoCode:
@@ -1201,14 +1203,28 @@ def openSettings():
 
 
 def getHaste():
-    ws = float(loadsettings.load()['walkspeed'])
-    msh = loadsettings.load('multipliers.txt')['msh']
-    msy = loadsettings.load('multipliers.txt')['msy']
+    setdat = loadsettings.load()
+    ws = float(setdat['walkspeed'])
+    mp  = loadsettings.load('multipliers.txt')
+    #print(mp)
+    msh = mp['msh']
+    msy = mp['msy']
     ww = loadRes()['ww']
     if str(msh) == "-1": return
-    ocr = customOCR(ww/8,msy,ww/10,msh,0)
+    if tesseract:
+        st = time.time()
+        image = np.array(pag.screenshot(region=(ww/8,msy,ww/10,msh)))
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        #gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+        #gray = cv2.medianBlur(gray, 3)
+        ocr = pytesseract.image_to_string(gray)
+        print(time.time()-st)
+        print(ocr)
+    else:
+        ocr = customOCR(ww/8,msy,ww/10,msh,0)
     if not ocr:return
     filtered = [x for x in ocr if "." in x[1][0] or x[1][0].replace("_","").replace(" ","").isdigit()]
+    
     if not filtered:return
     text = filtered[0][1][0].replace(" ","")
     if not text:return
@@ -1217,6 +1233,7 @@ def getHaste():
     for i in text:
         if i == "." or i.isdigit():
             num += i
+    print(num)
     try:
         num = float(num)
         if num > ws:
@@ -1787,8 +1804,7 @@ def gather(gfid):
         if timespent > setdat["gather_time"][gfid]:
             webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"][gfid]),"light green")
             break
-        if setdat['field_drift_compensation'][gfid]:
-            print("field drift comp")
+        if setdat['field_drift_compensation'][gfid] and gp != "stationary":
             fieldDriftCompensation()
         shv = stingerHunt(0,1)
         if  shv == "success":
@@ -1816,7 +1832,6 @@ def gather(gfid):
             rejoin()
             reset.reset()
         elif setdat['return_to_hive'][gfid] == "whirligig":
-            reject = 0
             webhook("","Activating whirligig","dark brown")
             if setdat['whirligig_slot'][gfid] == "none":
                 webhook("Notice","Whirligig option selected but no whirligig slot given, walking back","red")
@@ -1829,12 +1844,12 @@ def gather(gfid):
                     re = ebutton()
                     if re:
                         r = 1
-                if r or reject:
+                if r:
+                    convert()
+                    reset.reset()
+                else:
                     webhook("Notice","Whirligig failed to activate, walking back","red")
                     walk_to_hive()
-                else:
-                    convert()
-                reset.reset()
 
 def placeSprinkler():
     sprinklerCount = {
@@ -1846,12 +1861,22 @@ def placeSprinkler():
 
         }
     setdat = loadsettings.load()
-    move.press(str(setdat['sprinkler_slot']))
-    for _ in range(sprinklerCount[setdat['sprinkler_type']]):
+    times = sprinklerCount[setdat['sprinkler_type']]
+    if times == 1:
         move.press(str(setdat['sprinkler_slot']))
-        time.sleep(0.3)
-        move.apkey("space")
-        time.sleep(0.13)
+        keyboard.press(Key.space)
+        time.sleep(0.1)
+        keyboard.release(Key.space)
+    else:
+        keyboard.press(Key.space)
+        st = time.time()
+        while True:
+            if time.time() - st > times*2:
+                break
+            else:
+                move.press(str(setdat['sprinkler_slot']))
+        keyboard.release(Key.space)
+        
 def startLoop(planterTypes_prev, planterFields_prev,session_start):
     global invalid_prev_honey
     setStatus()
@@ -2284,7 +2309,11 @@ def setResolution():
         "4096x2304": [1.45,0.91,1.32,1.5],
         "3024x1964": [1,0.98, 1.2, 1.2],
         "3360x2100": [1.2,0.95,1.2,1.3],
-        "4480x2520": [1.4,0.89,1.4,1.9]
+        "4480x2520": [1.4,0.89,1.4,1.9],
+        "3600x2338": [1.45,0.93,1.2,1.6],
+        "3584x2240": [1.3, 0.93, 1.2, 1.5],
+        "1280x800": [0.9,1.03,1,1],
+        "3840x2160": [2.3,1.85,2.35,2.6]
         }
     if ndisplay in multiInfo:
         loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
@@ -2340,7 +2369,6 @@ if __name__ == "__main__":
     frame2 = ttk.Frame(notebook, width=780, height=460)
     frame3 = ttk.Frame(notebook, width=780, height=460)
     frame4 = ttk.Frame(notebook, width=780, height=460)
-    frame5 = ttk.Frame(notebook, width=780, height=460)
     frame6 = ttk.Frame(notebook, width=780, height=460)
     frame7 = ttk.Frame(notebook, width=780, height=460)
 
@@ -2348,7 +2376,6 @@ if __name__ == "__main__":
     frame2.pack(fill='both', expand=True)
     frame3.pack(fill='both', expand=True)
     frame4.pack(fill='both', expand=True)
-    frame5.pack(fill='both', expand=True)
     frame6.pack(fill='both', expand=True)
     frame7.pack(fill='both', expand=True)
 
@@ -2358,7 +2385,6 @@ if __name__ == "__main__":
     notebook.add(frame6, text='Planters')
     notebook.add(frame3, text='In Game Settings')
     notebook.add(frame7, text='Other Settings')
-    notebook.add(frame5, text='Calibration')
 
     #get variables
     gather_enable = tk.IntVar(value=setdat["gather_enable"])
@@ -2998,7 +3024,7 @@ if __name__ == "__main__":
             discord_bot_proc.start()
         if setdat['haste_compensation']:
             hastecompbg_proc.start()
-        if setdat['stinger']:
+        if setdat['stinger'] or (setdat['enable_discord_webhook'] and setdat['send_screenshot']):
             vic_proc.start()
         try:
             ses_start = 1

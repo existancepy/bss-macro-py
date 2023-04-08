@@ -27,7 +27,7 @@ def roblox():
     osascript -e 'activate application "Roblox"' 
     """
     os.system(cmd)
-    time.sleep(1)
+    time.sleep(3)
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
