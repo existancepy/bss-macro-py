@@ -1827,18 +1827,17 @@ def gather(gfid):
                 walk_to_hive(gfid)
             else:
                 move.press(str(setdat['whirligig_slot'][gfid]))
-                time.sleep(1)
+                time.sleep(2)
                 r = 0
                 for _ in range(2):
-                    re = ebutton()
-                    if re:
+                    if ebutton():
                         r = 1
                 if r:
                     convert()
                     reset.reset()
                 else:
                     webhook("Notice","Whirligig failed to activate, walking back","red")
-                    walk_to_hive()
+                    walk_to_hive(gfid)
 
 def placeSprinkler():
     sprinklerCount = {
@@ -2258,6 +2257,7 @@ def haste_comp():
         time.sleep(1)
         print('a')
 def setResolution():
+    global warnings
     wwd = int(pag.size()[0])
     whd = int(pag.size()[1])
     warnings = []
@@ -2302,7 +2302,8 @@ def setResolution():
         "3600x2338": [1.45,0.93,1.2,1.6],
         "3584x2240": [1.3, 0.93, 1.2, 1.5],
         "1280x800": [0.9,1.03,1,1],
-        "3840x2160": [2.3,1.85,2.35,2.6]
+        "3840x2160": [2.3,1.85,2.35,2.6],
+        "3456x2234": [1.2, 0.93, 1.3, 1.6]
         }
     if ndisplay in multiInfo:
         loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
@@ -2986,11 +2987,11 @@ if __name__ == "__main__":
         '''
         macro()
     def macro():
-        global  prevHour, prevMin, honeyHist
+        global  prevHour, prevMin, honeyHist, warnings
         savedat = loadRes()
         ww = savedat['ww']
         wh = savedat['wh']
-        webhook("Macro started - Report","exih_macro\nVersion {}\nScreen Coordinates: {}x{}\nPython {}".format(macrov,ww,wh,python_ver),"dark brown")
+        webhook("Macro started - Report","exih_macro\nVersion {}\nScreen Coordinates: {}x{}\nPython {}\n{}".format(macrov,ww,wh,python_ver,warnings),"dark brown")
         setdat = loadsettings.load()
         if not is_running("roblox"):
             rejoin()
