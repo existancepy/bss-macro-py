@@ -50,7 +50,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.40.1"
+macrov = "1.40.2"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -432,10 +432,11 @@ def canon(fast=0):
     ww = savedata['ww']
     wh = savedata['wh']
     for i in range(4):
-        if checkwithOCR("disconnect"):
-            return "dc"
         #Move to canon:
-        if not fast: webhook("","Moving to canon","dark brown")
+        if not fast:
+            if checkwithOCR("disconnect"):
+                return "dc"
+            webhook("","Moving to cannon","dark brown")
         move.apkey("space")
         time.sleep(1)
         move.hold("w",0.8)
@@ -460,7 +461,7 @@ def canon(fast=0):
                     webhook("","Bee Bear detected","dark brown")
                     break
                 else:
-                    webhook("","Canon found","dark brown")
+                    webhook("","Cannon found","dark brown")
                     with open('canonfails.txt', 'w') as f:
                         f.write('0')
                     f.close()
@@ -468,7 +469,7 @@ def canon(fast=0):
         mouse.position = (mw//2,mh//5*4)
         reset.reset()
     else:
-        webhook("","Canon failed too many times, rejoining", "red")
+        webhook("","Cannon failed too many times, rejoining", "red")
         setStatus("disconnect")
         time.sleep(1)
         return "dc"
@@ -491,22 +492,23 @@ def acchold(key,duration):
     sleep(duration*ws/28)
     pag.keyUp(key)
 
-def mondo_buff():
+def collect_mondo_buff():
     webhook("","Travelling: Mondo Buff","dark brown")
+    if canon() == "dc": return
     time.sleep(2)
     move.hold("e",0)
-    move.hold("space",0)
-    move.hold("space",0)
+    pag.press("space")
+    pag.press("space")
     move.hold("s",0.8)
     sleep(0.82)
-    move.hold("space",0)
+    pag.press("space")
     sleep(1.5)
     move.hold("a",2)
     move.hold("d",2.6)
     move.hold("a",0.6)
     sleep(120)
 
-def wreath():
+def collect_wreath():
     savedata = loadRes()
     setdat = loadsettings.load()
     ww = savedata['ww']
@@ -536,14 +538,11 @@ def wreath():
                 savetimings('wreath')
                 time.sleep(2)
                 acchold("w",0.2)
-                acchold("a",0.4)
-                acchold("s",0.4)
-                acchold("d",0.4)
-                acchold("w",0.1)
-                acchold("a",0.2)
-                acchold("s",0.2)
-                acchold("d",0.2)
-                acchold("w",0.2)
+                for _ in range(3):
+                    acchold("s",0.4)
+                    acchold("a",0.3)
+                    acchold("w",0.4)
+                    acchold("d",0.3)
                 reset.reset()
                 return
         webhook("","Honey Wreath not found, resetting","dark brown",1)
@@ -1211,17 +1210,7 @@ def getHaste():
     msy = mp['msy']
     ww = loadRes()['ww']
     if str(msh) == "-1": return
-    if tesseract:
-        st = time.time()
-        image = np.array(pag.screenshot(region=(ww/8,msy,ww/10,msh)))
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        #gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-        #gray = cv2.medianBlur(gray, 3)
-        ocr = pytesseract.image_to_string(gray)
-        print(time.time()-st)
-        print(ocr)
-    else:
-        ocr = customOCR(ww/8,msy,ww/10,msh,0)
+    ocr = customOCR(ww/8,msy,ww/10,msh,0)
     if not ocr:return
     filtered = [x for x in ocr if "." in x[1][0] or x[1][0].replace("_","").replace(" ","").isdigit()]
     
@@ -2004,7 +1993,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             if getStatus() == "disconnect": return
         
         if setdat['wreath'] and checkRespawn('wreath','30m'):
-            wreath()
+            collect_wreath()
             stingerHunt()
             if getStatus() == "disconnect": return
             
@@ -2052,7 +2041,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 with open('timings.txt','w') as f:
                     f.writelines(templist)
                 f.close()
-                mondo_buff()
+                collect_mondo_buff()
                 webhook("","Collected: Mondo Buff","bright green",1)
                 reset.reset()
                 convert()
