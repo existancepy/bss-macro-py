@@ -50,7 +50,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.40.3"
+macrov = "1.40.4"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -567,15 +567,16 @@ def convert():
     while True:
         sh = stingerHunt(1,1)
         if sh == "dc" or sh == "success":
-            break
+            return
         c = ebutton()
         if not c:
             webhook("","Convert done","brown")
-            time.sleep(2)
             break
         if time.perf_counter()  - st > 600:
             webhook("","Converting took too long, moving on","brown")
             break
+    if setdat['stinger']:
+        move.press(",")
         
 def walk_to_hive(gfid):
     savedata = loadRes()
