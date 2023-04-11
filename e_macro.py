@@ -576,7 +576,7 @@ def convert():
             webhook("","Converting took too long, moving on","brown")
             break
     if setdat['stinger']:
-        move.press(",")
+        move.press(".")
         
 def walk_to_hive(gfid):
     savedata = loadRes()
