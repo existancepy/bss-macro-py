@@ -50,7 +50,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.40.4"
+macrov = "1.40.5"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -727,9 +727,10 @@ def stingerHunt(convert=0,gathering=0):
                     webhook("","Took too long to kill vicious bee, leaving","red")
                     break
                 if status == "killing_vb_died":
+                    webhook("","Died to Vicious Bee","red")
                     reset.reset()
                     if canon(1) == "dc": return "dc"
-                    fieldGoTo = status.split("_")[4]
+                    fieldGoTo = status.split("_")[-1]
                     exec(open("field_{}.py".format(fieldGoTo)).read())
                     setStatus("killing_vb")
             reset.reset()
