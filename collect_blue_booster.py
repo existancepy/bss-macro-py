@@ -5,6 +5,7 @@ import os
 import tkinter
 import loadsettings
 import move
+from delay import sleep
 ws = loadsettings.load()["walkspeed"]
 
 def apd(k):
@@ -19,16 +20,15 @@ def apu(k):
     os.system(cmd)
 
 
-move.hold("s",5)
-move.hold("d",6)
-move.hold("w",5)
-move.hold("a",10)
-move.hold("s",7)
-move.hold("d",4)
-move.hold("w",11)
-move.hold("s",0.1)
-move.hold("d",0.35)
+
+exec(open("field_blue flower.py").read())
+move.apkey("space")
+pag.keyDown("a")
+sleep(8)
+move.press("space")
+sleep(0.2)
+pag.keyUp("a")
 move.hold("w",4)
-move.hold("d",3)
-move.hold("s",0.6)
-    
+move.hold("d",5)
+move.hold("a",0.25)
+move.hold("s",7)

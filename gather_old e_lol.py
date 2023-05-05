@@ -4,9 +4,8 @@ import tkinter
 import move
 import loadsettings
 import time
-setdat = loadsettings.load()
-sizeword = setdat["gather_size"][gfid]
-width = round(setdat["gather_width"][gfid]*1.5)
+sizeword = setdat["gather_size"]
+width = round(setdat["gather_width"]*1.5)
 size = 0
 if sizeword.lower() == "s":
     size = 0.5

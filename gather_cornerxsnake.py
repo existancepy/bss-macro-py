@@ -6,10 +6,9 @@ import move
 import loadsettings
 import time
 import Quartz
-setdat = loadsettings.load()
 
-sizeword = setdat["gather_size"][gfid]
-width = setdat["gather_width"][gfid]
+sizeword = setdat["gather_size"]
+width = setdat["gather_width"]
 size = 0
 if sizeword.lower() == "s":
     size = 1
@@ -33,10 +32,10 @@ keyboard.release('d')
 move.hold("a",wm*2)
 move.hold("w",sm)
 move.hold("d",wm*2)
-move.hold("w",sm*5)
+move.hold("w",sm*6)
 move.hold("d",0.4*width)
 move.hold("a",0.4*width)
-move.hold("s",sm)
+move.hold("s",sm*2)
 move.hold("a",wm*2)
 move.hold("s",sm)
 move.hold("d",wm*2)

@@ -7,7 +7,6 @@ import move
 import sys
 import cv2
 from PIL import ImageGrab
-from delay import sleep
 import numpy as np
 import imagesearch
 import loadsettings
@@ -28,7 +27,7 @@ def roblox():
     osascript -e 'activate application "Roblox"' 
     """
     os.system(cmd)
-    sleep(3)
+    time.sleep(3)
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -76,7 +75,7 @@ my = float(input("input y screenshot multiplier: "))
 lx = float(input("input x length multiplier: "))
 ly = float(input("input y length multiplier: "))
 roblox()
-ima = pag.screenshot(region=(0,0,ww,wh))
+ima = pag.screenshot()
 ima.save('screentest.png')
 im = pag.screenshot(region=(ww//(2.65*mx),wh//(20*my),ww//(21*lx),wh//(17*ly)))
 im.save('test.png')

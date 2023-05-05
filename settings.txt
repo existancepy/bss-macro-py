@@ -1,5 +1,5 @@
 
-hive_number:2
+hive_number:6
 walkspeed:28
 gifted_vicious_bee:0
 enable_discord_webhook:0
@@ -11,8 +11,8 @@ display_type:built-in retina display
 private_server_link:
 enable_discord_bot:0
 discord_bot_token:
-haste_compensation:1
-low_performance_haste_compensation:0
+haste_compensation:0
+show_haste_warn:0
 rejoin_every_enabled:0
 rejoin_every:1
 rejoin_delay:50
@@ -20,18 +20,6 @@ rejoin_method:new tab
 manual_fullscreen:0
 gather_enable:1
 gather_field:['pine tree', 'none', 'none']
-gather_pattern:['typewriter', 'stationary', 'snake']
-gather_size:['m', 's', 'l']
-gather_width:[2, 4, 5]
-gather_time:[15, 5, 10]
-pack:[95, 0, 1]
-before_gather_turn:['right', 'right', 'left']
-turn_times:[2, 1, 3]
-return_to_hive:['reset', 'whirligig', 'rejoin']
-whirligig_slot:[1, 2, 3]
-start_location:['lower right', 'upper left', 'left']
-distance_from_center:[3, 2, 4]
-field_drift_compensation:[1, 0, 1]
 stump_snail:0
 continue_after_stump_snail:0
 ladybug:0
@@ -56,8 +44,16 @@ snow_machine:0
 mondo_buff:0
 lid_art:0
 candles:0
-start_honey:12559849144529
-prev_honey:12568421055914
-start_time:1679749185.70386
+start_honey:0
+prev_honey:0
+start_time:1683329261.893833
 canon_time:1.0
 reverse_hive_direction:0
+blue_booster:0
+red_booster:0
+mountain_booster:0
+gather_in_boosted:0
+slot_enable:[1, 0, 0, 0, 0, 0, 0]
+slot_time:[5, 0, 0, 0, 0, 0, 0]
+slot_freq:['secs', 'secs', 'secs', 'secs', 'secs', 'secs', 'secs']
+slot_use:['always', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering']

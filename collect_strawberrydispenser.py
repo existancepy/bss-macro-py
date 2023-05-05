@@ -30,6 +30,7 @@ time.sleep(0.1)
 pag.keyUp("w")
 move.press("space")
 time.sleep(0.5)
+move.hold("d",1)
 
 
 

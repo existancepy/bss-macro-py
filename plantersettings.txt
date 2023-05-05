@@ -3,9 +3,9 @@ enable_planters:0
 paper_planter:0
 ticket_planter:0
 plastic_planter:0
-candy_planter:1
-blueclay_planter:1
-redclay_planter:1
+candy_planter:0
+blueclay_planter:0
+redclay_planter:0
 tacky_planter:0
 pesticide_planter:0
 heattreated_planter:0
@@ -16,10 +16,10 @@ festive_planter:0
 paper_slot:None
 ticket_slot:None
 plastic_slot:None
-candy_slot:6
-blueclay_slot:7
-redclay_slot:5
-tacky_slot:5
+candy_slot:None
+blueclay_slot:None
+redclay_slot:None
+tacky_slot:None
 pesticide_slot:None
 heattreated_slot:None
 hydroponic_slot:None

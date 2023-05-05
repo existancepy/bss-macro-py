@@ -5,6 +5,7 @@ import os
 import tkinter
 import loadsettings
 import move
+from delay import sleep
 ws = loadsettings.load()["walkspeed"]
 
 def apd(k):
@@ -19,16 +20,8 @@ def apu(k):
     os.system(cmd)
 
 
-move.hold("s",5)
+
+move.press('e')
+sleep(3)
 move.hold("d",6)
-move.hold("w",5)
-move.hold("a",10)
-move.hold("s",7)
-move.hold("d",4)
-move.hold("w",11)
-move.hold("s",0.1)
-move.hold("d",0.35)
-move.hold("w",4)
-move.hold("d",3)
-move.hold("s",0.6)
-    
+
