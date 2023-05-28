@@ -53,7 +53,7 @@ blue_booster:0
 red_booster:0
 mountain_booster:0
 gather_in_boosted:0
-slot_enable:[1, 0, 0, 0, 0, 0, 0]
-slot_time:[5, 0, 0, 0, 0, 0, 0]
+slot_enable:[0, 0, 0, 0, 0, 0, 0]
+slot_time:[0, 0, 0, 0, 0, 0, 0]
 slot_freq:['secs', 'secs', 'secs', 'secs', 'secs', 'secs', 'secs']
 slot_use:['always', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering']
