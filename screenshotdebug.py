@@ -1,5 +1,6 @@
 import pyautogui as pag
 import time
+import os
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
