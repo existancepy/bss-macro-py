@@ -84,6 +84,7 @@ Enter in your password
 After that,
 ```bash
 pip3 install pyautogui pillow discord-webhook discord.py pynput matplotlib pymupdf
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 After the installation is complete, run these commands one by one
@@ -94,6 +95,7 @@ arch
 ```
 Terminal should display "arm64"
 ```bash
+
 pip3 install paddlepaddle==2.3.2
 
 pip3 install --no-deps paddleocr==2.6.1.0
