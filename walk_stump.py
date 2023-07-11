@@ -5,17 +5,7 @@ import os
 import tkinter
 import loadsettings
 import move
-import pytesseract
-ws = loadsettings.load()["walkspeed"]
-def ebutton(pagmode=0):
-    cap = pag.screenshot(region=(ww//3,0,ww//6.5,wh//25))
-    img = cv2.cvtColor(np.array(cap), cv2.COLOR_RGB2BGR)
-    img = cv2.resize(img, None, fx=1.3, fy=1.3)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    config = '--oem 3 --psm %d' % 13
-    tesstr = pytesseract.image_to_string(img, config = config)
-    tesstr = ''.join([x for x in tesstr if x.isdigit()])
-    return tesstr
+
 
 def apd(k):
     cmd = """
