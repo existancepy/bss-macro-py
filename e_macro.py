@@ -2427,7 +2427,9 @@ def setResolution():
         "3584x2240": [1.3, 0.93, 1.2, 1.5],
         "1280x800": [0.9,1.03,1,1],
         "3840x2160": [2.3,1.85,2.35,2.6],
-        "3456x2234": [1.2, 0.93, 1.3, 1.6]
+        "3456x2234": [1.2, 0.93, 1.3, 1.6],
+        "2560x1600": [0.9, 1.02, 1, 1.1],
+        "2560x1440": [1.45,0.87,1.8,2.2]
         }
     if ndisplay in multiInfo:
         loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
