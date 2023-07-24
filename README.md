@@ -29,8 +29,9 @@ Made and tested on mac, currently untested for windows/linux.
 
 
 ## Installation 
-Installation guide for  macro
 
+Installation guide for  macro
+### Currently the most updated installation instructions are in the discord. The github one works fine, but you are more likely to encounter errors.
 Check your macOS version. This will determine which installation step to follow. To see your macOS version, apple logo -> about this mac
 
 For M1/M2 Macs, I highly recommend updating your macOS version to ventura (13.0) and above. The macro is highly unlikely to work on older versions
