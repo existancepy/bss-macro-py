@@ -1,3 +1,6 @@
+def printRed(txt):
+    print("\033[0;31m{}\033[00m".format(txt))
+
 try:
     import pyautogui as pag
 except Exception as e:
@@ -25,7 +28,7 @@ from pynput.mouse import Button
 try:
     import matplotlib.pyplot as plt
 except Exception as e:
-    print("\033[0;31mThere is an import error here! Enter `pip3 install matplotlib` in terminal'\033[00m")
+    print("\033[0;31mThere is an import error here! Enter pip3 install matplotlib in terminal'\033[00m")
 from PIL import ImageGrab, Image
 
 try:
@@ -35,13 +38,22 @@ except Exception as e:
     print("\033[0;31mThere is a import error here! Check out ImportError: dlopen in #common-fixes in the discord server or 'bugs and fixes' section in the github\033[00m")
     quit()
 
+
 from ocrpy import imToString,customOCR
 import sv_ttk
 import math
 import ast
 import calibrate_hive
 from datetime import datetime
+import pyscreeze
 
+if tuple(map(int, np.version.split("."))) >= (1,24,0):
+    printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.version))
+    quit()
+
+if tuple(map(int, pyscreeze.version.split("."))) >= (0,1,29):
+    printRed("Invalid pyscreeze version. Your current numpy version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.version))
+    quit()
 savedata = {}
 ww = ""
 wh = ""
