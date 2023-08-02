@@ -48,11 +48,11 @@ from datetime import datetime
 import pyscreeze
 
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
-    printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
+    printRed("Invalid numpy version. Your current numpy version is {} but the required version is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
     quit()
 
 if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
-    printRed("Invalid pyscreeze version. Your current numpy version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
+    printRed("Invalid pyscreeze version. Your current numpy version is {} but the required version is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
     quit()
 savedata = {}
 ww = ""
