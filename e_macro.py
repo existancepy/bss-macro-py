@@ -2016,6 +2016,8 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     planterset = loadsettings.planterLoad()
     ww = savedata['ww']
     wh = savedata['wh']
+    im = pag.screenshot(region=(0,0,ww,wh))
+    im.save("screen.png")
     gfid = 0
     if planterset['enable_planters']:
         with open("planterdata.txt","r") as f:
