@@ -1,6 +1,7 @@
 import pyautogui as pag
 import time
 import os
+import loadsettings
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -23,10 +24,15 @@ def roblox():
 savedat = loadRes()
 ww = savedat['ww']
 wh = savedat['wh']
-
+ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
 roblox()
 im = pag.screenshot(region=(0,0,ww,wh))
 im.save("screen.png")
+cap = pag.screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
+cap.save('e_symbol.png')
 cmd = """
     osascript -e 'activate application "Terminal"' 
     """
