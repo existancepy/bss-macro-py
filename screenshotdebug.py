@@ -37,3 +37,4 @@ cmd = """
     osascript -e 'activate application "Terminal"' 
     """
 os.system(cmd)
+print("Done! The following 2 images can be found in your bss-macro-py-main folder: \nscreen.png\ne_symbol.png")
