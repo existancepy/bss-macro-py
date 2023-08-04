@@ -266,8 +266,6 @@ def checkwithOCR(m):
 def ebutton(pagmode=0):
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
     log(ocrval)
-    cap = pag.screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
-    cap.save('e_button.png')
     return "E" in ocrval and len(ocrval) <= 3
 
 def detectNight(bypasstime=0):
