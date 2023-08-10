@@ -137,6 +137,8 @@ def resetCheck():
                     pass
                 elif i == 2 and r[2] < 15:
                     pass
+                elif 60 < r[0] < 70 and r[2] > 41:
+                    break
                 else:           
                     passed = 0
                     break
