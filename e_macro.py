@@ -1250,17 +1250,16 @@ def openSettings():
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
-    for _ in range(24):
+    for _ in range(26):
         keyboard.press(Key.page_down)
         time.sleep(0.02)
         keyboard.release(Key.page_down)
     time.sleep(0.5)
-    for _ in range(3):
+    for _ in range(1):
         keyboard.press(Key.page_up)
         time.sleep(0.02)
         keyboard.release(Key.page_up)
-    pag.scroll(100)
-    for _ in range(5):
+    for _ in range(8):
         statData = customOCR(0,wh/7,ww/7,wh/2)
         statNames = ''.join([x[1][0] for x in statData]).lower()
         print(statNames)
