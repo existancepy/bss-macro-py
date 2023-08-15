@@ -37,7 +37,7 @@ def reset():
     loadSave()
     for i in range(2):
         webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
-        mouse.position = (mw/(xsm*4.11),mh/(9*ysm))
+        mouse.position = (mw/(xsm*4.11)+40,mh/(9*ysm))
         ww = savedata["ww"]
         wh = savedata["wh"]
         xo = ww//4
@@ -47,9 +47,8 @@ def reset():
         time.sleep(0.5)
         pag.press('esc')
         time.sleep(0.1)
-        keyboard.press('r')
-        keyboard.release('r')
-        time.sleep(0.1)
+        pag.press('r')
+        time.sleep(0.2)
         pag.press('enter')
         sleep(8.5)
         for _ in range(4):
@@ -137,8 +136,6 @@ def resetCheck():
                     pass
                 elif i == 2 and r[2] < 15:
                     pass
-                elif 60 < r[0] < 70 and r[2] > 41:
-                    break
                 else:           
                     passed = 0
                     break
