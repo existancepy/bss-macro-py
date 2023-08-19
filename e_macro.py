@@ -1300,7 +1300,7 @@ def getHaste():
     msy = mp['msy']
     ww = loadRes()['ww']
     if str(msh) == "-1": return
-    ocr = customOCR(ww/8,msy,ww/10,msh,0)
+    ocr = customOCR(ww/8,msy,ww/10,msh)
     if not ocr:return
     filtered = [x for x in ocr if "." in x[1][0] or x[1][0].replace("_","").replace(" ","").isdigit()]
     
