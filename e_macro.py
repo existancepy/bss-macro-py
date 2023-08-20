@@ -62,7 +62,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.42.3    "
+macrov = "1.42.4    "
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -1827,6 +1827,7 @@ def gather(gfid):
         else:
             setdat[key] = val.lower()
     canon()
+    if getStatus() == "disconnect": return
     webhook("","Travelling: {}".format(currfield.title()),"dark brown")
     exec(open("field_{}.py".format(currfield)).read())
     cf = currfield.replace(" ","").lower()
