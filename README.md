@@ -28,7 +28,7 @@ Made and tested on mac, currently untested for windows/linux.
 
 
 
-## Installation 
+## Installation (CURRENTLY OUTDATED, GO TO THE DISCORD SERVER)
 
 Installation guide for  macro
 ### Currently the most updated installation instructions are in the discord. The github one works fine, but you are more likely to encounter errors.
