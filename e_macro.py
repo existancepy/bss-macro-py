@@ -62,7 +62,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.42.4    "
+macrov = "1.42.5"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -274,7 +274,8 @@ def detectNight(bypasstime=0):
     wh = savedat['wh']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    screen = np.array(pag.screenshot(region=(0,0,round((ww/3.4)*xlm),round((wh/25)*ylm))))
+    img = pag.screenshot(region=(0,0,round((ww/3.4)*xlm),round((wh/25)*ylm)))
+    screen = np.array(img)
     w,h = screen.shape[:2]
     rgb = screen[0,0][:3]
     if not setdat['stinger']: return False
@@ -293,6 +294,7 @@ def detectNight(bypasstime=0):
                     print(x,y)
                     webhook("","Night Detected","dark brown")
                     savetimings("night")
+                    img.save("night.png")
                     return True
     return False
 
@@ -884,21 +886,20 @@ def clickYes():
     ww = res['ww']
     wh = res['wh']
     setdat = loadsettings.load()
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    mw,mh = pag.size()
     a = imagesearch.find("yes.png",0.2,0,0,ww,wh)
+    multi = 1
     if setdat['display_type'] == "built-in retina display":
-        if a:
-            mouse.position = (a[1]//2+urows//4,a[2]//2+ucols//4)
-            mouse.click(Button.left, 1)
-        else:
-            mouse.position = (ww//4-70,wh//3.2)
-            mouse.click(Button.left, 1)
-    else:
-        if a:
-            mouse.position = (a[1]+urows//2,a[2]+ucols//2)
-            mouse.click(Button.left, 1)
-        else:
-            mouse.position= (ww//2-50,wh//1.6)
-            mouse.click(Button.left, 1)
+        multi = 2
+    if a:
+        mouse.position = (a[1]//multi+urows//(multi*2),a[2]//multi+ucols//(multi*2))
+        time.sleep(1)
+        mouse.click(Button.left, 1)    
+    mouse.position = (mw/(xsm*2.311),mh/(1.565*ysm))
+    time.sleep(1)
+    mouse.click(Button.left, 1)    
             
     
 def goToPlanter(field,place=0):
