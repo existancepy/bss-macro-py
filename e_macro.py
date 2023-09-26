@@ -5,7 +5,7 @@ try:
     import pyautogui as pag
 except Exception as e:
     print(e)
-    print("\033[0;31mThere is an import error here! This is most likely caused by an incorrect installation process. Ensure that you have done the 'pip3 install...steps'\033[00m")
+    printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
     quit()
 import time, os, ctypes, tty
 import tkinter
