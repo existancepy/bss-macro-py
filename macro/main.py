@@ -62,7 +62,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.43"
+macrov = "1.42.6"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -626,6 +626,7 @@ def walk_to_hive(field):
     exec(open("walk_{}.py".format(field)).read())
     for _ in range(45):
         move.hold("a",0.1)
+        time.sleep(0.06)
         r = ebutton()
         if r:
             if checkwithOCR('bee bear'):
