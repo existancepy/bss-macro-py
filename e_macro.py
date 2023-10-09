@@ -62,7 +62,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.42.5"
+macrov = "1.42.6"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -600,10 +600,8 @@ def walk_to_hive(field):
     wh = savedata['wh']
     webhook("","Going back to hive: {}".format(field.title()),"dark brown")
     exec(open("walk_{}.py".format(field)).read())
-    for _ in range(30):
-        pag.keyDown("a")
-        time.sleep(0.15)
-        pag.keyUp("a")
+    for _ in range(45):
+        move.hold("a",0.1)
         r = ebutton()
         if r:
             if checkwithOCR('bee bear'):
