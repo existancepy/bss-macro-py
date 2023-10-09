@@ -602,6 +602,7 @@ def walk_to_hive(field):
     exec(open("walk_{}.py".format(field)).read())
     for _ in range(45):
         move.hold("a",0.1)
+        time.sleep(0.06)
         r = ebutton()
         if r:
             if checkwithOCR('bee bear'):
