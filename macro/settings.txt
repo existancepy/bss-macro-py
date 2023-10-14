@@ -2,8 +2,8 @@
 hive_number:3
 walkspeed:28
 gifted_vicious_bee:0
-enable_discord_webhook:1
-discord_webhook_url:https://discord.com/api/webhooks/708117350217416764/IeEvF6BBirvqxjsuVo-cDvLFYe-uDdlT2_oLCm5M3nfE4FqZdLA6ggCIJ5CjZomxKZcP
+enable_discord_webhook:0
+discord_webhook_url:
 send_screenshot:1
 sprinkler_slot:1
 sprinkler_type:saturator
