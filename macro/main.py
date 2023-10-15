@@ -62,7 +62,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.42.7"
+macrov = "1.42.8"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -1644,7 +1644,39 @@ async def asyncRejoin():
 def openRoblox(link):
     rm = loadsettings.load()['rejoin_method']
     if rm == "new tab":
-        webbrowser.open(link)
+        webbrowser.open(link, new = 2)
+    elif rm == "copy paste":
+        webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True, new = 2)
+        time.sleep(3)
+        with keyboard.pressed(Key.cmd):
+            keyboard.press('t')
+            keyboard.release('t')
+        time.sleep(1)
+        keyboard.type(link)
+        time.sleep(0.5)
+        with keyboard.pressed(Key.cmd):
+            keyboard.press('a')
+            time.sleep(0.1)
+            keyboard.release('a')
+            time.sleep(0.3)
+            keyboard.press('c')
+            time.sleep(0.1)
+            keyboard.release('c')
+            time.sleep(0.3)
+            keyboard.press('w')
+            time.sleep(0.1)
+            keyboard.release('w')
+            time.sleep(0.5)
+            keyboard.press('t')
+            time.sleep(0.1)
+            keyboard.release('t')
+            time.sleep(1)
+            keyboard.press('v')
+            time.sleep(0.1)
+            keyboard.release('v')
+        time.sleep(1)
+        keyboard.press(Key.enter)
+        
     else:
         webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True)
         time.sleep(3)
@@ -3773,7 +3805,7 @@ if __name__ == "__main__":
     tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
     tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen).place(x=0, y = 190)
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
-    dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link"],style='my.TMenubutton' )
+    dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste"],style='my.TMenubutton' )
     dropField.place(width=90,x = 360, y = 155,height=24)
     
     #Tab 7
