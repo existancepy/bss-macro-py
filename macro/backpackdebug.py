@@ -40,6 +40,8 @@ def bpc():
         X1*=2 #(round((mw/2+60), 0))*2
         Y1*=2 #14*2
     im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
+    testimg = pag.screenshot(region = (X1,Y1,50,50))
+    testimg.save("backpack.png")
     col = tuple(im[0,0])
     print(col)
     backpackColor = int(rgb_to_hex(col[0],col[1],col[2]),16)
