@@ -5,7 +5,11 @@ import zipfile
 import shutil
 from io import BytesIO
 
-def update():
+def update(t = "m"):
+    link = "https://github.com/existancepy/bss-macro-py/archive/master.zip"
+    if t = "e":
+        link = "https://github.com/existancepy/bss-macro-py-experimental/archive/master.zip"
+        
     destination = os.getcwd().replace("/macro","")
     source = f"{destination}/bss-macro-py-main"
     print(os.listdir(destination))
@@ -14,7 +18,7 @@ def update():
             os.remove(f"{destination}/{f}")
         else:
             shutil.rmtree(f"{destination}/{f}")
-    req = requests.get('https://github.com/existancepy/bss-macro-py/archive/master.zip')
+    req = requests.get(link)
     zipf= zipfile.ZipFile(BytesIO(req.content))
     zipf.extractall(destination)
     files = os.listdir(source) 
