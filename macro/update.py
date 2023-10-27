@@ -7,7 +7,7 @@ from io import BytesIO
 
 def update(t = "m"):
     link = "https://github.com/existancepy/bss-macro-py/archive/master.zip"
-    if t = "e":
+    if t == "e":
         link = "https://github.com/existancepy/bss-macro-py-experimental/archive/master.zip"
         
     destination = os.getcwd().replace("/macro","")
