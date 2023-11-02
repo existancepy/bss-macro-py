@@ -5,7 +5,7 @@ setdat = loadsettings.load()
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = discord.Client(intents=intents)
+client = discord.Bot(intents=intents)
 
 @client.event
 async def on_ready():
