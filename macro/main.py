@@ -138,34 +138,26 @@ def discord_bot():
     intents = discord.Intents.default()
     intents.message_content = True
 
-    client = discord.Client(intents=intents)
+    client = discord.Bot(intents=intents)
 
     @client.event
     async def on_ready():
         print(f'Logged in as {client.user}')
 
-    @client.event
-    async def on_message(message):
-        if message.author == client.user:
-            return
-
-        if message.content.startswith('!b'):
-            args = message.content.split(" ")[1:]
-            cmd = args[0].lower()
-            if cmd == "rejoin":
-                await message.channel.send("Now attempting to rejoin")
-                await asyncRejoin()
-            elif cmd == "screenshot":
-                await message.channel.send("Sending a screenshot via webhook")
-                webhook("User Requested: Screenshot","","light blue",1)
-            elif cmd == "report":
-                await message.channel.send("Sending Hourly Report")
-                hourlyReport(0)
-                
-                #honeyHist = []
-                #savehoney_history(honeyHist)
+    @client.command(name="rejoin",description="rejoin the game")
+    async def rejoincmd(ctx):
+        await ctx.respond("Now attempting to rejoin")
+        await asyncRejoin()
+    @client.command(name="screenshot",description="screenshot your computer")
+    async def screenshotcmd(ctx):
+        await ctx.respond("Sending a screenshot via webhook")
+        webhook("User Requested: Screenshot","","light blue",1)
+    @client.command(name="report",description="sends an hourly report")
+    async def reportcmd(ctx):
+        await ctx.respond("Sending Hourly Report")
+        hourlyReport(0)
     handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-    client.run(setdat['discord_bot_token'], log_handler=handler)
+    client.run(setdat['discord_bot_token'])
 def setStatus(msg="none"):
     with open("status.txt","w") as f:
         f.write(msg)
