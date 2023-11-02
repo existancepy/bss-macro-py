@@ -62,7 +62,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.42.8"
+macrov = "1.42.9"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -299,8 +299,8 @@ def detectNight(bypasstime=0):
     wh = savedat['wh']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    screen = pag.screenshot(region=(0,0,round(ww/(3.4*xlm)),round(wh/(25*ylm))))
-    screen = np.array(screen)
+    nightarea = pag.screenshot(region=(0,0,round(ww/(3.4*xlm)),round(wh/(25*ylm))))
+    screen = np.array(nightarea)
     w,h = screen.shape[:2]
     rgb = screen[0,0][:3]
     if not setdat['stinger']: return False
@@ -319,7 +319,7 @@ def detectNight(bypasstime=0):
                     print(x,y)
                     webhook("","Night Detected","dark brown")
                     savetimings("night")
-                    screen.save("night.png")
+                    nightarea.save("night.png")
                     return True
     return False
 
