@@ -1953,6 +1953,7 @@ def gather(gfid):
         mouse.press(Button.left)
         if setdat['shift_lock']: pag.press('shift')
         exec(open("gather_{}.py".format(gp)).read())
+        if setdat['shift_lock']: pag.press('shift')
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
         if bpcap >= setdat["pack"]:
@@ -1966,7 +1967,6 @@ def gather(gfid):
             break
         if setdat['field_drift_compensation'] and gp != "stationary":
             fieldDriftCompensation()
-        if setdat['shift_lock']: pag.press('shift')
         shv = stingerHunt(0,1)
         if  shv == "success":
             stingerFound = 1
