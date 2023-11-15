@@ -15,8 +15,8 @@ mh = ms[1]
 #84% 11231045
 #100% 14889259
 
-def rgb_to_hex(r, g, b):
-      return ('0x{:X}{:X}{:X}').format(r, g, b)
+def rgb_to_dec(r, g, b):
+      return (r * 256 * 256) + (g * 256) + b
 def bpc():
     dt = loadsettings.load()['display_type']
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
@@ -29,7 +29,7 @@ def bpc():
     im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
     col = tuple(im[0,0])
     #print(col)
-    backpackColor = int(rgb_to_hex(col[0],col[1],col[2]),16)
+    backpackColor = rgb_to_dec(col[0],col[1],col[2])
     #gm = 0.00001284664 #100/(14889259-7105124)
     #gc = -91.276 #100- gm*14889259
     #perc = int(gm*backpackColor+gc)
