@@ -2511,7 +2511,8 @@ def setResolution():
         "2560x1600": [0.9, 1.02, 1, 1.1],
         "2560x1440": [1.45,0.87,1.8,2.2],
         "5120x2880": [1.4,0.87,1.7,2],
-        "3420x2224":[0.81, 0.95, 1.12, 1.24]
+        "3420x2224":[0.81, 0.95, 1.12, 1.24],
+        "3840x2486": [1.3, 0.92, 1.45, 1.45]
         }
     if ndisplay in multiInfo:
         loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
@@ -3802,7 +3803,7 @@ if __name__ == "__main__":
     rejoindelaytextbox = tkinter.Text(frame7, width = 4, height = 1, bg= wbgc)
     rejoindelaytextbox.insert("end",rejoin_delay)
     rejoindelaytextbox.place(x=55,y=158)
-    tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
+    tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, yF = 155)
     tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen).place(x=0, y = 190)
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
     dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste"],style='my.TMenubutton' )
