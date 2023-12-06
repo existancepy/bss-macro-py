@@ -8,9 +8,18 @@ savedata = {}
 ms = pag.size()
 mw = ms[0]
 mh = ms[1]
-dt = loadsettings.load()['display_type']
-ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+def loadRes():
+    outdict =  {}
+    with open('save.txt') as f:
+        lines = f.read().split("\n")
+    f.close()
+    for s in lines:
+        l = s.replace(" ","").split(":")
+        if l[1].isdigit():
+            l[1] = int(l[1])
+        outdict[l[0]] = l[1]
+    return outdict
+
 def loadSave():
     with open('save.txt') as f:
         lines = f.read().split("\n")
@@ -28,19 +37,17 @@ cmd = """
 os.system(cmd)
 time.sleep(1)
 def rgb_to_dec(r, g, b):
-      return (r * 256 * 256) + (g * 256) + b
+      return (r*256*256)+(g*256)+b
     
 def bpc():
-    dt = loadsettings.load()['display_type']
-    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    X1=mw//2+63
+    savedat = loadRes()
+    ww = savedat['ww']
+    wh = savedat['wh']
+    X1=mw//2+70
     Y1=7
-    if dt == "built-in retina display":
-        X1*=2 #(round((mw/2+60), 0))*2
-        Y1*=2 #14*2
+    print(ww, X1)
     im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
-    testimg = pag.screenshot(region = (X1,Y1,50,50))
+    testimg = pag.screenshot(region = (X1,Y1,100,100))
     testimg.save("backpack.png")
     col = tuple(im[0,0])
     print(col)
