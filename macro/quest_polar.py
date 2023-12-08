@@ -5,7 +5,7 @@ import os
 import tkinter
 import loadsettings
 import move
-ws = loadsettings.load()["walkspeed"]
+from delay import sleep
 
 def apd(k):
     cmd = """
@@ -17,25 +17,21 @@ def apu(k):
         osascript -e  'tell application "System Events" to key up "{}"'
     """.format(k)
     os.system(cmd)
-
-
-move.hold("d",5)
-move.hold("s",7)
-move.apkey('space')
-pag.keyDown("a")
-time.sleep(12*28/ws)
-pag.keyUp("a")
-move.hold("w",8)
-move.hold("d",4)
-move.hold("s",1)
-move.hold("w",1.2)
+    
+move.press(".")
+move.press(".")
+move.press("e")
+sleep(0.08)
+pag.keyDown("w")
+sleep(0.73)
 move.press("space")
-time.sleep(0.1)
 move.press("space")
-time.sleep(8)
-move.hold("w",5)
-move.hold("s",0.2)
-move.hold("d",5)
-move.hold("s",0.6)
+sleep(0.8)
+move.press("space")
+sleep(0.5)
+move.hold("w",3)
+move.hold("a",1)
+move.hold("d",0.3)
+move.hold("s",0.3)
 
     

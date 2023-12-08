@@ -4,13 +4,23 @@ import loadsettings
 import time
 from pixelcolour import getPixelColor
 import numpy as np
+import subprocess
 savedata = {}
 ms = pag.size()
 mw = ms[0]
 mh = ms[1]
-dt = loadsettings.load()['display_type']
-ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+def loadRes():
+    outdict =  {}
+    with open('save.txt') as f:
+        lines = f.read().split("\n")
+    f.close()
+    for s in lines:
+        l = s.replace(" ","").split(":")
+        if l[1].isdigit():
+            l[1] = int(l[1])
+        outdict[l[0]] = l[1]
+    return outdict
+
 def loadSave():
     with open('save.txt') as f:
         lines = f.read().split("\n")
@@ -27,24 +37,28 @@ cmd = """
 
 os.system(cmd)
 time.sleep(1)
-def rgb_to_hex(r, g, b):
-      return ('0x{:X}{:X}{:X}').format(r, g, b)
+loadsettings.save('display_type',"built-in display")
+def rgb_to_dec(r, g, b):
+      return (r*256*256)+(g*256)+b
     
 def bpc():
-    dt = loadsettings.load()['display_type']
-    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    X1=mw//2+63
-    Y1=7
-    if dt == "built-in retina display":
-        X1*=2 #(round((mw/2+60), 0))*2
-        Y1*=2 #14*2
+    savedat = loadRes()
+    ww = savedat['ww']
+    wh = savedat['wh']
+    add = 65
+    
+    info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
+    if "retina" in info or "m1" in info or "m2" in info:
+        add*= 2
+    X1=ww//2+add
+    Y1=8
+    print(ww, X1)
     im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
-    testimg = pag.screenshot(region = (X1,Y1,50,50))
+    testimg = pag.screenshot(region = (X1,Y1,100,100))
     testimg.save("backpack.png")
     col = tuple(im[0,0])
     print(col)
-    backpackColor = int(rgb_to_hex(col[0],col[1],col[2]),16)
+    backpackColor = rgb_to_dec(col[0],col[1],col[2])
     #gm = 0.00001284664 #100/(14889259-7105124)
     #gc = -91.276 #100- gm*14889259
     #perc = int(gm*backpackColor+gc)
@@ -65,4 +79,3 @@ def bpc():
 bpc()
     
 #pag.moveTo(X1,Y1)
-

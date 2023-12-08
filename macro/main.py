@@ -7,6 +7,9 @@ except Exception as e:
     print(e)
     printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
     quit()
+
+from difflib import SequenceMatcher
+from tkinter_tooltips import *
 import time, os, ctypes, tty
 import tkinter
 import tkinter as tk
@@ -62,7 +65,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.42.9"
+macrov = "1.44"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -90,6 +93,7 @@ for i in qdata:
         questData[questBear][questTitle] = questInfo
     else:
         questInfo.append(i)
+
 if __name__ == '__main__':
     planterTypes_prev = []
     planterFields_prev = []
@@ -299,8 +303,8 @@ def detectNight(bypasstime=0):
     wh = savedat['wh']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    nightarea = pag.screenshot(region=(0,0,round(ww/(3.4*xlm)),round(wh/(25*ylm))))
-    screen = np.array(nightarea)
+    night = pag.screenshot(region=(0,0,round(ww/(3.4*xlm)),round(wh/(40*ylm))))
+    screen = np.array(screen)
     w,h = screen.shape[:2]
     rgb = screen[0,0][:3]
     if not setdat['stinger']: return False
@@ -319,7 +323,7 @@ def detectNight(bypasstime=0):
                     print(x,y)
                     webhook("","Night Detected","dark brown")
                     savetimings("night")
-                    nightarea.save("night.png")
+                    night.save("night.png")
                     return True
     return False
 
@@ -586,17 +590,18 @@ def collect_wreath():
         webhook("","Honey Wreath not found, resetting","dark brown",1)
         reset.reset()
     
-def convert():
+def convert(bypass=0):
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
     setdat = loadsettings.load()
-    r = False
-    for _ in range(2):
-        r = ebutton()
-        if r: break
-        time.sleep(0.25)
-    if not r: return
+    if not bypass:
+        r = False
+        for _ in range(2):
+            r = ebutton()
+            if r: break
+            time.sleep(0.25)
+        if not r: return
     move.press("e")
     if setdat['stinger']:
         move.press(",")
@@ -610,6 +615,9 @@ def convert():
         c = ebutton()
         if not c:
             webhook("","Convert done","brown")
+            wait = setdat["convert_wait"]
+            if wait: webhook("", f'Waiting for an additional {wait} seconds', "light green")
+            time.sleep(wait)
             break
         if time.perf_counter()  - st > 600:
             webhook("","Converting took too long, moving on","brown")
@@ -632,7 +640,7 @@ def walk_to_hive(field):
             if checkwithOCR('bee bear'):
                 break
             else:
-                convert()
+                convert(1)
                 reset.reset()
                 return
         
@@ -896,7 +904,7 @@ def placePlanter(planter):
                     clickYes()
 
                 break
-        mouse.click(27,102)
+        mouse.move(27,102)
         mouse.click(Button.left, 2)
     savePlanterTimings(planter)
     webhook("","Placed Planter: {}".format(displayPlanterName(planter)),"bright green",1)
@@ -1238,17 +1246,73 @@ def updateHive(h):
     webhook("","Found Hive: {}".format(h),"bright green")
     loadsettings.save('hive_number',h)
 
-def getQuest():
+def clickdialog(t=20):
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    mouse.position = (mw//(2*xsm),round(mh*(4/5*ysm)))
+    for _ in range(t):
+        mouse.press(Button.left)
+        sleep(0.25)
+        mouse.release(Button.left)
+    
+def getQuest(giver):
+    setdat = loadsettings.load()
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     pag.typewrite("\\")
     for _ in range(5):
         keyboard.press(Key.up)
         time.sleep(0.05)
         keyboard.release(Key.up)
-        time.sleep(0.1)
+        time.sleep(0.1)   
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
     move.press("enter")
+    keyboard.press(Key.down)
+    time.sleep(0.05)
+    keyboard.release(Key.down)
+    for _ in range(10):
+        keyboard.press(Key.page_up)
+        time.sleep(0.02)
+        keyboard.release(Key.page_up)
+        time.sleep(0.01)
+
+    q_title = ""
+    for _ in range(10):
+        ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2)
+        lines = [x[1][0].lower() for x in ocr]
+        for i in lines:
+            if giver in i:
+                if ":" in i: i  = i.split(":")[1]
+                q_title = i.replace(giver,"").replace("bear","")
+                break
+        if q_title:
+            break
+        for _ in range(2):
+            keyboard.press(Key.page_down)
+            time.sleep(0.02)
+            keyboard.release(Key.page_down)
+
+    keyboard.press(Key.up)
+    time.sleep(0.05)
+    keyboard.release(Key.up)
+    move.press("enter")
+    pag.typewrite("\\")
+    if not q_title: return False
+
+    highest_match = [0,"",[]]
+    for k,v in questData[giver].items():
+        match = SequenceMatcher(None, k, q_title).ratio()
+        if match > highest_match[0]:
+            highest_match[0] = match
+            highest_match[1] = k
+            highest_match[2] = v
+    webhook('',f'Quest detected: {highest_match[1]}',"light blue")
+
+    if setdat["haste_compensation"]: openSettings()
+    return highest_match[2]
+    
 def openSettings():
     savedat = loadRes()
     mw, mh = pag.size()
@@ -1871,7 +1935,6 @@ root.destroy()
 updateSave("ww",ww)
 updateSave("wh",wh)
 '''
-            
     
 def gather(gfid):
     with open("fieldsettings.txt","r") as f:
@@ -1953,7 +2016,6 @@ def gather(gfid):
         mouse.press(Button.left)
         if setdat['shift_lock']: pag.press('shift')
         exec(open("gather_{}.py".format(gp)).read())
-        if setdat['shift_lock']: pag.press('shift')
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
         if bpcap >= setdat["pack"]:
@@ -1967,6 +2029,7 @@ def gather(gfid):
             break
         if setdat['field_drift_compensation'] and gp != "stationary":
             fieldDriftCompensation()
+        if setdat['shift_lock']: pag.press('shift')
         shv = stingerHunt(0,1)
         if  shv == "success":
             stingerFound = 1
@@ -2043,9 +2106,12 @@ def placeSprinkler():
 def startLoop(planterTypes_prev, planterFields_prev,session_start):
     global invalid_prev_honey
     setStatus()
-    setdat = loadsettings.load()   
+    userset = loadsettings.load()
+    setdat = userset
     val = validateSettings()
     setStatus()
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     with open('canonfails.txt', 'w') as f:
         f.write('0')
     f.close()
@@ -2107,6 +2173,35 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         """
         os.system(cmd)
         timings = loadtimings()
+        quest_gathers = []
+        setdat = userset
+        #quests
+        if setdat["polar_quest"]:
+            #check if quest done, else read curr quest
+            for _ in range(2):
+                canon()
+                webhook("","Travelling: Polar Bear (quest) ","brown")
+                exec(open("quest_polar.py").read())
+                sleep(0.5)
+                if ebutton():
+                    move.press("e")
+                    sleep(0.2)
+                    move.press("e")
+                    break
+                reset.reset()
+                sleep(0.7)
+            clickdialog()
+            quest = getQuest("polar")
+            reset.reset()
+            print(quest)
+            for i in quest:
+                if i.startswith("gather"):
+                    quest_gathers.append(i.split("_")[1])
+                elif i.startswith("kill"):
+                    setdat[i.split("_")[2]] = 1
+                
+                
+            
         #Stump snail check
         if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
             canon()
@@ -2220,7 +2315,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 convert()
                 stingerHunt()
                 if getStatus() == "disconnect": return
-        
+   
             
         
         #Planter check
@@ -2448,12 +2543,21 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             while True:
                 if gfid >= len(setdat['gather_field']):
                     gfid = 0
-                if setdat["gather_field"][gfid].lower() == "none":
+                    
+                f = setdat["gather_field"][gfid].lower()
+                if f in quest_gathers:
+                    quest_gathers.remove(f)
+                if f == "none":
                     gfid += 1
                 else: break
                 
         else:
             mouse.click(Button.left, 1)
+
+        if setdat['polar_quest']:
+            for i in quest_gathers:
+                gather(i)
+                if getStatus() == "disconnect": return
         
 
             
@@ -2742,6 +2846,10 @@ if __name__ == "__main__":
     rejoin_method.set(setdat['rejoin_method'])
     manual_fullscreen = tk.IntVar(value=setdat['manual_fullscreen'])
     
+    convert_wait = setdat['convert_wait']
+    #convert_every_enabled = tk.IntVar(value=setdat["convert_every_enabled"])
+    #convert_every = setdat['convert_every']
+    
     wealthclock = tk.IntVar(value=setdat["wealthclock"])
     blueberrydispenser = tk.IntVar(value=setdat["blueberrydispenser"])
     strawberrydispenser = tk.IntVar(value=setdat["strawberrydispenser"])
@@ -2821,6 +2929,7 @@ if __name__ == "__main__":
     gather_fields.insert(0,"None")
     field_options = tk.Variable(value=[x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")])
     planter_fields =  plantdat['planter_fields']
+    
 
     multipliers = loadsettings.load('multipliers.txt')
 
@@ -3040,7 +3149,7 @@ if __name__ == "__main__":
         update.update()
         exit()
     def updateExp():
-        updateexperiment.update()
+        uupdate.update("e")
         exit()
 
     def expu():
@@ -3158,6 +3267,9 @@ if __name__ == "__main__":
             "rejoin_delay": rejoindelaytextbox.get(1.0,"end").replace("\n",""),
             "rejoin_method": rejoin_method.get(),
             "manual_fullscreen": manual_fullscreen.get(),
+            "convert_wait": convertwaittextbox.get(1.0,"end").replace("\n",""),
+            #"convert_every_enabled": convert_every_enabled.get(),
+            #"convert_every": converttextbox.get(1.0,"end").replace("\n",""),
             
             "gather_enable": gather_enable.get(),
             "gather_field": [gather_field_one.get(),gather_field_two.get(),gather_field_three.get()],
@@ -3203,7 +3315,7 @@ if __name__ == "__main__":
             "slot_time": slot_time_list,
             "slot_freq": slot_freq_list,
             "slot_use": slot_use_list,
-            "polar_quest": polar_quest
+            "polar_quest": polar_quest.get()
 
         }
 
@@ -3483,6 +3595,7 @@ if __name__ == "__main__":
     tkinter.Label(frame1, text = "Rotate Camera").place(x = 140, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, before_gather_turn_one,before_gather_turn_one.get(), *["None","Left","Right"],style='smaller.TMenubutton' )
     dropField.place(width=60,x = 255, y = ylevel+67,height=22)
+    button2_ttp = CreateToolTip(dropField, "direction to turn to.")
     dropField = ttk.OptionMenu(frame1, turn_times_one,turn_times_one.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton' )
     dropField.place(width=50,x = 325, y = ylevel+67,height=22)
 
@@ -3747,9 +3860,9 @@ if __name__ == "__main__":
 
     
     #Tab 6
-    '''
-    tkinter.Checkbutton(frame8, text="Polar Bear quest", variable=polar_quest).place(x=0, y = 30)
-    '''
+
+    #tkinter.Checkbutton(frame8, text="Polar Bear quest", variable=polar_quest).place(x=0, y = 30)
+
     #Tab 7
     tkinter.Label(frame3, text = "Hive Slot (6-5-4-3-2-1)").place(x = 0, y = 15)
     dropField = ttk.OptionMenu(frame3, hive_number, setdat['hive_number'], *[x+1 for x in range(6)],style='my.TMenubutton' )
@@ -3768,7 +3881,18 @@ if __name__ == "__main__":
     dropField.place(width=60,x = 245, y = 85,height=24)
 
     tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation, command = warnHasteComp).place(x=0, y = 120)
-    
+
+    tkinter.Label(frame3, text = "Wait").place(x = 0, y = 155)
+    convertwaittextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
+    convertwaittextbox.insert("end",convert_wait)
+    convertwaittextbox.place(x = 40, y=157)
+    tkinter.Label(frame3, text = "secs after converting").place(x = 75, y = 155)
+
+    #tkinter.Checkbutton(frame3, text="Convert every", variable=convert_every_enabled).place(x=0, y = 190)
+    #converttextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
+    #converttextbox.insert("end", convert_every)
+    #converttextbox.place(x=120,y=193)
+    #tkinter.Label(frame3, text = "mins").place(x = 160, y = 190)
 
 
     #Tab 8

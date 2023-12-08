@@ -101,9 +101,21 @@ def loadRes():
             l[1] = int(l[1])
         outdict[l[0]] = l[1]
     return outdict
+'''
+savedat = loadRes()
+ww = savedat['ww']
+wh = savedat['wh']
 roblox()
-mouse.position = (mw/(xsm*2.311),mh/(1.565*ysm))
-                    
+a = pag.screenshot(region=(0,wh/7,ww/4.5,wh/2))
+a.save("b.png")
+'''
+savedat = loadRes()
+ww = savedat['ww']
+wh = savedat['wh']
+print(mw,mh)
+i = np.array(pag.screenshot()).shape[1::-1]
+print(i)
+              
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
 small_image = cv2.imread('./images/general/nightsky.png')

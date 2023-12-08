@@ -22,7 +22,7 @@ def apu(k):
 move.hold("s",7)
 move.hold("d",6)
 move.hold("w",11)
-move.hold("s",0.1)
+move.hold("s",0.15)
 move.hold("d",0.35)
 move.hold("w",4)
 move.hold("d",3)
