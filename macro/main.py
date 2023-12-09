@@ -65,7 +65,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.44"
+macrov = "1.44.1"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -304,7 +304,7 @@ def detectNight(bypasstime=0):
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
     night = pag.screenshot(region=(0,0,round(ww/(3.4*xlm)),round(wh/(40*ylm))))
-    screen = np.array(screen)
+    screen = np.array(night)
     w,h = screen.shape[:2]
     rgb = screen[0,0][:3]
     if not setdat['stinger']: return False
