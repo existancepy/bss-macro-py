@@ -27,7 +27,6 @@ import logging
 import pynput
 from pynput.keyboard import Key
 from pynput.mouse import Button
-import _thread
 
 try:
     import matplotlib.pyplot as plt
