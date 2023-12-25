@@ -1008,11 +1008,13 @@ def hastecompbg():
     print("hastecomp activated")
     while True:
         getHaste()
+'''
 def on_press(key):
     if hasattr(key, "char") and key.char == ('z'):
         print("stopped key pressed")
         _thread.interrupt_main()
         return False
+'''
       
 def vic():
     setdat = loadsettings.load()
