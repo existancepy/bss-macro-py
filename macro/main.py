@@ -2443,9 +2443,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 with open("planterdata.txt","w") as f:
                     f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
                 f.close()
-            for p,f in occupiedStuff:
-                if p == "plenty":
-                    gather(f)
                                                                                         
         #Mob run check
         if setdat['werewolf'] and checkRespawn("werewolf","1h"):
