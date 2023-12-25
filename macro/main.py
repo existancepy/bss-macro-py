@@ -65,7 +65,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.1"
+macrov = "1.45.2"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -1782,7 +1782,7 @@ def rejoin():
         os.system(cmd)
         time.sleep(1)
         if setdat['manual_fullscreen']:
-            menubarRaw = customOCR(ww-200, 0, 200, 60, 0)
+            menubarRaw = customOCR(0, 0, 300, 60, 0)
             menubar = ""
             try:
                 for i in menubarRaw:
@@ -1790,7 +1790,7 @@ def rejoin():
             except:
                 pass
             menubar = menubar.lower()
-            if "am" in menubar or "pm" in menubar:
+            if "rob" in menubar or "lox" in menubar:
                 webhook("","Roblox is not in fullscreen, activating fullscreen", "dark brown")
                 fullscreen()
             else:
