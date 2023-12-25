@@ -7,7 +7,7 @@ discord_webhook_url:
 send_screenshot:0
 sprinkler_slot:1
 sprinkler_type:saturator
-display_type:built-in display
+display_type:built-in retina display
 private_server_link:
 enable_discord_bot:0
 discord_bot_token:
@@ -45,9 +45,9 @@ snow_machine:0
 mondo_buff:0
 lid_art:0
 candles:0
-start_honey:0
-prev_honey:0
-start_time:1701934456.429583
+start_honey:1685293
+prev_honey:1685293
+start_time:1703466955.246623
 canon_time:1.0
 reverse_hive_direction:0
 blue_booster:0

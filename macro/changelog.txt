@@ -94,3 +94,14 @@ Changelog:
 -24/1/23
 - Added field drift compensation. It finds the saturator and moves to it.
 
+- 24/12/23
+- Added new cornerxelol pattern. Elol pattern but it aligns to a corner
+- Changed cornerxsnake based on nesmiz's suggestion
+- Changed standing position for mondo chick based on pen pen's suggestion
+- Gather/field settings now save automatically, there is no need to start the macro
+- When rejoining, terminates the roblox process instead of quitting the app
+- Manual fullscreen setting now can detect if roblox is in fullscreen or not, and trigger fullscreen accordingly. It works by looking for the text "am"/"pm" in the top right of the screen (where the menu bar is)
+- Increased walk distance when walking back to hive. Macro should walk across all 6 hives
+- The hotkey "z" can now be used to stop the macro from anywhere
+- Calibrated backpack% detection. Now works with even more % values
+

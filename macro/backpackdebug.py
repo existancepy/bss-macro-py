@@ -37,6 +37,7 @@ cmd = """
 
 os.system(cmd)
 time.sleep(1)
+loadsettings.save('display_type',"built-in display")
 def rgb_to_dec(r, g, b):
       return (r*256*256)+(g*256)+b
     

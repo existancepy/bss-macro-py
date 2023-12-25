@@ -27,6 +27,7 @@ import logging
 import pynput
 from pynput.keyboard import Key
 from pynput.mouse import Button
+import _thread
 
 try:
     import matplotlib.pyplot as plt
@@ -65,7 +66,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.44.1"
+macrov = "1.45"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -539,15 +540,9 @@ def collect_mondo_buff():
     if canon() == "dc": return
     time.sleep(2)
     move.hold("e",0)
-    pag.press("space")
-    pag.press("space")
-    move.hold("s",0.8)
-    sleep(0.82)
-    pag.press("space")
-    sleep(1.5)
-    move.hold("a",2)
-    move.hold("d",2.6)
-    move.hold("a",0.6)
+    sleep(2.5)
+    move.hold("w",1.4)
+    move.hold("d",4)
     sleep(120)
 
 def collect_wreath():
@@ -632,7 +627,7 @@ def walk_to_hive(field):
     wh = savedata['wh']
     webhook("","Going back to hive: {}".format(field.title()),"dark brown")
     exec(open("walk_{}.py".format(field)).read())
-    for _ in range(45):
+    for _ in range(65):
         move.hold("a",0.1)
         time.sleep(0.06)
         r = ebutton()
@@ -1014,7 +1009,12 @@ def hastecompbg():
     print("hastecomp activated")
     while True:
         getHaste()
-
+def on_press(key):
+    if hasattr(key, "char") and key.char == ('z'):
+        print("stopped key pressed")
+        _thread.interrupt_main()
+        return False
+      
 def vic():
     setdat = loadsettings.load()
     fields = ['pepper','mountain','rose','cactus','spider','clover']
@@ -1755,10 +1755,7 @@ def openRoblox(link):
 def rejoin():
     setdat = loadsettings.load()
     for i in range(3):
-        cmd = """
-            osascript -e 'tell application "Roblox" to quit' 
-            """
-        os.system(cmd)
+        subprocess.run(['pkill', '-9', '"Roblox"'])
         savedata = loadRes()
         ww = savedata['ww']
         wh = savedata['wh']
@@ -1784,7 +1781,19 @@ def rejoin():
         os.system(cmd)
         time.sleep(1)
         if setdat['manual_fullscreen']:
-            fullscreen()
+            menubarRaw = customOCR(ww-200, 0, 200, 60, 0)
+            menubar = ""
+            try:
+                for i in menubarRaw:
+                    menubar += i[1][0]
+            except:
+                pass
+            menubar = menubar.lower()
+            if "am" in menubar or "pm" in menubar:
+                webhook("","Roblox is not in fullscreen, activating fullscreen", "dark brown")
+                fullscreen()
+            else:
+                webhook("","Roblox is already in fullscreen, not activating fullscreen", "dark brown")
         time.sleep(2)
         move.hold("w",5,0)
         move.hold("w",i*2,0)
@@ -2104,7 +2113,7 @@ def placeSprinkler():
         keyboard.release(Key.space)
         
 def startLoop(planterTypes_prev, planterFields_prev,session_start):
-    global invalid_prev_honey
+    global invalid_prev_honey, quest_kills, quest_gathers
     setStatus()
     userset = loadsettings.load()
     setdat = userset
@@ -2173,32 +2182,37 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         """
         os.system(cmd)
         timings = loadtimings()
-        quest_gathers = []
         setdat = userset
         #quests
         if setdat["polar_quest"]:
             #check if quest done, else read curr quest
-            for _ in range(2):
-                canon()
-                webhook("","Travelling: Polar Bear (quest) ","brown")
-                exec(open("quest_polar.py").read())
-                sleep(0.5)
-                if ebutton():
-                    move.press("e")
-                    sleep(0.2)
-                    move.press("e")
-                    break
+            if ses_start:
+                for _ in range(2):
+                    canon()
+                    webhook("","Travelling: Polar Bear (quest) ","brown")
+                    exec(open("quest_polar.py").read())
+                    sleep(0.5)
+                    if ebutton():
+                        move.press("e")
+                        sleep(0.2)
+                        move.press("e")
+                        break
+                    reset.reset()
+                    sleep(0.7)
+                clickdialog()
+                quest = getQuest("polar")
+                polar_quest = {}
                 reset.reset()
-                sleep(0.7)
-            clickdialog()
-            quest = getQuest("polar")
-            reset.reset()
-            print(quest)
-            for i in quest:
-                if i.startswith("gather"):
-                    quest_gathers.append(i.split("_")[1])
-                elif i.startswith("kill"):
-                    setdat[i.split("_")[2]] = 1
+                print(quest)
+                for i in quest:
+                    if i.startswith("gather"):
+                        f = i.split("_")[1]
+                        quest_gathers[f] = ["polar", 0, 1]
+                    elif i.startswith("kill"):
+                        _,c,m = i.split("_")
+                        setdat[i.split("_")[2]] = 1
+                        quest_kills[m] = ["polar",0, int(c)]
+                
                 
                 
             
@@ -2296,6 +2310,8 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             if getStatus() == "disconnect": return
         
         if setdat['mondo_buff']:
+            collect_mondo_buff()
+            '''
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
             hour,minute,_ = [int(x) for x in current_time.split(":")]
@@ -2315,6 +2331,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 convert()
                 stingerHunt()
                 if getStatus() == "disconnect": return
+            '''
    
             
         
@@ -2425,7 +2442,10 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     
                 with open("planterdata.txt","w") as f:
                     f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
-                f.close()             
+                f.close()
+            for p,f in occupiedStuff:
+                if p == "plenty":
+                    gather(f)
                                                                                         
         #Mob run check
         if setdat['werewolf'] and checkRespawn("werewolf","1h"):
@@ -2554,7 +2574,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         else:
             mouse.click(Button.left, 1)
 
-        if setdat['polar_quest']:
+        if quest_gathers:
             for i in quest_gathers:
                 gather(i)
                 if getStatus() == "disconnect": return
@@ -3174,16 +3194,8 @@ if __name__ == "__main__":
         label.grid(row=0, column=0, columnspan=2)
         button_yes.grid(row=1, column=0)
         button_no.grid(row=1, column=1)
-         
-    def startGo():
-        global setdat, stop, planterTypes_prev, planterFields_prev
-        setdat = loadsettings.load()
-        planterFields_set = []
-        for i in listbox.curselection():
-            planterFields_set.append(listbox.get(i).lower())
-        with open("fieldsettings.txt","r") as f:
-            fields = ast.literal_eval(f.read())
-        f.close()
+    def saveFields(e = ""):
+        global fields
         fields[gather_field_one.get().lower()] = {'gather_pattern': gather_pattern_one.get(),
                                           'gather_size': gather_size_one.get(),
                                           'gather_width': gather_width_one.get(),
@@ -3238,6 +3250,16 @@ if __name__ == "__main__":
         with open("fieldsettings.txt","w") as f:
             f.write(str(fields))
         f.close()
+        
+    def startGo():
+        global setdat, stop, planterTypes_prev, planterFields_prev, quest_kill, quest_gathers
+        quest_kill = {}
+        quest_gathers = {}
+        setdat = loadsettings.load()
+        planterFields_set = []
+        for i in listbox.curselection():
+            planterFields_set.append(listbox.get(i).lower())
+        saveFields()
         slot_enable_list = []
         slot_use_list = []
         slot_freq_list = []
@@ -3479,7 +3501,10 @@ if __name__ == "__main__":
         
         vic_proc.start()
         try:
+            listener = pynput.keyboard.Listener(on_press=on_press)
+            listener.start()
             ses_start = 1
+            
             while True:
                 #if keyboard.is_pressed('q'):
                     #raise KeyboardInterrupt
@@ -3500,23 +3525,26 @@ if __name__ == "__main__":
         loadsettings.save("display_type",display_type.get().lower())
         setResolution()
         
-    def disablews_one(event):
+    def disablews_one(event=""):
         if return_to_hive_one.get().lower() == "whirligig":
             wslotmenu_one.configure(state="normal")
         else:
             wslotmenu_one.configure(state="disable")
+        if event: saveFields()
             
-    def disablews_two(event):
+    def disablews_two(event=""):
         if return_to_hive_two.get().lower() == "whirligig":
             wslotmenu_two.configure(state="normal")
         else:
             wslotmenu_two.configure(state="disable")
+        if event: saveFields()
             
-    def disablews_three(event):
+    def disablews_three(event=""):
         if return_to_hive_three.get().lower() == "whirligig":
             wslotmenu_three.configure(state="normal")
         else:
             wslotmenu_three.configure(state="disable")
+        if event: saveFields()
 
     def disableeb(event):
         pass
@@ -3584,83 +3612,87 @@ if __name__ == "__main__":
     ylevel = 50
     dropField = ttk.OptionMenu(frame1, gather_field_one,setdat['gather_field'][0].title(), *gather_fields[1:],style='smaller.TMenubutton', command = fieldOne )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_one).place(x=10, y = ylevel+65)
-    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_one).place(x=140, y = ylevel+85)
+    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_one, command = saveFields).place(x=10, y = ylevel+65)
+    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_one, command = saveFields).place(x=140, y = ylevel+85)
 
-    dropField = ttk.OptionMenu(frame1, gather_pattern_one,gather_pattern_one.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(frame1, gather_pattern_one,gather_pattern_one.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
-    dropField = ttk.OptionMenu(frame1, gather_size_one,gather_size_one.get(), *["S","M","L"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, gather_size_one,gather_size_one.get(), *["S","M","L"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
-    dropField = ttk.OptionMenu(frame1, gather_width_one,gather_width_one.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, gather_width_one,gather_width_one.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 320, y = ylevel+35,height=22)
 
     tkinter.Label(frame1, text = "Rotate Camera").place(x = 140, y = ylevel+65)
-    dropField = ttk.OptionMenu(frame1, before_gather_turn_one,before_gather_turn_one.get(), *["None","Left","Right"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, before_gather_turn_one,before_gather_turn_one.get(), *["None","Left","Right"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=60,x = 255, y = ylevel+67,height=22)
     button2_ttp = CreateToolTip(dropField, "direction to turn to.")
-    dropField = ttk.OptionMenu(frame1, turn_times_one,turn_times_one.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, turn_times_one,turn_times_one.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 325, y = ylevel+67,height=22)
 
     timetextbox_one = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     timetextbox_one.place(x = 400, y=ylevel+35)
+    timetextbox_one.bind('<KeyRelease>', saveFields)
     packtextbox_one = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_one.place(x = 460, y=ylevel+35)
+    packtextbox_one.bind('<KeyRelease>', saveFields)
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_one,return_to_hive_one.get().title(), command = disablews_one, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
     tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
-    wslotmenu_one = ttk.OptionMenu(frame1 , whirligig_slot_one,whirligig_slot_one.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton')
+    wslotmenu_one = ttk.OptionMenu(frame1 , whirligig_slot_one,whirligig_slot_one.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton', command = saveFields)
     wslotmenu_one.place(width=50,x = 542, y = ylevel+65,height=22)
 
 
-    dropField = ttk.OptionMenu(frame1, start_location_one,start_location_one.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, start_location_one,start_location_one.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=100,x = 625, y = ylevel+35,height=22)
     tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
-    dropField = ttk.OptionMenu(frame1, distance_from_center_one,distance_from_center_one.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, distance_from_center_one,distance_from_center_one.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
 
     ylevel = 140
     dropField = ttk.OptionMenu(frame1, gather_field_two,setdat['gather_field'][1].title(), *gather_fields,style='smaller.TMenubutton', command = fieldTwo )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_two).place(x=10, y = ylevel+65)
-    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_two).place(x=140, y = ylevel+85)
+    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_two, command = saveFields).place(x=10, y = ylevel+65)
+    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_two, command = saveFields).place(x=140, y = ylevel+85)
     
-    dropField = ttk.OptionMenu(frame1, gather_pattern_two,gather_pattern_two.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(frame1, gather_pattern_two,gather_pattern_two.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
-    dropField = ttk.OptionMenu(frame1, gather_size_two,gather_size_two.get().title(), *["S","M","L"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, gather_size_two,gather_size_two.get().title(), *["S","M","L"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
-    dropField = ttk.OptionMenu(frame1, gather_width_two,gather_width_two.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, gather_width_two,gather_width_two.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 320, y = ylevel+35,height=22)
 
     tkinter.Label(frame1, text = "Rotate Camera").place(x = 140, y = ylevel+65)
-    dropField = ttk.OptionMenu(frame1, before_gather_turn_two,before_gather_turn_two.get().title(), *["None","Left","Right"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, before_gather_turn_two,before_gather_turn_two.get().title(), *["None","Left","Right"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=60,x = 255, y = ylevel+67,height=22)
-    dropField = ttk.OptionMenu(frame1, turn_times_two,turn_times_two.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, turn_times_two,turn_times_two.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 325, y = ylevel+67,height=22)
 
     timetextbox_two = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     timetextbox_two.place(x = 400, y=ylevel+35)
+    timetextbox_two.bind('<KeyRelease>', saveFields)
     packtextbox_two = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_two.place(x = 460, y=ylevel+35)
+    packtextbox_two.bind('<KeyRelease>', saveFields)
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_two,return_to_hive_two.get().title(), command = disablews_two, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
     tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
-    wslotmenu_two = ttk.OptionMenu(frame1 , whirligig_slot_two,whirligig_slot_two.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton')
+    wslotmenu_two = ttk.OptionMenu(frame1 , whirligig_slot_two,whirligig_slot_two.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton', command = saveFields)
     wslotmenu_two.place(width=50,x = 542, y = ylevel+65,height=22)
 
 
-    dropField = ttk.OptionMenu(frame1, start_location_two,start_location_two.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, start_location_two,start_location_two.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=100,x = 625, y = ylevel+35,height=22)
     tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, distance_from_center_two,distance_from_center_two.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
 
     ylevel = 230
-    dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields,style='smaller.TMenubutton', command = fieldOne )
+    dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields,style='smaller.TMenubutton', command = fieldThree )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_three).place(x=10, y = ylevel+65)
-    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_three).place(x=140, y = ylevel+85)
+    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_three, command = saveFields).place(x=10, y = ylevel+65)
+    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_three, command = saveFields).place(x=140, y = ylevel+85)
     
-    dropField = ttk.OptionMenu(frame1, gather_pattern_three,gather_pattern_three.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(frame1, gather_pattern_three,gather_pattern_three.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
     dropField = ttk.OptionMenu(frame1, gather_size_three,gather_size_three.get().title(), *["S","M","L"],style='smaller.TMenubutton' )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
@@ -3668,26 +3700,28 @@ if __name__ == "__main__":
     dropField.place(width=50,x = 320, y = ylevel+35,height=22)
 
     tkinter.Label(frame1, text = "Rotate Camera").place(x = 140, y = ylevel+65)
-    dropField = ttk.OptionMenu(frame1, before_gather_turn_three,before_gather_turn_three.get().title(), *["None","Left","Right"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, before_gather_turn_three,before_gather_turn_three.get().title(), *["None","Left","Right"],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=60,x = 255, y = ylevel+67,height=22)
-    dropField = ttk.OptionMenu(frame1, turn_times_three,turn_times_three.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, turn_times_three,turn_times_three.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 325, y = ylevel+67,height=22)
 
     timetextbox_three = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     timetextbox_three.place(x = 400, y=ylevel+35)
+    timetextbox_three.bind('<KeyRelease>', saveFields)
     packtextbox_three = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_three.place(x = 460, y=ylevel+35)
+    packtextbox_three.bind('<KeyRelease>', saveFields)
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_three,return_to_hive_three.get().title(), command = disablews_three, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
     tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
-    wslotmenu_three = ttk.OptionMenu(frame1 , whirligig_slot_three,whirligig_slot_three.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton')
+    wslotmenu_three = ttk.OptionMenu(frame1 , whirligig_slot_three,whirligig_slot_three.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton', command = saveFields)
     wslotmenu_three.place(width=50,x = 542, y = ylevel+65,height=22)
 
 
-    dropField = ttk.OptionMenu(frame1, start_location_three,start_location_three.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, start_location_three,start_location_three.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=100,x = 625, y = ylevel+35,height=22)
     tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
-    dropField = ttk.OptionMenu(frame1, distance_from_center_three,distance_from_center_three.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, distance_from_center_three,distance_from_center_three.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
     
 
@@ -3956,9 +3990,9 @@ if __name__ == "__main__":
     ttk.Button(root, text = "Experimental update",command = expu, width = 16,).place(x=300,y=420)
     ttk.Label(root, text = "version {}".format(macrov)).place(x = 680, y = 440)
 
-    disablews_one("1")
-    disablews_two("1")
-    disablews_three("1")
+    disablews_one()
+    disablews_two()
+    disablews_three()
     disabledw()
     disableeb("1")
     fieldOne(gather_field_one.get())
