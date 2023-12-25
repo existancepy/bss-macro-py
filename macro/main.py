@@ -66,7 +66,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45"
+macrov = "1.45.1"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -3498,8 +3498,8 @@ if __name__ == "__main__":
         
         vic_proc.start()
         try:
-            listener = pynput.keyboard.Listener(on_press=on_press)
-            listener.start()
+            #listener = pynput.keyboard.Listener(on_press=on_press)
+            #listener.start()
             ses_start = 1
             
             while True:
