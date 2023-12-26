@@ -65,7 +65,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.2"
+macrov = "1.45.3"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -1785,8 +1785,8 @@ def rejoin():
             menubarRaw = customOCR(0, 0, 300, 60, 0)
             menubar = ""
             try:
-                for i in menubarRaw:
-                    menubar += i[1][0]
+                for x in menubarRaw:
+                    menubar += x[1][0]
             except:
                 pass
             menubar = menubar.lower()
