@@ -65,7 +65,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.3"
+macrov = "1.45.4"
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
@@ -128,6 +128,10 @@ def pagmove(k,t):
     time.sleep(t)
     pag.keyUp(k)
 def fullscreen():
+    cmd = """
+            osascript -e 'activate application "Roblox"' 
+        """
+    os.system(cmd)
     keyboard.press(Key.cmd)
     time.sleep(0.05)
     keyboard.press(Key.ctrl)
