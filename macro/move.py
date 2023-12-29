@@ -58,6 +58,7 @@ def hold(k,t,hastecomp = 1):
     try:
         ws = settings['walkspeed']
     except:
+        ws = 30
         webhook("","An error has occured when reading movespeed. Contact Existance with a screenshot of terminal at the point","red")
         print(settings)
         log(settings)
