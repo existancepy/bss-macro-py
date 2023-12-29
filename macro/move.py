@@ -54,7 +54,13 @@ def aphold(k,t):
     
     
 def hold(k,t,hastecomp = 1):
-    ws = loadsettings.load()['walkspeed']
+    settings = loadsettings.load()
+    try:
+        ws = settings['walkspeed']
+    except:
+        webhook("","An error has occured when reading movespeed. Contact Existance with a screenshot of terminal at the point","red")
+        print(settings)
+        log(settings)
     if hastecomp:
         try:
             with open("haste.txt","r") as f:
