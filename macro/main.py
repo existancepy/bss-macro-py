@@ -49,7 +49,12 @@ import ast
 import calibrate_hive
 from datetime import datetime
 import pyscreeze
-
+sv_i = sys.version_info
+python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
+if (sv_i[1]>=10):
+    printRed("{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
+    quit()
+    
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
     printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
     quit()
@@ -66,8 +71,6 @@ mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
 macrov = "1.45.5"
-sv_i = sys.version_info
-python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
