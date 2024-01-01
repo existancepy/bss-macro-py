@@ -70,7 +70,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.5"
+macrov = "1.45.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2074,6 +2074,7 @@ def gather(gfid):
             convert()
         elif setdat['return_to_hive'] == "rejoin":
             rejoin()
+            convert()
             reset.reset()
         elif setdat['return_to_hive'] == "whirligig":
             webhook("","Activating whirligig","dark brown")
