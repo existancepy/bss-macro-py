@@ -81,8 +81,11 @@ def imToString(m):
         cap = pag.screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
     cap.save("{}.png".format(sn))  
     result = ocr.ocr("{}.png".format(sn),cls=False)[0]
-    result = sorted(result, key = lambda x: x[1][1], reverse = True)
-    out = ''.join([x[1][0] for x in result])
+    try:
+        result = sorted(result, key = lambda x: x[1][1], reverse = True)
+        out = ''.join([x[1][0] for x in result])
+    except:
+        out = ""
     os.remove("{}.png".format(sn))
     log("OCR for {}\n\n{}".format(m,out))
     return out
