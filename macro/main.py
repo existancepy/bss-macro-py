@@ -70,7 +70,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.6"
+macrov = "1.45.7"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1763,18 +1763,13 @@ def openRoblox(link):
 def rejoin():
     setdat = loadsettings.load()
     for i in range(3):
-        subprocess.run(['pkill', '-9', '"Roblox"'])
         savedata = loadRes()
         ww = savedata['ww']
         wh = savedata['wh']
         webhook("","Rejoining","dark brown",1)
         time.sleep(3)
-        if is_running("roblox"):
-                cmd = """
-                    osascript -e 'tell application "Roblox" to quit' 
-                    """
-                os.system(cmd)
-                time.sleep(3)
+        subprocess.run(['pkill', '-9', '"Roblox"'])
+               
         if setdat["private_server_link"]:
             openRoblox(setdat["private_server_link"])
         else:
@@ -1782,10 +1777,12 @@ def rejoin():
             time.sleep(10)
                 
         time.sleep(setdat['rejoin_delay']*(i+1))
+        if not is_running("roblox"):
+            webhook("","Roblox is not running, waiting for another min", "red", 1)
+            time.sleep(60)
         cmd = """
             osascript -e 'activate application "Roblox"' 
         """
-        
         os.system(cmd)
         time.sleep(1)
         if setdat['manual_fullscreen']:
@@ -1798,10 +1795,10 @@ def rejoin():
                 pass
             menubar = menubar.lower()
             if "rob" in menubar or "lox" in menubar:
-                webhook("","Roblox is not in fullscreen, activating fullscreen", "dark brown")
+                webhook("","Roblox is not in fullscreen, activating fullscreen", "dark brown",1)
                 fullscreen()
             else:
-                webhook("","Roblox is already in fullscreen, not activating fullscreen", "dark brown")
+                webhook("","Roblox is already in fullscreen, not activating fullscreen", "dark brown",1)
         time.sleep(2)
         move.hold("w",5,0)
         move.hold("w",i*2,0)
