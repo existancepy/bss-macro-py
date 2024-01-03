@@ -6,6 +6,7 @@ import loadsettings
 from pynput.keyboard import Key,Controller
 from delay import sleep
 from webhook import webhook
+from logpy import log
 keyboard = Controller()
 def apdown(k):
     cmd = """
