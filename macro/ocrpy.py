@@ -103,4 +103,7 @@ def customOCR(X1,Y1,W1,H1,applym=1):
     out = ocr.ocr("{}.png".format(sn),cls=False)
     log("OCR for Custom\n{}".format(out))
     os.remove("{}.png".format(sn))
-    return out[0]
+    if out:
+        return out[0]
+    else:
+        return [[[""],["",0]]]

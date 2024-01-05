@@ -1,6 +1,13 @@
 def printRed(txt):
     print("\033[0;31m{}\033[00m".format(txt))
-
+    
+import sys
+sv_i = sys.version_info
+python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
+if (sv_i[1]>=10):
+    printRed("{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
+    quit()
+    
 try:
     import pyautogui as pag
 except Exception as e:
@@ -15,7 +22,7 @@ import tkinter
 import tkinter as tk
 from tkinter import ttk
 import backpack, reset, loadsettings, move,update,updateexperiment
-import multiprocessing, webbrowser, imagesearch, sys, discord, subprocess
+import multiprocessing, webbrowser, imagesearch, discord, subprocess
 from webhook import webhook
 global savedata
 global setdat
@@ -49,11 +56,6 @@ import ast
 import calibrate_hive
 from datetime import datetime
 import pyscreeze
-sv_i = sys.version_info
-python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
-if (sv_i[1]>=10):
-    printRed("{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
-    quit()
     
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
     printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
@@ -70,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.7"
+macrov = "1.45.8"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -481,7 +483,8 @@ def canon(fast=0):
     setdat = loadsettings.load()
     ww = savedata['ww']
     wh = savedata['wh']
-    for i in range(4):
+    disconnect = False
+    for i in range(3):
         #Move to canon:
         if not fast:
             if checkwithOCR("disconnect"):
@@ -490,6 +493,10 @@ def canon(fast=0):
         time.sleep(1)
         move.hold("w",0.8)
         move.hold("d",0.9*(setdat["hive_number"])+1)
+        if ebutton():
+            webhook("","E button detected. Roblox is frozen", "red",1)
+            disconnect = True
+            break
         pag.keyDown("d")
         time.sleep(0.5)
         move.press("space")
@@ -497,15 +504,14 @@ def canon(fast=0):
         r = ""
         pag.keyUp("d")
         if fast:
-            move.hold("d",0.9)
+            move.hold("d",0.95)
             time.sleep(0.1)
             return
         move.hold("d",0.3)
-        for _ in range(4):
+        for _ in range(6):
             move.hold("d",0.2)
             time.sleep(0.05)
-            r = ebutton()
-            if r:
+            if ebutton():
                 if checkwithOCR('bee bear'):
                     webhook("","Bee Bear detected","dark brown")
                     break
@@ -519,6 +525,9 @@ def canon(fast=0):
         reset.reset()
     else:
         webhook("","Cannon failed too many times, rejoining", "red")
+        disconnect = True
+        
+    if disconnect:
         setStatus("disconnect")
         time.sleep(1)
         return "dc"
@@ -970,6 +979,11 @@ def goToPlanter(field,place=0):
     elif field == "spider":
         move.hold("s",3)
         move.hold("d",4)
+    elif field == "sunflower":
+        move.hold("d",3)
+        move.hold("w",4.5)
+        move.hold("a",0.4)
+        move.hold("s",0.4)
     else:
         time.sleep(0.8)
     time.sleep(0.2)
@@ -1717,6 +1731,13 @@ def openRoblox(link):
     rm = loadsettings.load()['rejoin_method']
     if rm == "new tab":
         webbrowser.open(link, new = 2)
+    elif rm == "reload":
+        webbrowser.open(link, new = 2)
+        time.sleep(2)
+        with keyboard.pressed(Key.cmd):
+            keyboard.press('r')
+            time.sleep(0.1)
+            keyboard.release('r')
     elif rm == "copy paste":
         webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True, new = 2)
         time.sleep(3)
@@ -1804,7 +1825,6 @@ def rejoin():
         move.hold("w",i*2,0)
         move.hold("s",0.6,0)
         foundHive = 0
-        move.apkey('space')
         time.sleep(0.5)
         webhook("","Finding Hive", "dark brown",1)
         if setdat['hive_number'] == 3:
@@ -2050,7 +2070,7 @@ def gather(gfid):
             break
         if not cycleCount%20:
             if checkwithOCR("disconnect"): return
-        if not cycleCount%3:
+        if not cycleCount%2:
             bpcap = backpack.bpc()
         mouse.release(Button.left)
         cycleCount += 1
@@ -2316,8 +2336,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             if getStatus() == "disconnect": return
         
         if setdat['mondo_buff']:
-            collect_mondo_buff()
-            '''
+
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
             hour,minute,_ = [int(x) for x in current_time.split(":")]
@@ -2337,7 +2356,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 convert()
                 stingerHunt()
                 if getStatus() == "disconnect": return
-            '''
    
             
         
@@ -3414,6 +3432,8 @@ if __name__ == "__main__":
         except:
             pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(setdict['walkspeed']),title="Invalid setting",button="OK")
             return
+        if float(setdict["walkspeed"]) > 40:
+            pag.alert(text="The walkspeed of {} is unusually high. Make sure that the value is entered correctly and there are no haste stacks")
         
         savesettings(setdict,"settings.txt")
         savesettings(planterdict,"plantersettings.txt")
@@ -3968,7 +3988,7 @@ if __name__ == "__main__":
     tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
     tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen).place(x=0, y = 190)
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
-    dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste"],style='my.TMenubutton' )
+    dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste", "Reload"],style='my.TMenubutton' )
     dropField.place(width=90,x = 360, y = 155,height=24)
     
     #Tab 7
