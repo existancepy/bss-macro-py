@@ -18,7 +18,6 @@ import backpack
 from webhook import webhook
 import webbrowser
 import reset
-import _darwinmouse as mouse
 import ast
 import getHaste
 
