@@ -309,7 +309,7 @@ def ebutton(pagmode=0):
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    ocrval = imagesearch.find("e_symbol.png", 0.9, ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm), 0, 0)
+    ocrval = imagesearch.find("e_symbol.png", 0.8, ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm), 0, 0)
     log(ocrval)
     return bool(ocrval)
     '''
