@@ -302,9 +302,21 @@ def checkwithOCR(m):
     return False
     
 def ebutton(pagmode=0):
+    savedata = loadRes()
+    ww = savedata['ww']
+    wh = savedata['wh']
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
+    ocrval = imagesearch.find("e_symbol.png", 0.9, ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm), 0, 0)
+    log(ocrval)
+    return bool(ocrval)
+    '''
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
     log(ocrval)
     return "E" in ocrval and len(ocrval) <= 3
+    '''
 
 def detectNight(bypasstime=0):
     savedat = loadRes()

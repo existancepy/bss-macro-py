@@ -1,10 +1,10 @@
 
-hive_number:5
+hive_number:6
 walkspeed:28
 gifted_vicious_bee:0
 enable_discord_webhook:0
 discord_webhook_url:
-send_screenshot:0
+send_screenshot:1
 sprinkler_slot:1
 sprinkler_type:saturator
 display_type:built-in retina display
@@ -16,11 +16,11 @@ show_haste_warn:1
 rejoin_every_enabled:0
 rejoin_every:1
 rejoin_delay:130
-rejoin_method:Reload
+rejoin_method:reload
 manual_fullscreen:0
 convert_wait:0
 gather_enable:1
-gather_field:['Pine Tree', 'None', 'None']
+gather_field:['pine tree', 'none', 'none']
 stump_snail:0
 continue_after_stump_snail:0
 ladybug:0
@@ -45,9 +45,9 @@ snow_machine:0
 mondo_buff:0
 lid_art:0
 candles:0
-start_honey:0
-prev_honey:0
-start_time:1704416674.490035
+start_honey:14875400046726
+prev_honey:14875400046726
+start_time:1704629412.713068
 canon_time:1.0
 reverse_hive_direction:0
 blue_booster:0
@@ -55,7 +55,7 @@ red_booster:0
 mountain_booster:0
 gather_in_boosted:0
 slot_enable:[0, 0, 0, 0, 0, 0, 0]
-slot_time:['0', '0', '0', '0', '0', '0', '0']
-slot_freq:['Secs', 'Secs', 'Secs', 'Secs', 'Secs', 'Secs', 'Secs']
-slot_use:['Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering']
+slot_time:[0, 0, 0, 0, 0, 0, 0]
+slot_freq:['secs', 'secs', 'secs', 'secs', 'secs', 'secs', 'secs']
+slot_use:['gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering']
 polar_quest:0

@@ -18,7 +18,6 @@ import backpack
 from webhook import webhook
 import webbrowser
 import reset
-import _darwinmouse as mouse
 import ast
 import getHaste
 from datetime import datetime
@@ -110,36 +109,15 @@ roblox()
 a = pag.screenshot(region=(0,wh/7,ww/4.5,wh/2))
 a.save("b.png")
 '''
-def rgb_to_dec(r, g, b):
-      return (r * 256 * 256) + (g * 256) + b
 savedat = loadRes()
 ww = savedat['ww']
 wh = savedat['wh']
-X1=ww//2+130
-Y1=8
+ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
 roblox()
-out = {}
-percHist = []
-'''
-while True:
-    pollenRaw = ocrpy.customOCR(1560, 8, 1832, 60, 0)
-    pollen = pollenRaw[0][1][0]
-    if "/" in pollen:
-        p = int(pollen.split("/")[0].replace(",",""))
-        im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
-        col = tuple(im[0,0])
-        #print(col)
-        backpackColor = rgb_to_dec(col[0],col[1],col[2])
-        perc = int(int(p)/1411010*100)
-        if perc not in percHist:
-            out[backpackColor] = perc
-            percHist.append(perc)
-    print(out)
-print(pollen)
-'''
-
-while True:
-    print(backpack.bpc())
+print(bool(imagesearch.find("e_symbol.png", 0.9, ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm), 0, 0)))
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
 small_image = cv2.imread('./images/general/nightsky.png')
