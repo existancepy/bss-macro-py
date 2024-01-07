@@ -6,10 +6,12 @@ import ast
 
 def load(filename = "settings.txt"):
     info = {}
-    with open(filename,"r") as f:
-        lines = f.read().split("\n")
-    f.close()
-    print(lines)
+    lines = []
+    while len(lines) != 1 or not len(lines):
+        with open(filename,"r") as f:
+            lines = f.read().split("\n")
+        f.close()
+        print(lines)
     for s in lines:
         if not s.startswith("=") and not s == "":
             l = s.strip().split(":",1)
