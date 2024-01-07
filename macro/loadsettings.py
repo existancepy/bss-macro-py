@@ -7,7 +7,7 @@ import ast
 def load(filename = "settings.txt"):
     info = {}
     lines = []
-    while len(lines) != 1 or not len(lines):
+    while len(lines) == 1 or not len(lines):
         with open(filename,"r") as f:
             lines = f.read().split("\n")
         f.close()
