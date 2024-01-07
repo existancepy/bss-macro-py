@@ -52,6 +52,7 @@ def find(img,confi, x1 = 0, y1 = 0, x2 = 0, y2 = 0,fast=0, defaultPath = 1):
         screen = ImageGrab.grab()
     else:
         screen = pag.screenshot(region=(x1,y1,x2,y2))
+        screen.save("e_symbol_from.png")
     screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
     if defaultPath:
         if display_type == "built-in retina display":
@@ -67,5 +68,7 @@ def find(img,confi, x1 = 0, y1 = 0, x2 = 0, y2 = 0,fast=0, defaultPath = 1):
     if not img == "disconnect.png":
         log("Trying to find {}. max_val is {} ".format(img,max_val))
     if max_val >= confi:
+        print("success")
         return [1,x,y,max_val]
+    print(max_val)
     return 

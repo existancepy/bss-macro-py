@@ -11,7 +11,6 @@ def load(filename = "settings.txt"):
         with open(filename,"r") as f:
             lines = f.read().split("\n")
         f.close()
-        print(lines)
     for s in lines:
         if not s.startswith("=") and not s == "":
             l = s.strip().split(":",1)
