@@ -62,13 +62,13 @@ def imToString(m):
         cap.save("{}.png".format(sn))  
         ocrres = ocr.ocr("{}.png".format(sn),cls=False)[0]
         #print(ocrres)
-        result = [x[1][0] for x in ocrres]
-        honey = 0
-        for i in result:
-            if i[0].isdigit():
-                honey = i
-                break
         try:
+            result = [x[1][0] for x in ocrres]
+            honey = 0
+            for i in result:
+                if i[0].isdigit():
+                    honey = i
+                    break
             honey = int(''.join([x for x in honey if x.isdigit()]))
             log(millify(honey))
         except Exception as e:
