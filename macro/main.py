@@ -302,6 +302,7 @@ def checkwithOCR(m):
     return False
     
 def ebutton(pagmode=0):
+    '''
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
@@ -316,7 +317,7 @@ def ebutton(pagmode=0):
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
     log(ocrval)
     return "E" in ocrval and len(ocrval) <= 3
-    '''
+   
 
 def detectNight(bypasstime=0):
     savedat = loadRes()
