@@ -12,7 +12,7 @@ private_server_link:
 enable_discord_bot:0
 discord_bot_token:
 haste_compensation:0
-show_haste_warn:1
+show_haste_warn:0
 rejoin_every_enabled:0
 rejoin_every:1
 rejoin_delay:130
