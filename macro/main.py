@@ -497,6 +497,7 @@ def canon(fast=0):
     ww = savedata['ww']
     wh = savedata['wh']
     disconnect = False
+    eb_freeze = False
     for i in range(3):
         #Move to canon:
         if not fast:
@@ -507,15 +508,17 @@ def canon(fast=0):
         move.hold("w",0.8)
         move.hold("d",0.9*(setdat["hive_number"])+1)
         if ebutton():
-            webhook("","E button detected. Roblox is frozen", "red",1)
-            disconnect = True
-            break
+            eb_freeze = True
         pag.keyDown("d")
         time.sleep(0.5)
         move.press("space")
         time.sleep(0.2)
         r = ""
         pag.keyUp("d")
+        if ebutton() and eb_freeze:
+            webhook("","E button detected. Roblox is frozen", "red",1)
+            disconnect = True
+            break
         if fast:
             move.hold("d",0.95)
             time.sleep(0.1)
