@@ -61,10 +61,10 @@ def imToString(m):
         cap = pag.screenshot(region=(ww//(3*xsm),0,ww//(6.5*xlm),wh//(ylm*25)))
         cap.save("{}.png".format(sn))  
         ocrres = ocr.ocr("{}.png".format(sn),cls=False)[0]
+        honey = 0
         #print(ocrres)
         try:
             result = [x[1][0] for x in ocrres]
-            honey = 0
             for i in result:
                 if i[0].isdigit():
                     honey = i
