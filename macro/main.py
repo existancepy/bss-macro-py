@@ -518,8 +518,7 @@ def canon(fast=0):
         time.sleep(0.5)
         move.press("space")
         time.sleep(0.05)
-        move.hold("w",0.1)
-        time.sleep(0.05)
+        move.hold("w",0.15)
         r = ""
         pag.keyUp("d")
         if ebutton() and eb_freeze:
