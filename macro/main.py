@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.10"
+macrov = "1.45.11"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -320,7 +320,9 @@ def ebutton(pagmode=0):
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
     log(ocrval)
     return "E" in ocrval and len(ocrval) <= 3
-   
+
+def rebutton():
+    return ebutton() and "claim" in getBesideE()
 
 def detectNight(bypasstime=0):
     savedat = loadRes()
@@ -656,13 +658,16 @@ def convert(bypass=0):
         move.press(".")
         
 def walk_to_hive(field):
+    setdat = loadsettings.load()
+    hive = setdat['hive_number']
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
     webhook("","Going back to hive: {}".format(field.title()),"dark brown")
     exec(open("walk_{}.py".format(field)).read())
-    for _ in range(65):
-        move.hold("a",0.1)
+    move.hold("a",(hive-1)*0.9)
+    for _ in range(30):
+        move.hold("a",0.12)
         time.sleep(0.06)
         r = ebutton()
         if r:
@@ -672,7 +677,6 @@ def walk_to_hive(field):
                 convert(1)
                 reset.reset()
                 return
-            break
         
     webhook("","Cant find hive, resetting","dark brown",1)
     reset.reset()
@@ -1848,7 +1852,7 @@ def rejoin():
         time.sleep(0.5)
         webhook("","Finding Hive", "dark brown",1)
         if setdat['hive_number'] == 3:
-            if ebutton():
+            if rebutton():
                 move.press('e')
                 foundHive = 1
                 webhook("","Hive Found: 3","dark brown",1)
@@ -1857,7 +1861,7 @@ def rejoin():
             move.hold('d',1,0)
             for _ in range(4):
                 move.hold('d',0.1)
-                if ebutton():
+                if rebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 2","dark brown",1)
@@ -1866,7 +1870,7 @@ def rejoin():
             move.hold('d',2,0)
             for _ in range(4):
                 move.hold('d',0.1,0)
-                if ebutton():
+                if rebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 1","dark brown",1)
@@ -1875,7 +1879,7 @@ def rejoin():
             move.hold('a',0.6,0)
             for _ in range(4):
                 move.hold('a',0.1,0)
-                if ebutton():
+                if rebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 4","dark brown",1)
@@ -1884,14 +1888,14 @@ def rejoin():
             move.hold('a',1.9,0)
             for _ in range(4):
                 move.hold('a',0.1,0)
-                if ebutton():
+                if rebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 5","dark brown",1)
                     break
         else:
             move.hold('a',3.3,0)
-            if ebutton():
+            if rebutton():
                     move.press('e')
                     foundHive = 1
                     webhook("","Hive Found: 6","dark brown",1)
@@ -1903,7 +1907,7 @@ def rejoin():
                 move.hold('a',0.2)
                 for _ in range(3):
                     move.hold('a',0.1,0)
-                    if ebutton():
+                    if rebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(1)
@@ -1912,7 +1916,7 @@ def rejoin():
                 move.hold('a',0.9,0)
                 for _ in range(3):
                     move.hold('a',0.1,0)
-                    if ebutton():
+                    if rebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(2)
@@ -1921,7 +1925,7 @@ def rejoin():
                 move.hold("a",0.9,0)
                 for _ in range(3):
                     move.hold('a',0.1,0)
-                    if ebutton():
+                    if rebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(3)
@@ -1930,7 +1934,7 @@ def rejoin():
                 move.hold('a',0.8,0)
                 for _ in range(3):
                     move.hold('a',0.1,0)
-                    if ebutton():
+                    if rebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(4)
@@ -1939,7 +1943,7 @@ def rejoin():
                 move.hold('a',0.9,0)
                 for _ in range(3):
                     move.hold('a',0.1,0)
-                    if ebutton():
+                    if rebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(5)
@@ -1948,7 +1952,7 @@ def rejoin():
                 move.hold('a',0.9,0)
                 for _ in range(3):
                     move.hold('a',0.1,0)
-                    if ebutton():
+                    if rebutton():
                         move.press('e')
                         foundHive = 1
                         updateHive(6)
@@ -2065,6 +2069,8 @@ def gather(gfid):
     end_gather = 0
     bpcap = 0
     cycleCount = 0
+    prev_bp = 0
+    repeat_bp = 0
     while not end_gather:
         time.sleep(0.05)
         mouse.press(Button.left)
@@ -2076,7 +2082,6 @@ def gather(gfid):
             webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
             break
-        
         if timespent > setdat["gather_time"]:
             webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
@@ -2092,6 +2097,15 @@ def gather(gfid):
             if checkwithOCR("disconnect"): return
         if not cycleCount%2:
             bpcap = backpack.bpc()
+            if bpcap == prev_bp:
+                repeat_bp += 1
+            else:
+                prev_bp = bpcap
+                repeat_bp = 0
+        if repeat_bp >= 5:
+            setStatus("disconnect")
+            webhook("","Backpack has not changed. Roblox is frozen","red")
+            return 
         mouse.release(Button.left)
         cycleCount += 1
     time.sleep(0.5)
