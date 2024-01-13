@@ -1,34 +1,5 @@
-Your macro version is 1.45.8
+Your macro version is 1.45.9
 
 
 display type: retina
 Screen coordinates: 2880x1800
-[20:10:12] Macro started - Report - exih_macro
-Version 1.45.8
-Screen Coordinates: 2880x1800
-Python 3.9.5
-[]
-Session Start
-[20:10:26]  - Resetting character, Attempt: 1
-(115, 115, 117, 255)
-(116, 100, 37, 255)
-Trying to find e_symbol.png. max_val is 0.8190119862556458 
-None
-Trying to find e_symbol.png. max_val is 0.8190119862556458 
-None
-OCR for disconnect
-
-token slav80
-OCR for disconnect
-
-token slav80
-[20:10:47]  - Moving to cannon
-Trying to find e_symbol.png. max_val is 0.8207623958587646 
-None
-Trying to find e_symbol.png. max_val is 0.973898708820343 
-[1, 77, 5, 0.973898708820343]
-OCR for bee bear
-
-Fire the Red CannonE
-[20:11:00]  - Cannon found
-[20:11:00]  - Travelling: Pine Tree

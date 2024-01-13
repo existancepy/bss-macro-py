@@ -16,7 +16,7 @@ mouse = Controller()
 savedata = {}
 mw,mh = pag.size()
 tar =  (127, 108, 41)
-var = 30
+var = 40
 def loadSave():
     with open('save.txt') as f:
         lines = f.read().split("\n")

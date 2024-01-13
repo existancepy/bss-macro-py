@@ -36,6 +36,7 @@ time.sleep(8)
 move.hold("w",5)
 move.hold("s",0.2)
 move.hold("d",5)
+move.hold("w",1)
 move.hold("s",0.6)
 
     

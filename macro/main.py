@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.9"
+macrov = "1.45.10"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -300,7 +300,10 @@ def checkwithOCR(m):
         if "bear" in text:
             return True
     return False
-    
+
+def getBesideE():
+    return imToString("bee bear").lower()
+
 def ebutton(pagmode=0):
     '''
     savedata = loadRes()
@@ -529,7 +532,7 @@ def canon(fast=0):
             time.sleep(0.05)
             if ebutton():
                 if checkwithOCR('bee bear'):
-                    webhook("","Bee Bear detected","dark brown")
+                    webhook("","Bear detected","dark brown")
                     break
                 else:
                     webhook("","Cannon found","dark brown")
@@ -663,12 +666,13 @@ def walk_to_hive(field):
         time.sleep(0.06)
         r = ebutton()
         if r:
-            if checkwithOCR('bee bear'):
-                break
-            else:
+            text = getBesideE()
+            log(text)
+            if "ma" in text or "ke" in text:
                 convert(1)
                 reset.reset()
                 return
+            break
         
     webhook("","Cant find hive, resetting","dark brown",1)
     reset.reset()
