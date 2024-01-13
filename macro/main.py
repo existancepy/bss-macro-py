@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.11"
+macrov = "1.45.12"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -517,7 +517,9 @@ def canon(fast=0):
         pag.keyDown("d")
         time.sleep(0.5)
         move.press("space")
-        time.sleep(0.2)
+        time.sleep(0.05)
+        move.hold("w",0.1)
+        time.sleep(0.05)
         r = ""
         pag.keyUp("d")
         if ebutton() and eb_freeze:
