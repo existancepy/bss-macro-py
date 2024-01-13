@@ -2103,7 +2103,7 @@ def gather(gfid):
             else:
                 prev_bp = bpcap
                 repeat_bp = 0
-        if repeat_bp >= 5:
+        if repeat_bp >= 15:
             setStatus("disconnect")
             webhook("","Backpack has not changed. Roblox is frozen","red")
             return 
