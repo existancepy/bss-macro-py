@@ -348,7 +348,7 @@ def detectNight(bypasstime=0):
                                 success = False
                 if success:
                     print(x,y)
-                    webhook("","Night Detected","dark brown")
+                    webhook("","Night Detected","dark brown",1)
                     savetimings("night")
                     night.save("night.png")
                     return True
