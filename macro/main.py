@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.12"
+macrov = "1.45.13"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -322,7 +322,7 @@ def ebutton(pagmode=0):
     return "E" in ocrval and len(ocrval) <= 3
 
 def rebutton():
-    return ebutton() and "claim" in getBesideE()
+    return "claim" in getBesideE()
 
 def detectNight(bypasstime=0):
     savedat = loadRes()
@@ -670,14 +670,12 @@ def walk_to_hive(field):
     for _ in range(30):
         move.hold("a",0.12)
         time.sleep(0.06)
-        r = ebutton()
-        if r:
-            text = getBesideE()
-            log(text)
-            if "ma" in text or "ke" in text:
-                convert(1)
-                reset.reset()
-                return
+        text = getBesideE()
+        log(text)
+        if "ma" in text or "ke" in text:
+            convert(1)
+            reset.reset()
+            return
         
     webhook("","Cant find hive, resetting","dark brown",1)
     reset.reset()
