@@ -5,7 +5,7 @@ import os
 import tkinter
 import loadsettings
 import move
-
+ws = loadsettings.load()["walkspeed"]
 def apd(k):
     cmd = """
         osascript -e  'tell application "System Events" to key down "{}"'
