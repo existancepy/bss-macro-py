@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.13"
+macrov = "1.45.14"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2096,7 +2096,7 @@ def gather(gfid):
             if checkwithOCR("disconnect"): return
         if not cycleCount%2:
             bpcap = backpack.bpc()
-            if bpcap == prev_bp:
+            if bpcap == prev_bp and prev_bp != 0:
                 repeat_bp += 1
             else:
                 prev_bp = bpcap
