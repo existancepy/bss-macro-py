@@ -25,7 +25,21 @@ def millify(n):
     n = float(n)
     millidx = max(0,min(len(millnames)-1,
                         int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
-
+def screenshot(**kwargs):
+    out = None
+    for _ in range(4):
+        try: 
+            if "region" in kwargs:
+                out = pag.screenshot(region=kwargs['region'])
+            else:
+                out = pag.screenshot()
+        except FileNotFoundError as e:
+            log(e)
+            print(e)
+        else:
+            break
+    return out
+    
 def imToString(m):
     savedata = loadRes()
     ww = savedata['ww']
