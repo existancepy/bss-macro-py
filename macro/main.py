@@ -961,7 +961,7 @@ def clickYes():
         mouse.position = (a[1]//multi+urows//(multi*2),a[2]//multi+ucols//(multi*2))
         time.sleep(1)
         mouse.click(Button.left, 1)    
-    mouse.position = (mw/(xsm*2.311),mh/(1.565*ysm))
+    mouse.position = (mw/(xsm*2.311),mh/(1.851*ysm))
     time.sleep(1)
     mouse.click(Button.left, 1)
     
