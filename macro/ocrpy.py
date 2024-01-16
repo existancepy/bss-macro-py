@@ -89,7 +89,7 @@ def imToString(m):
         os.remove("{}.png".format(sn))
         return honey
     elif m == "disconnect":
-        cap = .screenshot(region=(ww//(3),wh//(2.8),ww//(2.3),wh//(5)))
+        cap = screenshot(region=(ww//(3),wh//(2.8),ww//(2.3),wh//(5)))
     elif m == "dialog":
         cap = screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
     cap.save("{}.png".format(sn))  
