@@ -37,6 +37,7 @@ def screenshot(**kwargs):
         except FileNotFoundError as e:
             log(e)
             print(e)
+            time.sleep(0.5)
     return out
     
 def imToString(m):
@@ -62,6 +63,7 @@ def imToString(m):
         cap = screenshot(region=(ww*3//4, 0, ww//4,wh//3))
     elif m == "ebutton":
         cap = screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
+        if not cap: return ""
         cap.save("{}.png".format(sn))
         result = ocr.ocr("{}.png".format(sn),cls=False)[0]
         os.remove("{}.png".format(sn))
@@ -72,6 +74,7 @@ def imToString(m):
             return ""
     elif m == "honey":
         cap = pag.screenshot(region=(ww//(3*xsm),0,ww//(6.5*xlm),wh//(ylm*25)))
+        if not cap: return ""
         cap.save("{}.png".format(sn))  
         ocrres = ocr.ocr("{}.png".format(sn),cls=False)[0]
         honey = 0
@@ -92,6 +95,7 @@ def imToString(m):
         cap = screenshot(region=(ww//(3),wh//(2.8),ww//(2.3),wh//(5)))
     elif m == "dialog":
         cap = screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
+    if not cap: return ""
     cap.save("{}.png".format(sn))  
     result = ocr.ocr("{}.png".format(sn),cls=False)[0]
     try:
