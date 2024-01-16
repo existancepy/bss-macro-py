@@ -33,11 +33,10 @@ def screenshot(**kwargs):
                 out = pag.screenshot(region=kwargs['region'])
             else:
                 out = pag.screenshot()
+            break
         except FileNotFoundError as e:
             log(e)
             print(e)
-        else:
-            break
     return out
     
 def imToString(m):
@@ -54,15 +53,15 @@ def imToString(m):
     # ImageGrab-To capture the screen image in a loop. 
     # Bbox used to capture a specific area.
     if m == "bee bear":
-        cap = pag.screenshot(region=(ww//(3*xsm),wh//(20*ysm),ww//(3*xlm),wh//(7*ylm)))
+        cap = screenshot(region=(ww//(3*xsm),wh//(20*ysm),ww//(3*xlm),wh//(7*ylm)))
     elif m == "egg shop":
-        cap = pag.screenshot(region=(ww//(1.2*xsm),wh//(3*ysm),ww-ww//1.2,wh//5))
+        cap = screenshot(region=(ww//(1.2*xsm),wh//(3*ysm),ww-ww//1.2,wh//5))
     elif m == "blue":
-        cap = pag.screenshot(region=(ww*3//4, wh//3*2, ww//4,wh//3))
+        cap = screenshot(region=(ww*3//4, wh//3*2, ww//4,wh//3))
     elif m == "chat":
-        cap = pag.screenshot(region=(ww*3//4, 0, ww//4,wh//3))
+        cap = screenshot(region=(ww*3//4, 0, ww//4,wh//3))
     elif m == "ebutton":
-        cap = pag.screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
+        cap = screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
         cap.save("{}.png".format(sn))
         result = ocr.ocr("{}.png".format(sn),cls=False)[0]
         os.remove("{}.png".format(sn))
@@ -90,9 +89,9 @@ def imToString(m):
         os.remove("{}.png".format(sn))
         return honey
     elif m == "disconnect":
-        cap = pag.screenshot(region=(ww//(3),wh//(2.8),ww//(2.3),wh//(5)))
+        cap = .screenshot(region=(ww//(3),wh//(2.8),ww//(2.3),wh//(5)))
     elif m == "dialog":
-        cap = pag.screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
+        cap = screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
     cap.save("{}.png".format(sn))  
     result = ocr.ocr("{}.png".format(sn),cls=False)[0]
     try:
@@ -110,9 +109,9 @@ def customOCR(X1,Y1,W1,H1,applym=1):
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
     if applym:
-        cap = pag.screenshot(region=(X1/xsm,Y1/ysm,W1/xlm,H1/ylm))
+        cap = screenshot(region=(X1/xsm,Y1/ysm,W1/xlm,H1/ylm))
     else:
-        cap = pag.screenshot(region=(X1,Y1,W1,H1))
+        cap = screenshot(region=(X1,Y1,W1,H1))
     cap.save("{}.png".format(sn)) 
     out = ocr.ocr("{}.png".format(sn),cls=False)
     log("OCR for Custom\n{}".format(out))
