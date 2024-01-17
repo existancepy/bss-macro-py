@@ -15,7 +15,7 @@ haste_compensation:0
 show_haste_warn:0
 rejoin_every_enabled:0
 rejoin_every:1
-rejoin_delay:130
+rejoin_delay:60
 rejoin_method:reload
 manual_fullscreen:0
 convert_wait:0
