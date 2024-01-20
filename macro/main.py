@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.16"
+macrov = "1.45.17"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -533,16 +533,12 @@ def canon(fast=0):
         for _ in range(6):
             move.hold("d",0.2)
             time.sleep(0.05)
-            if ebutton():
-                if checkwithOCR('bee bear'):
-                    webhook("","Bear detected","dark brown")
-                    break
-                else:
-                    webhook("","Cannon found","dark brown")
-                    with open('canonfails.txt', 'w') as f:
-                        f.write('0')
-                    f.close()
-                    return
+            if "fire" in getBesideE():
+                webhook("","Cannon found","dark brown")
+                with open('canonfails.txt', 'w') as f:
+                    f.write('0')
+                f.close()
+                return
         mouse.position = (mw//2,mh//5*4)
         reset.reset()
     else:
