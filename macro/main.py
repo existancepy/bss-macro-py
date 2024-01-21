@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.17"
+macrov = "1.45.18"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -663,7 +663,7 @@ def walk_to_hive(field):
     webhook("","Going back to hive: {}".format(field.title()),"dark brown")
     exec(open("walk_{}.py".format(field)).read())
     move.hold("a",(hive-1)*0.9)
-    for _ in range(30):
+    for _ in range(50):
         move.hold("a",0.12)
         time.sleep(0.06)
         text = getBesideE()
