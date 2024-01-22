@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.18"
+macrov = "1.45.19"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -640,7 +640,7 @@ def convert(bypass=0):
         sh = stingerHunt(1,1)
         if sh == "dc" or sh == "success":
             return
-        c = ebutton()
+        c = "make" in getBesideE()
         if not c:
             webhook("","Convert done","brown")
             wait = setdat["convert_wait"]
