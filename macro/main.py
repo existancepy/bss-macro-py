@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.19"
+macrov = "1.45.20"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -302,7 +302,9 @@ def checkwithOCR(m):
     return False
 
 def getBesideE():
-    return imToString("bee bear").lower()
+    text = imToString("bee bear").lower()
+    log(text)
+    return text
 
 def ebutton(pagmode=0):
     '''
@@ -517,10 +519,10 @@ def canon(fast=0):
         pag.keyDown("d")
         time.sleep(0.5)
         move.press("space")
-        time.sleep(0.05)
-        move.hold("w",0.15)
+        time.sleep(0.2)
         r = ""
         pag.keyUp("d")
+        move.hold("w",0.2)
         if ebutton() and eb_freeze:
             webhook("","E button detected. Roblox is frozen", "red",1)
             disconnect = True
@@ -626,7 +628,7 @@ def convert(bypass=0):
     if not bypass:
         r = False
         for _ in range(2):
-            r = ebutton()
+            r = "make" in getBesideE()
             if r: break
             time.sleep(0.25)
         if not r: return
@@ -640,7 +642,7 @@ def convert(bypass=0):
         sh = stingerHunt(1,1)
         if sh == "dc" or sh == "success":
             return
-        c = "make" in getBesideE()
+        c = "stop" in getBesideE()
         if not c:
             webhook("","Convert done","brown")
             wait = setdat["convert_wait"]
@@ -667,8 +669,7 @@ def walk_to_hive(field):
         move.hold("a",0.12)
         time.sleep(0.06)
         text = getBesideE()
-        log(text)
-        if "ma" in text or "ke" in text:
+        if "make" in text:
             convert(1)
             reset.reset()
             return

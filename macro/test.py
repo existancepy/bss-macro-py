@@ -116,8 +116,19 @@ ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
 xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
 ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
 xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-roblox()
-print(bool(imagesearch.find("e_symbol.png", 0.9, ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm), 0, 0)))
+cmd = """
+        osascript -e 'activate application "Roblox"' 
+    """
+os.system(cmd)
+keyboard.press(Key.cmd)
+time.sleep(0.05)
+keyboard.press(Key.ctrl)
+time.sleep(0.05)
+keyboard.press("f")
+time.sleep(0.1)
+keyboard.release(Key.cmd)
+keyboard.release(Key.ctrl)
+keyboard.release("f")
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
 small_image = cv2.imread('./images/general/nightsky.png')
