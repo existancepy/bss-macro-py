@@ -1234,7 +1234,7 @@ def collect(name,beesmas=0):
         if usename == "wealthclock" or usename == "samovar":
             for _ in range(6):
                 move.hold("w",0.2)
-                if ebutton(): break
+                if "use" in getBesideE(): break
         elif usename == "candles":
             for _ in range(7):
                 move.hold("w",0.2)
@@ -1259,7 +1259,7 @@ def collect(name,beesmas=0):
                 time.sleep(1.5)
                 pag.keyUp("w")
         for _ in range(2):
-            if ebutton():
+            if "use" in getBesideE():
                 webhook("","Collected: {}".format(dispname),"bright green",1)
                 claimLoot =  1
                 break
