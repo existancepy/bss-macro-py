@@ -2440,7 +2440,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                             goToPlanter(currField)
                             if getStatus() == "disconnect": return
                             webhook('',"Travelling: {} ({})\nObjective: Collect Planter, Attempt: {}".format(displayPlanterName(currPlanter),currField.title(),i+1),"dark brown")
-                            if ebutton():
+                            if "claim" in getBesideE():
                                 move.press('e')
                                 clickYes()
                                 if currField == "pumpkin":
