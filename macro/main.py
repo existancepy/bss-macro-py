@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.20"
+macrov = "1.45.21"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -149,7 +149,10 @@ def fullscreen():
 def discord_bot():
     setdat = loadsettings.load()
     intents = discord.Intents.default()
-    intents.message_content = True
+    try:
+        intents.message_content = True
+    except:
+        intents.messages = True
 
     client = discord.Client(intents=intents)
 
