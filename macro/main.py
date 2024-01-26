@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.21"
+macrov = "1.45.22"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -180,7 +180,10 @@ def discord_bot():
                 
                 #honeyHist = []
                 #savehoney_history(honeyHist)
-    handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+    try:
+        handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+    except:
+        pass
     client.run(setdat['discord_bot_token'], log_handler=handler)
 def setStatus(msg="none"):
     with open("status.txt","w") as f:
