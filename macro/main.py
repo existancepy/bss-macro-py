@@ -7,7 +7,7 @@ python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 if (sv_i[1]>=10):
     printRed("{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
     quit()
-    
+print(python_ver)
 try:
     import pyautogui as pag
 except Exception as e:
