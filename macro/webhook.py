@@ -39,6 +39,7 @@ def webhook(title,desc,colour,ss=0,hr=0):
         embed.set_image(url='attachment://screenshot.jpg')
         os.remove('screenshot.jpg')
     if hr:
+        log("trying to send hourly report")
         with open("hourlyReport-resized.png", "rb") as f:
             webhook.add_file(file=f.read(), filename='hourlyReport-resized.png')
         f.close()
