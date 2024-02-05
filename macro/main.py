@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.27"
+macrov = "1.45.28"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1992,6 +1992,7 @@ def gather(gfid):
     else:
         currfield =  gfid
     setdat = fields[currfield]
+    settings = loadsettings.load()
     for key in setdat:
         val = str(setdat[key])
         if val.isdigit():
@@ -2090,7 +2091,7 @@ def gather(gfid):
             else:
                 prev_bp = bpcap
                 repeat_bp = 0
-        if setdat["backpack_freeze"]:
+        if settings["backpack_freeze"]:
             if repeat_bp >= 15:
                 setStatus("disconnect")
                 webhook("","Backpack has not changed. Roblox is frozen","red")
