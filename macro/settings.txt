@@ -59,3 +59,4 @@ slot_time:[0, 0, 0, 0, 0, 0, 0]
 slot_freq:['secs', 'secs', 'secs', 'secs', 'secs', 'secs', 'secs']
 slot_use:['gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering']
 polar_quest:0
+backpack_freeze:0

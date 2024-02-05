@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.26"
+macrov = "1.45.27"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -381,29 +381,20 @@ def hourlyReport(hourly=1):
         
         setdat = loadsettings.load()
         log(honeyHist)
-        if hourly == 0:
-            setdat['prev_honey'] = honeyHist[-1]
-        digitCounts = []
+        #remove values less than 1000
         for i, e in enumerate(honeyHist[:]):
             if len(str(e)) <= 4:
                 honeyHist.pop(i)
-        if honeyHist.count(honeyHist[0]) != len(honeyHist):
-            for i, e in reversed(list(enumerate(honeyHist[:]))):
-                if e != setdat['prev_honey']:
-                    break
-                else:
-                    honeyHist.pop(i)
-        log('prev honey: {}'.format(setdat['prev_honey']))
-        log(honeyHist)
-        
-        while True:
-            compList = [x for x in honeyHist if x]
-            sortedHoney = sorted(compList)
-            if sortedHoney == compList:
-                break
+        #remove values less than the previous one
+        counter = 1
+        while counter < len(honeyHist):
+            if honeyHist[i] < honeyHist[counter-1]:
+                honeyHist.pop(counter)
             else:
-                removeELE = sortedHoney[-1]
-                honeyHist.remove(removeELE)
+                i += 1
+        if hourly == 0:
+            setdat['prev_honey'] = honeyHist[-1]
+        log('prev honey: {}'.format(setdat['prev_honey']))
         log(honeyHist)
         currHoney = honeyHist[-1]
         session_honey = currHoney - setdat['start_honey']
@@ -2099,12 +2090,11 @@ def gather(gfid):
             else:
                 prev_bp = bpcap
                 repeat_bp = 0
-        '''
-        if repeat_bp >= 15:
-            setStatus("disconnect")
-            webhook("","Backpack has not changed. Roblox is frozen","red")
-            return 
-        '''
+        if setdat["backpack_freeze"]:
+            if repeat_bp >= 15:
+                setStatus("disconnect")
+                webhook("","Backpack has not changed. Roblox is frozen","red")
+                return 
         mouse.release(Button.left)
         cycleCount += 1
     time.sleep(0.5)
@@ -2949,6 +2939,8 @@ if __name__ == "__main__":
     gather_in_boosted = tk.IntVar(value=setdat["gather_in_boosted"])
 
     polar_quest = tk.IntVar(value=setdat["polar_quest"])
+
+    backpack_freeze = tk.IntVar(value=setdat["backpack_freeze"])
     
     canon_time = setdat['canon_time']
     reverse_hive_direction = tk.IntVar(value=setdat['reverse_hive_direction'])
@@ -3393,7 +3385,8 @@ if __name__ == "__main__":
             "slot_time": slot_time_list,
             "slot_freq": slot_freq_list,
             "slot_use": slot_use_list,
-            "polar_quest": polar_quest.get()
+            "polar_quest": polar_quest.get(),
+            "backpack_freeze": backpack_freeze.get()
 
         }
 
@@ -4023,6 +4016,7 @@ if __name__ == "__main__":
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
     dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste", "Reload"],style='my.TMenubutton' )
     dropField.place(width=90,x = 360, y = 155,height=24)
+    tkinter.Checkbutton(frame7, text="Backpack freeze detection", variable=backpack_freeze).place(x=0, y = 225)
     
     #Tab 7
     '''
