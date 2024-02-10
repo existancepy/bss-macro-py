@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.45.29"
+macrov = "1.46"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -388,7 +388,7 @@ def hourlyReport(hourly=1):
         #remove values less than the previous one
         counter = 1
         while counter < len(honeyHist):
-            if honeyHist[i] < honeyHist[counter-1]:
+            if honeyHist[counter] < honeyHist[counter-1]:
                 honeyHist.pop(counter)
             else:
                 counter += 1
@@ -1277,7 +1277,7 @@ def rawreset(nowait=0):
     time.sleep(8) 
 def updateHive(h):
     global setdat
-    webhook("","Found Hive: {}".format(h),"bright green")
+    webhook("","Guessed Hive: {}".format(h),"bright green")
     loadsettings.save('hive_number',h)
 
 def clickdialog(t=20):
@@ -1802,7 +1802,12 @@ def rejoin():
         webhook("","Rejoining","dark brown",1)
         time.sleep(3)
         subprocess.run(['pkill', '-9', '"Roblox"'])
-               
+        cmd = """
+            osascript -e 'quit application "Roblox"'
+        """
+        os.system(cmd)
+        subprocess.Popen("osascript -e 'quit app \"Roblox\"'", shell=True)
+        time.sleep(3)
         if setdat["private_server_link"]:
             openRoblox(setdat["private_server_link"])
         else:
@@ -1836,141 +1841,25 @@ def rejoin():
         move.hold("w",5,0)
         move.hold("w",i*2,0)
         move.hold("s",0.6,0)
-        foundHive = 0
         time.sleep(0.5)
         webhook("","Finding Hive", "dark brown",1)
-        if setdat['hive_number'] == 3:
-            if rebutton():
-                move.press('e')
-                foundHive = 1
-                webhook("","Hive Found: 3","dark brown",1)
-                break
-        elif setdat['hive_number'] == 2:
-            move.hold('d',1,0)
-            for _ in range(4):
-                move.hold('d',0.1)
-                if rebutton():
-                    move.press('e')
-                    foundHive = 1
-                    webhook("","Hive Found: 2","dark brown",1)
-                    break
-        elif setdat['hive_number'] == 1:
-            move.hold('d',2,0)
-            for _ in range(4):
-                move.hold('d',0.1,0)
-                if rebutton():
-                    move.press('e')
-                    foundHive = 1
-                    webhook("","Hive Found: 1","dark brown",1)
-                    break
-        elif setdat['hive_number'] == 4:
-            move.hold('a',0.6,0)
-            for _ in range(4):
-                move.hold('a',0.1,0)
-                if rebutton():
-                    move.press('e')
-                    foundHive = 1
-                    webhook("","Hive Found: 4","dark brown",1)
-                    break
-        elif setdat['hive_number'] == 5:
-            move.hold('a',1.9,0)
-            for _ in range(4):
-                move.hold('a',0.1,0)
-                if rebutton():
-                    move.press('e')
-                    foundHive = 1
-                    webhook("","Hive Found: 5","dark brown",1)
-                    break
-        else:
-            move.hold('a',3.3,0)
-            if rebutton():
-                    move.press('e')
-                    foundHive = 1
-                    webhook("","Hive Found: 6","dark brown",1)
-                    break
-        while True:   
-            if not foundHive:
-                move.hold("d",12,0)
-                webhook("","Hive already claimed, finding new hive","dark brown",1)
-                move.hold('a',0.2)
-                for _ in range(3):
-                    move.hold('a',0.1,0)
-                    if rebutton():
-                        move.press('e')
-                        foundHive = 1
-                        updateHive(1)
-                        break
-                if foundHive: break
-                move.hold('a',0.9,0)
-                for _ in range(3):
-                    move.hold('a',0.1,0)
-                    if rebutton():
-                        move.press('e')
-                        foundHive = 1
-                        updateHive(2)
-                        break
-                if foundHive: break
-                move.hold("a",0.9,0)
-                for _ in range(3):
-                    move.hold('a',0.1,0)
-                    if rebutton():
-                        move.press('e')
-                        foundHive = 1
-                        updateHive(3)
-                        break
-                if foundHive: break
-                move.hold('a',0.8,0)
-                for _ in range(3):
-                    move.hold('a',0.1,0)
-                    if rebutton():
-                        move.press('e')
-                        foundHive = 1
-                        updateHive(4)
-                        break
-                if foundHive: break
-                move.hold('a',0.9,0)
-                for _ in range(3):
-                    move.hold('a',0.1,0)
-                    if rebutton():
-                        move.press('e')
-                        foundHive = 1
-                        updateHive(5)
-                        break
-                if foundHive: break
-                move.hold('a',0.9,0)
-                for _ in range(3):
-                    move.hold('a',0.1,0)
-                    if rebutton():
-                        move.press('e')
-                        foundHive = 1
-                        updateHive(6)
-                        break
-                break
-            else: break
-        if not foundHive:
-            rawreset()
-            webhook("","Unable to claim hive, using final resort method","dark brown",1)
-            move.hold("w",5)
-            move.hold("s",0.55)
-            move.hold('d',4)
-            starttime = time.time()
-            for _ in range(4):
-                move.press(",")
-            pag.keyDown("d")
-            while time.time()-starttime < 10:
+        move.hold("d",4)
+        for j in range(40):
+            move.hold("a",0.4)
+            time.sleep(0.06)
+            text = getBesideE()
+            if "claim" in text:
                 move.press("e")
-            pag.keyUp("d")
-            updateHive(6)
-        if setdat['haste_compensation']: openSettings()
+                print(j)
+                print((j+1)//2)
+                updateHive(max(1,min(6,(j+1)//2)))
+                break
         convert()
-        
         if reset.resetCheck():
             webhook("","Rejoin successful","dark brown")
+            if setdat['haste_compensation']: openSettings()
             break
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
-    
-
-    
 '''
 root = tkinter.Tk()
 root.withdraw()
@@ -3662,7 +3551,7 @@ if __name__ == "__main__":
     ylevel = 50
     dropField = ttk.OptionMenu(frame1, gather_field_one,setdat['gather_field'][0].title(), *gather_fields[1:],style='smaller.TMenubutton', command = fieldOne )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_one, command = saveFields).place(x=10, y = ylevel+65)
+    tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_one, command = saveFields).place(x=10, y = ylevel+65)
     tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_one, command = saveFields).place(x=140, y = ylevel+85)
 
     dropField = ttk.OptionMenu(frame1, gather_pattern_one,gather_pattern_one.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
@@ -3701,7 +3590,7 @@ if __name__ == "__main__":
     ylevel = 140
     dropField = ttk.OptionMenu(frame1, gather_field_two,setdat['gather_field'][1].title(), *gather_fields,style='smaller.TMenubutton', command = fieldTwo )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_two, command = saveFields).place(x=10, y = ylevel+65)
+    tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_two, command = saveFields).place(x=10, y = ylevel+65)
     tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_two, command = saveFields).place(x=140, y = ylevel+85)
     
     dropField = ttk.OptionMenu(frame1, gather_pattern_two,gather_pattern_two.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
@@ -3739,7 +3628,7 @@ if __name__ == "__main__":
     ylevel = 230
     dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields,style='smaller.TMenubutton', command = fieldThree )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Field Drift\nCompensation", variable=field_drift_compensation_three, command = saveFields).place(x=10, y = ylevel+65)
+    tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_three, command = saveFields).place(x=10, y = ylevel+65)
     tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_three, command = saveFields).place(x=140, y = ylevel+85)
     
     dropField = ttk.OptionMenu(frame1, gather_pattern_three,gather_pattern_three.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
