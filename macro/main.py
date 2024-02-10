@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.46"
+macrov = "1.46.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -386,6 +386,7 @@ def hourlyReport(hourly=1):
             if len(str(e)) <= 4:
                 honeyHist.pop(i)
         #remove values less than the previous one
+        honeyHist = honeyHist[1:]
         counter = 1
         while counter < len(honeyHist):
             if honeyHist[counter] < honeyHist[counter-1]:
