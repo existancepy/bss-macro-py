@@ -1856,7 +1856,7 @@ def rejoin():
                 updateHive(max(1,min(6,(j+1)//2)))
                 break
         convert()
-        if reset.resetCheck():
+        if reset.reset(True):
             webhook("","Rejoin successful","dark brown")
             if setdat['haste_compensation']: openSettings()
             break
