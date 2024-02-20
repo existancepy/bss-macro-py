@@ -85,7 +85,7 @@ def reset(hiveCheck=False):
                 for _ in range(4):
                     keyboard.press(Key.page_down)
                     keyboard.release(Key.page_down)
-                return
+                return True
             for _ in range(4):
                 keyboard.press(',')
                 time.sleep(0.05)
