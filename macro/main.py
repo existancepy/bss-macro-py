@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.46.3"
+macrov = "1.46.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1857,7 +1857,7 @@ def rejoin():
                 convert()
                 webhook("","Rejoin successful","dark brown")
                 if setdat['haste_compensation']: openSettings()
-                break
+                return
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
 '''
 root = tkinter.Tk()
