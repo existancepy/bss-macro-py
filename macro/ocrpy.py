@@ -4,6 +4,7 @@ import pyautogui as pag
 import numpy as np
 from logpy import log
 import os
+import subprocess
 import time
 def loadRes():
     outdict =  {}
@@ -18,7 +19,18 @@ def loadRes():
     return outdict
 
 ocr = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
+newUI = False
+try:
+    open("new-ui-fix.txt")
+    print("applying new UI fixes for OCR")
+    newUI = True
+except FileNotFoundError:
+    pass
 
+doublePixel = False
+info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
+if "retina" in info or "m1" in info or "m2" in info:
+    doublePixel = True
 def millify(n):
     if not n: return 0
     millnames = ['',' K',' M',' B',' T', 'Qd']
@@ -49,12 +61,14 @@ def imToString(m):
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
     sn = time.time()
-    # Path of tesseract executable
-    #pytesseract.pytesseract.tesseract_cmd ='**Path to tesseract executable**'
-    # ImageGrab-To capture the screen image in a loop. 
-    # Bbox used to capture a specific area.
+    ebY = wh//(20*ysm)
+    honeyY = 0
+    if newUI:
+        ebY = wh//(14*ysm)
+        honeyY = 31
+        if doublePixel: honeyY*=2
     if m == "bee bear":
-        cap = screenshot(region=(ww//(3*xsm),wh//(20*ysm),ww//(3*xlm),wh//(7*ylm)))
+        cap = screenshot(region=(ww//(3*xsm),ebY,ww//(3*xlm),wh//(7*ylm)))
     elif m == "egg shop":
         cap = screenshot(region=(ww//(1.2*xsm),wh//(3*ysm),ww-ww//1.2,wh//5))
     elif m == "blue":
@@ -62,7 +76,7 @@ def imToString(m):
     elif m == "chat":
         cap = screenshot(region=(ww*3//4, 0, ww//4,wh//3))
     elif m == "ebutton":
-        cap = screenshot(region=(ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm)))
+        cap = screenshot(region=(ww//(2.65*xsm),ebY,ww//(21*xlm),wh//(17*ylm)))
         if not cap: return ""
         cap.save("{}.png".format(sn))
         result = ocr.ocr("{}.png".format(sn),cls=False)[0]

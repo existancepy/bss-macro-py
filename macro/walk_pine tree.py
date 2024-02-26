@@ -37,6 +37,6 @@ move.hold("w",13)
 move.hold("s",0.7)
 move.hold("d",5)
 move.hold("w",1)
-move.hold("s",0.55)
+move.hold("s",0.65)
 
     

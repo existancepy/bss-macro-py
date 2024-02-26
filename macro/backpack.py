@@ -17,6 +17,20 @@ data = sorted(data.items())
 #52% 8502900
 #84% 11231045
 #100% 14889259
+Y1=8
+try:
+    open("new-ui-fix.txt")
+    print("applying new UI fixes for backpack")
+    Y1 = 31
+except FileNotFoundError:
+    pass
+
+add = 65
+
+info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
+if "retina" in info or "m1" in info or "m2" in info:
+    add*= 2
+    Y1 *= 2
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -34,14 +48,7 @@ def rgb_to_dec(r, g, b):
 def bpc():
     savedat = loadRes()
     ww = savedat['ww']
-    wh = savedat['wh']
-    add = 65
-    
-    info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
-    if "retina" in info or "m1" in info or "m2" in info:
-        add*= 2
     X1=ww//2+add
-    Y1=8
     im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
     col = tuple(im[0,0])
     #print(col)
