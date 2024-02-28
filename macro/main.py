@@ -72,7 +72,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.46.5"
+macrov = "1.46.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2593,8 +2593,7 @@ if __name__ == "__main__":
     cmd = 'defaults read -g AppleInterfaceStyle'
     p = bool(subprocess.Popen(cmd, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True).communicate()[0])
-    print("\033[0;32m\n\nTo re-launch the macro, enter the following 2 commands in terminal:\033[00m")
-    print("cd path/to/macro-folder\npython3 e_macro.py\n")
+    
     print("\033[0;32mTo stop the macro\033[00m")
     print("tab out of roblox, make sure terminal is in focus and press ctrl c\nor,\nright click the macro app in the dock and force quit")
     print("\n\nYour python version is {}".format(python_ver))
@@ -3524,11 +3523,126 @@ if __name__ == "__main__":
         else:
             harvesttextbox.delete("1.0", "end")
             harvesttextbox.insert("end",harvest_int)
-            
+
+    class Tooltip:
+        def __init__(self, widget,
+                     *,
+                     bg='#FFFFEA',
+                     pad=(5, 3, 5, 3),
+                     text='widget info',
+                     waittime=400,
+                     wraplength=250):
+
+            self.waittime = waittime  # in miliseconds, originally 500
+            self.wraplength = wraplength  # in pixels, originally 180
+            self.widget = widget
+            self.text = text
+            self.widget.bind("<Enter>", self.onEnter)
+            self.widget.bind("<Leave>", self.onLeave)
+            self.widget.bind("<ButtonPress>", self.onLeave)
+            self.bg = bg
+            self.pad = pad
+            self.id = None
+            self.tw = None
+
+        def onEnter(self, event=None):
+            self.schedule()
+
+        def onLeave(self, event=None):
+            self.unschedule()
+            self.hide()
+
+        def schedule(self):
+            self.unschedule()
+            self.id = self.widget.after(self.waittime, self.show)
+
+        def unschedule(self):
+            id_ = self.id
+            self.id = None
+            if id_:
+                self.widget.after_cancel(id_)
+
+        def show(self):
+            def tip_pos_calculator(widget, label,
+                                   *,
+                                   tip_delta=(10, 5), pad=(5, 3, 5, 3)):
+
+                w = widget
+
+                s_width, s_height = w.winfo_screenwidth(), w.winfo_screenheight()
+
+                width, height = (pad[0] + label.winfo_reqwidth() + pad[2],
+                                 pad[1] + label.winfo_reqheight() + pad[3])
+
+                mouse_x, mouse_y = w.winfo_pointerxy()
+
+                x1, y1 = mouse_x + tip_delta[0], mouse_y + tip_delta[1]
+                x2, y2 = x1 + width, y1 + height
+
+                x_delta = x2 - s_width
+                if x_delta < 0:
+                    x_delta = 0
+                y_delta = y2 - s_height
+                if y_delta < 0:
+                    y_delta = 0
+
+                offscreen = (x_delta, y_delta) != (0, 0)
+
+                if offscreen:
+
+                    if x_delta:
+                        x1 = mouse_x - tip_delta[0] - width
+
+                    if y_delta:
+                        y1 = mouse_y - tip_delta[1] - height
+
+                offscreen_again = y1 < 0  # out on the top
+
+                if offscreen_again:
+                    # No further checks will be done.
+
+                    # TIP:
+                    # A further mod might automagically augment the
+                    # wraplength when the tooltip is too high to be
+                    # kept inside the screen.
+                    y1 = 0
+
+                return x1, y1
+
+            bg = self.bg
+            pad = self.pad
+            widget = self.widget
+
+            # creates a toplevel window
+            self.tw = tk.Toplevel(widget)
+
+            # Leaves only the label and removes the app window
+            self.tw.wm_overrideredirect(True)
+
+            win = ttk.Frame(self.tw)
+            label = tkinter.Label(win, text=self.text, wraplength = 250, justify=tk.LEFT)
+
+            label.grid(padx=(pad[0], pad[2]),
+                       pady=(pad[1], pad[3]),
+                       sticky=tk.NSEW)
+            win.grid()
+
+            x, y = tip_pos_calculator(widget, label)
+
+            self.tw.wm_geometry("+%d+%d" % (x, y))
+
+        def hide(self):
+            tw = self.tw
+            if tw:
+                tw.destroy()
+            self.tw = None
+
+     
     #Tab 1
             
-    tkinter.Checkbutton(frame1, text="Enable Gathering", variable=gather_enable).place(x=0, y = 15)
-
+    checkbox = tkinter.Checkbutton(frame1, text="Enable Gathering", variable=gather_enable)
+    checkbox.place(x=0, y = 15)
+    Tooltip(checkbox, text = "The macro will rotate and gather between the assigned fields")
     tkinter.Label(frame1, text = "Pattern").place(x = 230, y = 15)
     tkinter.Label(frame1, text = "Gather Until").place(x = 450, y = 15) 
     tkinter.Label(frame1, text = "Fields").place(x = 35, y = 50)
@@ -3550,123 +3664,181 @@ if __name__ == "__main__":
     ylevel = 50
     dropField = ttk.OptionMenu(frame1, gather_field_one,setdat['gather_field'][0].title(), *gather_fields[1:],style='smaller.TMenubutton', command = fieldOne )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_one, command = saveFields).place(x=10, y = ylevel+65)
-    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_one, command = saveFields).place(x=140, y = ylevel+85)
-
+    Tooltip(dropField,text = "First field to gather")
+    checkbox = tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_one, command = saveFields)
+    checkbox.place(x=10, y = ylevel+65)
+    Tooltip(checkbox, text = "Moves the player to the supreme saturator")
+    checkbox = tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_one, command = saveFields)
+    checkbox.place(x=140, y = ylevel+85)
+    Tooltip(checkbox, text = "Activate shift lock when gathering")
+    
     dropField = ttk.OptionMenu(frame1, gather_pattern_one,gather_pattern_one.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "The pattern/shape that the player walks when gathering")
     dropField = ttk.OptionMenu(frame1, gather_size_one,gather_size_one.get(), *["S","M","L"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
+    Tooltip(dropField, text = "The size of the shape. Generally affects the area covered")
     dropField = ttk.OptionMenu(frame1, gather_width_one,gather_width_one.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 320, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "Affects each shape differently")
 
     tkinter.Label(frame1, text = "Rotate Camera").place(x = 140, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, before_gather_turn_one,before_gather_turn_one.get(), *["None","Left","Right"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=60,x = 255, y = ylevel+67,height=22)
-    button2_ttp = CreateToolTip(dropField, "direction to turn to.")
+    Tooltip(dropField, text = "The direction to turn after landing on the field. Direction is relative to the hives (faces the hives by default)")
     dropField = ttk.OptionMenu(frame1, turn_times_one,turn_times_one.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 325, y = ylevel+67,height=22)
+    Tooltip(dropField, text = "The number of turns")
 
     timetextbox_one = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     timetextbox_one.place(x = 400, y=ylevel+35)
     timetextbox_one.bind('<KeyRelease>', saveFields)
+    timetextbox_one.bind('<Return>', lambda e: "break")
+    Tooltip(timetextbox_one, text = "Maximum time to gather for")
     packtextbox_one = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_one.place(x = 460, y=ylevel+35)
     packtextbox_one.bind('<KeyRelease>', saveFields)
+    packtextbox_one.bind('<Return>', lambda e: "break")
+    Tooltip(packtextbox_one, text = "Minimum backpack capacity to gather for.\nSet to 101 to disable")
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_one,return_to_hive_one.get().title(), command = disablews_one, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
+    Tooltip(dropConvert, text = "How the macro returns to hive after gathering")
     tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
     wslotmenu_one = ttk.OptionMenu(frame1 , whirligig_slot_one,whirligig_slot_one.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton', command = saveFields)
     wslotmenu_one.place(width=50,x = 542, y = ylevel+65,height=22)
+    Tooltip(wslotmenu_one, text = "The hotbar slot of the whirligig")
 
 
     dropField = ttk.OptionMenu(frame1, start_location_one,start_location_one.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=100,x = 625, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "The area on the field that the macro will walk towards. Direction is relative to the hives")
     tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, distance_from_center_one,distance_from_center_one.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
+    Tooltip(dropField, text = "The distance that the player should walk to the start location")
 
     ylevel = 140
     dropField = ttk.OptionMenu(frame1, gather_field_two,setdat['gather_field'][1].title(), *gather_fields,style='smaller.TMenubutton', command = fieldTwo )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_two, command = saveFields).place(x=10, y = ylevel+65)
-    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_two, command = saveFields).place(x=140, y = ylevel+85)
+    Tooltip(dropField,text = "Second field to gather")
+    checkbox = tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_two, command = saveFields)
+    checkbox.place(x=10, y = ylevel+65)
+    Tooltip(checkbox, text = "Moves the player to the supreme saturator")
+    checkbox = tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_two, command = saveFields)
+    checkbox.place(x=140, y = ylevel+85)
+    Tooltip(checkbox, text = "Activate shift lock when gathering")
     
     dropField = ttk.OptionMenu(frame1, gather_pattern_two,gather_pattern_two.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "The pattern/shape that the player walks when gathering")
     dropField = ttk.OptionMenu(frame1, gather_size_two,gather_size_two.get().title(), *["S","M","L"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
+    Tooltip(dropField, text = "The size of the shape. Generally affects the area covered")
     dropField = ttk.OptionMenu(frame1, gather_width_two,gather_width_two.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 320, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "Affects each shape differently")
 
     tkinter.Label(frame1, text = "Rotate Camera").place(x = 140, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, before_gather_turn_two,before_gather_turn_two.get().title(), *["None","Left","Right"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=60,x = 255, y = ylevel+67,height=22)
+    Tooltip(dropField, text = "The direction to turn after landing on the field. Direction is relative to the hives (faces the hives by default)")
     dropField = ttk.OptionMenu(frame1, turn_times_two,turn_times_two.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 325, y = ylevel+67,height=22)
+    Tooltip(dropField, text = "The number of turns")
 
     timetextbox_two = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     timetextbox_two.place(x = 400, y=ylevel+35)
     timetextbox_two.bind('<KeyRelease>', saveFields)
+    timetextbox_two.bind('<Return>', lambda e: "break")
+    Tooltip(timetextbox_two, text = "Maximum time to gather for")
     packtextbox_two = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_two.place(x = 460, y=ylevel+35)
     packtextbox_two.bind('<KeyRelease>', saveFields)
+    packtextbox_two.bind('<Return>', lambda e: "break")
+    Tooltip(packtextbox_two, text = "Minimum backpack capacity to gather for.\nSet to 101 to disable")
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_two,return_to_hive_two.get().title(), command = disablews_two, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
+    Tooltip(dropConvert, text = "How the macro returns to hive after gathering")
     tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
     wslotmenu_two = ttk.OptionMenu(frame1 , whirligig_slot_two,whirligig_slot_two.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton', command = saveFields)
     wslotmenu_two.place(width=50,x = 542, y = ylevel+65,height=22)
+    Tooltip(wslotmenu_two, text = "The hotbar slot of the whirligig")
 
 
     dropField = ttk.OptionMenu(frame1, start_location_two,start_location_two.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=100,x = 625, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "The area on the field that the macro will walk towards. Direction is relative to the hives")
     tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, distance_from_center_two,distance_from_center_two.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
+    Tooltip(dropField, text = "The distance that the player should walk to the start location")
 
     ylevel = 230
     dropField = ttk.OptionMenu(frame1, gather_field_three,setdat['gather_field'][2].title(), *gather_fields,style='smaller.TMenubutton', command = fieldThree )
     dropField.place(x = 10, y = ylevel+35,height=22,width=100)
-    tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_three, command = saveFields).place(x=10, y = ylevel+65)
-    tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_three, command = saveFields).place(x=140, y = ylevel+85)
+    Tooltip(dropField,text = "Third field to gather")
+    checkbox = tkinter.Checkbutton(frame1, text="Saturator\nAlign", variable=field_drift_compensation_three, command = saveFields)
+    checkbox.place(x=10, y = ylevel+65)
+    Tooltip(checkbox, text = "Moves the player to the supreme saturator")
+    checkbox = tkinter.Checkbutton(frame1, text="Gather w/ Shift Lock", variable=shift_lock_three, command = saveFields)
+    checkbox.place(x=140, y = ylevel+85)
+    Tooltip(checkbox, text = "Activate shift lock when gathering")
     
     dropField = ttk.OptionMenu(frame1, gather_pattern_three,gather_pattern_three.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "The pattern/shape that the player walks when gathering")
     dropField = ttk.OptionMenu(frame1, gather_size_three,gather_size_three.get().title(), *["S","M","L"],style='smaller.TMenubutton' )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
+    Tooltip(dropField, text = "The size of the shape. Generally affects the area covered")
     dropField = ttk.OptionMenu(frame1, gather_width_three,gather_width_three.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
     dropField.place(width=50,x = 320, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "Affects each shape differently")
 
     tkinter.Label(frame1, text = "Rotate Camera").place(x = 140, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, before_gather_turn_three,before_gather_turn_three.get().title(), *["None","Left","Right"],style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=60,x = 255, y = ylevel+67,height=22)
+    Tooltip(dropField, text = "The direction to turn after landing on the field. Direction is relative to the hives (faces the hives by default)")
     dropField = ttk.OptionMenu(frame1, turn_times_three,turn_times_three.get(), *[(x+1) for x in range(4)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 325, y = ylevel+67,height=22)
+    Tooltip(dropField, text = "The number of turns")
 
     timetextbox_three = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     timetextbox_three.place(x = 400, y=ylevel+35)
     timetextbox_three.bind('<KeyRelease>', saveFields)
+    timetextbox_three.bind('<Return>', lambda e: "break")
+    Tooltip(timetextbox_three, text = "Maximum time to gather for")
     packtextbox_three = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_three.place(x = 460, y=ylevel+35)
     packtextbox_three.bind('<KeyRelease>', saveFields)
+    packtextbox_three.bind('<Return>', lambda e: "break")
+    Tooltip(packtextbox_three, text = "Minimum backpack capacity to gather for.\nSet to 101 to disable")
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_three,return_to_hive_three.get().title(), command = disablews_three, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
+    Tooltip(dropConvert, text = "How the macro returns to hive after gathering")
     tkinter.Label(frame1, text = "Whirligig Slot").place(x = 452, y = ylevel+65)
     wslotmenu_three = ttk.OptionMenu(frame1 , whirligig_slot_three,whirligig_slot_three.get(), *[1,2,3,4,5,6,7,"none"],style='smaller.TMenubutton', command = saveFields)
     wslotmenu_three.place(width=50,x = 542, y = ylevel+65,height=22)
+    Tooltip(wslotmenu_three, text = "The hotbar slot of the whirligig")
 
 
     dropField = ttk.OptionMenu(frame1, start_location_three,start_location_three.get().title(), *["Center","Upper Right","Right","Lower Right","Bottom","Lower Left","Left","Upper Left","Top"],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=100,x = 625, y = ylevel+35,height=22)
+    Tooltip(dropField, text = "The area on the field that the macro will walk towards. Direction is relative to the hives")
     tkinter.Label(frame1, text = "Distance").place(x = 625, y = ylevel+65)
     dropField = ttk.OptionMenu(frame1, distance_from_center_three,distance_from_center_three.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 695, y = ylevel+65,height=22)
-    
+    Tooltip(dropField, text = "The distance that the player should walk to the start location")
 
     #Tab 2 
-    tkinter.Checkbutton(frame2, text="Apply gifted vicious bee hive bonus", variable=gifted_vicious_bee).place(x=0, y = 15)
-    tkinter.Checkbutton(frame2, text="Stump Snail", variable=stump_snail).place(x=0, y = 50)
-    tkinter.Checkbutton(frame2, text="Continue macro after stump snail is killed", variable=continue_after_stump_snail).place(x=120, y = 50)
+    checkbox = tkinter.Checkbutton(frame2, text="Apply gifted vicious bee hive bonus", variable=gifted_vicious_bee)
+    checkbox.place(x=0, y = 15)
+    Tooltip(checkbox, text = "Accounts for gifted vicious' hive bonus in the calculation of mob respawn times")
+    checkbox = tkinter.Checkbutton(frame2, text="Stump Snail", variable=stump_snail)
+    checkbox.place(x=0, y = 50)
+    Tooltip(checkbox, text = "Afks at stump snail indefinitely (unless 'continue macro after stump snail' is enabled)")
+    checkbox = tkinter.Checkbutton(frame2, text="Continue macro after stump snail is killed", variable=continue_after_stump_snail)
+    checkbox.place(x=120, y = 50)
+    Tooltip(checkbox, text = "Detects when stump snail is killed and continues macroing. Does not replace amulet")
     tkinter.Checkbutton(frame2, text="Ladybug", variable=ladybug).place(x=0, y = 85)
     tkinter.Checkbutton(frame2, text="Rhino Beetle", variable=rhinobeetle).place(x=80, y = 85)
     tkinter.Checkbutton(frame2, text="Scorpion", variable=scorpion).place(x=190, y = 85)
@@ -3676,7 +3848,9 @@ if __name__ == "__main__":
 
     #Tab 3
     tkinter.Checkbutton(frame4, text="Wealth Clock", variable=wealthclock).place(x=0, y = 15)
-    tkinter.Checkbutton(frame4, text="Mondo Buff", variable=mondo_buff).place(x=120, y = 15)
+    checkbox = tkinter.Checkbutton(frame4, text="Mondo Buff", variable=mondo_buff)
+    checkbox.place(x=120, y = 15)
+    Tooltip(checkbox, text = "Goes to the mondo chick within the first 20mins of the hour.\n Stays for 2mins")
     tkinter.Checkbutton(frame4, text="Blueberry Dispenser", variable=blueberrydispenser).place(x=0, y = 50)
     tkinter.Checkbutton(frame4, text="Strawberry Dispenser", variable=strawberrydispenser).place(x=160, y = 50)
     tkinter.Checkbutton(frame4, text="(Free) Royal Jelly Dispenser", variable=royaljellydispenser).place(x=320, y = 50)
@@ -3692,16 +3866,23 @@ if __name__ == "__main__":
     tkinter.Label(frame4, text = "Gumdrop Slot").place(x = 130, y = 122)
     dropField = ttk.OptionMenu(frame4, gumdrop_slot,setdat['gumdrop_slot'], *[x for x in range(1,8)],style='smaller.TMenubutton')
     dropField.place(width=65,x = 225, y = 124,height=20)
-    tkinter.Checkbutton(frame4, text="Stinger Hunt", variable=stinger).place(x=0, y = 155)
+    Tooltip(dropField, text = "hotbar slot of the gumdrop")
+    checkbox = tkinter.Checkbutton(frame4, text="Stinger Hunt", variable=stinger)
+    checkbox.place(x=0, y = 155)
+    Tooltip(checkbox, text = "Detects night, finds vicious bee and fights it.\n\nNote that night detection requires the sky/wall to be visible in the upper left corner of the screen")
 
     #Tab 4
 
     tkinter.Checkbutton(frame5, text="Blue Booster", variable=blue_booster).place(x=10, y = 15)
     tkinter.Checkbutton(frame5, text="Red Booster", variable=red_booster).place(x=10, y = 50)
     tkinter.Checkbutton(frame5, text="Mountain Booster", variable=mountain_booster).place(x=10, y = 85)
-    tkinter.Checkbutton(frame5, text="Gather in\nBoosted Field", variable=gather_in_boosted).place(x=15, y = 130)
+    checkbox = tkinter.Checkbutton(frame5, text="Gather in\nBoosted Field", variable=gather_in_boosted)
+    checkbox.place(x=15, y = 130)
+    Tooltip(checkbox, text = "Gather in the field with the field boost for 15mins")
     ttk.Separator(frame5,orient="vertical").place(x=190, y=15, width=2, height=310)
-    tkinter.Label(frame5, text = "Slot").place(x = 300, y = 15)
+    label = tkinter.Label(frame5, text = "Slot")
+    label.place(x = 300, y = 15)
+    Tooltip(label, text = "Use the item in the associated hotbar slot")
     tkinter.Checkbutton(frame5, text="Slot 1", variable=slot_enable_1).place(x=210, y = 60)
     tkinter.Checkbutton(frame5, text="Slot 2", variable=slot_enable_2).place(x=210, y = 95)
     tkinter.Checkbutton(frame5, text="Slot 3", variable=slot_enable_3).place(x=210, y = 130)
@@ -3762,7 +3943,9 @@ if __name__ == "__main__":
     dropField.place(width=65,x = 430, y = 270,height=20)
     
     #Tab 5
-    tkinter.Checkbutton(frame6, text="Enable Planters", variable=enable_planters).place(x=545, y = 20)
+    checkbox = tkinter.Checkbutton(frame6, text="Enable Planters", variable=enable_planters)
+    checkbox.place(x=545, y = 20)
+    Tooltip(checkbox, text = "Automatically places and collects planters.\nAutomatically decides on which planter to place per field\nRotates between fields  and planters to avoid degration.")
     tkinter.Label(frame6, text = "Allowed Planters").place(x = 120, y = 15)
     tkinter.Label(frame6, text = "slot").place(x = 105, y = 40)
     tkinter.Checkbutton(frame6, text="Paper", variable=paper_planter).place(x=0, y = 65)
@@ -3816,6 +3999,7 @@ if __name__ == "__main__":
     listbox['yscrollcommand'] = scrollbar.set
     listbox.configure(font=('Helvetica 14'),width=14)
     listbox.place(x=400,y=70)
+    Tooltip(listbox, text = "Which fields the macro can place planters in")
     scrollbar.place(x=513,y=75,height=110)
     for i in planter_fields:
         listbox.select_set(field_options.get().index(i.title()))
@@ -3828,8 +4012,12 @@ if __name__ == "__main__":
     harvesttextbox = tkinter.Text(frame6, width = 4, height = 1, bg= wbgc)
     harvesttextbox.insert("end",harvest)
     harvesttextbox.place(x = 637, y=107)
+    harvesttextbox.bind('<Return>', lambda e: "break")
+    Tooltip(harvesttextbox, text = "How often the macro will collect the planters")
     tkinter.Label(frame6, text = "Hours").place(x=674,y=105)
-    tkinter.Checkbutton(frame6, text="Full Grown", variable=harvest_full,command=lambda: changeHarvest("full")).place(x=545, y = 140)
+    checkbox = tkinter.Checkbutton(frame6, text="Full Grown", variable=harvest_full,command=lambda: changeHarvest("full"))
+    checkbox.place(x=545, y = 140)
+    Tooltip(checkbox, text = "Override the harvest setting to collect the planters when full")
    #tkinter.Checkbutton(frame6, text="Auto", variable=harvest_auto,command=lambda: changeHarvest("auto")).place(x=640, y = 140)
 
     
@@ -3841,10 +4029,13 @@ if __name__ == "__main__":
     tkinter.Label(frame3, text = "Hive Slot (6-5-4-3-2-1)").place(x = 0, y = 15)
     dropField = ttk.OptionMenu(frame3, hive_number, setdat['hive_number'], *[x+1 for x in range(6)],style='my.TMenubutton' )
     dropField.place(width=60,x = 160, y = 15,height=24)
+    Tooltip(dropField, text = "what hive is currently claimed.\n1 is the closest to red cannon, 6 is closest to the noob shop")
     tkinter.Label(frame3, text = "Move Speed (without haste)").place(x = 0, y = 50)
     speedtextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
     speedtextbox.insert("end",walkspeed)
     speedtextbox.place(x = 185, y=52)
+    speedtextbox.bind('<Return>', lambda e: "break")
+    Tooltip(speedtextbox, text = "The movespeed of the player without any additional haste.\nThe movespeed can be found in the bee swarm settings")
 
     tkinter.Label(frame3, text = "Sprinkler Type").place(x = 0, y = 85)
     dropField = ttk.OptionMenu(frame3, sprinkler_type, setdat['sprinkler_type'], *["Basic","Silver","Golden","Diamond","Saturator"],style='my.TMenubutton' )
@@ -3853,15 +4044,20 @@ if __name__ == "__main__":
     tkinter.Label(frame3, text = "Slot").place(x = 205, y = 85)
     dropField = ttk.OptionMenu(frame3, sprinkler_slot, setdat['sprinkler_slot'], *[x+1 for x in range(6)],style='my.TMenubutton' )
     dropField.place(width=60,x = 245, y = 85,height=24)
+    Tooltip(dropField, text = "The hotbar slot of the sprinkler")
 
-    tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation, command = warnHasteComp).place(x=0, y = 120)
-
+    checkbox = tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation, command = warnHasteComp)
+    checkbox.place(x=0, y = 120)
+    Tooltip(checkbox, text = "Requires UI Navigagtion to be enabled.\n\nConstantly reads the movespeed stat from the in-game settings to compensate for any of its changes.\nCan be inconsistent as it takes 1-3 seconds to detect.")
+    
     tkinter.Label(frame3, text = "Wait").place(x = 0, y = 155)
     convertwaittextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
     convertwaittextbox.insert("end",convert_wait)
     convertwaittextbox.place(x = 40, y=157)
+    convertwaittextbox.bind('<Return>', lambda e: "break")
+    Tooltip(convertwaittextbox, text = "Time to wait after the macro is done converting. This is useful for converting small amount of excess pollen/balloon")
     tkinter.Label(frame3, text = "secs after converting").place(x = 75, y = 155)
-
+    
     #tkinter.Checkbutton(frame3, text="Convert every", variable=convert_every_enabled).place(x=0, y = 190)
     #converttextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
     #converttextbox.insert("end", convert_every)
@@ -3870,42 +4066,55 @@ if __name__ == "__main__":
 
 
     #Tab 8
-    tkinter.Checkbutton(frame7, text="Enable Discord Webhook", command = disabledw,variable=enable_discord_webhook).place(x=0, y = 15)
+    checkbox = tkinter.Checkbutton(frame7, text="Enable Discord Webhook", command = disabledw,variable=enable_discord_webhook)
+    checkbox.place(x=0, y = 15)
+    Tooltip(checkbox, text = "Uses a discord webhook to send status messages")
     tkinter.Label(frame7, text = "Discord Webhook Link").place(x = 350, y = 15)
     urltextbox = tkinter.Text(frame7, width = 24, height = 1, yscrollcommand = True, bg= wbgc)
     urltextbox.insert("end",discord_webhook_url)
     sendss = tkinter.Checkbutton(frame7, text="Send screenshots", variable=send_screenshot)
     sendss.place(x=200, y = 15)
+    Tooltip(sendss, text = "Sends screenshots along with the status messages.\nAlso enables the hourly report, which is sent at the start of every hour")
     urltextbox.place(x = 500, y=17)
     
     tkinter.Label(frame7, text = "Private Server Link (optional)").place(x = 0, y = 85)
     linktextbox = tkinter.Text(frame7, width = 24, height = 1, bg= wbgc)
     linktextbox.insert("end",private_server_link)
     linktextbox.place(x=190,y=87)
+    linktextbox.bind('<Return>', lambda e: "break")
+    Tooltip(linktextbox, text = "The private server link the macro will use when rejoining. If no link is provided, the macro will join a public server instead")
     
-    tkinter.Checkbutton(frame7, text="Enable Discord Bot", variable=enable_discord_bot).place(x=0, y = 50)
+    checkbox = tkinter.Checkbutton(frame7, text="Enable Discord Bot", variable=enable_discord_bot)
+    checkbox.place(x=0, y = 50)
+    Tooltip(checkbox, text = "A discord bot which allows you to send commands to the macro")
     tkinter.Label(frame7, text = "Discord Bot Token").place(x = 170, y = 50)
     tokentextbox = tkinter.Text(frame7, width = 24, height = 1, bg= wbgc)
     tokentextbox.insert("end",discord_bot_token)
     tokentextbox.place(x = 300, y=52)
-    
+    tokentextbox.bind('<Return>', lambda e: "break")
 
     tkinter.Checkbutton(frame7, text="Rejoin every", variable=rejoin_every_enabled).place(x=0, y = 120)
     rejoinetextbox = tkinter.Text(frame7, width = 4, height = 1, bg= wbgc)
     rejoinetextbox.insert("end",rejoin_every)
     rejoinetextbox.place(x=104,y=123)
+    rejoinetextbox.bind('<Return>', lambda e: "break")
     tkinter.Label(frame7, text = "hours").place(x = 140, y = 120)
 
     tkinter.Label(frame7, text = "Wait for").place(x = 0, y = 155)
     rejoindelaytextbox = tkinter.Text(frame7, width = 4, height = 1, bg= wbgc)
     rejoindelaytextbox.insert("end",rejoin_delay)
     rejoindelaytextbox.place(x=55,y=158)
+    rejoindelaytextbox.bind('<Return>', lambda e: "break")
+    Tooltip(rejoindelaytextbox, text = "The time to wait for bee swarm to load when rejoining")
     tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
     tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen).place(x=0, y = 190)
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
     dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste", "Reload"],style='my.TMenubutton' )
     dropField.place(width=90,x = 360, y = 155,height=24)
-    tkinter.Checkbutton(frame7, text="Backpack freeze detection", variable=backpack_freeze).place(x=0, y = 225)
+    Tooltip(dropField, text = "How the macro interacts with the browser when rejoining. Different rejoin methods work for different users.\n\nIt is recommended to experiment to see which one works for you.")
+    checkbox = tkinter.Checkbutton(frame7, text="Backpack freeze detection", variable=backpack_freeze)
+    checkbox.place(x=0, y = 225)
+    Tooltip(checkbox, text = "Detects roblox as frozen when the backpack has not changed for a while.\nThis detection only occurs when the macro is gathering")
     
     #Tab 7
     '''
