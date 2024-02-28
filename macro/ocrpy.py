@@ -87,7 +87,7 @@ def imToString(m):
         except:
             return ""
     elif m == "honey":
-        cap = pag.screenshot(region=(ww//(3*xsm),0,ww//(6.5*xlm),wh//(ylm*25)))
+        cap = pag.screenshot(region=(ww//(3*xsm),honeyY,ww//(6.5*xlm),wh//(ylm*25)))
         if not cap: return ""
         cap.save("{}.png".format(sn))  
         ocrres = ocr.ocr("{}.png".format(sn),cls=False)[0]
