@@ -73,11 +73,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-<<<<<<< Updated upstream
-macrov = "1.46.7"
-=======
 macrov = "1.47"
->>>>>>> Stashed changes
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -492,7 +488,7 @@ def hourlyReport(hourly=1):
         '''
         
         try:
-            UI = 30
+            UI = 25
             info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
             if "retina" in info or "m1" in info or "m2" in info:
                 UI*=2
