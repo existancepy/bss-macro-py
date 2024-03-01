@@ -1,22 +1,6 @@
-
-hive_number:4
-walkspeed:28
-gifted_vicious_bee:0
-enable_discord_webhook:0
-discord_webhook_url:
-send_screenshot:1
-sprinkler_slot:1
-sprinkler_type:saturator
-display_type:built-in retina display
-private_server_link:
-enable_discord_bot:0
-discord_bot_token:
 haste_compensation:0
-show_haste_warn:0
 rejoin_every_enabled:0
 rejoin_every:1
-rejoin_delay:60
-rejoin_method:reload
 manual_fullscreen:0
 convert_wait:0
 gather_enable:1
@@ -30,6 +14,7 @@ scorpion:0
 werewolf:0
 mantis:0
 stinger:0
+ant_challenge:0
 wealthclock:0
 blueberrydispenser:0
 strawberrydispenser:0
@@ -45,11 +30,7 @@ snow_machine:0
 mondo_buff:0
 lid_art:0
 candles:0
-start_honey:0
-prev_honey:0
-start_time:1708910643.232681
-canon_time:1.0
-reverse_hive_direction:0
+antpass:0
 blue_booster:0
 red_booster:0
 mountain_booster:0

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hourly Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+</head>
+<body style = "font-family: 'Montserrat', sans-serif; 
+    background-image: linear-gradient( rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.8) 100%), 
+url(/Users/brydonti/Desktop/bee_swarm_macro/macro/hourlyReport/assets/background.png);
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;">
+    <label style="display: block;color: white; font-size: 1.8vw; width: 100%; text-align: center; font-weight: 700;margin-bottom: 3vw;">Hourly Report</label>
+    <main style = "margin-left: 2%; width: 96%; display: flex; padding-bottom: 2vw;">
+        <div style="width:60%; display: flex; flex-direction: column;">
+            <div style = "background-color: #1F1F1F; width: 100%; border: 50%; border-radius: 10px; box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.3);">
+                <label style="display: block;color: white; font-size: 1.3vw; width: 100%; text-align: center; font-weight: 600; margin-top: 1vw;">Honey/min</label>
+                <canvas id="myChart" style = "margin-top: 2vw;"></canvas>
+            </div>
+            <div style = "background-color: #1F1F1F; width: 100%; border: 50%; border-radius: 10px; box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.3); margin-top: 4vw; display: flex; flex-direction: column; align-items: center;">
+                <label style="display: block;color: white; font-size: 1.3vw; width: 100%; text-align: center; font-weight: 600; margin-top: 1vw;">Buffs</label>
+                <img src = "
+/Users/brydonti/Desktop/bee_swarm_macro/macro/hourlyReport/assets/buffs.png
+                " style="width: 80%; margin-top: 2vw; border-radius: 7px; margin-bottom: 1.3vw;">
+            </div>
+        </div>
+        <div style = "background-color: #1F1F1F; width: 30%; border: 50%; margin-left: auto; border-radius: 10px; box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.3);">
+            <label style="display: block;color: white; font-size: 1.3vw; width: 100%; text-align: center; font-weight: 600; margin-top: 1vw;">Stats</label>
+            <div style="width:100%; display: flex; flex-direction: column;">
+                <label style="display: block;color: white; font-size: 1.2vw; width: 100%; font-weight: 500; margin-top: 2vw; margin-left: 10%;">
+Session Time:	0d 0h 34m
+                </label>
+                <label style="display: block;color: white; font-size: 1.2vw; width: 100%; font-weight: 500; margin-top: 2vw; margin-left: 10%;">
+Current Honey:	14.93 T
+                </label>
+                <label style="display: block;color: white; font-size: 1.2vw; width: 100%; font-weight: 500; margin-top: 2vw; margin-left: 10%;">
+Session Honey:	8.65 B
+                </label>
+                <label style="display: block;color: white; font-size: 1.2vw; width: 100%; font-weight: 500; margin-top: 2vw; margin-left: 10%;">
+Honey This Hour:	8.65 B
+                </label>
+            </div>
+        </div>
+    </main>
+    <script>
+        function leadingZero(inp){
+            if (inp < 10) return `0${inp}`
+            return inp
+        }
+
+        function millify(n){
+            if (!n) return 0
+            var millnames = ['','K','M','B','T','Qd']
+            var digitCount = Math.floor(Math.log10(Math.abs(n))/3)
+            var millidx = Math.max(0,Math.min(millnames.length -1, digitCount))
+
+            return `${(n / 10**(3 * millidx)).toFixed(1)}${millnames[millidx]}`
+        }
+const xValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58]
+const yValues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10564927, 49106010, 71515386, 277418636, 110031109, 170183469, 117928605, 149718451, 224602536, 136006034, 75047113, 1076495, 2858573, 2361404, 708859953, 886051045, 808025225, 815809440, 769278445, 730284202, 687052254, 463525373, 66131528, 203854460, 142712299, 156219128, 114068801, 117168020, 158775301, 101290330, 136064085, 122508499, 61261947]
+        var hour = leadingZero(new Date().getHours())
+        Chart.defaults.global.defaultFontColor = "#fff";
+        Chart.defaults.global.defaultFontSize = 14
+        new Chart("myChart", {
+            type: "line",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: yValues,
+                    fill: false,
+                    borderColor: '#BB86FC',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                legend: {display: false},
+                elements: {
+                    point:{
+                        radius: 0
+                    }
+                },
+                layout: {
+                    padding: {
+                        left: 20,
+                        right: 20,
+                        top: 0,
+                        bottom: 10
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        gridLines: {
+                            display:false
+                        },
+
+                        ticks: {
+                            autoSkip: false,
+                            minRotation: 0,
+                            maxRotation: 0,
+                            callback: function(value, index, values) {
+                                if (!(value%10)) return `${hour}:${leadingZero(value)}`
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        gridLines: {
+                            borderDash: [5, 10],
+                            color: "#464645"
+                        },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return millify(value);
+                            }
+                        }
+                    }]
+                    }
+            }
+        });
+    </script>
+</body>
+</html>

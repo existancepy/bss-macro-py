@@ -34,7 +34,7 @@ import logging
 import pynput
 from pynput.keyboard import Key
 from pynput.mouse import Button
-
+from html2image import Html2Image
 try:
     import matplotlib.pyplot as plt
 except Exception as e:
@@ -56,6 +56,7 @@ import ast
 import calibrate_hive
 from datetime import datetime
 import pyscreeze
+import shutil
     
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
     printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
@@ -72,10 +73,15 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
+<<<<<<< Updated upstream
 macrov = "1.46.7"
+=======
+macrov = "1.47"
+>>>>>>> Stashed changes
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
+hti = Html2Image()
 questData = {}
 questBear = ""
 questTitle = ""
@@ -422,8 +428,25 @@ def hourlyReport(hourly=1):
                 yvals.append(int(hf) - int(hb))
         #yvals = [1,2,3,4,5,6,7,8]
         xvals = [x+1 for x in range(len(yvals))]
-
-
+        rootDir = os.path.dirname(os.path.abspath(__file__)) + "/hourlyReport"
+        with open("./hourlyReport/index.html", "r") as f:
+            data = f.read().split("\n")
+            data.insert(0,"")
+        f.close()
+        print(data)
+        data[13] = f"url({rootDir}/assets/background.png);"
+        data[27] = f"{rootDir}/assets/buffs.png"        
+        data[35] = f"Session Time:\t{session_time}"
+        data[38] = f"Current Honey:\t{millify(currHoney)}"
+        data[41] = f"Session Honey:\t{millify(session_honey)}"
+        data[44] = f"Honey This Hour:\t{millify(hourly_honey)}"
+        data[63] = f"const xValues = {xvals}"
+        data[64] = f"const yValues = {yvals}"
+        print(data)
+        with open("./hourlyReport/index.html","w") as f:
+            f.write('\n'.join(data[1:]))
+        f.close()
+        '''
         fig = plt.figure(figsize=(12,12), dpi=300,constrained_layout=True)
         gs = fig.add_gridspec(12,12)
         fig.patch.set_facecolor('#121212')
@@ -466,10 +489,18 @@ def hourlyReport(hourly=1):
         ax1.tick_params(axis='x', colors='white')
         ax1.tick_params(axis='y', colors='white')
         ax1.plot(xvals, yvals,color="#BB86FC")
+        '''
         
-        
-        buffim = pag.screenshot(region = (0,wh/(30*ysm),ww/2,wh/(16*ylm)))
-        buffim.save("buffs.png")
+        try:
+            UI = 30
+            info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
+            if "retina" in info or "m1" in info or "m2" in info:
+                UI*=2
+        except FileNotFoundError:
+            UI = 0
+        buffim = pag.screenshot(region = (0,wh/(30*ysm)+UI,ww/2,wh/(16*ylm)))
+        buffim.save("./hourlyReport/assets/buffs.png")
+        '''
         buffim = plt.imread('buffs.png')
         ax2 = fig.add_subplot(gs[4:6, 0:7])
         ax2.set_title('Buffs',color='white',fontsize=19)
@@ -479,7 +510,9 @@ def hourlyReport(hourly=1):
         ax2.imshow(buffim)
         
         plt.grid(alpha=0.08)
-        plt.savefig("hourlyReport-resized.png", bbox_inches='tight')    
+        plt.savefig("hourlyReport-resized.png", bbox_inches='tight')
+        '''
+        hti.screenshot(html_file='./hourlyReport/index.html', save_as='hourlyReport-resized.png')
         webhook("**Hourly Report**","","light blue",0,1)
     except Exception as e:
         log(e)
@@ -1224,39 +1257,50 @@ def collect(name,beesmas=0):
         if canon() == "dc": return
         webhook("","Travelling: {}".format(dispname),"dark brown")
         exec(open("collect_{}.py".format(usename)).read())
+        
         if usename == "wealthclock" or usename == "samovar":
             for _ in range(6):
                 move.hold("w",0.2)
-                if "use" in getBesideE(): break
+                if "use" in getBesideE():
+                    claimLoot = 1
+                    break
+                
         elif usename == "candles":
             for _ in range(7):
                 move.hold("w",0.2)
                 if ebutton():
+                    claimLoot = 1
                     break
+                
         elif usename == "lid_art" or usename == "feast":
             for _ in range(7):
                 move.hold("s",0.2)
                 if ebutton():
+                    claimLoot = 1
                     break
+                
         elif usename == "gluedispenser":
             time.sleep(1)
             move.press(str(setdat['gumdrop_slot']))
             time.sleep(2)
             move.hold("w",2.5)
-        time.sleep(0.5)
-        if usename == "feast":
+            time.sleep(0.5)
+            
+        elif usename == "feast":
             if checkwithOCR("bee bear"):
                 pag.keyDown("w")
                 time.sleep(1)
                 move.apkey("space")
                 time.sleep(1.5)
                 pag.keyUp("w")
-        for _ in range(2):
-            if "use" in getBesideE():
-                webhook("","Collected: {}".format(dispname),"bright green",1)
-                claimLoot =  1
-                break
-        if claimLoot: break
+        else:
+            for _ in range(2):
+                if "use" in getBesideE():
+                    claimLoot =  1
+                    break
+        if claimLoot:
+            webhook("","Collected: {}".format(dispname),"bright green",1)
+            break
         webhook("","Unable To Collect: {}".format(dispname),"dark brown",1)
         reset.reset()
     savetimings(usename)
@@ -1839,6 +1883,18 @@ def rejoin():
             else:
                 webhook("","Roblox is already in fullscreen, not activating fullscreen", "dark brown",1)
         time.sleep(2)
+        webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True)
+        time.sleep(0.5)
+        for _ in range(2):
+            with keyboard.pressed(Key.cmd):
+                keyboard.press('w')
+                time.sleep(0.1)
+                keyboard.release('w')
+            time.sleep(0.5)
+        cmd = """
+                osascript -e 'activate application "Roblox"' 
+            """
+        os.system(cmd)
         move.hold("w",5,0)
         move.hold("w",i*2,0)
         move.hold("s",0.6,0)
@@ -1856,6 +1912,10 @@ def rejoin():
                 updateHive(max(1,min(6,(j+1)//2)))
                 convert()
                 webhook("","Rejoin successful","dark brown")
+                currentTime = datetime.now().strftime("%H:%M")
+                pag.typewrite("/")
+                pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.04)
+                keyboard.press(Key.enter)
                 if setdat['haste_compensation']: openSettings()
                 return
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
@@ -1871,7 +1931,8 @@ updateSave("wh",wh)
 '''
     
 def gather(gfid):
-    with open("fieldsettings.txt","r") as f:
+    settings = loadsettings.load()
+    with open(f"./profiles/{settings['current_profile']}/fieldsettings.txt","r") as f:
         fields = ast.literal_eval(f.read())
     f.close()
     if str(gfid).isdigit():
@@ -1880,7 +1941,6 @@ def gather(gfid):
     else:
         currfield =  gfid
     setdat = fields[currfield]
-    settings = loadsettings.load()
     for key in setdat:
         val = str(setdat[key])
         if val.isdigit():
@@ -2124,7 +2184,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         #quests
         if setdat["polar_quest"]:
             #check if quest done, else read curr quest
-            if ses_start:
+            if session_start:
                 for _ in range(2):
                     canon()
                     webhook("","Travelling: Polar Bear (quest) ","brown")
@@ -2244,6 +2304,11 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         
         if setdat['gluedispenser'] and checkRespawn('gluedispenser','22h'):
             collect('glue dispenser')
+            stingerHunt()
+            if getStatus() == "disconnect": return
+
+        if setdat['antpass'] and checkRespawn('antpass','2h'):
+            collect('antpass')
             stingerHunt()
             if getStatus() == "disconnect": return
         
@@ -2602,7 +2667,6 @@ if __name__ == "__main__":
     time.sleep(5)
     setResolution()
     loadSave()
-    plantdat = loadsettings.planterLoad()
     firstRun = 1
     ww = savedata["ww"]
     wh = savedata["wh"]
@@ -2623,10 +2687,39 @@ if __name__ == "__main__":
 
     s.configure('my.TMenubutton', font=('Helvetica', 12))
     s.configure('smaller.TMenubutton', font=('Helvetica', 10))
-    with open("fieldsettings.txt","r") as f:
+    s.configure('small.TButton', font=('Helvetica', 12))
+
+    def updateProfile(profile = None):
+        reference = loadsettings.loadFile(f"./src/default settings/settings.txt")
+        if not profile:
+            profile = loadsettings.loadFile("generalsettings.txt")["current_profile"]
+
+        originalPath = f"./profiles/{profile}/settings.txt"
+        original = loadsettings.loadFile(originalPath)
+        out = []
+        for i in reference.keys():
+            if not i in original:
+                original[i] = reference[i]
+            out.append(f"{i}:{original[i]}")
+        with open(originalPath, "w") as f:
+            f.write("\n".join(out))
+        f.close()
+        
+    updateProfile()
+    
+    setdat = loadsettings.load()
+    plantdat = loadsettings.planterLoad()
+    with open(f"./profiles/{setdat['current_profile']}/fieldsettings.txt","r") as f:
         fields = ast.literal_eval(f.read())
     f.close()
-    
+            
+    def loadSettings(profile):
+        global setdat, plantdat, fields
+        setdat = loadsettings.load(profile = profile)
+        plantdat = loadsettings.planterLoad(profile)
+        with open(f"./profiles/{profile}/fieldsettings.txt","r") as f:
+            fields = ast.literal_eval(f.read())
+        f.close()
     # create frames
     frame1 = ttk.Frame(notebook, width=780, height=460)
     frame2 = ttk.Frame(notebook, width=780, height=460)
@@ -2636,6 +2729,7 @@ if __name__ == "__main__":
     frame7 = ttk.Frame(notebook, width=780, height=460)
     frame5 = ttk.Frame(notebook, width=780, height=460)
     #frame8 = ttk.Frame(notebook, width=780, height=460)
+    frame9 = ttk.Frame(notebook, width=780, height=460)
     
     frame1.pack(fill='both', expand=True)
     frame2.pack(fill='both', expand=True)
@@ -2645,6 +2739,7 @@ if __name__ == "__main__":
     frame7.pack(fill='both', expand=True)
     frame5.pack(fill='both', expand=True)
     #frame8.pack(fill='both', expand=True)
+    frame9.pack(fill='both', expand=True)
 
     notebook.add(frame1, text='Gather')
     notebook.add(frame2, text='Bug run')
@@ -2654,6 +2749,7 @@ if __name__ == "__main__":
     #notebook.add(frame8, text='Quests')
     notebook.add(frame3, text='In Game Settings')
     notebook.add(frame7, text='Other Settings')
+    notebook.add(frame9, text='Profile')    
 
     #get variables
     gather_enable = tk.IntVar(value=setdat["gather_enable"])
@@ -2759,136 +2855,256 @@ if __name__ == "__main__":
         timetextbox_three.insert("end",gather_time_three)
         packtextbox_three.delete("1.0", 'end')
         packtextbox_three.insert("end",setdat["pack"])
-    
 
-
-    
-    
-
-    
-    
-    stump_snail = tk.IntVar(value=setdat["stump_snail"])
-    continue_after_stump_snail = tk.IntVar(value=setdat["continue_after_stump_snail"])
-    ladybug = tk.IntVar(value=setdat["ladybug"])
-    rhinobeetle = tk.IntVar(value=setdat["rhinobeetle"])
-    werewolf = tk.IntVar(value=setdat["werewolf"])
-    scorpion = tk.IntVar(value=setdat["scorpion"])
-    spider = tk.IntVar(value=setdat["spider"])
-    mantis = tk.IntVar(value=setdat["mantis"])
-    stinger = tk.IntVar(value=setdat["stinger"])
-    gifted_vicious_bee = tk.IntVar(value=setdat["gifted_vicious_bee"])
-    enable_discord_webhook = tk.IntVar(value=setdat["enable_discord_webhook"])
-    discord_webhook_url= setdat["discord_webhook_url"]
-    send_screenshot  = tk.IntVar(value=setdat["send_screenshot"])
-    walkspeed = setdat["walkspeed"]
-    hive_number = tk.IntVar(value=setdat["hive_number"])
+      
+    stump_snail = tk.IntVar()
+    continue_after_stump_snail = tk.IntVar()
+    ladybug = tk.IntVar()
+    rhinobeetle = tk.IntVar()
+    werewolf = tk.IntVar()
+    scorpion = tk.IntVar()
+    spider = tk.IntVar()
+    mantis = tk.IntVar()
+    stinger = tk.IntVar()
+    gifted_vicious_bee = tk.IntVar()
+    enable_discord_webhook = tk.IntVar()
+    discord_webhook_url= ""
+    send_screenshot  = tk.IntVar()
+    walkspeed = ""
+    hive_number = tk.IntVar()
     display_type = tk.StringVar(root)
-    display_type.set(setdat["display_type"].capitalize())
-    private_server_link = setdat["private_server_link"]
-    enable_discord_bot = tk.IntVar(value=setdat["enable_discord_bot"])
+    private_server_link = ""
+    enable_discord_bot = tk.IntVar()
     sprinkler_slot = tk.StringVar(root)
-    sprinkler_slot.set(setdat["sprinkler_slot"])
     sprinkler_type = tk.StringVar(root)
-    sprinkler_type.set(setdat["sprinkler_type"].title())
-    discord_bot_token = setdat['discord_bot_token']
-    haste_compensation = tk.IntVar(value=setdat["haste_compensation"])
+    discord_bot_token = ""
+    haste_compensation = tk.IntVar()
 
-    rejoin_every_enabled = tk.IntVar(value=setdat["rejoin_every_enabled"])
+    rejoin_every_enabled = tk.IntVar()
     rejoin_every = setdat['rejoin_every']
     rejoin_delay = setdat['rejoin_delay']
     rejoin_method = tk.StringVar(root)
-    rejoin_method.set(setdat['rejoin_method'])
-    manual_fullscreen = tk.IntVar(value=setdat['manual_fullscreen'])
+    manual_fullscreen = tk.IntVar()
     
-    convert_wait = setdat['convert_wait']
-    #convert_every_enabled = tk.IntVar(value=setdat["convert_every_enabled"])
-    #convert_every = setdat['convert_every']
+    convert_wait = ""
+    #convert_every_enabled = tk.IntVar()
+    #convert_every = ""
     
-    wealthclock = tk.IntVar(value=setdat["wealthclock"])
-    blueberrydispenser = tk.IntVar(value=setdat["blueberrydispenser"])
-    strawberrydispenser = tk.IntVar(value=setdat["strawberrydispenser"])
-    royaljellydispenser  = tk.IntVar(value=setdat["royaljellydispenser"])
-    treatdispenser = tk.IntVar(value=setdat["treatdispenser"])
-    gluedispenser = tk.IntVar(value=setdat["gluedispenser"])
+    wealthclock = tk.IntVar()
+    blueberrydispenser = tk.IntVar()
+    strawberrydispenser = tk.IntVar()
+    royaljellydispenser  = tk.IntVar()
+    treatdispenser = tk.IntVar()
+    gluedispenser = tk.IntVar()
     gumdrop_slot = tk.StringVar(root)
-    gumdrop_slot.set(setdat["gumdrop_slot"])
-    stockings = tk.IntVar(value=setdat["stockings"])
-    feast = tk.IntVar(value=setdat["feast"])
-    samovar = tk.IntVar(value=setdat["samovar"])
-    wreath = tk.IntVar(value=setdat["wreath"])
-    snow_machine = tk.IntVar(value=setdat["snow_machine"])
-    mondo_buff = tk.IntVar(value=setdat["mondo_buff"])
-    lid_art = tk.IntVar(value=setdat["lid_art"])
-    candles = tk.IntVar(value=setdat["candles"])
+    stockings = tk.IntVar()
+    feast = tk.IntVar()
+    samovar = tk.IntVar()
+    wreath = tk.IntVar()
+    snow_machine = tk.IntVar()
+    mondo_buff = tk.IntVar()
+    lid_art = tk.IntVar()
+    candles = tk.IntVar()
+    antpass = tk.IntVar()
+    antchallenge = tk.IntVar()
 
-    blue_booster = tk.IntVar(value=setdat["blue_booster"])
-    red_booster = tk.IntVar(value=setdat["red_booster"])
-    mountain_booster = tk.IntVar(value=setdat["mountain_booster"])
-    gather_in_boosted = tk.IntVar(value=setdat["gather_in_boosted"])
+    blue_booster = tk.IntVar()
+    red_booster = tk.IntVar()
+    mountain_booster = tk.IntVar()
+    gather_in_boosted = tk.IntVar()
 
-    polar_quest = tk.IntVar(value=setdat["polar_quest"])
+    polar_quest = tk.IntVar()
 
-    backpack_freeze = tk.IntVar(value=setdat["backpack_freeze"])
+    backpack_freeze = tk.IntVar()
     
-    canon_time = setdat['canon_time']
-    reverse_hive_direction = tk.IntVar(value=setdat['reverse_hive_direction'])
+    canon_time = ""
+    reverse_hive_direction = tk.IntVar()
 
-    enable_planters = tk.IntVar(value=plantdat['enable_planters'])
-    paper_planter = tk.IntVar(value=plantdat['paper_planter'])
-    ticket_planter = tk.IntVar(value=plantdat['ticket_planter'])
-    plastic_planter = tk.IntVar(value=plantdat['plastic_planter'])
-    candy_planter = tk.IntVar(value=plantdat['candy_planter'])
-    blueclay_planter = tk.IntVar(value=plantdat['blueclay_planter'])
-    redclay_planter = tk.IntVar(value=plantdat['redclay_planter'])
-    tacky_planter = tk.IntVar(value=plantdat['tacky_planter'])
-    pesticide_planter = tk.IntVar(value=plantdat['pesticide_planter'])
-    heattreated_planter = tk.IntVar(value=plantdat['heattreated_planter'])
-    hydroponic_planter = tk.IntVar(value=plantdat['hydroponic_planter'])
-    petal_planter = tk.IntVar(value=plantdat['petal_planter'])
-    plenty_planter = tk.IntVar(value=plantdat['plenty_planter'])
-    festive_planter = tk.IntVar(value=plantdat['festive_planter'])
+    enable_planters = tk.IntVar()
+    paper_planter = tk.IntVar()
+    ticket_planter = tk.IntVar()
+    plastic_planter = tk.IntVar()
+    candy_planter = tk.IntVar()
+    blueclay_planter = tk.IntVar()
+    redclay_planter = tk.IntVar()
+    tacky_planter = tk.IntVar()
+    pesticide_planter = tk.IntVar()
+    heattreated_planter = tk.IntVar()
+    hydroponic_planter = tk.IntVar()
+    petal_planter = tk.IntVar()
+    plenty_planter = tk.IntVar()
+    festive_planter = tk.IntVar()
     paper_slot = tk.StringVar(root)
-    paper_slot.set(plantdat['paper_slot'])
     ticket_slot = tk.StringVar(root)
-    ticket_slot.set(plantdat['ticket_slot'])
     plastic_slot = tk.StringVar(root)
-    plastic_slot.set(plantdat['plastic_slot'])
     candy_slot = tk.StringVar(root)
-    candy_slot.set(plantdat['candy_slot'])
     blueclay_slot = tk.StringVar(root)
-    blueclay_slot.set(plantdat['blueclay_slot'])
     redclay_slot = tk.StringVar(root)
-    redclay_slot.set(plantdat['redclay_slot'])
     tacky_slot = tk.StringVar(root)
-    tacky_slot.set(plantdat['tacky_slot'])
     pesticide_slot = tk.StringVar(root)
-    pesticide_slot.set(plantdat['pesticide_slot'])
     heattreated_slot = tk.StringVar(root)
-    heattreated_slot.set(plantdat['heattreated_slot'])
     hydroponic_slot = tk.StringVar(root)
-    hydroponic_slot.set(plantdat['hydroponic_slot'])
     petal_slot = tk.StringVar(root)
-    petal_slot.set(plantdat['plenty_slot'])
     plenty_slot = tk.StringVar(root)
-    plenty_slot.set(plantdat['plenty_slot'])
     festive_slot = tk.StringVar(root)
-    festive_slot.set(plantdat['festive_slot'])
     harvest = plantdat['harvest']
     planter_count = tk.StringVar(root)
-    planter_count.set(plantdat['planter_count'])
-    show_haste_warn = setdat['show_haste_warn']
-    harvest_full = tk.IntVar(value=boolToInt(str(harvest)=="full"))
-    harvest_auto = tk.IntVar(value=boolToInt(str(harvest)=="auto"))
-    harvest_int = plantdat['harvest']
+    show_haste_warn = ""
+    harvest_full = tk.IntVar()
+    harvest_auto = tk.IntVar()
+    harvest_int = 0
+    planter_fields = []
+
+    current_profile = tk.StringVar(root)
+
+    def loadVariables():
+        global walkspeed, discord_webhook_url, private_server_link, discord_bot_token, planter_fields,convert_wait
+        stump_snail.set(setdat["stump_snail"])
+        continue_after_stump_snail.set(setdat["continue_after_stump_snail"])
+        ladybug.set(setdat["ladybug"])
+        rhinobeetle.set(setdat["rhinobeetle"])
+        werewolf.set(setdat["werewolf"])
+        scorpion.set(setdat["scorpion"])
+        spider.set(setdat["spider"])
+        mantis.set(setdat["mantis"])
+        stinger.set(setdat["stinger"])
+        gifted_vicious_bee.set(setdat["gifted_vicious_bee"])
+        enable_discord_webhook.set(setdat["enable_discord_webhook"])
+        discord_webhook_url= setdat["discord_webhook_url"]
+        send_screenshot.set(setdat["send_screenshot"])
+        walkspeed = setdat["walkspeed"]
+        hive_number.set(setdat["hive_number"])
+        display_type.set(setdat["display_type"].capitalize())
+        private_server_link = setdat["private_server_link"]
+        enable_discord_bot.set(setdat["enable_discord_bot"])
+        sprinkler_slot.set(setdat["sprinkler_slot"])
+        sprinkler_type.set(setdat["sprinkler_type"].title())
+        discord_bot_token = setdat['discord_bot_token']
+        haste_compensation.set(setdat["haste_compensation"])
+
+        rejoin_every_enabled.set(setdat["rejoin_every_enabled"])
+        rejoin_every = setdat['rejoin_every']
+        rejoin_delay = setdat['rejoin_delay']
+        rejoin_method.set(setdat['rejoin_method'])
+        manual_fullscreen.set(setdat['manual_fullscreen'])
+        
+        convert_wait = setdat['convert_wait']
+        #convert_every_enabled.set(setdat["convert_every_enabled"])
+        #convert_every = setdat['convert_every']
+        
+        wealthclock.set(setdat["wealthclock"])
+        blueberrydispenser.set(setdat["blueberrydispenser"])
+        strawberrydispenser.set(setdat["strawberrydispenser"])
+        royaljellydispenser.set(setdat["royaljellydispenser"])
+        treatdispenser.set(setdat["treatdispenser"])
+        gluedispenser.set(setdat["gluedispenser"])
+        gumdrop_slot.set(setdat["gumdrop_slot"])
+        stockings.set(setdat["stockings"])
+        feast.set(setdat["feast"])
+        samovar.set(setdat["samovar"])
+        wreath.set(setdat["wreath"])
+        snow_machine.set(setdat["snow_machine"])
+        mondo_buff.set(setdat["mondo_buff"])
+        lid_art.set(setdat["lid_art"])
+        candles.set(setdat["candles"])
+        antpass.set(setdat["antpass"])
+        antchallenge.set(setdat["ant_challenge"])
+
+        blue_booster.set(setdat["blue_booster"])
+        red_booster.set(setdat["red_booster"])
+        mountain_booster.set(setdat["mountain_booster"])
+        gather_in_boosted.set(setdat["gather_in_boosted"])
+
+        polar_quest.set(setdat["polar_quest"])
+
+        backpack_freeze.set(setdat["backpack_freeze"])
+        
+        canon_time = setdat['canon_time']
+        reverse_hive_direction.set(setdat['reverse_hive_direction'])
+
+        enable_planters.set(plantdat['enable_planters'])
+        paper_planter.set(plantdat['paper_planter'])
+        ticket_planter.set(plantdat['ticket_planter'])
+        plastic_planter.set(plantdat['plastic_planter'])
+        candy_planter.set(plantdat['candy_planter'])
+        blueclay_planter.set(plantdat['blueclay_planter'])
+        redclay_planter.set(plantdat['redclay_planter'])
+        tacky_planter.set(plantdat['tacky_planter'])
+        pesticide_planter.set(plantdat['pesticide_planter'])
+        heattreated_planter.set(plantdat['heattreated_planter'])
+        hydroponic_planter.set(plantdat['hydroponic_planter'])
+        petal_planter.set(plantdat['petal_planter'])
+        plenty_planter.set(plantdat['plenty_planter'])
+        festive_planter.set(plantdat['festive_planter'])
+        paper_slot.set(plantdat['paper_slot'])
+        ticket_slot.set(plantdat['ticket_slot'])
+        plastic_slot.set(plantdat['plastic_slot'])
+        candy_slot.set(plantdat['candy_slot'])
+        blueclay_slot.set(plantdat['blueclay_slot'])
+        redclay_slot.set(plantdat['redclay_slot'])
+        tacky_slot.set(plantdat['tacky_slot'])
+        pesticide_slot.set(plantdat['pesticide_slot'])
+        heattreated_slot.set(plantdat['heattreated_slot'])
+        hydroponic_slot.set(plantdat['hydroponic_slot'])
+        petal_slot.set(plantdat['plenty_slot'])
+        plenty_slot.set(plantdat['plenty_slot'])
+        festive_slot.set(plantdat['festive_slot'])
+        harvest = plantdat['harvest']
+        planter_count.set(plantdat['planter_count'])
+        show_haste_warn = setdat['show_haste_warn']
+        harvest_full.set(boolToInt(str(harvest)=="full"))
+        harvest_auto.set(boolToInt(str(harvest)=="auto"))
+        harvest_int = plantdat['harvest']
+        slot_options = ["none"]+[x+1 for x in range(7)]
+        planter_fields = plantdat['planter_fields']
+
+        #current_profile.set(setdat["current_profile"])
+
+
+    multipliers = loadsettings.load('multipliers.txt')
+    loadVariables()
+    
     slot_options = ["none"]+[x+1 for x in range(7)]
     gather_fields = [x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")]
     gather_fields.insert(0,"None")
     field_options = tk.Variable(value=[x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")])
-    planter_fields =  plantdat['planter_fields']
-    
+    profiles = []
 
-    multipliers = loadsettings.load('multipliers.txt')
+    def loadTextBoxes():
+        slottextbox_one.delete("1.0", tk.END)
+        slottextbox_one.insert("end",setdat['slot_time'][0])
+        slottextbox_two.delete("1.0", tk.END)
+        slottextbox_two.insert("end",setdat['slot_time'][1])
+        slottextbox_three.delete("1.0", tk.END)
+        slottextbox_three.insert("end",setdat['slot_time'][2])
+        slottextbox_four.delete("1.0", tk.END)
+        slottextbox_four.insert("end",setdat['slot_time'][3])
+        slottextbox_five.delete("1.0", tk.END)
+        slottextbox_five.insert("end",setdat['slot_time'][4])
+        slottextbox_six.delete("1.0", tk.END)
+        slottextbox_six.insert("end",setdat['slot_time'][5])
+        slottextbox_seven.delete("1.0", tk.END)
+        slottextbox_seven.insert("end",setdat['slot_time'][6])
 
+        harvesttextbox.delete("1.0", tk.END)
+        harvesttextbox.insert("end",plantdat['harvest'])
+
+        convertwaittextbox.delete("1.0", tk.END)
+        convertwaittextbox.insert("end",setdat["convert_wait"])
+
+        rejoinetextbox.delete("1.0", tk.END)
+        rejoinetextbox.insert("end",setdat["rejoin_every"])
+
+    def reloadProfileList(updateOptions = True):
+        global profiles
+        profiles = [x for x in os.listdir("./profiles") if "." not in x]
+        if not updateOptions: return
+        menu = profileField["menu"]
+        menu.delete(0, "end")
+        for i in profiles:
+            menu.add_command(label=i, 
+                             command=lambda value=i: current_profile.set(value))
+    reloadProfileList(False)
     for i,e in enumerate(setdat['slot_enable']):
         globals()['slot_enable_%s' % (i+1)] = tk.IntVar(value=e)
         
@@ -2905,201 +3121,6 @@ if __name__ == "__main__":
     wwa  = savedata['ww']
     wha = savedata['wh']
 
-    def screenshothive():
-        cmd = """
-                    osascript -e  'activate application "Roblox"'
-                """
-        os.system(cmd)
-        setdat = loadsettings.load()
-        maxvals = []
-        savedata = loadSave()
-        pag.moveTo(350,100)
-        savedata = loadRes()
-        ww = savedata["ww"]
-        wh = savedata["wh"]
-        xo = ww//4
-        yo = wh//4*3
-        xt = xo*3-xo
-        yt = wh-yo
-        time.sleep(2)
-        pag.press('esc')
-        time.sleep(0.1)
-        pag.press('r')
-        time.sleep(0.2)
-        pag.press('enter')
-        time.sleep(8)
-        for _ in range(4):
-            pag.press('pgup')
-        time.sleep(0.1)
-        for _ in range(6):
-            pag.press('o')
-        for _ in range(2):
-            r = imagesearch.find("hive0.png",0, xo, yo, xt, yt)
-            maxvals.append(r[3])
-            for _ in range(4):
-                pag.press(",")
-                
-        if maxvals[0] < maxvals[1]:
-            for _ in range(4):
-                pag.press(",")
-        xo = ww//4
-        yo = wh-2
-        xt = ww//8
-        yt = 2
-        webhook("","Screenshotting: hive1.png","dark brown",1)
-        im = pag.screenshot(region = (xo,yo,xt,yt))
-        if setdat['display_type'] ==  "built-in retina display":
-            im.save('./images/retina/hive1.png')
-        else:
-            im.save('./images/built-in/hive1.png')
-            
-        
-    def calibratehive(term=1):
-        if subprocess.call("system_profiler SPDisplaysDataType | grep -i 'retina'", shell=True) == 0:
-            loadsettings.save('display_type', 'built-in retina display')
-        else:
-            loadsettings.save('display_type',"built-in display")
-        if not calibrate_hive.calibrate():
-            cmd = """
-                    osascript -e  'activate application "Terminal"'
-                """
-            os.system(cmd)
-            window = tk.Toplevel()
-            label = tk.Label(window, text="ERROR calibrating, ensure that:\n\n -Roblox is in fullscreen\n -Terminal has screen recording permissions (System prefences -> security and privacy -> privacy -> screen recording)\n\nIf the issue still persists, go to calibration tab -> calibrate hive.",bg=wbgc)
-            button_no = ttk.Button(window, text="Ok", command=window.destroy)
-            label.grid(row=0, column=0, columnspan=2)
-            button_no.grid(row=1, column=1)
-            return False
-        elif term:
-            cmd = """
-                    osascript -e  'activate application "Terminal"'
-                """
-            os.system(cmd)
-
-        return True
-        
-            
-    def calibratebp():
-        webhook("","Calibrating: Backpack","dark brown")
-        savedata = loadRes()
-        reset.reset()
-        webhook("","Filling up backpack","dark brown")
-        canon()
-        time.sleep(2)
-        exec(open("{}.py".format(setdat['gather_field'])).read())
-        time.sleep(1)
-        webhook("Gathering: {}".format(setdat['gather_field']),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
-        move.apkey("space")
-        placeSprinkler()
-        time.sleep(0.2)
-        if setdat["before_gather_turn"] == "left":
-            for _ in range(setdat["turn_times"]):
-                move.press(",")
-        elif setdat["before_gather_turn"] == "right":
-            for _ in range(setdat["turn_times"]):
-                move.press(".")
-        timestart = time.perf_counter()
-        while True:
-            time.sleep(0.05)
-            mouse.press(Button.left)
-            time.sleep(0.05)
-            exec(open("gather_{}.py".format(setdat['gather_pattern'])).read())
-            time.sleep(0.05)
-            time.sleep(0.05)
-            timespent = (time.perf_counter() - timestart)/60
-            if timespent > 20:
-                webhook("Gathering: ended","Time: {:.2f}".format(timespent),"light green")
-                break
-            if setdat['field_drift_compensation'] and setdat['gather_pattern'] != "stationary":
-                fieldDriftCompensation()
-            mouse.release(Button.left)
-        time.sleep(0.5)
-        webhook("","Finding coordinates of backpack","dark brown")
-        for x in range(ww//2+50,ww//2+200):
-            for y in range(6,18):
-                pix = pag.pixel(x,y)
-                if pix[0] > 230:
-                    #savesettings("bploc",[x,y])
-                    webhook("","Success! Backpack coordinates found at: {},{}".format(x,y),"light blue")
-                    break
-            else:
-                continue
-            break
-    def screenshotebutton():
-        setdat = loadsettings.load()
-        webhook("","Screenshotting: eb.png","dark brown")
-        xo = ww//2.6
-        yo = wh//19
-        xt = ww//25
-        yt = wh//30
-        im = pag.screenshot(region = (xo,yo,xt,yt))
-        if setdat['display_type'] ==  "built-in retina display":
-            im.save('./images/retina/eb.png')
-        else:
-            im.save('./images/built-in/eb.png')
-
-    def calibrateebutton():
-        setdat = loadsettings.load()
-        savedata = loadRes()
-        ww = savedata['ww']
-        wh = savedata['wh']
-        webhook("","Calibrating: e_button","dark brown",1)        
-        vals = []
-        reset.reset()
-        move.hold("w",2)
-        move.hold("d",0.9*(setdat["hive_number"])+1)
-        pag.keyDown("d")
-        time.sleep(0.5)
-        move.press("space")
-        time.sleep(0.2)
-        r = ""
-        pag.keyUp("d")
-        for _ in range(7):
-            move.hold("d",0.15)
-            vals.append(imagesearch.find("eb.png",0,ww//3,0,ww//3,wh//3)[3])
-            
-        webhook("","Done obtaining vals","dark brown")
-            
-        vals = sorted(vals,reverse=True)
-        log(vals)
-        gap = vals[0] - 0.05
-        truemin = 0
-        for i in range(len(vals)):
-            if vals[i] > gap:
-                truemin = vals[i]
-            else:
-                break
-        thresh = math.floor(truemin*100)/100
-        webhook("","Calculated: E Button Threshold\nValue: {}".format(thresh),"dark brown")
-        webhook("","Determining e button detect type","dark brown")
-        loadsettings.save("ebthreshold",thresh)
-        loadsettings.save("ebdetect","cv2")
-        reset.reset()
-        canon()
-        #screenshotebutton()
-        #r=imagesearch.find("eb.png",0,0,0,ww,wh//2)[3]
-        #thresh = math.ceil((r*100)/100)
-        #loadsettings.save("ebthreshold",thresh)
-        if ebutton(1):
-            loadsettings.save("ebdetect","pyautogui")
-            webhook("","E button detect type: pyautogui".format(thresh),"light blue")
-        else:
-            webhook("","E button detect type: cv2".format(thresh),"light blue")
-
-    def calibrate():
-        if calibratehive(0):
-            #calibrateebutton()
-            webhook("","Calibration Complete","light green")
-            cmd = """
-                    osascript -e  'activate application "Terminal"'
-                """
-            os.system(cmd)
-            window = tk.Toplevel()
-            label = tk.Label(window, text="Calibration complete")
-            button_no = ttk.Button(window, text="Ok", command=window.destroy)
-            label.grid(row=0, column=0, columnspan=2)
-            button_no.grid(row=1, column=1)
-            
             
     def updateGo():
         update.update()
@@ -3181,9 +3202,68 @@ if __name__ == "__main__":
 
 
                                                       }
-        with open("fieldsettings.txt","w") as f:
+        with open(f"./profiles/{current_profile.get()}/fieldsettings.txt","w") as f:
             f.write(str(fields))
         f.close()
+        
+    def loadProfile(e):
+        print(e)
+        try:
+            updateProfile(e)
+            loadSettings(e)
+            loadVariables()
+            loadTextBoxes()
+            loadsettings.save("current_profile",e)
+        except FileNotFoundError:
+            print("Profile not found")
+            reloadProfileList()
+
+    def deleteProfile():
+        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        #window.config(bg=wbgc)
+        selectedProfile = tk.StringVar(window)
+        selectedProfile.set(current_profile.get())
+        label = tk.Label(window, text = "Profile name:")
+        dropField = ttk.OptionMenu(window, selectedProfile, current_profile.get(), *profiles)
+        button_yes = ttk.Button(window, text="Delete",command=lambda: [removeProfile(selectedProfile.get()), window.destroy()], style = "small.TButton")
+        button_no = ttk.Button(window, text="Cancel", command=window.destroy, style = "small.TButton")
+
+        label.grid(row = 0, column = 0, sticky = tk.W, pady = 2)
+        dropField.grid(row = 0, column = 1, pady = 2)
+        button_yes.grid(row=1, column=0)
+        button_no.grid(row=1, column=1)
+        
+    def removeProfile(profile):
+        if len(profiles) <= 1: return
+        shutil.rmtree(f"./profiles/{profile}")
+        reloadProfileList()
+        name = profiles[0]
+        current_profile.set(name)
+        loadProfile(name)
+        
+    def newProfile():
+        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        #window.config(bg=wbgc)
+        label = tk.Label(window, text = "Profile name:")
+        nameentry = tkinter.Entry(window, bg= wbgc)
+        nameentry.bind('<Return>', lambda e: "break")
+        button_yes = ttk.Button(window, text="Create",command=lambda: [createProfile(nameentry.get()), window.destroy()], style = "small.TButton")
+        button_no = ttk.Button(window, text="Cancel", command=window.destroy, style = "small.TButton")
+
+        label.grid(row = 0, column = 0, sticky = tk.W, pady = 2)
+        nameentry.grid(row = 0, column = 1, pady = 2)
+        button_yes.grid(row=1, column=0)
+        button_no.grid(row=1, column=1)
+
+    def createProfile(name):
+        path = f"./profiles/{name}"
+        os.mkdir(path)
+        files = ["fieldsettings.txt", "plantersettings.txt",  "settings.txt"]
+        for i in files:
+            shutil.copyfile(f"./src/default settings/{i}", f"{path}/{i}")
+        current_profile.set(name)
+        reloadProfileList()
+        loadProfile(name)
         
     def startGo():
         global setdat, stop, planterTypes_prev, planterFields_prev, quest_kill, quest_gathers
@@ -3204,8 +3284,8 @@ if __name__ == "__main__":
             slot_freq_list.append(globals()[f'slot_freq_{i}'].get())
             slot_use_list.append(globals()[f'slot_use_{i}'].get())
             slot_time_list.append(globals()[f'slottextbox_{nums[i-1]}'].get(1.0,"end").replace("\n",""))
-            
-        setdict = {
+
+        generalDict = {
             "hive_number": hive_number.get(),
             "walkspeed": speedtextbox.get(1.0,"end").replace("\n",""),
             "gifted_vicious_bee": gifted_vicious_bee.get(),
@@ -3218,12 +3298,20 @@ if __name__ == "__main__":
             "private_server_link":linktextbox.get(1.0,"end").replace("\n",""),
             "enable_discord_bot":enable_discord_bot.get(),
             "discord_bot_token":tokentextbox.get(1.0,"end").replace("\n",""),
-            "haste_compensation": haste_compensation.get(),
             "show_haste_warn": show_haste_warn,
-            "rejoin_every_enabled": rejoin_every_enabled.get(),
-            "rejoin_every": rejoinetextbox.get(1.0,"end").replace("\n",""),
+            "current_profile": current_profile.get(),
+            "start_honey":0,
+            "prev_honey":0,
+            "start_time":time.time(),
+            "canon_time":1.0,#cttextbox.get(1.0,"end").replace("\n",""),
+            "reverse_hive_direction": reverse_hive_direction.get(),
             "rejoin_delay": rejoindelaytextbox.get(1.0,"end").replace("\n",""),
             "rejoin_method": rejoin_method.get(),
+        } 
+        setDict = {
+            "haste_compensation": haste_compensation.get(),
+            "rejoin_every_enabled": rejoin_every_enabled.get(),
+            "rejoin_every": rejoinetextbox.get(1.0,"end").replace("\n",""),
             "manual_fullscreen": manual_fullscreen.get(),
             "convert_wait": convertwaittextbox.get(1.0,"end").replace("\n",""),
             #"convert_every_enabled": convert_every_enabled.get(),
@@ -3241,6 +3329,7 @@ if __name__ == "__main__":
             "werewolf": werewolf.get(),
             "mantis": mantis.get(),
             "stinger": stinger.get(),
+            "ant_challenge": antchallenge.get(),
 
             "wealthclock": wealthclock.get(),
             "blueberrydispenser": blueberrydispenser.get(),
@@ -3257,12 +3346,7 @@ if __name__ == "__main__":
             "mondo_buff": mondo_buff.get(),
             "lid_art":lid_art.get(),
             "candles": candles.get(),
-
-            "start_honey":0,
-            "prev_honey":0,
-            "start_time":time.time(),
-            "canon_time":1.0,#cttextbox.get(1.0,"end").replace("\n",""),
-            "reverse_hive_direction": reverse_hive_direction.get(),
+            "antpass": antpass.get(),
 
             "blue_booster": blue_booster.get(),
             "red_booster": red_booster.get(),
@@ -3313,15 +3397,6 @@ if __name__ == "__main__":
         
             }
 
-                
-
-        
-        #ww = int(wwatextbox.get(1.0,"end").replace("\n",""))
-        #wh = int(whatextbox.get(1.0,"end").replace("\n",""))
-        #if setdict["display_type"] == "built-in retina display":
-            #if ww<2000:
-                #pag.alert(text='The resolution is invalid for a built-in retina display. Check it by going to about this mac -> displays', title='Setting error', button='OK')
-                #return
         '''
             "dandelion_field": dandelion_field.get(),
             "sunflower_field": sunflower_field.get(),
@@ -3342,17 +3417,18 @@ if __name__ == "__main__":
             "pepper_field":pepper_field.get(),
         '''
         try:
-            a = float(setdict["walkspeed"])
+            a = float(generalDict["walkspeed"])
         except:
-            pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(setdict['walkspeed']),title="Invalid setting",button="OK")
+            pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
             return
-        if float(setdict["walkspeed"]) > 40:
+        if float(generalDict["walkspeed"]) > 40:
             pag.alert(text="The walkspeed of {} is unusually high. Make sure that the value is entered correctly and there are no haste stacks")
         
-        savesettings(setdict,"settings.txt")
-        savesettings(planterdict,"plantersettings.txt")
+        savesettings(generalDict,"generalsettings.txt")
+        savesettings(planterdict,f"./profiles/{current_profile.get()}/plantersettings.txt")
+        savesettings(setDict,f"./profiles/{current_profile.get()}/settings.txt")
         with open("haste.txt","w") as a:
-            a.write(setdict["walkspeed"])
+            a.write(generalDict["walkspeed"])
         a.close()
         if str(planterdict['enable_planters']) == "1":
             planterTypes_set = []
@@ -3383,18 +3459,6 @@ if __name__ == "__main__":
                 planterTypes_prev, planterFields_prev = planterTypes_set, planterFields_set
                 
                             
-        '''
-        if int(setdict['hivethreshold']) == 1:
-            window = tk.Toplevel() 
-            label = tk.Label(window,text="You have not calibrated your macro yet. Do you want to calibrate it automatically?")
-            button_yes = ttk.Button(window, text="Yes",command=lambda: [calibrate(), window.destroy()]) 
-            button_no = ttk.Button(window, text="No",command=lambda: [macro(),window.destroy()]) 
-            label.grid(row=0, column=0, columnspan=2)
-            button_yes.grid(row=1, column=0)
-            button_no.grid(row=1, column=1)
-        
-        else:
-        '''
         macro()
     def macro():
         global  prevHour, prevMin, honeyHist, warnings
@@ -3870,7 +3934,8 @@ if __name__ == "__main__":
     checkbox = tkinter.Checkbutton(frame4, text="Stinger Hunt", variable=stinger)
     checkbox.place(x=0, y = 155)
     Tooltip(checkbox, text = "Detects night, finds vicious bee and fights it.\n\nNote that night detection requires the sky/wall to be visible in the upper left corner of the screen")
-
+    tkinter.Checkbutton(frame4, text="(Free) Ant Pass Dispenser", variable=antpass).place(x=0, y = 190)
+    
     #Tab 4
 
     tkinter.Checkbutton(frame5, text="Blue Booster", variable=blue_booster).place(x=10, y = 15)
@@ -3908,25 +3973,18 @@ if __name__ == "__main__":
     dropField.place(width=85,x = 290, y = 270,height=20)
     slottextbox_one = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     slottextbox_one.place(x = 390, y=60)
-    slottextbox_one.insert("end",setdat['slot_time'][0])
     slottextbox_two = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     slottextbox_two.place(x = 390, y=95)
-    slottextbox_two.insert("end",setdat['slot_time'][1])
     slottextbox_three = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     slottextbox_three.place(x = 390, y=130)
-    slottextbox_three.insert("end",setdat['slot_time'][2])
     slottextbox_four = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     slottextbox_four.place(x = 390, y=165)
-    slottextbox_four.insert("end",setdat['slot_time'][3])
     slottextbox_five = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     slottextbox_five.place(x = 390, y=200)
-    slottextbox_five.insert("end",setdat['slot_time'][4])
     slottextbox_six = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     slottextbox_six.place(x = 390, y=235)
-    slottextbox_six.insert("end",setdat['slot_time'][5])
     slottextbox_seven = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
     slottextbox_seven.place(x = 390, y=270)
-    slottextbox_seven.insert("end",setdat['slot_time'][6])
     dropField = ttk.OptionMenu(frame5, slot_freq_1, slot_freq_1.get().title(), *timeOptions,style='smaller.TMenubutton')
     dropField.place(width=65,x = 430, y = 60,height=20)
     dropField = ttk.OptionMenu(frame5, slot_freq_2, slot_freq_2.get().title(), *timeOptions,style='smaller.TMenubutton')
@@ -4010,7 +4068,6 @@ if __name__ == "__main__":
     tkinter.Label(frame6, text = "Max planters").place(x=545,y=70)
     tkinter.Label(frame6, text = "Harvest Every").place(x=545,y=105)
     harvesttextbox = tkinter.Text(frame6, width = 4, height = 1, bg= wbgc)
-    harvesttextbox.insert("end",harvest)
     harvesttextbox.place(x = 637, y=107)
     harvesttextbox.bind('<Return>', lambda e: "break")
     Tooltip(harvesttextbox, text = "How often the macro will collect the planters")
@@ -4052,7 +4109,6 @@ if __name__ == "__main__":
     
     tkinter.Label(frame3, text = "Wait").place(x = 0, y = 155)
     convertwaittextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
-    convertwaittextbox.insert("end",convert_wait)
     convertwaittextbox.place(x = 40, y=157)
     convertwaittextbox.bind('<Return>', lambda e: "break")
     Tooltip(convertwaittextbox, text = "Time to wait after the macro is done converting. This is useful for converting small amount of excess pollen/balloon")
@@ -4095,7 +4151,6 @@ if __name__ == "__main__":
 
     tkinter.Checkbutton(frame7, text="Rejoin every", variable=rejoin_every_enabled).place(x=0, y = 120)
     rejoinetextbox = tkinter.Text(frame7, width = 4, height = 1, bg= wbgc)
-    rejoinetextbox.insert("end",rejoin_every)
     rejoinetextbox.place(x=104,y=123)
     rejoinetextbox.bind('<Return>', lambda e: "break")
     tkinter.Label(frame7, text = "hours").place(x = 140, y = 120)
@@ -4107,7 +4162,9 @@ if __name__ == "__main__":
     rejoindelaytextbox.bind('<Return>', lambda e: "break")
     Tooltip(rejoindelaytextbox, text = "The time to wait for bee swarm to load when rejoining")
     tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
-    tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen).place(x=0, y = 190)
+    checkbox = tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen)
+    checkbox.place(x=0, y = 190)
+    Tooltip(checkbox, text = "Fullscreens roblox when rejoining.")
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
     dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste", "Reload"],style='my.TMenubutton' )
     dropField.place(width=90,x = 360, y = 155,height=24)
@@ -4115,23 +4172,14 @@ if __name__ == "__main__":
     checkbox = tkinter.Checkbutton(frame7, text="Backpack freeze detection", variable=backpack_freeze)
     checkbox.place(x=0, y = 225)
     Tooltip(checkbox, text = "Detects roblox as frozen when the backpack has not changed for a while.\nThis detection only occurs when the macro is gathering")
+
+    #Tab 9
+    tkinter.Label(frame9, text = "Current profile").place(x = 0, y = 30)
+    profileField = ttk.OptionMenu(frame9, current_profile, setdat["current_profile"], *profiles,style='my.TMenubutton', command = loadProfile)
+    profileField.place(x = 115, y = 30)
+    ttk.Button(frame9, text = "New profile", command = newProfile, style='small.TButton').place(x=0,y=65)
+    ttk.Button(frame9, text = "Delete profile", command = deleteProfile, style='small.TButton').place(x=130,y=65)
     
-    #Tab 7
-    '''
-    ttk.Button(frame5, text = "Calibrate Hive", command = calibratehive, width = 10).place(x=0,y=13)
-    tkinter.Checkbutton(frame5, text="Reverse Hive Direction", variable=reverse_hive_direction).place(x=140, y = 15)
-    tkinter.Label(frame5, text = "Screenshot multiplier").place(x = 0, y = 50)
-    #dropField = ttk.OptionMenu(frame5, ebdetect,setdat['ebdetect'], command = disableeb, *["cv2","pyautogui"],style='my.TMenubutton' )
-    #dropField.place(width=130,x = 158, y = 51,height=24)
-    #tkinter.Label(frame5, text = " Threshold").place(x = 300, y = 50)
-    #smtextbox = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
-    #smtextbox.insert("end",multipliers['screenshot_multiplier'])
-    #smtextbox.place(x=158,y=53)
-    tkinter.Label(frame5, text = "Flight Multiplier").place(x = 0, y = 85)
-    cttextbox = tkinter.Text(frame5, width = 4, height = 1, bg= wbgc)
-    cttextbox.insert("end",canon_time)
-    cttextbox.place(x=110,y=88)
-    '''
     #Root
     ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=420)
     ttk.Button(root, text = "Update",command = updateFiles, width = 9,).place(x=150,y=420)
@@ -4146,12 +4194,6 @@ if __name__ == "__main__":
     fieldOne(gather_field_one.get())
     fieldTwo(gather_field_two.get())
     fieldThree(gather_field_three.get())
+    loadTextBoxes()
     root.mainloop()
-    
-
-
-        
-
-
-
 

@@ -1,0 +1,22 @@
+
+hive_number:4
+walkspeed:28
+gifted_vicious_bee:0
+enable_discord_webhook:0
+discord_webhook_url:
+send_screenshot:1
+sprinkler_slot:1
+sprinkler_type:saturator
+display_type:built-in retina display
+private_server_link:
+enable_discord_bot:0
+discord_bot_token:
+show_haste_warn:
+current_profile:first profile
+start_honey:14938701280615
+prev_honey:14938701280615
+start_time:1709260962.363501
+canon_time:1.0
+reverse_hive_direction:0
+rejoin_delay:60
+rejoin_method:reload
