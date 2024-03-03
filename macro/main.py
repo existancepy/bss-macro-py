@@ -73,11 +73,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-<<<<<<< Updated upstream
-macrov = "1.47"
-=======
 macrov = "1.48"
->>>>>>> Stashed changes
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -169,30 +165,6 @@ def discord_bot():
     async def on_message(message):
         if message.author == client.user:
             return
-<<<<<<< Updated upstream
-
-        if message.content.startswith('!b'):
-            args = message.content.split(" ")[1:]
-            cmd = args[0].lower()
-            if cmd == "rejoin":
-                await message.channel.send("Now attempting to rejoin")
-                await asyncRejoin()
-            elif cmd == "screenshot":
-                await message.channel.send("Sending a screenshot via webhook")
-                webhook("User Requested: Screenshot","","light blue",1)
-            elif cmd == "report":
-                await message.channel.send("Sending Hourly Report")
-                hourlyReport(0)
-                
-                #honeyHist = []
-                #savehoney_history(honeyHist)
-    client.run(setdat['discord_bot_token'])
-def setStatus(msg="none"):
-    with open("status.txt","w") as f:
-        f.write(msg)
-    f.close()
-=======
->>>>>>> Stashed changes
 
         if message.content.startswith('!b'):
             args = message.content.split(" ")[1:]
