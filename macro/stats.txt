@@ -1,0 +1,8 @@
+
+gather_time:[10.4]
+convert_time:[0.04, 0.04, 0.04]
+bug_time:0
+rejoin_time:0
+objective_time:0
+vic_kills:0
+bug_kills:0

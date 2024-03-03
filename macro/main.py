@@ -73,7 +73,11 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
+<<<<<<< Updated upstream
 macrov = "1.47"
+=======
+macrov = "1.48"
+>>>>>>> Stashed changes
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -165,6 +169,7 @@ def discord_bot():
     async def on_message(message):
         if message.author == client.user:
             return
+<<<<<<< Updated upstream
 
         if message.content.startswith('!b'):
             args = message.content.split(" ")[1:]
@@ -186,12 +191,38 @@ def setStatus(msg="none"):
     with open("status.txt","w") as f:
         f.write(msg)
     f.close()
+=======
+>>>>>>> Stashed changes
 
+        if message.content.startswith('!b'):
+            args = message.content.split(" ")[1:]
+            cmd = args[0].lower()
+            if cmd == "rejoin":
+                await message.channel.send("Now attempting to rejoin shortly. Forcing a disconnect")
+                setStatus("disconnect")
+            elif cmd == "screenshot":
+                await message.channel.send("Sending a screenshot via webhook")
+                webhook("User Requested: Screenshot","","light blue",1)
+            elif cmd == "report":
+                await message.channel.send("Sending Hourly Report")
+                hourlyReport(0)
+                
+                #honeyHist = []
+                #savehoney_history(honeyHist)
+    client.run(setdat['discord_bot_token'])
+    
 def getStatus():
     with open("status.txt","r") as f:
         out = f.read()
     f.close()
     return out
+
+def setStatus(msg="none"):
+    if msg != "none" and getStatus() == "disconnect": return
+    with open("status.txt","w") as f:
+        f.write(msg)
+    f.close()
+
 def validateSettings():
     return False
     '''
@@ -218,6 +249,31 @@ def validateSettings():
     return msg
     '''
 
+def addStat(name, value):
+    file = loadsettings.load("stats.txt")
+    if isinstance(file[name], list):
+        if len(file[name]) == 1 and file[name][0] == 0:
+            file[name][0] = value
+        else:
+            file[name].append(value)
+    else:
+        file[name] += value
+    savesettings(file, "stats.txt")
+
+def resetStats():
+    file = loadsettings.load("stats.txt")
+    resetStats = {
+        "gather_time":[0],
+        "convert_time":[0],
+        "bug_time":0,
+        "rejoin_time":0,
+        "objective_time":0,
+        "bug_kills":0
+        }
+    out = {**file, **resetStats}
+    savesettings(out, "stats.txt")
+            
+        
 def loadSave():
     global savedata
     with open('save.txt') as f:
@@ -310,18 +366,6 @@ def getBesideE():
     return text
 
 def ebutton(pagmode=0):
-    '''
-    savedata = loadRes()
-    ww = savedata['ww']
-    wh = savedata['wh']
-    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    ocrval = imagesearch.find("e_symbol.png", 0.8, ww//(2.65*xsm),wh//(20*ysm),ww//(21*xlm),wh//(17*ylm), 0, 0)
-    log(ocrval)
-    return bool(ocrval)
-    '''
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
     log(ocrval)
     return "E" in ocrval and len(ocrval) <= 3
@@ -360,13 +404,17 @@ def detectNight(bypasstime=0):
     return False
 
 def millify(n):
-    if not n: return 0
+    if not n: return "0"
     millnames = ['',' K',' M',' B',' T', 'Qd']
     n = float(n)
     millidx = max(0,min(len(millnames)-1,
                         int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
 
     return '{:.2f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
+
+def minAndSecs(m):
+    secs = round((float(m) - int(m))*60)
+    return f"{int(m)}m {secs}s"
 
 def hourlyReport(hourly=1):
     savedata = loadRes()
@@ -429,85 +477,50 @@ def hourlyReport(hourly=1):
             data = f.read().split("\n")
             data.insert(0,"")
         f.close()
+        
+        stats = loadsettings.load("stats.txt")
+        rejoin_time = minAndSecs(stats["rejoin_time"])
+        gather_time = minAndSecs(sum(stats["gather_time"]))
+        convert_time = minAndSecs(sum(stats["convert_time"]))
+        bug_time = minAndSecs(stats["bug_time"])
+        objective_time = minAndSecs(stats["objective_time"])
+
+        gather_avg = minAndSecs(sum(stats["gather_time"])/len(stats["gather_time"]))
+        convert_avg = minAndSecs(sum(stats["convert_time"])/len(stats["convert_time"]))
+        
         print(data)
         data[13] = f"url({rootDir}/assets/background.png);"
-        data[27] = f"{rootDir}/assets/buffs.png"        
-        data[35] = f"Session Time:\t{session_time}"
-        data[38] = f"Current Honey:\t{millify(currHoney)}"
-        data[41] = f"Session Honey:\t{millify(session_honey)}"
-        data[44] = f"Honey This Hour:\t{millify(hourly_honey)}"
-        data[63] = f"const xValues = {xvals}"
-        data[64] = f"const yValues = {yvals}"
+        data[30] = f"Rejoining:\t{rejoin_time}"
+        data[34] = f"Gathering:\t{gather_time}"
+        data[38] = f"Bug Runs:\t{bug_time}"
+        data[42] = f"Converting:\t{convert_time}"
+        data[46] = f"Collecting Objectives:\t{objective_time}"
+        data[55] = f"{rootDir}/assets/buffs.png"
+        data[65] = session_time
+        data[70] = millify(currHoney)
+        data[75] = millify(session_honey)
+        data[80] = str(stats["vic_kills"])
+        data[92] = millify(hourly_honey)
+        data[98] = gather_avg
+        data[104] = convert_avg
+        data[109] = str(stats["bug_kills"])
+        data[132] = f"const time = {xvals}"
+        data[133] = f"const honey = {yvals}"
+        data[197] = f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]'
+
         print(data)
         with open("./hourlyReport/index.html","w") as f:
             f.write('\n'.join(data[1:]))
         f.close()
-        '''
-        fig = plt.figure(figsize=(12,12), dpi=300,constrained_layout=True)
-        gs = fig.add_gridspec(12,12)
-        fig.patch.set_facecolor('#121212')
-
-        axText = fig.add_subplot(gs[0:12, 8:12])
-        axText.get_xaxis().set_visible(False)
-        axText.get_yaxis().set_visible(False)
-        axText.patch.set_facecolor('#121212')
-        axText.spines['bottom'].set_color('#121212')
-        axText.spines['top'].set_color('#121212')
-        axText.spines['left'].set_color('#121212')
-        axText.spines['right'].set_color('#121212')
-
-        plt.text(0.3,1,"Report", fontsize=20,color="white")
-        plt.text(0,0.95,"Session Time: {}".format(session_time), fontsize=15,color="white")
-        plt.text(0,0.9,"Current Honey: {}".format(millify(currHoney)), fontsize=15,color="white")
-        plt.text(0,0.85,"Session Honey: {}".format(millify(session_honey)), fontsize=15,color="white")
-        plt.text(0,0.8,"Honey/Hr: {}".format(millify(hourly_honey)), fontsize=15,color="white")
-
-        ax1 = fig.add_subplot(gs[0:3, 0:7])
-        if not yvals:
-            yvals = honeyHist.copy()
-        if max(yvals) == 0:
-            yticks = [0]
-        else:
-            yticks = np.arange(0, max(yvals)+1, max(yvals)/4)
-        yticksDisplay = [millify(x) if x else x for x in yticks]
-
-        xticks = np.arange(0,max(xvals)+1, 10)
-        xticksDisplay = ["{}:{}".format(timehour,x) if x else "{}:00".format(timehour) for x in xticks]
-
-        ax1.set_yticks(yticks,yticksDisplay,fontsize=16)
-        ax1.set_xticks(xticks,xticksDisplay,fontsize=16)
-        ax1.set_title('Honey/min',color='white',fontsize=19)
-        ax1.patch.set_facecolor('#121212')
-        ax1.spines['bottom'].set_color('white')
-        ax1.spines['top'].set_color('white')
-        ax1.spines['left'].set_color('white')
-        ax1.spines['right'].set_color('white')
-        ax1.tick_params(axis='x', colors='white')
-        ax1.tick_params(axis='y', colors='white')
-        ax1.plot(xvals, yvals,color="#BB86FC")
-        '''
         
         try:
-            UI = 25
-            info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
-            if "retina" in info or "m1" in info or "m2" in info:
-                UI*=2
+            open("new-ui-fix.txt")
+            UI = wh/(16*ysm)
         except FileNotFoundError:
-            UI = 0
-        buffim = pag.screenshot(region = (0,wh/(30*ysm)+UI,ww/2,wh/(16*ylm)))
+            UI = wh/(30*ysm)
+        buffim = pag.screenshot(region = (0,UI,ww/2.1,wh/(16*ylm)))
         buffim.save("./hourlyReport/assets/buffs.png")
-        '''
-        buffim = plt.imread('buffs.png')
-        ax2 = fig.add_subplot(gs[4:6, 0:7])
-        ax2.set_title('Buffs',color='white',fontsize=19)
-        ax2.get_xaxis().set_visible(False)
-        ax2.get_yaxis().set_visible(False)
-        ax2.patch.set_facecolor('#121212')
-        ax2.imshow(buffim)
-        
-        plt.grid(alpha=0.08)
-        plt.savefig("hourlyReport-resized.png", bbox_inches='tight')
-        '''
+
         hti.screenshot(html_file='./hourlyReport/index.html', save_as='hourlyReport-resized.png')
         webhook("**Hourly Report**","","light blue",0,1)
     except Exception as e:
@@ -674,6 +687,7 @@ def convert(bypass=0):
         if time.perf_counter()  - st > 600:
             webhook("","Converting took too long, moving on","brown")
             break
+    addStat("convert_time",round((time.perf_counter()  - st)/60,2))
     setStatus()
     if setdat['stinger']:
         move.press(".")
@@ -742,29 +756,53 @@ def moblootPattern(f,s,r,t):
 def resetMobTimer(cfield):
     if cfield:
         if cfield == "mushroom":
-            if checkRespawn("ladybug_mushroom","5m"): savetimings("ladybug_mushroom")
+            if checkRespawn("ladybug_mushroom","5m"):
+                addStat("bug_kills",1)
+                savetimings("ladybug_mushroom")
         elif cfield == "strawberry":
-            if checkRespawn("ladybug_strawberry","5m"): savetimings("ladybug_strawberry")
+            if checkRespawn("ladybug_strawberry","5m"):
+                addStat("bug_kills",2)
+                savetimings("ladybug_strawberry")
         elif cfield == "clover":
             if checkRespawn("ladybug_clover","5m"):
+                addStat("bug_kills",2)
                 savetimings("ladybug_clover")
                 savetimings("rhinobeetle_clover")
         elif cfield == "pumpkin" or cfield == "cactus":
-            if checkRespawn("werewolf","1h"):  savetimings("werewolf")
+            if checkRespawn("werewolf","1h"):
+                addStat("bug_kills",1)
+                savetimings("werewolf")
         elif cfield == "pinetree":
-            if checkRespawn("werewolf","1h"):  savetimings("werewolf")
-            if checkRespawn("mantis_pinetree","20m"):  savetimings("mantis_pinetree")
+            if checkRespawn("werewolf","1h"):
+                addStat("bug_kills",1)
+                savetimings("werewolf")
+            if checkRespawn("mantis_pinetree","20m"):
+                addStat("bug_kills",2)
+                savetimings("mantis_pinetree")
         elif cfield == "pineapple":
-            if checkRespawn("mantis_pineapple","20m"):  savetimings("mantis_pineapple")
-            if checkRespawn("rhinobeetle_pineapple","5m"):  savetimings("rhinobeetle_pineapple")
+            if checkRespawn("mantis_pineapple","20m"):
+                addStat("bug_kills",1)
+                savetimings("mantis_pineapple")
+            if checkRespawn("rhinobeetle_pineapple","5m"):
+                addStat("bug_kills",1)
+                savetimings("rhinobeetle_pineapple")
         elif cfield == "spider":
-            if checkRespawn("spider_spider","30m"):  savetimings("spider_spider")
+            if checkRespawn("spider_spider","30m"):
+                addStat("bug_kills",1)
+                savetimings("spider_spider")
         elif cfield == "rose":
-            if checkRespawn("scorpion_rose","20m"):  savetimings("scorpion_rose")
+            if checkRespawn("scorpion_rose","20m"):
+                addStat("bug_kills",2)
+                savetimings("scorpion_rose")
         elif cfield == "blueflower":
-            if checkRespawn("rhinobeetle_blueflower","5m"):  savetimings("rhinobeetle_blueflower")
+            if checkRespawn("rhinobeetle_blueflower","5m"):
+                addStat("bug_kills",2)
+                savetimings("rhinobeetle_blueflower")
         elif cfield == "bamboo":
-            if checkRespawn("rhinobeetle_bamboo","5m"):  savetimings("rhinobeetle_bamboo")
+            if checkRespawn("rhinobeetle_bamboo","5m"):
+                addStat("bug_kills",2)
+                savetimings("rhinobeetle_bamboo")
+                
 def stingerHunt(convert=0,gathering=0):
     setdat = loadsettings.load()
     fields = ['pepper','mountain top','rose','cactus','spider','clover']
@@ -836,6 +874,7 @@ def stingerHunt(convert=0,gathering=0):
             break
         reset.reset()
     setStatus("none")
+    addStat("vic_kills", 1)
     return "success"
 sat_image = cv2.imread('./images/retina/saturator.png')
 method = cv2.TM_SQDIFF_NORMED
@@ -1111,7 +1150,13 @@ def vic():
                 
                 
                     
-                    
+        if "gather" in status:
+            bluetexts = imToString("blue").lower()
+            print(bluetexts)
+            if "died" in bluetexts:
+                webhook("","Player Died","red")
+                setStatus("died")
+            
         if "vb" in status:
             bluetexts = imToString("blue").lower()
             print(bluetexts)
@@ -1165,8 +1210,10 @@ def vic():
                     prev_honey = loadsettings.load()['prev_honey']
                     honeyHist = [prev_honey]*60
                     prevHour = sysHour
+                    resetStats()
         
 def killMob(field,mob,reset):
+    st = time.perf_counter()
     webhook("","Travelling: {} ({})".format(mob.title(),field.title()),"dark brown")
     convert()
     if canon() == "dc": return
@@ -1176,7 +1223,7 @@ def killMob(field,mob,reset):
         for _ in range(4):
             move.press(",")
     lootMob(field,mob,reset)
-    
+    addStat("bug_time", round(st - time.perf_counter())/60, 2)
 def lootMob(field,mob,resetCheck):
     move.apkey("space")
     webhook("","Looting: {} ({})".format(mob.title(), field.title()),"bright green")
@@ -1243,6 +1290,7 @@ def get_booster(booster):
             
 def collect(name,beesmas=0):
     savedata = loadRes()
+    st = time.perf_counter()
     ww = savedata['ww']
     wh = savedata['wh']
     dispname = name.replace("_"," ").title()
@@ -1307,6 +1355,7 @@ def collect(name,beesmas=0):
             sleep(4)
         move.apkey("space")
         exec(open("claim_{}.py".format(usename)).read())
+    addStat("objective_time",round((time.perf_counter() - st)/60,2))
     reset.reset()
 def rawreset(nowait=0):
     pag.press('esc')
@@ -1836,6 +1885,7 @@ def openRoblox(link):
     
 def rejoin():
     setdat = loadsettings.load()
+    st = time.perf_counter()
     for i in range(3):
         savedata = loadRes()
         ww = savedata['ww']
@@ -1849,7 +1899,7 @@ def rejoin():
         os.system(cmd)
         subprocess.Popen("osascript -e 'quit app \"Roblox\"'", shell=True)
         time.sleep(3)
-        if setdat["private_server_link"]:
+        if setdat["private_server_link"] and i < 2:
             openRoblox(setdat["private_server_link"])
         else:
             openRoblox('https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129')
@@ -1913,6 +1963,7 @@ def rejoin():
                 pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.04)
                 keyboard.press(Key.enter)
                 if setdat['haste_compensation']: openSettings()
+                addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
                 return
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
 '''
@@ -2011,6 +2062,7 @@ def gather(gfid):
         exec(open("gather_{}.py".format(gp)).read())
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
+        status = getStatus()
         if bpcap >= setdat["pack"]:
             webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
@@ -2019,6 +2071,13 @@ def gather(gfid):
             webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
             break
+        if status == "died":
+            webhook("Gathering: ended","Time: {:.2f} - Died - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+            end_gather = 1
+            setdat['return_to_hive'] = "reset"
+            break
+        if status == "disconnect": return
+        
         if setdat['field_drift_compensation'] and gp != "stationary":
             fieldDriftCompensation()
         if setdat['shift_lock']: pag.press('shift')
@@ -2028,6 +2087,7 @@ def gather(gfid):
             break
         if not cycleCount%20:
             if checkwithOCR("disconnect"): return
+            
         if not cycleCount%2:
             bpcap = backpack.bpc()
             if bpcap == prev_bp and prev_bp != 0:
@@ -2039,11 +2099,13 @@ def gather(gfid):
             if repeat_bp >= 15:
                 setStatus("disconnect")
                 webhook("","Backpack has not changed. Roblox is frozen","red")
+                addStat("gather_time",round(timespent,2))
                 return 
         mouse.release(Button.left)
         cycleCount += 1
     time.sleep(0.5)
     setStatus()
+    addStat("gather_time",round(timespent,2))
     if not stingerFound:
         if setdat["before_gather_turn"] == "left":
             for _ in range(setdat["turn_times"]):
@@ -2383,7 +2445,8 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                             goToPlanter(currField)
                             if getStatus() == "disconnect": return
                             webhook('',"Travelling: {} ({})\nObjective: Collect Planter, Attempt: {}".format(displayPlanterName(currPlanter),currField.title(),i+1),"dark brown")
-                            if "harv" in getBesideE():
+                            getBeside = getBesideE()
+                            if "harv" in getBeside or "plant" in getBeside:
                                 move.press('e')
                                 clickYes()
                                 if currField == "pumpkin":
@@ -2750,11 +2813,8 @@ if __name__ == "__main__":
     #get variables
     gather_enable = tk.IntVar(value=setdat["gather_enable"])
     gather_field_one = tk.StringVar(root)
-    gather_field_one.set(setdat["gather_field"][0].title())
     gather_field_two = tk.StringVar(root)
-    gather_field_two.set(setdat["gather_field"][1].title())
     gather_field_three = tk.StringVar(root)
-    gather_field_three.set(setdat["gather_field"][2].title())
 
     return_to_hive_one = tk.StringVar(root)
     return_to_hive_two = tk.StringVar(root)
@@ -2955,6 +3015,11 @@ if __name__ == "__main__":
 
     def loadVariables():
         global walkspeed, discord_webhook_url, private_server_link, discord_bot_token, planter_fields,convert_wait
+
+        gather_field_one.set(setdat["gather_field"][0].title())
+        gather_field_two.set(setdat["gather_field"][1].title())
+        gather_field_three.set(setdat["gather_field"][2].title())
+
         stump_snail.set(setdat["stump_snail"])
         continue_after_stump_snail.set(setdat["continue_after_stump_snail"])
         ladybug.set(setdat["ladybug"])
@@ -3055,7 +3120,6 @@ if __name__ == "__main__":
         planter_fields = plantdat['planter_fields']
 
         #current_profile.set(setdat["current_profile"])
-
 
     multipliers = loadsettings.load('multipliers.txt')
     loadVariables()
@@ -3209,6 +3273,9 @@ if __name__ == "__main__":
             loadSettings(e)
             loadVariables()
             loadTextBoxes()
+            fieldOne(gather_field_one.get())
+            fieldTwo(gather_field_two.get())
+            fieldThree(gather_field_three.get())
             loadsettings.save("current_profile",e)
         except FileNotFoundError:
             print("Profile not found")
@@ -4170,11 +4237,12 @@ if __name__ == "__main__":
     Tooltip(checkbox, text = "Detects roblox as frozen when the backpack has not changed for a while.\nThis detection only occurs when the macro is gathering")
 
     #Tab 9
-    tkinter.Label(frame9, text = "Current profile").place(x = 0, y = 30)
+    tkinter.Label(frame9, justify=tk.LEFT, text = "Profiles store settings individually to allow you to swap between them.\nThey do not store discord bot, discord webhook, rejoin method, rejoin wait,\nvicious bonus, hive number and walkspeed settings").place(x = 0, y = 10)
+    tkinter.Label(frame9, text = "Current profile").place(x = 0, y = 105)
     profileField = ttk.OptionMenu(frame9, current_profile, setdat["current_profile"], *profiles,style='my.TMenubutton', command = loadProfile)
-    profileField.place(x = 115, y = 30)
-    ttk.Button(frame9, text = "New profile", command = newProfile, style='small.TButton').place(x=0,y=65)
-    ttk.Button(frame9, text = "Delete profile", command = deleteProfile, style='small.TButton').place(x=130,y=65)
+    profileField.place(x = 115, y = 105)
+    ttk.Button(frame9, text = "New profile", command = newProfile, style='small.TButton').place(x=0,y=140)
+    ttk.Button(frame9, text = "Delete profile", command = deleteProfile, style='small.TButton').place(x=130,y=140)
     
     #Root
     ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=420)

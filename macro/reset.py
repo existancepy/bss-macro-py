@@ -26,7 +26,11 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
-
+try:
+    open("new-ui-fix.txt")
+    yOffset = 20
+except FileNotFoundError:
+    yOffset = 0
 def reset(hiveCheck=False):
     setdat = loadsettings.load()
     loadSave()
@@ -41,7 +45,7 @@ def reset(hiveCheck=False):
     yt = wh-yo
     for i in range(2):
         webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
-        mouse.position = (mw/(xsm*4.11)+40,mh/(9*ysm))
+        mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
         time.sleep(0.5)
         pag.press('esc')
         time.sleep(0.1)
