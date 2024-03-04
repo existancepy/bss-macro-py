@@ -146,28 +146,17 @@ def hourlyReport(hourly=1):
     hti.screenshot(html_file='./hourlyReport/index.html', save_as='hourlyReport-resized.png')
     webhook("**Hourly Report**","","light blue",0,1)
 
-from ocrpy import customOCR
-import pynput
-from pynput.mouse import Button
-mouse = pynput.mouse.Controller()
-os.system('''osascript -e 'activate application "Roblox"' ''')
-time.sleep(1)
+import pyautogui as pag
+savedata = loadRes()
+ww = savedata['ww']
+wh = savedata['wh']
+ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
 
-def keepOld():
-    savedata = loadRes()
-    ww = savedata['ww']
-    wh = savedata['wh']
-    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    region = (ww/3.15,wh/2.15,ww/2.7,wh/4.2)
-    ocr = customOCR(*region,0)
-    if not ocr: return
-    for i in ocr:
-        if "kee" in i[1][0].lower():
-            mouse.position = ((i[0][0][0]+region[0])//2, (i[0][0][1]+region[1])//2)
-            mouse.click(Button.left)
-            return
-keepOld()
+os.system('''osascript -e 'activate application "Roblox"' ''')
+a = pag.screenshot(region=(ww//(3*xsm),wh//(20*ysm),ww//(3*xlm),wh//(7*ylm)))
+a.save("test.png")
+
 os.system('''osascript -e 'activate application "Terminal"' ''')

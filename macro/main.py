@@ -250,7 +250,7 @@ def resetAllStats():
     out = {}
     for k,v in file.items():
         if isinstance(v, list):
-            out[k] = []
+            out[k] = [0]
         elif isinstance(v, int) or isinstance(v, float):
             out[k] = 0
         else:
