@@ -73,7 +73,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.49"
+macrov = "1.49.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -245,7 +245,18 @@ def resetStats():
     out = {**file, **resetStats}
     savesettings(out, "stats.txt")
             
-        
+def resetAllStats():
+    file = loadsettings.load("stats.txt")
+    out = {}
+    for k,v in file.items():
+        if isinstance(v, list):
+            out[k] = []
+        elif isinstance(v, int) or isinstance(v, float):
+            out[k] = 0
+        else:
+            out[k] = v
+    savesettings(out, "stats.txt")
+    
 def loadSave():
     global savedata
     with open('save.txt') as f:
@@ -877,6 +888,7 @@ def stingerHunt(convert=0,gathering=0):
                 status = getStatus()
                 if status == "vb_killed":
                     webhook("","Vicious Bee Killed","bright green")
+                    addStat("vic_kills", 1)
                     break
                 if time.time()-st > 300:
                     webhook("","Took too long to kill vicious bee, leaving","red")
@@ -891,7 +903,6 @@ def stingerHunt(convert=0,gathering=0):
             break
         reset.reset()
     setStatus("none")
-    addStat("vic_kills", 1)
     return "success"
 sat_image = cv2.imread('./images/retina/saturator.png')
 method = cv2.TM_SQDIFF_NORMED
@@ -2203,6 +2214,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     with open('canonfails.txt', 'w') as f:
         f.write('0')
     f.close()
+    resetAllStats()
     if val:
         pag.alert(text='Your settings are incorrect! Check the terminal to see what is wrong.', title='Invalid settings', button='OK')
         print(val)
