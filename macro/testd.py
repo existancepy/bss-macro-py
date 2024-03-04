@@ -109,7 +109,6 @@ def hourlyReport(hourly=1):
 
     taskTimes = [stats["rejoin_time"],sum(stats["gather_time"]),stats["bug_time"],sum(stats["convert_time"]),stats["objective_time"]]
     print(data)
-    data[13] = f"url({rootDir}/assets/background.png);"
     data[30] = f"Rejoining:\t{rejoin_time}"
     data[34] = f"Gathering:\t{gather_time}"
     data[38] = f"Bug Runs:\t{bug_time}"
@@ -147,8 +146,28 @@ def hourlyReport(hourly=1):
     hti.screenshot(html_file='./hourlyReport/index.html', save_as='hourlyReport-resized.png')
     webhook("**Hourly Report**","","light blue",0,1)
 
+from ocrpy import customOCR
+import pynput
+from pynput.mouse import Button
+mouse = pynput.mouse.Controller()
+os.system('''osascript -e 'activate application "Roblox"' ''')
+time.sleep(1)
 
-st = time.perf_counter()
-time.sleep(2)
-print(time.perf_counter()  - st)
-print(round((time.perf_counter()  - st)/60,2))
+def keepOld():
+    savedata = loadRes()
+    ww = savedata['ww']
+    wh = savedata['wh']
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
+    region = (ww/3.15,wh/2.15,ww/2.7,wh/4.2)
+    ocr = customOCR(*region,0)
+    if not ocr: return
+    for i in ocr:
+        if "kee" in i[1][0].lower():
+            mouse.position = ((i[0][0][0]+region[0])//2, (i[0][0][1]+region[1])//2)
+            mouse.click(Button.left)
+            return
+keepOld()
+os.system('''osascript -e 'activate application "Terminal"' ''')

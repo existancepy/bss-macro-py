@@ -1,6 +1,6 @@
 
-gather_time:[10.4]
-convert_time:[0.04, 0.04, 0.04]
+gather_time:[0]
+convert_time:[0.23, 0.08, 0.14]
 bug_time:0
 rejoin_time:0
 objective_time:0

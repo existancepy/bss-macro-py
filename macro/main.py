@@ -73,7 +73,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.48"
+macrov = "1.49"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -461,7 +461,6 @@ def hourlyReport(hourly=1):
         convert_avg = minAndSecs(sum(stats["convert_time"])/len(stats["convert_time"]))
         
         print(data)
-        data[13] = f"url({rootDir}/assets/background.png);"
         data[30] = f"Rejoining:\t{rejoin_time}"
         data[34] = f"Gathering:\t{gather_time}"
         data[38] = f"Bug Runs:\t{bug_time}"
@@ -685,6 +684,26 @@ def walk_to_hive(field):
     webhook("","Cant find hive, resetting","dark brown",1)
     reset.reset()
     convert()
+
+def keepOldLoop(claim = True):
+    savedata = loadRes()
+    ww = savedata['ww']
+    wh = savedata['wh']
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
+    region = (ww/3.15,wh/2.15,ww/2.7,wh/4.2)
+    while True:
+        ocr = customOCR(*region,0)
+        for i in ocr:
+            if "kee" in i[1][0].lower():
+                mouse.release(Button.left)
+                if claim:
+                    mouse.position = ((i[0][0][0]+region[0])//2, (i[0][0][1]+region[1])//2)
+                    mouse.click(Button.left)
+                return
+        
 def checkRespawn(m,t):
     timing = float(loadtimings()[m])
     respt = int(''.join([x for x in list(t) if x.isdigit()]))
@@ -774,7 +793,33 @@ def resetMobTimer(cfield):
             if checkRespawn("rhinobeetle_bamboo","5m"):
                 addStat("bug_kills",2)
                 savetimings("rhinobeetle_bamboo")
-                
+
+def antChallenge():
+    webhook("","Travelling: Ant Challenge","dark brown")
+    canon()
+    exec(open("collect_antpass.py").read())
+    move.hold("w",4)
+    move.hold("d",1.5)
+    move.hold("s",0.4)
+    time.sleep(0.5)
+    besideE = getBesideE()
+    if "spen" in besideE or "play" in besideE:
+        webhook("","Start Ant Challenge","bright green",1)
+        move.press("e")
+        placeSprinkler()
+        mouse.press(Button.left)
+        time.sleep(1)
+        move.hold("s",1.5)
+        move.hold("w",0.15)
+        move.hold("d",0.3)
+        keepOldLoop()
+        webhook("","Ant Challenge Complete","bright green",1)
+        reset.reset()
+        return
+    webhook("", "Cant start ant challenge", "red", 1)
+    reset.reset()
+    return
+    
 def stingerHunt(convert=0,gathering=0):
     setdat = loadsettings.load()
     fields = ['pepper','mountain top','rose','cactus','spider','clover']
@@ -1124,7 +1169,6 @@ def vic():
                     
         if "gather" in status:
             bluetexts = imToString("blue").lower()
-            print(bluetexts)
             if "died" in bluetexts:
                 webhook("","Player Died","red")
                 setStatus("died")
@@ -1195,7 +1239,7 @@ def killMob(field,mob,reset):
         for _ in range(4):
             move.press(",")
     lootMob(field,mob,reset)
-    addStat("bug_time", round(st - time.perf_counter())/60, 2)
+    addStat("bug_time", round(time.perf_counter() - st)/60, 2)
 def lootMob(field,mob,resetCheck):
     move.apkey("space")
     webhook("","Looting: {} ({})".format(mob.title(), field.title()),"bright green")
@@ -1376,7 +1420,7 @@ def getQuest(giver):
 
     q_title = ""
     for _ in range(10):
-        ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2)
+        ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2,0)
         lines = [x[1][0].lower() for x in ocr]
         for i in lines:
             if giver in i:
@@ -1871,7 +1915,14 @@ def rejoin():
         os.system(cmd)
         subprocess.Popen("osascript -e 'quit app \"Roblox\"'", shell=True)
         time.sleep(3)
-        if setdat["private_server_link"] and i < 2:
+        ps = setdat["private_server_link"]
+        if setdat["rejoin_method"] == "deeplink":
+            deeplink = "roblox://placeID=1537690962"
+            if ps and i < 2:
+                deeplink += f"&linkCode={ps.lower().split('code=')[1]}"
+            subprocess.call(["open", deeplink])
+            
+        elif ps and i < 2:
             openRoblox(setdat["private_server_link"])
         else:
             openRoblox('https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129')
@@ -2341,7 +2392,12 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             collect('antpass')
             stingerHunt()
             if getStatus() == "disconnect": return
-        
+            
+        if setdat['ant_challenge']:
+            antChallenge()
+            stingerHunt()
+            if getStatus() == "disconnect": return
+            
         if setdat['mondo_buff']:
 
             now = datetime.now()
@@ -3970,6 +4026,7 @@ if __name__ == "__main__":
     checkbox.place(x=0, y = 155)
     Tooltip(checkbox, text = "Detects night, finds vicious bee and fights it.\n\nNote that night detection requires the sky/wall to be visible in the upper left corner of the screen")
     tkinter.Checkbutton(frame4, text="(Free) Ant Pass Dispenser", variable=antpass).place(x=0, y = 190)
+    tkinter.Checkbutton(frame4, text="Ant Challenge", variable=antchallenge).place(x=200, y = 190)
     
     #Tab 4
 
@@ -4201,7 +4258,7 @@ if __name__ == "__main__":
     checkbox.place(x=0, y = 190)
     Tooltip(checkbox, text = "Fullscreens roblox when rejoining.")
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
-    dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste", "Reload"],style='my.TMenubutton' )
+    dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste", "Reload", "Deeplink"],style='my.TMenubutton' )
     dropField.place(width=90,x = 360, y = 155,height=24)
     Tooltip(dropField, text = "How the macro interacts with the browser when rejoining. Different rejoin methods work for different users.\n\nIt is recommended to experiment to see which one works for you.")
     checkbox = tkinter.Checkbutton(frame7, text="Backpack freeze detection", variable=backpack_freeze)
