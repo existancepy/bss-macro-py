@@ -73,7 +73,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.49.1"
+macrov = "1.49.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1250,7 +1250,7 @@ def killMob(field,mob,reset):
         for _ in range(4):
             move.press(",")
     lootMob(field,mob,reset)
-    addStat("bug_time", round(time.perf_counter() - st)/60, 2)
+    addStat("bug_time", round((time.perf_counter() - st)/60, 2))
 def lootMob(field,mob,resetCheck):
     move.apkey("space")
     webhook("","Looting: {} ({})".format(mob.title(), field.title()),"bright green")
