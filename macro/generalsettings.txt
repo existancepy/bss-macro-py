@@ -13,10 +13,10 @@ enable_discord_bot:0
 discord_bot_token:
 show_haste_warn:
 current_profile:first profile
-start_honey:0
-prev_honey:0
-start_time:1709529061.1787179
+start_honey:15050255840044
+prev_honey:15050255840044
+start_time:1709547801.571737
 canon_time:1.0
 reverse_hive_direction:0
 rejoin_delay:60
-rejoin_method:Deeplink
+rejoin_method:deeplink

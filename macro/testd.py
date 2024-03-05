@@ -145,18 +145,13 @@ def hourlyReport(hourly=1):
 
     hti.screenshot(html_file='./hourlyReport/index.html', save_as='hourlyReport-resized.png')
     webhook("**Hourly Report**","","light blue",0,1)
-
-import pyautogui as pag
 savedata = loadRes()
 ww = savedata['ww']
 wh = savedata['wh']
-ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-
 os.system('''osascript -e 'activate application "Roblox"' ''')
-a = pag.screenshot(region=(ww//(3*xsm),wh//(20*ysm),ww//(3*xlm),wh//(7*ylm)))
-a.save("test.png")
-
+import pyautogui as pag
+time.sleep(1)
+p = pag.screenshot(region =  (5,5,ww,60))
+a = pag.locate("nightsky.png", p, grayscale=False)
+print(a)
 os.system('''osascript -e 'activate application "Terminal"' ''')

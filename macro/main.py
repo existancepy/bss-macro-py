@@ -73,7 +73,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.49.2"
+macrov = "1.49.3"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -179,8 +179,6 @@ def discord_bot():
                 await message.channel.send("Sending Hourly Report")
                 hourlyReport(0)
                 
-                #honeyHist = []
-                #savehoney_history(honeyHist)
     client.run(setdat['discord_bot_token'])
     
 def getStatus():
