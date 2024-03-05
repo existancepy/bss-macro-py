@@ -63,8 +63,11 @@ if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
     quit()
     
 if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
-    printRed("Invalid pyscreeze version. Your current numpy version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
+    printRed("Invalid pyscreeze version. Your current pyscreeze version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
     quit()
+
+info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
+retina = "retina" in info or "m1" in info or "m2" in info
 savedata = {}
 ww = ""
 wh = ""
@@ -358,30 +361,20 @@ def detectNight(bypasstime=0):
     savedat = loadRes()
     ww = savedat['ww']
     wh = savedat['wh']
-    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-    xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-    night = pag.screenshot(region=(0,0,round(ww/(3.4*xlm)),round(wh/(40*ylm))))
-    screen = np.array(night)
-    w,h = screen.shape[:2]
-    rgb = screen[0,0][:3]
     if not setdat['stinger']: return False
     if not checkRespawn("night","10m") and not bypasstime:
         return False
-    for x in range(20,w):
-        for y in range(20,h):
-            if list(screen[x,y]) == [0,0,0,255]:
-                success = True
-                for x1 in range(15):
-                    for y1 in range(15):
-                        if x+x1+1 < w and y1+y+1 < h:
-                            if list(screen[x+x1+1,y+y1+1]) != [0,0,0,255]:
-                                success = False
-                if success:
-                    print(x,y)
-                    webhook("","Night Detected","dark brown",1)
-                    savetimings("night")
-                    night.save("night.png")
-                    return True
+    y = 30
+    if retina:
+        y*=2
+    night = pyscreeze.screenshot(region = (0,0,ww/1.8,y))
+    res = list(pyscreeze._locateAll_python("./images/general/nightsky.png", night, limit=1))
+    print(res)
+    if res:
+        webhook("","Night Detected","dark brown",1)
+        savetimings("night")
+        night.save("night.png")
+        return True
     return False
 
 def millify(n):
@@ -1991,9 +1984,9 @@ def rejoin():
                 convert()
                 webhook("","Rejoin successful","dark brown")
                 currentTime = datetime.now().strftime("%H:%M")
-                pag.typewrite("/")
-                pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.04)
-                keyboard.press(Key.enter)
+                #pag.typewrite("/")
+                #pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.04)
+                #keyboard.press(Key.enter)
                 if setdat['haste_compensation']: openSettings()
                 addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
                 return
@@ -2683,9 +2676,8 @@ def setResolution():
     wwd = int(pag.size()[0])
     whd = int(pag.size()[1])
     warnings = []
-    info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
     scw = "\nScreen Coordinates not found in supported list. Contact Existance to get it supported."
-    if "retina" in info or "m1" in info or "m2" in info:
+    if retina:
         try:
             retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
             retout = retout.decode().split("\n")[1].strip().split("x")

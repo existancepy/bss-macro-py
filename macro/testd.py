@@ -149,9 +149,10 @@ savedata = loadRes()
 ww = savedata['ww']
 wh = savedata['wh']
 os.system('''osascript -e 'activate application "Roblox"' ''')
-import pyautogui as pag
+import pyscreeze
+import numpy as np
 time.sleep(1)
-p = pag.screenshot(region =  (5,5,ww,60))
-a = pag.locate("nightsky.png", p, grayscale=False)
+p = pyscreeze.screenshot(region =  (0,0,ww,60))
+a = list(pyscreeze._locateAll_python("./images/general/nightsky.png", p, limit=1))
 print(a)
 os.system('''osascript -e 'activate application "Terminal"' ''')

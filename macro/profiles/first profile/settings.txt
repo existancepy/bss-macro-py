@@ -1,11 +1,10 @@
-
-haste_compensation:0
+haste_compensation:1
 rejoin_every_enabled:0
 rejoin_every:1
 manual_fullscreen:0
 convert_wait:0
 gather_enable:1
-gather_field:['Pine Tree', 'None', 'None']
+gather_field:['pine tree', 'none', 'none']
 stump_snail:0
 continue_after_stump_snail:0
 ladybug:0
@@ -37,8 +36,8 @@ red_booster:0
 mountain_booster:0
 gather_in_boosted:0
 slot_enable:[0, 0, 0, 0, 0, 0, 0]
-slot_time:['0', '0', '0', '0', '0', '0', '0']
-slot_freq:['Secs', 'Secs', 'Secs', 'Secs', 'Secs', 'Secs', 'Secs']
-slot_use:['Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering']
+slot_time:[0, 0, 0, 0, 0, 0, 0]
+slot_freq:['secs', 'secs', 'secs', 'secs', 'secs', 'secs', 'secs']
+slot_use:['gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering', 'gathering']
 polar_quest:0
 backpack_freeze:0
