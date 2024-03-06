@@ -416,6 +416,7 @@ def minAndSecs(m):
     return f"{int(m)}m {secs}s"
 
 def hourlyReport(hourly=1):
+    setdat = loadsettings.load()
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
