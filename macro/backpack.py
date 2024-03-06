@@ -1,8 +1,5 @@
 import pyautogui as pag
-import time
 import os
-import tkinter
-import move
 import loadsettings
 import numpy as np
 from logpy import log
@@ -17,20 +14,7 @@ data = sorted(data.items())
 #52% 8502900
 #84% 11231045
 #100% 14889259
-Y1=8
-try:
-    open("new-ui-fix.txt")
-    print("applying new UI fixes for backpack")
-    Y1 = 31
-except FileNotFoundError:
-    pass
 
-add = 65
-
-info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
-if "retina" in info or "m1" in info or "m2" in info:
-    add*= 2
-    Y1 *= 2
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -46,6 +30,14 @@ def loadRes():
 def rgb_to_dec(r, g, b):
       return (r * 256 * 256) + (g * 256) + b
 def bpc():
+    Y1=8
+    add = 65
+    setdat = loadsettings.load()
+    
+    if setdat["new_ui"]: Y1 = 31  
+    if setdat['display_type'] == "built-in retina display":
+        add*= 2
+        Y1 *= 2
     savedat = loadRes()
     ww = savedat['ww']
     X1=ww//2+add

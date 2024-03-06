@@ -145,14 +145,11 @@ def hourlyReport(hourly=1):
 
     hti.screenshot(html_file='./hourlyReport/index.html', save_as='hourlyReport-resized.png')
     webhook("**Hourly Report**","","light blue",0,1)
+
+
 savedata = loadRes()
 ww = savedata['ww']
 wh = savedata['wh']
 os.system('''osascript -e 'activate application "Roblox"' ''')
-import pyscreeze
-import numpy as np
-time.sleep(1)
-p = pyscreeze.screenshot(region =  (0,0,ww,60))
-a = list(pyscreeze._locateAll_python("./images/general/nightsky.png", p, limit=1))
-print(a)
+
 os.system('''osascript -e 'activate application "Terminal"' ''')

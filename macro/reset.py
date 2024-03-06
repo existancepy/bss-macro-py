@@ -26,13 +26,11 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
-try:
-    open("new-ui-fix.txt")
-    yOffset = 20
-except FileNotFoundError:
-    yOffset = 0
+
 def reset(hiveCheck=False):
     setdat = loadsettings.load()
+    yOffset = 0
+    if setdat["new_ui"]: yOffset = 20
     loadSave()
     rhd = setdat["reverse_hive_direction"]
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']

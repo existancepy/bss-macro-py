@@ -19,6 +19,7 @@ from difflib import SequenceMatcher
 from tkinter_tooltips import *
 import time, os, ctypes, tty
 import tkinter
+import tkinter.filedialog
 import tkinter as tk
 from tkinter import ttk
 import backpack, reset, loadsettings, move,update,updateexperiment
@@ -32,6 +33,8 @@ import asyncio
 from logpy import log
 import logging
 import pynput
+import traceback
+from importlib import reload
 from pynput.keyboard import Key
 from pynput.mouse import Button
 from html2image import Html2Image
@@ -49,7 +52,13 @@ except Exception as e:
     quit()
 if __name__ == '__main__':
     print("\033[1;35m\nStarting Macro...  \n")
-from ocrpy import imToString,customOCR
+try:
+    import ocrpy
+    from ocrpy import imToString,customOCR
+except:
+    os.system("pip3 install --user --force-reinstall paddlepaddle==2.5.0")
+    reload(ocrpy)
+    from ocrpy import imToString,customOCR
 import sv_ttk
 import math
 import ast
@@ -59,12 +68,17 @@ import pyscreeze
 import shutil
     
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
-    printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
-    quit()
+    os.system('pip3 install --user "numpy<1.24.0"')
+    reload(numpy)
+    import numpy as np
+    #printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
+    #quit()
     
 if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
-    printRed("Invalid pyscreeze version. Your current pyscreeze version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
-    quit()
+    os.system('pip3 install --user "pyscreeze<0.1.29"')
+    reload(pyscreeze)
+    #printRed("Invalid pyscreeze version. Your current pyscreeze version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
+    #quit()
 
 info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
 retina = "retina" in info or "m1" in info or "m2" in info
@@ -76,7 +90,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.49.3"
+macrov = "1.50"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -369,13 +383,24 @@ def detectNight(bypasstime=0):
         y*=2
     night = pyscreeze.screenshot(region = (0,0,ww/1.8,y))
     res = list(pyscreeze._locateAll_python("./images/general/nightsky.png", night, limit=1))
-    print(res)
     if res:
         webhook("","Night Detected","dark brown",1)
         savetimings("night")
         night.save("night.png")
         return True
     return False
+
+def getTop(y):
+    height = 30
+    if retina:
+        height*=2
+        y*=2
+    res = customOCR(ww/3.5,y,ww/2.5,height,0)
+    log(f"{y},{res}")
+    if not res: return False
+    text = [x[1][0].lower() for x in res]
+    
+    return "honey" in text or "pollen" in text
 
 def millify(n):
     if not n: return "0"
@@ -1138,70 +1163,71 @@ def on_press(key):
 '''
       
 def vic():
-    setdat = loadsettings.load()
-    fields = ['pepper','mountain','rose','cactus','spider','clover']
-    prevHour = datetime.now().hour
-    prevMin = datetime.now().minute
-    invalid_prev_honey = 1
-    honeyHist = [0]*60
-    slots_last_used = [0]*7
-    while True:
-        status = getStatus()
-        
-        #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
-        currtime = time.time()
-        for i in range(len(setdat['slot_enable'])):
-            slot_enable = setdat['slot_enable'][i]
-            slot_freq = setdat['slot_freq'][i]
-            slot_use = setdat['slot_use'][i]
-            slot_time = setdat['slot_time'][i]
-            if slot_enable and status != "disconnect":
-                if slot_freq == "mins":
-                    slot_time*= 60
-                if currtime - slots_last_used[i] < slot_time:
-                    continue
-                if slot_use == "gathering" and status != "gathering":
-                    continue
-                if slot_use == "hive" and status != "hive":
-                    continue
-                move.press(str(i+1))
-                slots_last_used[i] = currtime
-                
-                
-                    
-        if "gather" in status:
-            bluetexts = imToString("blue").lower()
-            if "died" in bluetexts:
-                webhook("","Player Died","red")
-                setStatus("died")
+    try:
+        setdat = loadsettings.load()
+        fields = ['pepper','mountain','rose','cactus','spider','clover']
+        prevHour = datetime.now().hour
+        prevMin = datetime.now().minute
+        invalid_prev_honey = 1
+        honeyHist = [0]*60
+        slots_last_used = [0]*7
+        while True:
+            status = getStatus()
             
-        if "vb" in status:
-            bluetexts = imToString("blue").lower()
-            print(bluetexts)
-            if "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
-                currField = status.split("_")[2]
-                targetField = "none"
-                for fd in fields:
-                    if fd in bluetexts:
-                        if fd == "mountain":
-                            targetField = "mountain top"
-                        else:
-                            targetField = fd
-                        break
-                webhook("","Found Vicious Bee In {} Field".format(fd.title()),"light green")
-                if currField.lower() == targetField.lower():
-                    setStatus("vb_found_right_field")
-                else:
-                    setStatus("vb_found_wrong_field_{}".format(targetField))
-            elif "killing_vb" in status:
-                if "vicious" in bluetexts and "defeated" in bluetexts:
-                    setStatus("vb_killed")
-                elif "died" in bluetexts:
-                    setStatus("killing_vb_died")
-        else:
-            if setdat['stinger']:
+            #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
+            currtime = time.time()
+            for i in range(len(setdat['slot_enable'])):
+                slot_enable = setdat['slot_enable'][i]
+                slot_freq = setdat['slot_freq'][i]
+                slot_use = setdat['slot_use'][i]
+                slot_time = setdat['slot_time'][i]
+                if slot_enable and status != "disconnect":
+                    if slot_freq == "mins":
+                        slot_time*= 60
+                    if currtime - slots_last_used[i] < slot_time:
+                        continue
+                    if slot_use == "gathering" and status != "gathering":
+                        continue
+                    if slot_use == "hive" and status != "hive":
+                        continue
+                    move.press(str(i+1))
+                    slots_last_used[i] = currtime
+                    
+                    
+                        
+            if "gather" in status:
+                bluetexts = imToString("blue").lower()
+                if "died" in bluetexts:
+                    webhook("","Player Died","red")
+                    setStatus("died")
+                
+            elif "vb" in status:
+                bluetexts = imToString("blue").lower()
+                print(bluetexts)
+                if "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
+                    currField = status.split("_")[2]
+                    targetField = "none"
+                    for fd in fields:
+                        if fd in bluetexts:
+                            if fd == "mountain":
+                                targetField = "mountain top"
+                            else:
+                                targetField = fd
+                            break
+                    webhook("","Found Vicious Bee In {} Field".format(fd.title()),"light green")
+                    if currField.lower() == targetField.lower():
+                        setStatus("vb_found_right_field")
+                    else:
+                        setStatus("vb_found_wrong_field_{}".format(targetField))
+                elif "killing_vb" in status:
+                    if "vicious" in bluetexts and "defeated" in bluetexts:
+                        setStatus("vb_killed")
+                    elif "died" in bluetexts:
+                        setStatus("killing_vb_died")
+            elif setdat['stinger']:
                 if detectNight():
                     setStatus("night")
+                    
             if setdat['enable_discord_webhook'] and setdat['send_screenshot']:
                 sysTime = datetime.now()
                 sysHour = sysTime.hour
@@ -1229,6 +1255,10 @@ def vic():
                     honeyHist = [prev_honey]*60
                     prevHour = sysHour
                     resetStats()
+    except Exception:
+        print(traceback.format_exc())
+        log(traceback.format_exc())
+        webhook("","An error has occured with the background process. Stinger Hunt, Hourly Report and Slot usage are affected. Check terminal/macro logs for error message","red")
         
 def killMob(field,mob,reset):
     st = time.perf_counter()
@@ -1984,9 +2014,10 @@ def rejoin():
                 convert()
                 webhook("","Rejoin successful","dark brown")
                 currentTime = datetime.now().strftime("%H:%M")
-                #pag.typewrite("/")
-                #pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.04)
-                #keyboard.press(Key.enter)
+                if setdat["so_broke"]:
+                    pag.typewrite("/")
+                    pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.04)
+                    keyboard.press(Key.enter)
                 if setdat['haste_compensation']: openSettings()
                 addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
                 return
@@ -2166,6 +2197,7 @@ def gather(gfid):
                 else:
                     webhook("Notice","Whirligig failed to activate, walking back","red")
                     walk_to_hive(currfield)
+    stingerHunt()
 
 def placeSprinkler():
     sprinklerCount = {
@@ -2617,7 +2649,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 st = time.time()
                 while time.time() -st < 900:
                     gather(boostedField)
-                    stingerHunt()
                     if getStatus() == "disconnect": return
         if setdat['red_booster'] and checkRespawn("red_booster","1h"):
             boostedField = get_booster("red")
@@ -2638,7 +2669,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 st = time.time()
                 while time.time() -st < 900:
                     gather(boostedField)
-                    stingerHunt()
                     if getStatus() == "disconnect": return
             stingerHunt()
             if getStatus() == "disconnect": return
@@ -2959,6 +2989,7 @@ if __name__ == "__main__":
     walkspeed = ""
     hive_number = tk.IntVar()
     display_type = tk.StringVar(root)
+    new_ui = tk.IntVar()
     private_server_link = ""
     enable_discord_bot = tk.IntVar()
     sprinkler_slot = tk.StringVar(root)
@@ -3005,6 +3036,7 @@ if __name__ == "__main__":
     
     canon_time = ""
     reverse_hive_direction = tk.IntVar()
+    so_broke = tk.IntVar()
 
     enable_planters = tk.IntVar()
     paper_planter = tk.IntVar()
@@ -3066,6 +3098,7 @@ if __name__ == "__main__":
         walkspeed = setdat["walkspeed"]
         hive_number.set(setdat["hive_number"])
         display_type.set(setdat["display_type"].capitalize())
+        new_ui.set(setdat["new_ui"])
         private_server_link = setdat["private_server_link"]
         enable_discord_bot.set(setdat["enable_discord_bot"])
         sprinkler_slot.set(setdat["sprinkler_slot"])
@@ -3112,6 +3145,7 @@ if __name__ == "__main__":
         
         canon_time = setdat['canon_time']
         reverse_hive_direction.set(setdat['reverse_hive_direction'])
+        so_broke.set(setdat['so_broke'])
 
         enable_planters.set(plantdat['enable_planters'])
         paper_planter.set(plantdat['paper_planter'])
@@ -3311,6 +3345,32 @@ if __name__ == "__main__":
             print("Profile not found")
             reloadProfileList()
 
+    def importProfile():
+        path = tk.filedialog.askdirectory(initialdir = "~/Downloads")
+        files = os.listdir(path)
+        nameOri = path.split("/")[-1]
+        validFiles = ["fieldsettings.txt","settings.txt","plantersettings.txt"]
+        print(files)
+        for i in validFiles:
+            if i not in files:
+                pag.alert("Not a valid profile folder")
+                return
+                path = f"./profiles/{name}"
+        count = 0
+        name = nameOri
+        while True:
+            try:
+                shutil.copytree(path, f"./profiles/{name}")
+                break
+            except FileExistsError:
+                if count: name = f"{nameOri} ({count})"
+                count += 1
+            
+        current_profile.set(name)
+        reloadProfileList()
+        loadProfile(name)
+        
+        
     def deleteProfile():
         window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
         #window.config(bg=wbgc)
@@ -3388,6 +3448,7 @@ if __name__ == "__main__":
             "sprinkler_slot": sprinkler_slot.get(),
             "sprinkler_type": sprinkler_type.get(),
             "display_type": display_type.get().lower(),
+            "new_ui": new_ui.get(),
             "private_server_link":linktextbox.get(1.0,"end").replace("\n",""),
             "enable_discord_bot":enable_discord_bot.get(),
             "discord_bot_token":tokentextbox.get(1.0,"end").replace("\n",""),
@@ -3400,6 +3461,7 @@ if __name__ == "__main__":
             "reverse_hive_direction": reverse_hive_direction.get(),
             "rejoin_delay": rejoindelaytextbox.get(1.0,"end").replace("\n",""),
             "rejoin_method": rejoin_method.get(),
+            "so_broke": so_broke.get()
         } 
         setDict = {
             "haste_compensation": haste_compensation.get(),
@@ -3579,6 +3641,19 @@ if __name__ == "__main__":
         #fullscreen()
         im = pag.screenshot()
         im.save("roblox.png")
+        
+        if getTop(0):
+            newUI = 0
+            webhook("","Detected: Old UI","light blue")
+        elif getTop(30):
+            newUI = 1
+            webhook("","Detected: New UI","light blue")
+            log("applying new UI fix")
+        else:
+            webhook("","Unable to detect UI","red")
+            newUI = 0    
+        loadsettings.save("new_ui",newUI)
+        
         gather.value = 0
         timeupdate.value = int(time.time())
         time.sleep(0.5)
@@ -4266,6 +4341,9 @@ if __name__ == "__main__":
     checkbox = tkinter.Checkbutton(frame7, text="Backpack freeze detection", variable=backpack_freeze)
     checkbox.place(x=0, y = 225)
     Tooltip(checkbox, text = "Detects roblox as frozen when the backpack has not changed for a while.\nThis detection only occurs when the macro is gathering")
+    checkbox = tkinter.Checkbutton(frame7, text="Existance so broke", variable=so_broke)
+    checkbox.place(x=0, y = 260)
+    Tooltip(checkbox, text = "Sends 'Existance so broke' when rejoining. This is a reference to Natro's 'Natro so broke'")
 
     #Tab 9
     tkinter.Label(frame9, justify=tk.LEFT, text = "Profiles store settings individually to allow you to swap between them.\nThey do not store discord bot, discord webhook, rejoin method, rejoin wait,\nvicious bonus, hive number and walkspeed settings").place(x = 0, y = 10)
@@ -4274,6 +4352,7 @@ if __name__ == "__main__":
     profileField.place(x = 115, y = 105)
     ttk.Button(frame9, text = "New profile", command = newProfile, style='small.TButton').place(x=0,y=140)
     ttk.Button(frame9, text = "Delete profile", command = deleteProfile, style='small.TButton').place(x=130,y=140)
+    ttk.Button(frame9, text = "Import profile", command = importProfile, style='small.TButton').place(x=255,y=140)
     
     #Root
     ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=420)

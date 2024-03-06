@@ -19,18 +19,7 @@ def loadRes():
     return outdict
 
 ocr = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
-newUI = False
-try:
-    open("new-ui-fix.txt")
-    print("applying new UI fixes for OCR")
-    newUI = True
-except FileNotFoundError:
-    pass
 
-doublePixel = False
-info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
-if "retina" in info or "m1" in info or "m2" in info:
-    doublePixel = True
 def millify(n):
     if not n: return 0
     millnames = ['',' K',' M',' B',' T', 'Qd']
@@ -53,6 +42,7 @@ def screenshot(**kwargs):
     return out
     
 def imToString(m):
+    setdat = loadsettings.load()
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
@@ -63,10 +53,10 @@ def imToString(m):
     sn = time.time()
     ebY = wh//(20*ysm)
     honeyY = 0
-    if newUI:
+    if setdat["new_ui"]:
         ebY = wh//(14*ysm)
         honeyY = 31
-        if doublePixel: honeyY*=2
+        if setdat['display_type'] == "built-in retina display": honeyY*=2
     if m == "bee bear":
         cap = screenshot(region=(ww//(2.7*xsm),ebY,ww//(3*xlm),wh//(16*ylm)))
     elif m == "egg shop":
