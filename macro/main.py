@@ -90,7 +90,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.50.1"
+macrov = "1.50.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -511,10 +511,9 @@ def hourlyReport(hourly=1):
             f.write('\n'.join(data[1:]))
         f.close()
         
-        try:
-            open("new-ui-fix.txt")
+        if setdat["new_ui"]:
             UI = wh/(16*ysm)
-        except FileNotFoundError:
+        else:
             UI = wh/(30*ysm)
         buffim = pag.screenshot(region = (0,UI,ww/2.1,wh/(16*ylm)))
         buffim.save("./hourlyReport/assets/buffs.png")

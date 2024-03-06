@@ -1,8 +1,8 @@
 
-gather_time:[6.39, 2.81, 5.55]
-convert_time:[0.03, 0.03, 0.14, 0.04, 6.54]
+gather_time:[0]
+convert_time:[0]
 bug_time:0
 rejoin_time:0
-objective_time:1.31
+objective_time:0
 vic_kills:1
-bug_kills:5
+bug_kills:2

@@ -1,5 +1,5 @@
 
-hive_number:3
+hive_number:5
 walkspeed:28
 gifted_vicious_bee:0
 enable_discord_webhook:0
@@ -14,9 +14,9 @@ enable_discord_bot:0
 discord_bot_token:
 show_haste_warn:
 current_profile:first profile
-start_honey:15146614143463
-prev_honey:15146614143463
-start_time:1709695463.4098408
+start_honey:15176678126952
+prev_honey:15260070118267
+start_time:1709701529.615764
 canon_time:1.0
 reverse_hive_direction:0
 rejoin_delay:60
