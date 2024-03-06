@@ -90,7 +90,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.50"
+macrov = "1.50.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1387,7 +1387,8 @@ def collect(name,beesmas=0):
                 pag.keyUp("w")
         else:
             for _ in range(2):
-                if "use" in getBesideE():
+                besideE = getBesideE()
+                if "use" in besideE or "dispenser" in besideE:
                     claimLoot =  1
                     break
         if claimLoot:
