@@ -58,7 +58,7 @@ def imToString(m):
         honeyY = 31
         if setdat['display_type'] == "built-in retina display": honeyY*=2
     if m == "bee bear":
-        cap = screenshot(region=(ww//(2.7*xsm),ebY/1.2,ww//(3*xlm),wh//(20*ylm)))
+        cap = screenshot(region=(ww//(2.7*xsm),ebY/1.1,ww//(3*xlm),wh//(15*ylm)))
     elif m == "egg shop":
         cap = screenshot(region=(ww//(1.2*xsm),wh//(3*ysm),ww-ww//1.2,wh//5))
     elif m == "blue":

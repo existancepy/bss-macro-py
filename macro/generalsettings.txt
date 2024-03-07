@@ -1,24 +1,24 @@
 
-hive_number:5
+hive_number:3
 walkspeed:28
 gifted_vicious_bee:0
-enable_discord_webhook:0
-discord_webhook_url:
+enable_discord_webhook:1
+discord_webhook_url:https://discord.com/api/webhooks/1162895121315008545/IHapDfOLoVpERdPquwSSUWgIki9DcSM_hRgeCVN47VnY1ZlJDefqikBiCww2j-58WEBv
 send_screenshot:1
 sprinkler_slot:1
-sprinkler_type:saturator
 display_type:built-in retina display
 new_ui:0
 private_server_link:
-enable_discord_bot:0
-discord_bot_token:
+enable_discord_bot:1
+discord_bot_token:MTA2NTIwNjQ3OTUyNDczNzA2NA.GmOYES.iPxIrltexD9WWX-ZMt_ors4K7k4o0dWGmko94w
 show_haste_warn:
-current_profile:first profile
-start_honey:15176678126952
-prev_honey:15260070118267
-start_time:1709701529.615764
+current_profile:delte
+start_honey:15262779801592
+prev_honey:15262779801592
+start_time:1709785007.954752
 canon_time:1.0
 reverse_hive_direction:0
 rejoin_delay:60
 rejoin_method:deeplink
+sprinkler_type:saturator
 so_broke:0

@@ -90,7 +90,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.50.3"
+macrov = "1.50.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1422,12 +1422,15 @@ def updateHive(h):
 def clickdialog(t=20):
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    mouse.position = (mw//(2*xsm),round(mh*(4/5*ysm)))
+    mouse.position = (mw//2,round(mh*(7/10)))
     for _ in range(t):
         mouse.press(Button.left)
         sleep(0.25)
         mouse.release(Button.left)
-    
+
+def seqMatch(string1, string2, threshold):
+    return SequenceMatcher(None, string1, string2).ratio() > threshold
+
 def getQuest(giver):
     setdat = loadsettings.load()
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
@@ -1452,8 +1455,9 @@ def getQuest(giver):
         time.sleep(0.01)
 
     q_title = ""
+    lines = []
     for _ in range(10):
-        ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2,0)
+        ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2.5,0)
         lines = [x[1][0].lower() for x in ocr]
         for i in lines:
             if giver in i:
@@ -1481,9 +1485,37 @@ def getQuest(giver):
             highest_match[0] = match
             highest_match[1] = k
             highest_match[2] = v
-    webhook('',f'Quest detected: {highest_match[1]}',"light blue")
+    webhook('',f'Quest detected: {highest_match[1]}.title()',"light blue")
 
+    completeLines = []
+    quest = highest_match[2]
+    for i,e in enumerate(lines):
+        if seqMatch(e, "complete", 0.95):
+            completeLines[i-1] = f"{completeLines[i-1]} complete!" 
+        else:
+            completeLines.append(e)
+    print(completeLines)
+
+    objCount = 0
+    finalLines = []
+    for i,e in enumerate(completeLines):
+        if objCount >= len(quest): break
+        e = e.replace("defeat","")
+        if "pollen" in e:
+            e = e.split(" ")[-2:]
+        e = "".join([y for y in e if y.isdigit() or y == "," or y == "."])
+        for x in quest:
+            a = x.replace("_"," ").replace("kill","").replace("gather","")
+            if seqMatch(e,a,0.85):
+                objCount +=1
+                if not "complete" in e:
+                    finalLines += x
+    log(lines)
+    log(completeLines)
+    log(finalLines)
+    print(finalLines)
     if setdat["haste_compensation"]: openSettings()
+    
     return highest_match[2]
     
 def openSettings():
@@ -1984,15 +2016,17 @@ def rejoin():
                 fullscreen()
             else:
                 webhook("","Roblox is already in fullscreen, not activating fullscreen", "dark brown",1)
-        time.sleep(2)
-        webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True)
-        time.sleep(0.5)
-        for _ in range(2):
-            with keyboard.pressed(Key.cmd):
-                keyboard.press('w')
-                time.sleep(0.1)
-                keyboard.release('w')
+
+        if setdat["rejoin_method"] != "deeplink":
+            time.sleep(2)
+            webbrowser.open("https://docs.python.org/3/library/webbrowser.html", autoraise=True)
             time.sleep(0.5)
+            for _ in range(2):
+                with keyboard.pressed(Key.cmd):
+                    keyboard.press('w')
+                    time.sleep(0.1)
+                    keyboard.release('w')
+                time.sleep(0.5)
         cmd = """
                 osascript -e 'activate application "Roblox"' 
             """
@@ -2262,7 +2296,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         if setdat['haste_compensation']:
             rawreset(1)
             openSettings()
-        else: rawreset()
         currHoney = imToString('honey')
         loadsettings.save('start_honey',currHoney)
         loadsettings.save('prev_honey',currHoney)
@@ -3447,7 +3480,6 @@ if __name__ == "__main__":
             "discord_webhook_url": urltextbox.get(1.0,"end").replace("\n",""),
             "send_screenshot": send_screenshot.get(),
             "sprinkler_slot": sprinkler_slot.get(),
-            "sprinkler_type": sprinkler_type.get(),
             "display_type": display_type.get().lower(),
             "new_ui": new_ui.get(),
             "private_server_link":linktextbox.get(1.0,"end").replace("\n",""),
@@ -3462,6 +3494,7 @@ if __name__ == "__main__":
             "reverse_hive_direction": reverse_hive_direction.get(),
             "rejoin_delay": rejoindelaytextbox.get(1.0,"end").replace("\n",""),
             "rejoin_method": rejoin_method.get(),
+            "sprinkler_type": sprinkler_type.get(),
             "so_broke": so_broke.get()
         } 
         setDict = {
@@ -4235,6 +4268,7 @@ if __name__ == "__main__":
     
     dropField = ttk.OptionMenu(frame6, planter_count,plantdat['planter_count'], *[1,2,3],style='my.TMenubutton' )
     dropField.place(x = 630, y = 70,height=24,width=60)
+    Tooltip(dropField, text = "The maximum number of planters that can be placed at one time")
     tkinter.Label(frame6, text = "Max planters").place(x=545,y=70)
     tkinter.Label(frame6, text = "Harvest Every").place(x=545,y=105)
     harvesttextbox = tkinter.Text(frame6, width = 4, height = 1, bg= wbgc)
