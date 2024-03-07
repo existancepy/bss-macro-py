@@ -90,7 +90,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.50.5"
+macrov = "1.50.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1294,7 +1294,7 @@ def get_booster(booster):
             fields = ["pine tree", "blue flower", "bamboo"]
             for _ in range(9):
                 move.hold("w",0.15)
-                getBeside = getBeisdeE()
+                getBeside = getBesideE()
                 if "use" in getBeside or "booster" in getBeside:
                     move.press("e")
                     collected = 1
@@ -1302,7 +1302,7 @@ def get_booster(booster):
         elif booster == "red":
             fields = ["rose", "strawberry", "mushroom"]
             for _ in range(2):
-                getBeside = getBeisdeE()
+                getBeside = getBesideE()
                 if "use" in getBeside or "booster" in getBeside:
                     move.press("e")
                     collected = 1
@@ -1310,7 +1310,7 @@ def get_booster(booster):
         else:
             fields = ["sunflower", "dandelion", "spider", "clover", "pineapple", "pumpkin", "cactus"]
             for _ in range(2):
-                getBeside = getBeisdeE()
+                getBeside = getBesideE()
                 if "use" in getBeside or "booster" in getBeside:
                     move.press("e")
                     collected = 1
