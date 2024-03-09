@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.51.1"
+macrov = "1.51.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -4400,7 +4400,7 @@ if __name__ == "__main__":
     #Tab 6
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
-    tkinter.Label(frame3, text = "(Gathering settings can be changed in the gather tab)").place(x = 0, y = 50)
+    tkinter.Label(frame8, text = "(Gathering settings can be changed in the gather tab)").place(x = 0, y = 50)
 
     #Tab 7
     tkinter.Label(frame3, text = "Hive Slot (6-5-4-3-2-1)").place(x = 0, y = 15)
