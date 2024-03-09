@@ -34,6 +34,7 @@ kill_8_rhinobeetle
 gather_rose
 gather_pine tree
 kill_6_mantis
+kill_6_ladybug
 
 -spiced kebab
 gather_clover
@@ -57,7 +58,8 @@ kill_3_spider
 gather_rose
 gather_blue flower
 gather_clover
- 
+gather_cactus
+
 - high protein bug
 gather_sunflower
 kill_4_mantis

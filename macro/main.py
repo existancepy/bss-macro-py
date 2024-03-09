@@ -57,6 +57,7 @@ try:
     from ocrpy import imToString,customOCR
 except:
     os.system("pip3 install --user --force-reinstall paddlepaddle==2.5.0")
+    import ocrpy
     reload(ocrpy)
     from ocrpy import imToString,customOCR
 import sv_ttk
@@ -90,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.50.6"
+macrov = "1.51.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -115,9 +116,9 @@ for i in qdata:
         questInfo = []
     elif i.startswith("#"):
         questData[questBear][questTitle] = questInfo
-    else:
+    elif not i.isspace():
         questInfo.append(i)
-
+print()
 if __name__ == '__main__':
     planterTypes_prev = []
     planterFields_prev = []
@@ -499,13 +500,14 @@ def hourlyReport(hourly=1):
         data[70] = millify(currHoney)
         data[75] = millify(session_honey)
         data[80] = str(stats["vic_kills"])
-        data[92] = millify(hourly_honey)
-        data[98] = gather_avg
-        data[104] = convert_avg
-        data[109] = str(stats["bug_kills"])
-        data[132] = f"const time = {xvals}"
-        data[133] = f"const honey = {yvals}"
-        data[197] = f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]'
+        data[85] = str(stats["quests"])
+        data[97] = millify(hourly_honey)
+        data[103] = gather_avg
+        data[109] = convert_avg
+        data[114] = str(stats["bug_kills"])
+        data[137] = f"const time = {xvals}"
+        data[138] = f"const honey = {yvals}"
+        data[202] = f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]'
 
         print(data)
         with open("./hourlyReport/index.html","w") as f:
@@ -1353,7 +1355,7 @@ def collect(name,beesmas=0):
         webhook("","Travelling: {}".format(dispname),"dark brown")
         exec(open("collect_{}.py".format(usename)).read())
         
-        if usename == "wealthclock" or usename == "samovar":
+        if usename == "wealthclock" or usename == "samovar" or usename == "treatdispenser":
             for _ in range(6):
                 move.hold("w",0.2)
                 if "use" in getBesideE():
@@ -1434,6 +1436,15 @@ def clickdialog(t=20):
 def seqMatch(string1, string2, threshold):
     return SequenceMatcher(None, string1, string2).ratio() > threshold
 
+def hasNumber(string):
+    return any(char.isdigit() for char in string)
+
+def isMob(string):
+    mobs =  ["ant","ladybug","beetle","mantis","werewo","spider","scorpion"]
+    for x in mobs:
+        if  x in string: return True
+    return False
+    
 def getQuest(giver):
     setdat = loadsettings.load()
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
@@ -1447,7 +1458,18 @@ def getQuest(giver):
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
+    
+    for _ in range(4):
+        keyboard.press(Key.left)
+        time.sleep(0.05)
+        keyboard.release(Key.left)
+        time.sleep(0.1)
+
+    keyboard.press(Key.right)
+    time.sleep(0.05)
+    keyboard.release(Key.right)
     move.press("enter")
+    time.sleep(0.7)
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
@@ -1460,12 +1482,15 @@ def getQuest(giver):
     q_title = ""
     lines = []
     for _ in range(10):
-        ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2.5,0)
+        ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2.3,0)
         lines = [x[1][0].lower() for x in ocr]
-        for i in lines:
-            if giver in i:
-                if ":" in i: i  = i.split(":")[1]
-                q_title = i.replace(giver,"").replace("bear","")
+        #log(lines)
+        #search for quest title in only the first 8 lines
+        for i in range(min(len(lines),8)):
+            x = lines[i]
+            if giver in x:
+                if ":" in x: x  = x.split(":")[1]
+                q_title = x.replace(giver,"").replace("bear","").replace("bee","")
                 break
         if q_title:
             break
@@ -1479,6 +1504,19 @@ def getQuest(giver):
     keyboard.release(Key.up)
     move.press("enter")
     pag.typewrite("\\")
+
+    #readjust camera
+    for _ in range(10):
+        keyboard.press(Key.page_up)
+        time.sleep(0.01)
+        keyboard.release(Key.page_up)
+        time.sleep(0.01)
+    for _ in range(4):
+        keyboard.press(Key.page_down)
+        time.sleep(0.01)
+        keyboard.release(Key.page_down)
+        time.sleep(0.01)
+        
     if not q_title: return False
 
     highest_match = [0,"",[]]
@@ -1488,38 +1526,68 @@ def getQuest(giver):
             highest_match[0] = match
             highest_match[1] = k
             highest_match[2] = v
-    webhook('',f'Quest detected: {highest_match[1]}.title()',"light blue")
-
+    webhook('','Quest detected: {}'.format(highest_match[1].title()),"light blue")
     completeLines = []
     quest = highest_match[2]
+    log(quest)
+    #combine lines together
     for i,e in enumerate(lines):
-        if seqMatch(e, "complete", 0.95):
-            completeLines[i-1] = f"{completeLines[i-1]} complete!" 
+        prev = ""
+        if i > 0: prev = completeLines[-1]
+        #combine complete text
+        if (seqMatch(e,"complete!",0.9) or "compl" in e) and prev:
+            completeLines[-1] = f"{prev} {e} complete"
+        #combine mob text, ie "defeat 2", "spider" -> "defeat 2 spider"
+        elif isMob(e) and not hasNumber(e) and hasNumber(prev):
+            completeLines[-1] = f"{prev} {e}"
         else:
             completeLines.append(e)
     print(completeLines)
+    log(completeLines)
 
     objCount = 0
     finalLines = []
+    detectedObjs =  []
+    #match the detected text with the objectives from the database
     for i,e in enumerate(completeLines):
-        if objCount >= len(quest): break
-        e = e.replace("defeat","")
-        if "pollen" in e:
-            e = e.split(" ")[-2:]
-        e = "".join([y for y in e if y.isdigit() or y == "," or y == "."])
+        e = e.replace(" ","").replace("wolves","wolf")
         for x in quest:
-            a = x.replace("_"," ").replace("kill","").replace("gather","")
-            if seqMatch(e,a,0.85):
+            a = x.split("_")
+            #check for gather
+            add = False
+            if a[0] ==  "gather" and "pollen" in e and a[1].replace(" ","") in e:
+                add = True
+            #check for kill
+            elif a[0] == "kill" and "defeat" in e and a[2] in e:
+                add = True
+            if add:
+                print(f"{a}, {e}")
+                log(f"{a}, {e}")
                 objCount +=1
+                detectedObjs.append(x)
+                #only add uncompleted objectives
                 if not "complete" in e:
-                    finalLines += x
-    log(lines)
-    log(completeLines)
+                    finalLines.append(x)
+        if objCount >= len(quest): break
+    else:
+        #not all objectives are encountered for
+        webhook('','Unable to detect all quest objectives, doing undetected objectives', 'red')
+        log(finalLines)
+        #add the quests not detected
+        for i in quest:
+            if not i in detectedObjs:
+                finalLines.append(i)
+        return finalLines
     log(finalLines)
     print(finalLines)
+
+    if finalLines:
+        webhook('','Objectives Detected:\n\n{}'.format("\n".join(finalLines)),"light blue")
+    else:
+        webhook('','Quest Completed',"bright green")
     if setdat["haste_compensation"]: openSettings()
-    
-    return highest_match[2]
+        
+    return finalLines
     
 def openSettings():
     savedat = loadRes()
@@ -2266,8 +2334,7 @@ def placeSprinkler():
 def startLoop(planterTypes_prev, planterFields_prev,session_start):
     global invalid_prev_honey, quest_kills, quest_gathers
     setStatus()
-    userset = loadsettings.load()
-    setdat = userset
+    setdat = loadsettings.load()
     val = validateSettings()
     setStatus()
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
@@ -2333,17 +2400,17 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         """
         os.system(cmd)
         timings = loadtimings()
-        setdat = userset
+        setdat = loadsettings.load()
         #quests
         if setdat["polar_quest"]:
             #check if quest done, else read curr quest
             if session_start:
                 for _ in range(2):
                     canon()
-                    webhook("","Travelling: Polar Bear (quest) ","brown")
+                    webhook("","Travelling: Polar Bear (get quest) ","brown")
                     exec(open("quest_polar.py").read())
                     sleep(0.5)
-                    if ebutton():
+                    if "talk" in getBesideE():
                         move.press("e")
                         sleep(0.2)
                         move.press("e")
@@ -2351,7 +2418,14 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     reset.reset()
                     sleep(0.7)
                 clickdialog()
-                quest = getQuest("polar")
+                quest = ""
+                for _ in range(2):
+                    quest = getQuest("polar")
+                    if quest:
+                        break
+                    move.press("e")
+                    clickdialog()
+                        
                 polar_quest = {}
                 reset.reset()
                 print(quest)
@@ -2361,9 +2435,42 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         quest_gathers[f] = ["polar", 0, 1]
                     elif i.startswith("kill"):
                         _,c,m = i.split("_")
-                        setdat[i.split("_")[2]] = 1
-                        quest_kills[m] = ["polar",0, int(c)]
-                
+                        setdat[m] = 1
+                        #quest_kills[m] = ["polar",0, int(c)]
+            else:
+                quest = getQuest("polar")
+                if not quest is None:
+                    if not quest:
+                        for _ in range(2):
+                            canon()
+                            webhook("","Travelling: Polar Bear (submit quest) ","brown")
+                            exec(open("quest_polar.py").read())
+                            sleep(0.5)
+                            if "talk" in getBesideE():
+                                move.press("e")
+                                sleep(0.2)
+                                move.press("e")
+                                break
+                            reset.reset()
+                            sleep(0.7)
+                        clickdialog()
+                        move.press("e")
+                        sleep(0.2)
+                        move.press("e")
+                        clickdialog()
+                        addStat("quests",1)
+                        quest = getQuest("polar")
+                        reset.reset()
+                    print(quest)
+                    for i in quest:
+                        if i.startswith("gather"):
+                            f = i.split("_")[1]
+                            quest_gathers[f] = ["polar", 0, 1]
+                        elif i.startswith("kill"):
+                            _,c,m = i.split("_")
+                            setdat[m] = 1
+                            #quest_kills[m] = ["polar",0, int(c)]
+                        
                 
                 
             
@@ -2721,7 +2828,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     
                 f = setdat["gather_field"][gfid].lower()
                 if f in quest_gathers:
-                    quest_gathers.remove(f)
+                    quest_gathers.pop(f)
                 if f == "none":
                     gfid += 1
                 else: break
@@ -2730,9 +2837,11 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             mouse.click(Button.left, 1)
 
         if quest_gathers:
-            for i in quest_gathers:
+            for i in quest_gathers.copy():
                 gather(i)
+                quest_gathers.pop(i)
                 if getStatus() == "disconnect": return
+        session_start = 0
         
 
             
@@ -2827,7 +2936,7 @@ if __name__ == "__main__":
     ww = savedata["ww"]
     wh = savedata["wh"]
     root = tk.Tk(className='exih_macro')
-    root.geometry('780x460')
+    root.geometry('840x470')
     s = ttk.Style()
     if p:
         sv_ttk.set_theme("dark")
@@ -2884,7 +2993,7 @@ if __name__ == "__main__":
     frame6 = ttk.Frame(notebook, width=780, height=460)
     frame7 = ttk.Frame(notebook, width=780, height=460)
     frame5 = ttk.Frame(notebook, width=780, height=460)
-    #frame8 = ttk.Frame(notebook, width=780, height=460)
+    frame8 = ttk.Frame(notebook, width=780, height=460)
     frame9 = ttk.Frame(notebook, width=780, height=460)
     
     frame1.pack(fill='both', expand=True)
@@ -2894,7 +3003,7 @@ if __name__ == "__main__":
     frame6.pack(fill='both', expand=True)
     frame7.pack(fill='both', expand=True)
     frame5.pack(fill='both', expand=True)
-    #frame8.pack(fill='both', expand=True)
+    frame8.pack(fill='both', expand=True)
     frame9.pack(fill='both', expand=True)
 
     notebook.add(frame1, text='Gather')
@@ -2902,7 +3011,7 @@ if __name__ == "__main__":
     notebook.add(frame4, text='Collect')
     notebook.add(frame5, text='Boost')
     notebook.add(frame6, text='Planters')
-    #notebook.add(frame8, text='Quests')
+    notebook.add(frame8, text='Quests')
     notebook.add(frame3, text='In Game Settings')
     notebook.add(frame7, text='Other Settings')
     notebook.add(frame9, text='Profile')    
@@ -3287,7 +3396,7 @@ if __name__ == "__main__":
         update.update()
         exit()
     def updateExp():
-        uupdate.update("e")
+        update.update("e")
         exit()
 
     def expu():
@@ -3368,7 +3477,6 @@ if __name__ == "__main__":
         f.close()
         
     def loadProfile(e):
-        print(e)
         try:
             updateProfile(e)
             loadSettings(e)
@@ -3457,7 +3565,7 @@ if __name__ == "__main__":
         
     def startGo():
         global setdat, stop, planterTypes_prev, planterFields_prev, quest_kill, quest_gathers
-        quest_kill = {}
+        quest_kills = {}
         quest_gathers = {}
         setdat = loadsettings.load()
         planterFields_set = []
@@ -3496,7 +3604,7 @@ if __name__ == "__main__":
             "canon_time":1.0,#cttextbox.get(1.0,"end").replace("\n",""),
             "reverse_hive_direction": reverse_hive_direction.get(),
             "rejoin_delay": rejoindelaytextbox.get(1.0,"end").replace("\n",""),
-            "rejoin_method": rejoin_method.get(),
+            "rejoin_method": rejoin_method.get().lower(),
             "sprinkler_type": sprinkler_type.get(),
             "so_broke": so_broke.get()
         } 
@@ -3615,7 +3723,11 @@ if __name__ == "__main__":
             return
         if float(generalDict["walkspeed"]) > 40:
             pag.alert(text="The walkspeed of {} is unusually high. Make sure that the value is entered correctly and there are no haste stacks")
-        
+            return
+        if "share" in generalDict["private_server_link"] and generalDict["rejoin_method"] == "deeplink":
+            pag.alert(text="You entered a 'share?code' link!\n\nTo fix this:\n1. Paste the link in your browser\n2. Wait for roblox to load in\n3. Copy the link from the top of your browser.  It should be a 'privateServerLinkCode' link", title='Unsupported private server link', button='OK')
+            return
+            
         savesettings(generalDict,"generalsettings.txt")
         savesettings(planterdict,f"./profiles/{current_profile.get()}/plantersettings.txt")
         savesettings(setDict,f"./profiles/{current_profile.get()}/settings.txt")
@@ -4287,7 +4399,8 @@ if __name__ == "__main__":
     
     #Tab 6
 
-    #tkinter.Checkbutton(frame8, text="Polar Bear quest", variable=polar_quest).place(x=0, y = 30)
+    tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
+    tkinter.Label(frame3, text = "(Gathering settings can be changed in the gather tab)").place(x = 0, y = 50)
 
     #Tab 7
     tkinter.Label(frame3, text = "Hive Slot (6-5-4-3-2-1)").place(x = 0, y = 15)
