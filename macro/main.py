@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.51.1"
+macrov = "1.51.3"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     disconnected = multiprocessing.Value('i', 0)
     timeupdate = multiprocessing.Value('i', 0)
     night = manager.Value(ctypes.c_wchar_p, "")
-    reservedImages = ['test.png','roblox.png']
+    reservedImages = ['test.png','roblox.png','night.png']
     for i in os.listdir():
         if ".png" in i and not i in reservedImages:
             os.remove(i)
@@ -1481,12 +1481,16 @@ def getQuest(giver):
 
     q_title = ""
     lines = []
-    for _ in range(10):
+    for j in range(10):
         ocr = customOCR(0,wh/(7*ysm),ww/(4.5*xsm),wh/2.3,0)
         lines = [x[1][0].lower() for x in ocr]
         #log(lines)
         #search for quest title in only the first 8 lines
-        for i in range(min(len(lines),8)):
+        lineCount = min(len(lines),8)
+        #check all lines on the last iteration, detect quest at bottom of page
+        if j == 9:
+            lineCount = len(lines)
+        for i in range(lineCount):
             x = lines[i]
             if giver in x:
                 if ":" in x: x  = x.split(":")[1]
@@ -4400,7 +4404,7 @@ if __name__ == "__main__":
     #Tab 6
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
-    tkinter.Label(frame3, text = "(Gathering settings can be changed in the gather tab)").place(x = 0, y = 50)
+    tkinter.Label(frame8, text = "(Gathering settings can be changed in the gather tab)").place(x = 0, y = 50)
 
     #Tab 7
     tkinter.Label(frame3, text = "Hive Slot (6-5-4-3-2-1)").place(x = 0, y = 15)
