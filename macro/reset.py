@@ -15,8 +15,8 @@ keyboard = pynput.keyboard.Controller()
 mouse = Controller()
 savedata = {}
 mw,mh = pag.size()
-tar =  (142, 121, 47) #(127, 108, 41)
-var = 40
+tar =  [(250, 250, 250),(150,150,150)] #(127, 108, 41)
+var = 30
 def loadSave():
     with open('save.txt') as f:
         lines = f.read().split("\n")
@@ -51,36 +51,20 @@ def reset(hiveCheck=False):
         time.sleep(0.2)
         pag.press('enter')
         sleep(8.5)
-        for _ in range(2):
-            keyboard.press(Key.page_down)
-            keyboard.release(Key.page_down)
-        time.sleep(0.1)
-        keyboard.press('o')
-        time.sleep(0.1)
-        keyboard.release('o')
         for _ in range(4):
             r = getPixelColor(ww//2,wh-2)
             log(r)
-            passed = 1
-            for i in range(len(tar)):
-                if tar[i]-var <= r[i] <= tar[i]+var:
-                    pass
-                else:           
-                    passed = 0
-                    break
+            passed = 0
+            for x in tar: 
+                for i in range(len(x)):
+                    print(x,r)
+                    if x[i]-var <= r[i] <= x[i]+var:
+                        passed = 1
+                        break
+                if passed: break
                 
             if passed:
                 time.sleep(0.1)
-                if rhd:
-                    for _ in range(4):
-                        keyboard.press(',')
-                        time.sleep(0.05)
-                        keyboard.release(',')
-
-                time.sleep(0.1)
-                for _ in range(2):
-                    keyboard.press(Key.page_up)
-                    keyboard.release(Key.page_up)
                 for _ in range(4):
                     keyboard.press('o')
                     time.sleep(0.1)
