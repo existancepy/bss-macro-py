@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.51.3"
+macrov = "1.51.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -509,7 +509,7 @@ def hourlyReport(hourly=1):
         data[138] = f"const honey = {yvals}"
         data[202] = f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]'
 
-        print(data)
+        log(data)
         with open("./hourlyReport/index.html","w") as f:
             f.write('\n'.join(data[1:]))
         f.close()
@@ -1424,13 +1424,13 @@ def updateHive(h):
     webhook("","Guessed Hive: {}".format(h),"bright green")
     loadsettings.save('hive_number',h)
 
-def clickdialog(t=20):
+def clickdialog(t=60):
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     mouse.position = (mw//2,round(mh*(7/10)))
     for _ in range(t):
         mouse.press(Button.left)
-        sleep(0.25)
+        sleep(0.1)
         mouse.release(Button.left)
 
 def seqMatch(string1, string2, threshold):
@@ -2443,29 +2443,32 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         #quest_kills[m] = ["polar",0, int(c)]
             else:
                 quest = getQuest("polar")
-                if not quest is None:
-                    if not quest:
-                        for _ in range(2):
-                            canon()
-                            webhook("","Travelling: Polar Bear (submit quest) ","brown")
-                            exec(open("quest_polar.py").read())
-                            sleep(0.5)
-                            if "talk" in getBesideE():
-                                move.press("e")
-                                sleep(0.2)
-                                move.press("e")
-                                break
-                            reset.reset()
-                            sleep(0.7)
-                        clickdialog()
+                if not quest:
+                    for _ in range(2):
+                        canon()
+                        webhook("","Travelling: Polar Bear (submit quest) ","brown")
+                        exec(open("quest_polar.py").read())
+                        sleep(0.5)
+                        if "talk" in getBesideE():
+                            move.press("e")
+                            sleep(0.2)
+                            move.press("e")
+                            break
+                        reset.reset()
+                        sleep(0.7)
+                    clickdialog()
+                    quest = False
+                    for _ in range(2):
                         move.press("e")
                         sleep(0.2)
                         move.press("e")
                         clickdialog()
                         addStat("quests",1)
                         quest = getQuest("polar")
-                        reset.reset()
-                    print(quest)
+                        if quest: break
+                    reset.reset()
+                print(quest)
+                if quest:
                     for i in quest:
                         if i.startswith("gather"):
                             f = i.split("_")[1]
@@ -2474,7 +2477,9 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                             _,c,m = i.split("_")
                             setdat[m] = 1
                             #quest_kills[m] = ["polar",0, int(c)]
-                        
+                else:
+                    webhook("","Could not find quest","red")
+                    
                 
                 
             

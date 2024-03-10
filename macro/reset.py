@@ -16,7 +16,7 @@ mouse = Controller()
 savedata = {}
 mw,mh = pag.size()
 tar =  [(250, 250, 250),(150,150,150)] #(127, 108, 41)
-var = 30
+var = 20
 def loadSave():
     with open('save.txt') as f:
         lines = f.read().split("\n")
@@ -55,15 +55,18 @@ def reset(hiveCheck=False):
             r = getPixelColor(ww//2,wh-2)
             log(r)
             passed = 0
+            avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
+            '''
             for x in tar: 
                 for i in range(len(x)):
                     print(x,r)
-                    if x[i]-var <= r[i] <= x[i]+var:
-                        passed = 1
+                    if not (x[i]-var <= r[i] <= x[i]+var):
                         break
+                else:
+                    passed = 1
                 if passed: break
-                
-            if passed:
+            '''
+            if avgDiff < 9:
                 time.sleep(0.1)
                 for _ in range(4):
                     keyboard.press('o')
