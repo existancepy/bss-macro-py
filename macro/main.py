@@ -2346,7 +2346,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     with open('canonfails.txt', 'w') as f:
         f.write('0')
     f.close()
-    resetAllStats()
     if val:
         pag.alert(text='Your settings are incorrect! Check the terminal to see what is wrong.', title='Invalid settings', button='OK')
         print(val)
@@ -2360,6 +2359,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     with open('firstRun.txt', 'r') as f:
         if int(f.read()) == 1:
             continuePlanters = 0
+            resetAllStats()
     f.close()
     with open('firstRun.txt', 'w') as f:
         f.write("0")
