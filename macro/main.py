@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.51.4"
+macrov = "1.51.5"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -377,14 +377,23 @@ def detectNight(bypasstime=0):
     ww = savedat['ww']
     wh = savedat['wh']
     if not setdat['stinger']: return False
-    if not checkRespawn("night","10m") and not bypasstime:
-        return False
+    try:
+        if not checkRespawn("night","10m") and not bypasstime:
+            return False
+    except KeyError:
+        pass
     y = 30
     if retina:
         y*=2
-    night = pyscreeze.screenshot(region = (0,0,ww/1.8,y))
-    res = list(pyscreeze._locateAll_python("./images/general/nightsky.png", night, limit=1))
-    if res:
+    detects = True
+    for _ in range(3):
+        night = pyscreeze.screenshot(region = (0,0,ww/1.8,y))
+        res = list(pyscreeze._locateAll_python("./images/general/nightsky.png", night, limit=1))
+        if not res:
+            detect  = False
+            break
+        
+    if detect:
         webhook("","Night Detected","dark brown",1)
         savetimings("night")
         night.save("night.png")
@@ -489,7 +498,7 @@ def hourlyReport(hourly=1):
         gather_avg = minAndSecs(sum(stats["gather_time"])/len(stats["gather_time"]))
         convert_avg = minAndSecs(sum(stats["convert_time"])/len(stats["convert_time"]))
         
-        print(data)
+        log(data)
         data[30] = f"Rejoining:\t{rejoin_time}"
         data[34] = f"Gathering:\t{gather_time}"
         data[38] = f"Bug Runs:\t{bug_time}"
@@ -1354,7 +1363,12 @@ def collect(name,beesmas=0):
         if canon() == "dc": return
         webhook("","Travelling: {}".format(dispname),"dark brown")
         exec(open("collect_{}.py".format(usename)).read())
-        
+        if usename == "gluedispenser":
+            time.sleep(3)
+            move.press(str(setdat['gumdrop_slot']))
+            time.sleep(2)
+            move.hold("w",2.5)
+                
         if usename == "wealthclock" or usename == "samovar" or usename == "treatdispenser":
             for _ in range(6):
                 move.hold("w",0.2)
@@ -1375,13 +1389,6 @@ def collect(name,beesmas=0):
                 if ebutton():
                     claimLoot = 1
                     break
-                
-        elif usename == "gluedispenser":
-            time.sleep(1)
-            move.press(str(setdat['gumdrop_slot']))
-            time.sleep(2)
-            move.hold("w",2.5)
-            time.sleep(0.5)
             
         elif usename == "feast":
             if checkwithOCR("bee bear"):
@@ -1427,7 +1434,8 @@ def updateHive(h):
 def clickdialog(t=60):
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    mouse.position = (mw//2,round(mh*(7/10)))
+    ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+    mouse.position = (mw//2,mh//(1.43*ylm))
     for _ in range(t):
         mouse.press(Button.left)
         sleep(0.1)
@@ -1587,11 +1595,11 @@ def getQuest(giver):
 
     if finalLines:
         webhook('','Objectives Detected:\n\n{}'.format("\n".join(finalLines)),"light blue")
+        return finalLines
     else:
         webhook('','Quest Completed',"bright green")
+        return ["done"]
     if setdat["haste_compensation"]: openSettings()
-        
-    return finalLines
     
 def openSettings():
     savedat = loadRes()
@@ -2409,64 +2417,76 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         if setdat["polar_quest"]:
             #check if quest done, else read curr quest
             if session_start:
-                for _ in range(2):
+                reach = False
+                for _ in range(3):
                     canon()
                     webhook("","Travelling: Polar Bear (get quest) ","brown")
                     exec(open("quest_polar.py").read())
                     sleep(0.5)
                     if "talk" in getBesideE():
+                        webhook("","Reached Polar Bear","brown",1)
                         move.press("e")
                         sleep(0.2)
                         move.press("e")
+                        reach = True
                         break
+                    else:
+                        webhook("","Unable to reach Polar Bear","brown")
                     reset.reset()
                     sleep(0.7)
-                clickdialog()
-                quest = ""
-                for _ in range(2):
-                    quest = getQuest("polar")
-                    if quest:
-                        break
-                    move.press("e")
+                if reach:
                     clickdialog()
-                        
-                polar_quest = {}
-                reset.reset()
-                print(quest)
-                for i in quest:
-                    if i.startswith("gather"):
-                        f = i.split("_")[1]
-                        quest_gathers[f] = ["polar", 0, 1]
-                    elif i.startswith("kill"):
-                        _,c,m = i.split("_")
-                        setdat[m] = 1
-                        #quest_kills[m] = ["polar",0, int(c)]
+                    quest = ""
+                    for _ in range(2):
+                        quest = getQuest("polar")
+                        if quest:
+                            break
+                        webhook("Getting new quest", "brown")
+                        move.press("e")
+                        clickdialog()
+                            
+                    polar_quest = {}
+                    reset.reset()
+                    print(quest)
+                    for i in quest:
+                        if i.startswith("gather"):
+                            f = i.split("_")[1]
+                            quest_gathers[f] = ["polar", 0, 1]
+                        elif i.startswith("kill"):
+                            _,c,m = i.split("_")
+                            setdat[m] = 1
+                            #quest_kills[m] = ["polar",0, int(c)]
             else:
                 quest = getQuest("polar")
-                if not quest:
-                    for _ in range(2):
+                if quest == ["done"]:
+                    reach = False
+                    for _ in range(3):
                         canon()
                         webhook("","Travelling: Polar Bear (submit quest) ","brown")
                         exec(open("quest_polar.py").read())
                         sleep(0.5)
                         if "talk" in getBesideE():
+                            webhook("","Reached Polar Bear","brown",1)
                             move.press("e")
                             sleep(0.2)
                             move.press("e")
+                            reach = True
                             break
-                        reset.reset()
-                        sleep(0.7)
-                    clickdialog()
-                    quest = False
-                    for _ in range(2):
-                        move.press("e")
-                        sleep(0.2)
-                        move.press("e")
+                        else:
+                            webhook("","Unable to reach Polar Bear","brown")
+                    if reach:
                         clickdialog()
+                        quest = False
+                        webhook("Getting new quest", "brown")
+                        for _ in range(2):
+                            move.press("e")
+                            sleep(0.2)
+                            move.press("e")
+                            clickdialog()
+                            quest = getQuest("polar")
+                            if quest: break
                         addStat("quests",1)
-                        quest = getQuest("polar")
-                        if quest: break
-                    reset.reset()
+                        reset.reset()
                 print(quest)
                 if quest:
                     for i in quest:
