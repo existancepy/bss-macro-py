@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.51.6"
+macrov = "1.51.7"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1294,7 +1294,7 @@ def lootMob(field,mob,resetCheck):
     resetMobTimer(field.replace(" ","").lower())
     if resetCheck:
         reset.reset()
-        convert()
+
 def get_booster(booster):
     for i in range(2):
         collected = 0
@@ -1442,7 +1442,7 @@ def clickdialog(t=60):
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-    mouse.position = (mw//2,mh//(1.43*ylm))
+    mouse.position = (mw//2,round(mh*(7.2/10)))
     for _ in range(t):
         mouse.press(Button.left)
         sleep(0.1)
@@ -2133,8 +2133,8 @@ def rejoin():
             text = getBesideE()
             if "claim" in text:
                 move.press("e")
-                print(j)
-                print((j+1)//2)
+                log(j)
+                log((j+1)//2)
                 updateHive(max(1,min(6,(j+1)//2)))
                 convert()
                 webhook("","Rejoin successful","dark brown")
