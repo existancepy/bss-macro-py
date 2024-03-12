@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.51.5"
+macrov = "1.51.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -385,7 +385,7 @@ def detectNight(bypasstime=0):
     y = 30
     if retina:
         y*=2
-    detects = True
+    detect = True
     for _ in range(3):
         night = pyscreeze.screenshot(region = (0,0,ww/1.8,y))
         res = list(pyscreeze._locateAll_python("./images/general/nightsky.png", night, limit=1))
@@ -1397,6 +1397,13 @@ def collect(name,beesmas=0):
                 move.apkey("space")
                 time.sleep(1.5)
                 pag.keyUp("w")
+        elif usename == "blueberrydispenser":
+            for _ in range(6):
+                move.hold("a",0.2)
+                besideE = getBesideE()
+                if "use" in besideE or "dispenser" in besideE:
+                    claimLoot = 1
+                    break
         else:
             for _ in range(2):
                 besideE = getBesideE()
@@ -2441,7 +2448,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         quest = getQuest("polar")
                         if quest:
                             break
-                        webhook("Getting new quest", "brown")
+                        webhook("","Getting new quest", "brown")
                         move.press("e")
                         clickdialog()
                             
@@ -2477,7 +2484,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     if reach:
                         clickdialog()
                         quest = False
-                        webhook("Getting new quest", "brown")
+                        webhook("","Getting new quest", "brown")
                         for _ in range(2):
                             move.press("e")
                             sleep(0.2)
