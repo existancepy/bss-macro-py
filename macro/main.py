@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.52"
+macrov = "1.52.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -3731,7 +3731,7 @@ if __name__ == "__main__":
 
         planterdict = {
 
-            "enable_planters": enable_planters.get().lower(),
+            "enable_planters": enable_planters.get(),
             "paper_planter": paper_planter.get(),
             "ticket_planter": ticket_planter.get(),
             "plastic_planter": plastic_planter.get(),
