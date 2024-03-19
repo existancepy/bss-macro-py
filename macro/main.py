@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.51.7"
+macrov = "1.52"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -387,7 +387,10 @@ def detectNight(bypasstime=0):
         y*=2
     detect = True
     for _ in range(3):
-        night = pyscreeze.screenshot(region = (0,0,ww/1.8,y))
+        try:
+            night = pyscreeze.screenshot(region = (0,0,ww/1.8,y))
+        except FileNotFoundError:
+            break
         res = list(pyscreeze._locateAll_python("./images/general/nightsky.png", night, limit=1))
         if not res:
             detect  = False
@@ -682,6 +685,9 @@ def convert(bypass=0):
     webhook("","Starting convert","brown",1)
     st = time.perf_counter()
     setStatus("hive")
+    sh = stingerHunt()
+    if sh == "dc" or sh == "success":
+        return
     while True:
         sh = stingerHunt(1,1)
         if sh == "dc" or sh == "success":
@@ -877,7 +883,9 @@ def stingerHunt(convert=0,gathering=0):
     if status != "night": return False
     if convert:
         move.press(".")
-    if gathering: reset.reset()
+    if gathering:
+        webhook("Gathering: interrupted","Vicious Bee".format(timespent, setdat["return_to_hive"]),"dark brown")
+        reset.reset()
     for field in fields:
         status = getStatus()
         fieldGoTo = field
@@ -1174,15 +1182,15 @@ def on_press(key):
 '''
       
 def vic():
-    try:
-        setdat = loadsettings.load()
-        fields = ['pepper','mountain','rose','cactus','spider','clover']
-        prevHour = datetime.now().hour
-        prevMin = datetime.now().minute
-        invalid_prev_honey = 1
-        honeyHist = [0]*60
-        slots_last_used = [0]*7
-        while True:
+    setdat = loadsettings.load()
+    fields = ['pepper','mountain','rose','cactus','spider','clover']
+    prevHour = datetime.now().hour
+    prevMin = datetime.now().minute
+    invalid_prev_honey = 1
+    honeyHist = [0]*60
+    slots_last_used = [0]*7
+    while True:
+        try:
             status = getStatus()
             
             #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
@@ -1266,11 +1274,11 @@ def vic():
                     honeyHist = [prev_honey]*60
                     prevHour = sysHour
                     resetStats()
-    except Exception:
-        print(traceback.format_exc())
-        log(traceback.format_exc())
-        webhook("","An error has occured with the background process. Stinger Hunt, Hourly Report and Slot usage are affected. Check terminal/macro logs for error message","red")
-        
+        except Exception:
+            print(traceback.format_exc())
+            log(traceback.format_exc())
+            webhook("","An error has occured with the background process. Stinger Hunt, Hourly Report and Slot usage are affected. Check terminal/macro logs for error message","red")
+            
 def killMob(field,mob,reset):
     st = time.perf_counter()
     webhook("","Travelling: {} ({})".format(mob.title(),field.title()),"dark brown")
@@ -1442,7 +1450,7 @@ def clickdialog(t=60):
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-    mouse.position = (mw//2,round(mh*(7.2/10)))
+    mouse.position = (mw//2,mh*(7.3/10))
     for _ in range(t):
         mouse.press(Button.left)
         sleep(0.1)
@@ -2158,7 +2166,7 @@ updateSave("ww",ww)
 updateSave("wh",wh)
 '''
     
-def gather(gfid):
+def gather(gfid, quest = False):
     settings = loadsettings.load()
     with open(f"./profiles/{settings['current_profile']}/fieldsettings.txt","r") as f:
         fields = ast.literal_eval(f.read())
@@ -2177,9 +2185,16 @@ def gather(gfid):
             setdat[key] = float(val)
         else:
             setdat[key] = val.lower()
+    questMessage = ""
+    if quest:
+        questMessage = " (Quest)"
+        if settings["return_to_hive_override"].lower().replace(" ","") != "nooverride":
+            setdat["return_to_hive"] = settings["return_to_hive_override"]
+        if settings["gather_time_override_enabled"]:
+             setdat["gather_time"] = settings["gather_time_override"]
     canon()
     if getStatus() == "disconnect": return
-    webhook("","Travelling: {}".format(currfield.title()),"dark brown")
+    webhook("","Travelling: {}{}".format(currfield.title(), questMessage),"dark brown")
     exec(open("field_{}.py".format(currfield)).read())
     cf = currfield.replace(" ","").lower()
     time.sleep(0.2)
@@ -2226,6 +2241,7 @@ def gather(gfid):
     pag.click()
     gp = setdat["gather_pattern"].lower()
     webhook("Gathering: {}".format(currfield),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
+    if stingerHunt(0,1) == "success": return
     setStatus("gathering")
     time.sleep(0.2)
     timestart = time.perf_counter()
@@ -2253,7 +2269,7 @@ def gather(gfid):
             end_gather = 1
             break
         if status == "died":
-            webhook("Gathering: ended","Time: {:.2f} - Died - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+            webhook("Gathering: interrupted","Time: {:.2f} - Died - Return: {}".format(timespent, setdat["return_to_hive"]),"dark brown")
             end_gather = 1
             setdat['return_to_hive'] = "reset"
             break
@@ -2397,7 +2413,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     ww = savedata['ww']
     wh = savedata['wh']
     gfid = 0
-    if planterset['enable_planters']:
+    if int(planterset['enable_planters']):
         with open("planterdata.txt","r") as f:
             lines = f.read().split("\n")
         f.close()
@@ -2451,6 +2467,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         webhook("","Getting new quest", "brown")
                         move.press("e")
                         clickdialog()
+                        time.sleep(1)
                             
                     polar_quest = {}
                     reset.reset()
@@ -2874,7 +2891,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
 
         if quest_gathers:
             for i in quest_gathers.copy():
-                gather(i)
+                gather(i, quest = True)
                 quest_gathers.pop(i)
                 if getStatus() == "disconnect": return
         session_start = 0
@@ -3215,6 +3232,9 @@ if __name__ == "__main__":
     polar_quest = tk.IntVar()
 
     backpack_freeze = tk.IntVar()
+
+    return_to_hive_override = tk.StringVar(root)
+    gather_time_override_enabled = tk.IntVar()
     
     canon_time = ""
     reverse_hive_direction = tk.IntVar()
@@ -3324,6 +3344,9 @@ if __name__ == "__main__":
         polar_quest.set(setdat["polar_quest"])
 
         backpack_freeze.set(setdat["backpack_freeze"])
+
+        return_to_hive_override = tk.StringVar(root)
+        gather_time_override_enabled.set(setdat["gather_time_override_enabled"])
         
         canon_time = setdat['canon_time']
         reverse_hive_direction.set(setdat['reverse_hive_direction'])
@@ -3400,6 +3423,10 @@ if __name__ == "__main__":
 
         rejoinetextbox.delete("1.0", tk.END)
         rejoinetextbox.insert("end",setdat["rejoin_every"])
+        
+        gathertimeoverridetextbox.delete("1.0", tk.END)
+        gathertimeoverridetextbox.insert("end",setdat["gather_time_override"])
+        
 
     def reloadProfileList(updateOptions = True):
         global profiles
@@ -3694,13 +3721,17 @@ if __name__ == "__main__":
             "slot_freq": slot_freq_list,
             "slot_use": slot_use_list,
             "polar_quest": polar_quest.get(),
-            "backpack_freeze": backpack_freeze.get()
+            "backpack_freeze": backpack_freeze.get(),
+
+            "return_to_hive_override": return_to_hive_override.get(),
+            "gather_time_override": gathertimeoverridetextbox.get(1.0,"end").replace("\n",""),
+            "gather_time_override_enabled": gather_time_override_enabled.get()
 
         }
 
         planterdict = {
 
-            "enable_planters": enable_planters.get(),
+            "enable_planters": enable_planters.get().lower(),
             "paper_planter": paper_planter.get(),
             "ticket_planter": ticket_planter.get(),
             "plastic_planter": plastic_planter.get(),
@@ -3770,7 +3801,7 @@ if __name__ == "__main__":
         with open("haste.txt","w") as a:
             a.write(generalDict["walkspeed"])
         a.close()
-        if str(planterdict['enable_planters']) == "1":
+        if planterdict['enable_planters']:
             planterTypes_set = []
             for s in planterdict:
                 if str(planterdict[s]) == "1" and "_" in s:
@@ -3808,7 +3839,7 @@ if __name__ == "__main__":
             lines = f.read().split("\n")
         f.close()
         planterFields = ast.literal_eval(lines[2])
-        if planterset['enable_planters'] and not planterFields:
+        if planterset['enable_planters']and not planterFields:
             pag.alert(text='Planters enabled but no fields are selected', title='Warning', button='OK')
             return
         
@@ -3835,7 +3866,7 @@ if __name__ == "__main__":
             webhook("","Detected: New UI","light blue")
             log("applying new UI fix")
         else:
-            webhook("","Unable to detect UI","red")
+            webhook("","Unable to detect UI","red",1)
             newUI = 0    
         loadsettings.save("new_ui",newUI)
         
@@ -4355,59 +4386,65 @@ if __name__ == "__main__":
     dropField.place(width=65,x = 430, y = 270,height=20)
     
     #Tab 5
-    checkbox = tkinter.Checkbutton(frame6, text="Enable Planters", variable=enable_planters)
-    checkbox.place(x=545, y = 20)
-    Tooltip(checkbox, text = "Automatically places and collects planters.\nAutomatically decides on which planter to place per field\nRotates between fields  and planters to avoid degration.")
-    tkinter.Label(frame6, text = "Allowed Planters").place(x = 120, y = 15)
-    tkinter.Label(frame6, text = "slot").place(x = 105, y = 40)
-    tkinter.Checkbutton(frame6, text="Paper", variable=paper_planter).place(x=0, y = 65)
-    tkinter.Checkbutton(frame6, text="Ticket", variable=ticket_planter).place(x=0, y = 100)
-    tkinter.Checkbutton(frame6, text="Plastic", variable=plastic_planter).place(x=0, y = 135)
-    tkinter.Checkbutton(frame6, text="Candy", variable=candy_planter).place(x=0, y = 170)
-    tkinter.Checkbutton(frame6, text="Blue Clay", variable=blueclay_planter).place(x=0, y = 205)
-    tkinter.Checkbutton(frame6, text="Red Clay", variable=redclay_planter).place(x=0, y = 240)
-    tkinter.Checkbutton(frame6, text="Tacky", variable=tacky_planter).place(x=0, y = 275)
-
-    tkinter.Checkbutton(frame6, text="Pesticide", variable=pesticide_planter).place(x=175, y = 65)
-    tkinter.Checkbutton(frame6, text="Heat-Treated", variable=heattreated_planter).place(x=175, y = 100)
-    tkinter.Checkbutton(frame6, text="Hydroponic", variable=hydroponic_planter).place(x=175, y = 135)
-    tkinter.Checkbutton(frame6, text="Petal", variable=petal_planter).place(x=175, y = 170)
-    tkinter.Checkbutton(frame6, text="Planter of Plenty", variable=plenty_planter).place(x=175, y = 205)
-    tkinter.Checkbutton(frame6, text="Festive", variable=festive_planter).place(x=175, y = 240)
     
-    dropField = ttk.OptionMenu(frame6, paper_slot,plantdat['paper_slot'], *slot_options,style='smaller.TMenubutton')
+    SCALE_LABELS = {
+    0: "Off",
+    1: "Automatic",
+    #2: "Manual"
+    }
+
+    settingsFrame = ttk.Frame(frame6)
+    automaticFrame = ttk.Frame(settingsFrame)
+    tkinter.Label(automaticFrame, text = "Allowed Planters").place(x = 120, y = 15)
+    tkinter.Label(automaticFrame, text = "slot").place(x = 105, y = 40)
+    tkinter.Checkbutton(automaticFrame, text="Paper", variable=paper_planter).place(x=0, y = 65)
+    tkinter.Checkbutton(automaticFrame, text="Ticket", variable=ticket_planter).place(x=0, y = 100)
+    tkinter.Checkbutton(automaticFrame, text="Plastic", variable=plastic_planter).place(x=0, y = 135)
+    tkinter.Checkbutton(automaticFrame, text="Candy", variable=candy_planter).place(x=0, y = 170)
+    tkinter.Checkbutton(automaticFrame, text="Blue Clay", variable=blueclay_planter).place(x=0, y = 205)
+    tkinter.Checkbutton(automaticFrame, text="Red Clay", variable=redclay_planter).place(x=0, y = 240)
+    tkinter.Checkbutton(automaticFrame, text="Tacky", variable=tacky_planter).place(x=0, y = 275)
+
+    tkinter.Checkbutton(automaticFrame, text="Pesticide", variable=pesticide_planter).place(x=175, y = 65)
+    tkinter.Checkbutton(automaticFrame, text="Heat-Treated", variable=heattreated_planter).place(x=175, y = 100)
+    tkinter.Checkbutton(automaticFrame, text="Hydroponic", variable=hydroponic_planter).place(x=175, y = 135)
+    tkinter.Checkbutton(automaticFrame, text="Petal", variable=petal_planter).place(x=175, y = 170)
+    tkinter.Checkbutton(automaticFrame, text="Planter of Plenty", variable=plenty_planter).place(x=175, y = 205)
+    tkinter.Checkbutton(automaticFrame, text="Festive", variable=festive_planter).place(x=175, y = 240)
+    
+    dropField = ttk.OptionMenu(settingsFrame, paper_slot,plantdat['paper_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 90, y = 69,height=20)
-    dropField = ttk.OptionMenu(frame6, ticket_slot,plantdat['ticket_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, ticket_slot,plantdat['ticket_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 90, y = 69+35,height=20)
-    dropField = ttk.OptionMenu(frame6, plastic_slot,plantdat['plastic_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, plastic_slot,plantdat['plastic_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 90, y = 69+35*2,height=20)
-    dropField = ttk.OptionMenu(frame6, candy_slot,plantdat['candy_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, candy_slot,plantdat['candy_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 90, y = 69+35*3,height=20)
-    dropField = ttk.OptionMenu(frame6, blueclay_slot,plantdat['blueclay_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, blueclay_slot,plantdat['blueclay_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 90, y = 69+35*4,height=20)
-    dropField = ttk.OptionMenu(frame6, redclay_slot,plantdat['redclay_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, redclay_slot,plantdat['redclay_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 90, y = 69+35*5,height=20)
-    dropField = ttk.OptionMenu(frame6, tacky_slot,plantdat['tacky_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, tacky_slot,plantdat['tacky_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 90, y = 69+35*6,height=20)
 
-    dropField = ttk.OptionMenu(frame6, pesticide_slot,plantdat['pesticide_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, pesticide_slot,plantdat['pesticide_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 290, y = 69,height=20)
-    dropField = ttk.OptionMenu(frame6, heattreated_slot,plantdat['heattreated_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, heattreated_slot,plantdat['heattreated_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 290, y = 69+35,height=20)
-    dropField = ttk.OptionMenu(frame6, hydroponic_slot,plantdat['hydroponic_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, hydroponic_slot,plantdat['hydroponic_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 290, y = 69+35*2,height=20)
-    dropField = ttk.OptionMenu(frame6, petal_slot,plantdat['petal_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, petal_slot,plantdat['petal_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 290, y = 69+35*3,height=20)
-    dropField = ttk.OptionMenu(frame6, plenty_slot,plantdat['plenty_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, plenty_slot,plantdat['plenty_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 290, y = 69+35*4,height=20)
-    dropField = ttk.OptionMenu(frame6, festive_slot,plantdat['festive_slot'], *slot_options,style='smaller.TMenubutton')
+    dropField = ttk.OptionMenu(settingsFrame, festive_slot,plantdat['festive_slot'], *slot_options,style='smaller.TMenubutton')
     dropField.place(width=65,x = 290, y = 69+35*5,height=20)
 
 
-    tkinter.Label(frame6, text = "Allowed Fields").place(x = 400, y = 15)
-    ttk.Separator(frame6,orient="vertical").place(x=370, y=30, width=2, height=260)    
-    listbox = tk.Listbox(frame6,listvariable=field_options,height=7,selectmode=tk.MULTIPLE)
-    scrollbar = ttk.Scrollbar(frame6,orient=tk.VERTICAL,command=listbox.yview)
+    tkinter.Label(automaticFrame, text = "Allowed Fields").place(x = 400, y = 15)
+    ttk.Separator(settingsFrame,orient="vertical").place(x=370, y=30, width=2, height=260)    
+    listbox = tk.Listbox(automaticFrame,listvariable=field_options,height=7,selectmode=tk.MULTIPLE)
+    scrollbar = ttk.Scrollbar(automaticFrame,orient=tk.VERTICAL,command=listbox.yview)
     listbox['yscrollcommand'] = scrollbar.set
     listbox.configure(font=('Helvetica 14'),width=14)
     listbox.place(x=400,y=70)
@@ -4417,26 +4454,58 @@ if __name__ == "__main__":
         listbox.select_set(field_options.get().index(i.title()))
 
     
-    dropField = ttk.OptionMenu(frame6, planter_count,plantdat['planter_count'], *[1,2,3],style='my.TMenubutton' )
+    dropField = ttk.OptionMenu(automaticFrame, planter_count,plantdat['planter_count'], *[1,2,3],style='my.TMenubutton' )
     dropField.place(x = 630, y = 70,height=24,width=60)
     Tooltip(dropField, text = "The maximum number of planters that can be placed at one time")
-    tkinter.Label(frame6, text = "Max planters").place(x=545,y=70)
-    tkinter.Label(frame6, text = "Harvest Every").place(x=545,y=105)
-    harvesttextbox = tkinter.Text(frame6, width = 4, height = 1, bg= wbgc)
+    tkinter.Label(automaticFrame, text = "Max planters").place(x=545,y=70)
+    tkinter.Label(automaticFrame, text = "Harvest Every").place(x=545,y=105)
+    harvesttextbox = tkinter.Text(automaticFrame, width = 4, height = 1, bg= wbgc)
     harvesttextbox.place(x = 637, y=107)
     harvesttextbox.bind('<Return>', lambda e: "break")
     Tooltip(harvesttextbox, text = "How often the macro will collect the planters")
-    tkinter.Label(frame6, text = "Hours").place(x=674,y=105)
-    checkbox = tkinter.Checkbutton(frame6, text="Full Grown", variable=harvest_full,command=lambda: changeHarvest("full"))
+    tkinter.Label(automaticFrame, text = "Hours").place(x=674,y=105)
+    checkbox = tkinter.Checkbutton(automaticFrame, text="Full Grown", variable=harvest_full,command=lambda: changeHarvest("full"))
     checkbox.place(x=545, y = 140)
     Tooltip(checkbox, text = "Override the harvest setting to collect the planters when full")
-   #tkinter.Checkbutton(frame6, text="Auto", variable=harvest_auto,command=lambda: changeHarvest("auto")).place(x=640, y = 140)
+   #tkinter.Checkbutton(automaticFrame, text="Auto", variable=harvest_auto,command=lambda: changeHarvest("auto")).place(x=640, y = 140)
 
+    def scaleLabels(value):
+        value = int(value)
+        slider.config(label=SCALE_LABELS[value])
+        if value == 0:
+            settingsFrame.forget()
+        else:
+            settingsFrame.pack(fill = "both", expand = True)
+            if value == 1:
+                automaticFrame.pack(fill="both", expand = True)
+            else:
+                automaticFrame.forget()
+            
+
+
+    slider = tk.Scale(frame6, from_=min(SCALE_LABELS), to=max(SCALE_LABELS),
+        orient=tk.HORIZONTAL, showvalue=False,variable=enable_planters, command=scaleLabels)
+
+    slider.place(x=720,y =10)
+    scaleLabels(enable_planters.get())
+    Tooltip(slider, text = "Automatic: Automatically decides, places and collects planters.\
+    \nRotates between fields and planters to avoid degration.\
+    \n\nManual: Set the planters the assigned fields for 3 planter cycles as well as each individual collection time")
     
     #Tab 6
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
-    tkinter.Label(frame8, text = "(Gathering settings can be changed in the gather tab)").place(x = 0, y = 50)
+    tkinter.Label(frame8, text = "Override gather settings (other settings can be changed in gather tab)").place(x = 0, y = 100)
+    tkinter.Label(frame8, text = "Return to Hive").place(x = 0, y = 135)
+    dropField = ttk.OptionMenu(frame8, return_to_hive_override, setdat['return_to_hive_override'], *["No override","Walk","Reset","Rejoin","Whirligig"],style='my.TMenubutton')
+    dropField.place(width=100,x = 110, y = 135,height=24)
+    checkbox = tkinter.Checkbutton(frame8, text="Gather for", variable=gather_time_override_enabled,command=lambda: changeHarvest("full"))
+    checkbox.place(x=0, y = 165)
+    gathertimeoverridetextbox = tkinter.Text(frame8, width = 4, height = 1, bg= wbgc)
+    gathertimeoverridetextbox.place(x = 95, y=169)
+    gathertimeoverridetextbox.bind('<Return>', lambda e: "break")
+    tkinter.Label(frame8, text = "mins").place(x=130,y=166)
+    
 
     #Tab 7
     tkinter.Label(frame3, text = "Hive Slot (6-5-4-3-2-1)").place(x = 0, y = 15)

@@ -42,3 +42,6 @@ slot_freq:['Secs', 'Secs', 'Secs', 'Secs', 'Secs', 'Secs', 'Secs']
 slot_use:['Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering', 'Gathering']
 polar_quest:0
 backpack_freeze:0
+return_to_hive_override: no override
+gather_time_override:8
+gather_time_override_enabled:0
