@@ -52,7 +52,7 @@ def reset(hiveCheck=False):
         pag.press('enter')
         sleep(8.5)
         for _ in range(4):
-            r = tuple(getPixelColor(ww//2,wh-2))
+            r = getPixelColor(ww//2,wh-2)
             log(r)
             passed = 0
             avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
