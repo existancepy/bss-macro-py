@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.53"
+macrov = "1.53.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -3487,7 +3487,7 @@ if __name__ == "__main__":
         cycle_2_planter_1.set(plantdat['cycle_2_planter_1'])
         cycle_2_field_1.set(plantdat['cycle_2_field_1'])
         cycle_2_planter_2.set(plantdat['cycle_2_planter_2'])
-        cycle_2_field_2.set(plantdat['cycle_1_field_2'])
+        cycle_2_field_2.set(plantdat['cycle_2_field_2'])
         cycle_2_planter_3.set(plantdat['cycle_2_planter_3'])
         cycle_2_field_3.set(plantdat['cycle_2_field_3'])
         cycle_3_planter_1.set(plantdat['cycle_3_planter_1'])
@@ -3539,6 +3539,8 @@ if __name__ == "__main__":
         
         gathertimeoverridetextbox.delete("1.0", tk.END)
         gathertimeoverridetextbox.insert("end",setdat["gather_time_override"])
+        
+        scaleLabels(enable_planters.get())
         
 
     def reloadProfileList(updateOptions = True):
@@ -4712,7 +4714,6 @@ if __name__ == "__main__":
         orient=tk.HORIZONTAL, showvalue=False,variable=enable_planters, command=scaleLabels)
 
     slider.place(x=720,y =10)
-    scaleLabels(enable_planters.get())
     Tooltip(slider, text = "Automatic: Automatically decides, places and collects selected planters in the selected fields.\
     \nRotates between fields and planters to avoid degration.\
     \n\nManual: Assign planter and fields for up to 3 planter cycles. \
