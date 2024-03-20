@@ -52,10 +52,32 @@ def reset(hiveCheck=False):
         pag.press('enter')
         sleep(8.5)
         for _ in range(4):
-            r = getPixelColor(ww//2,wh-2)
+            r = getPixelColor(ww//2,wh-2)[:-1]
             log(r)
             passed = 0
-            avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
+
+            #abs doesnt work for some reason, all negatives roll over to 255
+            
+            if r[2] > r[1]:
+                diff1 = r[2]-r[1]
+            else:
+                diff1 = r[1] - r[2]
+                
+            if r[2] > r[0]:
+                diff2 = r[2] - r[0]
+            else:
+                diff2 = r[0] - r[2]
+
+            if r[1] > r[0]:
+                diff3 = r[1] - r[0]
+            else:
+                diff3 = r[0] - r[1]
+                
+            log(diff1)
+            log(diff2)
+            log(diff3)
+            avgDiff = (diff1+diff2+diff3)/3
+            log(avgDiff)
             '''
             for x in tar: 
                 for i in range(len(x)):
@@ -66,7 +88,7 @@ def reset(hiveCheck=False):
                     passed = 1
                 if passed: break
             '''
-            if avgDiff < 9:
+            if avgDiff < 6:
                 time.sleep(0.1)
                 for _ in range(4):
                     keyboard.press('o')

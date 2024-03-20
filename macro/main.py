@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.52.1"
+macrov = "1.53"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -487,8 +487,7 @@ def hourlyReport(hourly=1):
         xvals = [x+1 for x in range(len(yvals))]
         rootDir = os.path.dirname(os.path.abspath(__file__)) + "/hourlyReport"
         with open("./hourlyReport/index.html", "r") as f:
-            data = f.read().split("\n")
-            data.insert(0,"")
+            data = f.read()
         f.close()
         
         stats = loadsettings.load("stats.txt")
@@ -502,30 +501,33 @@ def hourlyReport(hourly=1):
         convert_avg = minAndSecs(sum(stats["convert_time"])/len(stats["convert_time"]))
         
         log(data)
-        data[30] = f"Rejoining:\t{rejoin_time}"
-        data[34] = f"Gathering:\t{gather_time}"
-        data[38] = f"Bug Runs:\t{bug_time}"
-        data[42] = f"Converting:\t{convert_time}"
-        data[46] = f"Collecting Objectives:\t{objective_time}"
-        data[55] = f"{rootDir}/assets/buffs.png"
-        data[65] = session_time
-        data[70] = millify(currHoney)
-        data[75] = millify(session_honey)
-        data[80] = str(stats["vic_kills"])
-        data[85] = str(stats["quests"])
-        data[97] = millify(hourly_honey)
-        data[103] = gather_avg
-        data[109] = convert_avg
-        data[114] = str(stats["bug_kills"])
-        data[137] = f"const time = {xvals}"
-        data[138] = f"const honey = {yvals}"
-        data[202] = f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]'
+        replaceDict = {
+            "-rejointime": f"Rejoining:\t{rejoin_time}",
+            "-gathertime": f"Gathering:\t{gather_time}",
+            "-bugruntime": f"Bug Runs:\t{bug_time}",
+            "-converttime": f"Converting:\t{convert_time}",
+            "-objectivetime": f"Converting:\t{convert_time}",
+            "-buffpath": f"{rootDir}/assets/buffs.png",
+            "-sessiontime": session_time,
+            "-currenthoney": millify(currHoney),
+            "-sessionhoney": millify(session_honey),
+            "-vickills": str(stats["vic_kills"]),
+            "-quests": str(stats["quests"]),
+            "-hourlyhoney": millify(hourly_honey),
+            "-gatheravg": gather_avg,
+            "-convertavg": convert_avg,
+            "-bugkills": str(stats["bug_kills"]),
+            "const time = []": f"const time = {xvals}",
+            "const honey = []": f"const honey = {yvals}",
+            "const times = []":  f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]'
+        }
+
+
+        for k, v in replaceDict.items():
+            data = data.replace(k,v)
 
         log(data)
-        with open("./hourlyReport/index.html","w") as f:
-            f.write('\n'.join(data[1:]))
-        f.close()
-        
+
         if setdat["new_ui"]:
             UI = wh/(16*ysm)
         else:
@@ -533,7 +535,7 @@ def hourlyReport(hourly=1):
         buffim = pag.screenshot(region = (0,UI,ww/2.1,wh/(16*ylm)))
         buffim.save("./hourlyReport/assets/buffs.png")
 
-        hti.screenshot(html_file='./hourlyReport/index.html', save_as='hourlyReport-resized.png')
+        hti.screenshot(html_str=data, save_as='hourlyReport-resized.png')
         webhook("**Hourly Report**","","light blue",0,1)
     except Exception as e:
         log(e)
@@ -884,7 +886,7 @@ def stingerHunt(convert=0,gathering=0):
     if convert:
         move.press(".")
     if gathering:
-        webhook("Gathering: interrupted","Vicious Bee".format(timespent, setdat["return_to_hive"]),"dark brown")
+        webhook("Gathering: interrupted","Vicious Bee","dark brown")
         reset.reset()
     for field in fields:
         status = getStatus()
@@ -951,6 +953,12 @@ def displayPlanterName(planter):
     elif planter == "plenty":
         return "The Planter of Plenty"
     return "{} Planter".format(planter.title())
+
+def usablePlanterName(planter):
+    planter = planter.lower().replace(" ","")
+    if "plenty" in planter:
+        return "plenty"
+    return planter
 
 def removeComments(strng):
     res = ""
@@ -1074,14 +1082,27 @@ def clickYes():
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     mw,mh = pag.size()
+    region = (ww/3.2,wh/2.3,ww/2.5,wh/3.4)
+    ocr = customOCR(*region,0)
+    for i in ocr:
+        if "yes" in i[1][0].lower():
+            mouse.position = ((i[0][0][0]+region[0])//2, (i[0][0][1]+region[1])//2)
+            mouse.click(Button.left, 1)
+            log("OCR yes click")
+            return
+            
     a = imagesearch.find("yes.png",0.2,0,0,ww,wh)
     multi = 1
     if setdat['display_type'] == "built-in retina display":
         multi = 2
     if a:
+        log("image yes click")
         mouse.position = (a[1]//multi+urows//(multi*2),a[2]//multi+ucols//(multi*2))
         time.sleep(1)
-        mouse.click(Button.left, 1)    
+        mouse.click(Button.left, 1)
+        return
+    
+    log("blind yes click")
     mouse.position = (mw/(xsm*2.311),mh/(1.851*ysm))
     time.sleep(1)
     mouse.click(Button.left, 1)
@@ -2260,7 +2281,7 @@ def gather(gfid, quest = False):
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
         status = getStatus()
-        if bpcap >= setdat["pack"]:
+        if setdat["pack"] <= 100 and bpcap >= setdat["pack"]:
             webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
             break
@@ -2413,6 +2434,10 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     ww = savedata['ww']
     wh = savedata['wh']
     gfid = 0
+    planter_cycle = 1
+    maxPlanters = 3
+    maxCycles = 1
+    automatic_planters = bool(planterset['enable_planters'] == 1)
     if int(planterset['enable_planters']):
         with open("planterdata.txt","r") as f:
             lines = f.read().split("\n")
@@ -2423,11 +2448,19 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         planterFields = ast.literal_eval(lines[2])
         #if planterTypes == planterTypes_prev and planterFields == planterFields_prev:
             #continuePlanters = 1
-        maxPlanters = planterset['planter_count']
-        if len(planterTypes) < maxPlanters:
-            maxPlanters = len(planterTypes)
-        if len(planterFields) < maxPlanters:
-            maxPlanters = len(planterFields)
+        if automatic_planters:
+            maxPlanters = planterset['planter_count']
+            if len(planterTypes) < maxPlanters:
+                maxPlanters = len(planterTypes)
+            if len(planterFields) < maxPlanters:
+                maxPlanters = len(planterFields)
+        else:
+            for i in range(1,4):
+                for j in range(1,4):
+                    if planterset[f"cycle_{i}_planter_{j}"] != "none" and planterset[f"cycle_{i}_field_{j}"] != "none":
+                        maxCycles = i
+                        break
+            
     
     while True:
         cmd = """
@@ -2657,21 +2690,33 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         #Planter check
         
         if planterset['enable_planters']:
-            if not continuePlanters or not occupiedStuff:
+            if not continuePlanters or (not occupiedStuff and automatic_planters):
+                if automatic_planters:
                 
-                occupiedStuff = []
-                for i in range(maxPlanters):
-                    bestPlanter = getBestPlanter(planterFields[i],occupiedStuff,planterTypes)
-                    webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),planterFields[i].title()),"dark brown")
-                    goToPlanter(planterFields[i],1)
-                    if getStatus() == "disconnect": return
-                    placePlanter(bestPlanter)
-                    occupiedStuff.append((bestPlanter,planterFields[i]))
+                    occupiedStuff = []
+                    for i in range(maxPlanters):
+                        bestPlanter = getBestPlanter(planterFields[i],occupiedStuff,planterTypes)
+                        webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),planterFields[i].title()),"dark brown")
+                        goToPlanter(planterFields[i],1)
+                        if getStatus() == "disconnect": return
+                        placePlanter(bestPlanter)
+                        occupiedStuff.append((bestPlanter,planterFields[i]))
+                    log(occupiedStuff)
+                    with open("planterdata.txt","w") as f:
+                        f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
+                    f.close()
+                else:
+                    for i in range(1,4):
+                        planter = planterset[f"cycle_{planter_cycle}_planter_{i}"]
+                        field = planterset[f"cycle_{planter_cycle}_field_{i}"]
+                        if planter == "none" or field == "none": continue
+                        webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(planter.title(),field.title()),"dark brown")
+                        goToPlanter(field,1)
+                        if getStatus() == "disconnect": return
+                        placePlanter(usablePlanterName(planter))
+                    occupiedStuff.append("a")
                 continuePlanters = 1
-                log(occupiedStuff)
-                with open("planterdata.txt","w") as f:
-                    f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
-                f.close()
+                
             else:
                 planterTimes = {}
                 with open("plantertimings.txt","r") as f:
@@ -2687,16 +2732,24 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 fieldsToPlace = []
                 removeFromOccupied = []
                 for i in range(maxPlanters):
-                    currPlanter = occupiedStuff[i][0]
-                    currField = occupiedStuff[i][1]
-                    if str(planterset['harvest']) == "full":
-                        growTime = planterInfo[currPlanter]['grow_time']
-                        if currField in planterInfo[currPlanter]['grow_fields']:
-                            growTime /= planterInfo[currPlanter]['grow_time_bonus']
-                    elif str(planterset['harvest']) == "auto":
-                        growTime = 1
-                    else:
-                        growTime = planterset['harvest']
+                    if automatic_planters:
+                        currPlanter = occupiedStuff[i][0]
+                        currField = occupiedStuff[i][1]
+                        if str(planterset['harvest']) == "full":
+                            growTime = planterInfo[currPlanter]['grow_time']
+                            if currField in planterInfo[currPlanter]['grow_fields']:
+                                growTime /= planterInfo[currPlanter]['grow_time_bonus']
+                        elif str(planterset['harvest']) == "auto":
+                            growTime = 1
+                        else:
+                            growTime = planterset['harvest']
+                        
+                    else:      
+                        currPlanter = usablePlanterName(planterset[f"cycle_{planter_cycle}_planter_{i+1}"])
+                        currField = planterset[f"cycle_{planter_cycle}_field_{i+1}"]    
+                        if currPlanter == "none" or currField == "none": continue
+                        growTime = planterset['manual_harvest']
+                        
                     occupiedFields = []
                     if time.time() - planterTimes[currPlanter] > growTime*60*60:
                         collectAnyPlanters += 1
@@ -2709,6 +2762,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                             if "harv" in getBeside or "plant" in getBeside:
                                 move.press('e')
                                 clickYes()
+                                addStat("planters",1)
                                 if currField == "pumpkin":
                                     for _ in range(4):
                                         move.press(",")
@@ -2722,48 +2776,66 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                                         break
                                     moblootPattern(1.1,1.4,"none",2)
                                 reset.reset()
-                                cycleFields.remove(currField)
-                                cycleFields.append(currField)
-                                removeFromOccupied.append((currPlanter,currField))
+                                if automatic_planters:
+                                    cycleFields.remove(currField)
+                                    cycleFields.append(currField)
+                                    removeFromOccupied.append((currPlanter,currField))
                                 break
                             else:
                                 webhook("","Cant find Planter","red",1)
                                 reset.reset()
                         else:
-                            cycleFields.remove(currField)
-                            cycleFields.append(currField)
-                            removeFromOccupied.append((currPlanter,currField))
+                            if automatic_planters:
+                                cycleFields.remove(currField)
+                                cycleFields.append(currField)
+                                removeFromOccupied.append((currPlanter,currField))
                     else:
-                        occupiedFields.append(currField)
-                if collectAnyPlanters > 0 and planterFields == cycleFields:
-                    firstelement = cycleFields[0]
-                    cycleFields.pop(0)
-                    cycleFields.append(firstelement)
-                planterFields = cycleFields.copy()
-                for i in removeFromOccupied:
-                    occupiedStuff.remove(i)
-                log(occupiedStuff)
-                log(occupiedFields)
-                log(planterFields)
-                for _ in range(maxPlanters-len(occupiedStuff)):
-                    for i in planterFields:
-                        if not i in fieldsToPlace and not i in occupiedFields:
-                            fieldsToPlace.append(i)
-                            break
+                        if automatic_planters: occupiedFields.append(currField)
+
+                if automatic_planters:
+                    if collectAnyPlanters > 0 and planterFields == cycleFields:
+                        firstelement = cycleFields[0]
+                        cycleFields.pop(0)
+                        cycleFields.append(firstelement)
+                    planterFields = cycleFields.copy()
+                    for i in removeFromOccupied:
+                        occupiedStuff.remove(i)
+                    log(occupiedStuff)
+                    log(occupiedFields)
+                    log(planterFields)
+                    for _ in range(maxPlanters-len(occupiedStuff)):
+                        for i in planterFields:
+                            if not i in fieldsToPlace and not i in occupiedFields:
+                                fieldsToPlace.append(i)
+                                break
+                    log(fieldsToPlace)
+                    for i in fieldsToPlace:
+                        bestPlanter = getBestPlanter(i,occupiedStuff,planterTypes)
+                        webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),i.title()),"dark brown")
+                        goToPlanter(i,1)
+                        if getStatus() == "disconnect": return
+                        placePlanter(bestPlanter)
+                        occupiedStuff.append((bestPlanter,i))
+                        
+                    with open("planterdata.txt","w") as f:
+                        f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
+                    f.close()
+
+                elif collectAnyPlanters:
+                    planter_cycle += 1
+                    if planter_cycle > maxCycles:
+                        planter_cycle = 1
                     
-                log(fieldsToPlace)
-                for i in fieldsToPlace:
-                    bestPlanter = getBestPlanter(i,occupiedStuff,planterTypes)
-                    webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),i.title()),"dark brown")
-                    goToPlanter(i,1)
-                    if getStatus() == "disconnect": return
-                    placePlanter(bestPlanter)
-                    occupiedStuff.append((bestPlanter,i))
+                    for i in range(1,4):
+                        planter = planterset[f"cycle_{planter_cycle}_planter_{i}"]
+                        field = planterset[f"cycle_{planter_cycle}_field_{i}"]
+                        if planter == "none" or field == "none": continue
+                        webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(planter.title(),field.title()),"dark brown")
+                        goToPlanter(field,1)
+                        if getStatus() == "disconnect": return
+                        placePlanter(usablePlanterName(planter))
                     
-                with open("planterdata.txt","w") as f:
-                    f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
-                f.close()
-                                                                                        
+                                                                                                            
         #Mob run check
         if setdat['werewolf'] and checkRespawn("werewolf","1h"):
             killMob("pumpkin","werewolf",1)
@@ -3008,20 +3080,21 @@ if __name__ == "__main__":
     s.configure('small.TButton', font=('Helvetica', 12))
 
     def updateProfile(profile = None):
-        reference = loadsettings.loadFile(f"./src/default settings/settings.txt")
         if not profile:
             profile = loadsettings.loadFile("generalsettings.txt")["current_profile"]
-
-        originalPath = f"./profiles/{profile}/settings.txt"
-        original = loadsettings.loadFile(originalPath)
-        out = []
-        for i in reference.keys():
-            if not i in original:
-                original[i] = reference[i]
-            out.append(f"{i}:{original[i]}")
-        with open(originalPath, "w") as f:
-            f.write("\n".join(out))
-        f.close()
+        files = ["settings.txt","plantersettings.txt"]
+        for f in files:
+            reference = loadsettings.loadFile(f"./src/default settings/{f}")
+            originalPath = f"./profiles/{profile}/{f}"
+            original = loadsettings.loadFile(originalPath)
+            out = []
+            for i in reference.keys():
+                if not i in original:
+                    original[i] = reference[i]
+                out.append(f"{i}:{original[i]}")
+            with open(originalPath, "w") as f:
+                f.write("\n".join(out))
+            f.close()
         
     updateProfile()
     
@@ -3275,6 +3348,25 @@ if __name__ == "__main__":
     harvest_int = 0
     planter_fields = []
 
+    cycle_1_planter_1 = tk.StringVar(root)
+    cycle_1_field_1 = tk.StringVar(root)
+    cycle_1_planter_2 = tk.StringVar(root)
+    cycle_1_field_2 = tk.StringVar(root)
+    cycle_1_planter_3 = tk.StringVar(root)
+    cycle_1_field_3 = tk.StringVar(root)
+    cycle_2_planter_1 = tk.StringVar(root)
+    cycle_2_field_1 = tk.StringVar(root)
+    cycle_2_planter_2 = tk.StringVar(root)
+    cycle_2_field_2 = tk.StringVar(root)
+    cycle_2_planter_3 = tk.StringVar(root)
+    cycle_2_field_3 = tk.StringVar(root)
+    cycle_3_planter_1 = tk.StringVar(root)
+    cycle_3_field_1 = tk.StringVar(root)
+    cycle_3_planter_2 = tk.StringVar(root)
+    cycle_3_field_2 = tk.StringVar(root)
+    cycle_3_planter_3 = tk.StringVar(root)
+    cycle_3_field_3 = tk.StringVar(root)
+
     current_profile = tk.StringVar(root)
 
     def loadVariables():
@@ -3385,8 +3477,25 @@ if __name__ == "__main__":
         harvest_full.set(boolToInt(str(harvest)=="full"))
         harvest_auto.set(boolToInt(str(harvest)=="auto"))
         harvest_int = plantdat['harvest']
-        slot_options = ["none"]+[x+1 for x in range(7)]
         planter_fields = plantdat['planter_fields']
+        cycle_1_planter_1.set(plantdat['cycle_1_planter_1'])
+        cycle_1_field_1.set(plantdat['cycle_1_field_1'])
+        cycle_1_planter_2.set(plantdat['cycle_1_planter_2'])
+        cycle_1_field_2.set(plantdat['cycle_1_field_2'])
+        cycle_1_planter_3.set(plantdat['cycle_1_planter_3'])
+        cycle_1_field_3.set(plantdat['cycle_1_field_3'])
+        cycle_2_planter_1.set(plantdat['cycle_2_planter_1'])
+        cycle_2_field_1.set(plantdat['cycle_2_field_1'])
+        cycle_2_planter_2.set(plantdat['cycle_2_planter_2'])
+        cycle_2_field_2.set(plantdat['cycle_1_field_2'])
+        cycle_2_planter_3.set(plantdat['cycle_2_planter_3'])
+        cycle_2_field_3.set(plantdat['cycle_2_field_3'])
+        cycle_3_planter_1.set(plantdat['cycle_3_planter_1'])
+        cycle_3_field_1.set(plantdat['cycle_3_field_1'])
+        cycle_3_planter_2.set(plantdat['cycle_3_planter_2'])
+        cycle_3_field_2.set(plantdat['cycle_3_field_2'])
+        cycle_3_planter_3.set(plantdat['cycle_3_planter_3'])
+        cycle_3_field_3.set(plantdat['cycle_3_field_3'])
 
         #current_profile.set(setdat["current_profile"])
 
@@ -3394,6 +3503,7 @@ if __name__ == "__main__":
     loadVariables()
     
     slot_options = ["none"]+[x+1 for x in range(7)]
+    planters = ["None","Paper","Ticket","Candy","Blue Clay","Red Clay","Tacky","Pesticide","Heattreated","Hydroponic","Petal","Planter of Plenty","Festive"]
     gather_fields = [x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")]
     gather_fields.insert(0,"None")
     field_options = tk.Variable(value=[x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")])
@@ -3417,6 +3527,9 @@ if __name__ == "__main__":
 
         harvesttextbox.delete("1.0", tk.END)
         harvesttextbox.insert("end",plantdat['harvest'])
+
+        manualharvesttextbox.delete("1.0", tk.END)
+        manualharvesttextbox.insert("end",plantdat['manual_harvest'])
 
         convertwaittextbox.delete("1.0", tk.END)
         convertwaittextbox.insert("end",setdat["convert_wait"])
@@ -3760,7 +3873,26 @@ if __name__ == "__main__":
             "festive_slot":festive_slot.get(),
             'planter_fields':planterFields_set,
             "planter_count": planter_count.get(),
-            "harvest": harvesttextbox.get(1.0,"end").replace("\n","")
+            "harvest": harvesttextbox.get(1.0,"end").replace("\n",""),
+            "manual_harvest": manualharvesttextbox.get(1.0,"end").replace("\n",""),
+            "cycle_1_planter_1":cycle_1_planter_1.get().lower(),
+            "cycle_1_field_1":cycle_1_field_1.get().lower(),
+            "cycle_1_planter_2":cycle_1_planter_2.get().lower(),
+            "cycle_1_field_2":cycle_1_field_2.get().lower(),
+            "cycle_1_planter_3":cycle_1_planter_3.get().lower(),
+            "cycle_1_field_3":cycle_1_field_3.get().lower(),
+            "cycle_2_planter_1":cycle_2_planter_1.get().lower(),
+            "cycle_2_field_1":cycle_2_field_1.get().lower(),
+            "cycle_2_planter_2":cycle_2_planter_2.get().lower(),
+            "cycle_2_field_2":cycle_2_field_2.get().lower(),
+            "cycle_2_planter_3":cycle_2_planter_3.get().lower(),
+            "cycle_2_field_3":cycle_2_field_3.get().lower(),
+            "cycle_3_planter_1":cycle_3_planter_1.get().lower(),
+            "cycle_3_field_1":cycle_3_field_1.get().lower(),
+            "cycle_3_planter_2":cycle_3_planter_2.get().lower(),
+            "cycle_3_field_2":cycle_3_field_2.get().lower(),
+            "cycle_3_planter_3":cycle_3_planter_3.get().lower(),
+            "cycle_3_field_3":cycle_3_field_3.get().lower()
         
             }
 
@@ -3839,7 +3971,7 @@ if __name__ == "__main__":
             lines = f.read().split("\n")
         f.close()
         planterFields = ast.literal_eval(lines[2])
-        if planterset['enable_planters']and not planterFields:
+        if planterset['enable_planters'] == 1 and not planterFields:
             pag.alert(text='Planters enabled but no fields are selected', title='Warning', button='OK')
             return
         
@@ -4390,11 +4522,12 @@ if __name__ == "__main__":
     SCALE_LABELS = {
     0: "Off",
     1: "Automatic",
-    #2: "Manual"
+    2: "Manual"
     }
 
     settingsFrame = ttk.Frame(frame6)
     automaticFrame = ttk.Frame(settingsFrame)
+    manualFrame = ttk.Frame(settingsFrame)
     tkinter.Label(automaticFrame, text = "Allowed Planters").place(x = 120, y = 15)
     tkinter.Label(automaticFrame, text = "slot").place(x = 105, y = 40)
     tkinter.Checkbutton(automaticFrame, text="Paper", variable=paper_planter).place(x=0, y = 65)
@@ -4460,7 +4593,6 @@ if __name__ == "__main__":
     tkinter.Label(automaticFrame, text = "Max planters").place(x=545,y=70)
     tkinter.Label(automaticFrame, text = "Harvest Every").place(x=545,y=105)
     harvesttextbox = tkinter.Text(automaticFrame, width = 4, height = 1, bg= wbgc)
-    harvesttextbox.place(x = 637, y=107)
     harvesttextbox.bind('<Return>', lambda e: "break")
     Tooltip(harvesttextbox, text = "How often the macro will collect the planters")
     tkinter.Label(automaticFrame, text = "Hours").place(x=674,y=105)
@@ -4469,6 +4601,97 @@ if __name__ == "__main__":
     Tooltip(checkbox, text = "Override the harvest setting to collect the planters when full")
    #tkinter.Checkbutton(automaticFrame, text="Auto", variable=harvest_auto,command=lambda: changeHarvest("auto")).place(x=640, y = 140)
 
+    tkinter.Label(manualFrame, text = "Planter slots").place(x = 120, y = 15)
+    tkinter.Label(manualFrame, text="Paper").place(x=0, y = 65)
+    tkinter.Label(manualFrame, text="Ticket").place(x=0, y = 100)
+    tkinter.Label(manualFrame, text="Plastic").place(x=0, y = 135)
+    tkinter.Label(manualFrame, text="Candy").place(x=0, y = 170)
+    tkinter.Label(manualFrame, text="Blue Clay").place(x=0, y = 205)
+    tkinter.Label(manualFrame, text="Red Clay").place(x=0, y = 240)
+    tkinter.Label(manualFrame, text="Tacky").place(x=0, y = 275)
+
+    tkinter.Label(manualFrame, text="Pesticide",).place(x=175, y = 65)
+    tkinter.Label(manualFrame, text="Heat-Treated",).place(x=175, y = 100)
+    tkinter.Label(manualFrame, text="Hydroponic").place(x=175, y = 135)
+    tkinter.Label(manualFrame, text="Petal").place(x=175, y = 170)
+    tkinter.Label(manualFrame, text="Planter of Plenty").place(x=175, y = 205)
+    tkinter.Label(manualFrame, text="Festive").place(x=175, y = 240)
+
+    tkinter.Label(manualFrame, text = "Cycles").place(x = 400, y = 15)
+
+    ttk.Separator(manualFrame,orient="horizontal").place(x=2, y=310, width=350, height=2)
+    tkinter.Label(manualFrame, text = "Harvest Every").place(x=0,y=330)
+
+    manualharvesttextbox = tkinter.Text(manualFrame, width = 4, height = 1, bg= wbgc)
+    manualharvesttextbox.bind('<Return>', lambda e: "break")
+    manualharvesttextbox.place(x = 92, y=331)    
+    Tooltip(manualharvesttextbox, text = "How often the macro will collect the planters")
+    tkinter.Label(manualFrame, text = "Hours").place(x=129,y=330) 
+
+    ylevel = 80
+    tkinter.Label(manualFrame, text = "Cycle 1").place(x = 450, y = ylevel-30)
+    
+    tkinter.Label(manualFrame, text = "Planters").place(x = 390, y = ylevel)
+    dropField = ttk.OptionMenu(manualFrame, cycle_1_planter_1,plantdat['cycle_1_planter_1'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 450, y = ylevel,height=24,width=95)
+    tkinter.Label(manualFrame, text = "Fields").place(x = 390, y = ylevel+35)
+    dropField = ttk.OptionMenu(manualFrame, cycle_1_field_1,plantdat['cycle_1_field_1'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 450, y = ylevel+35,height=24,width=95)
+    
+    dropField = ttk.OptionMenu(manualFrame, cycle_1_planter_2,plantdat['cycle_1_planter_2'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 580, y = ylevel,height=24,width=95)
+    dropField = ttk.OptionMenu(manualFrame, cycle_1_field_2,plantdat['cycle_1_field_2'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 580, y = ylevel+35,height=24,width=95)
+
+    dropField = ttk.OptionMenu(manualFrame, cycle_1_planter_3,plantdat['cycle_1_planter_3'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 710, y = ylevel,height=24,width=95)
+    dropField = ttk.OptionMenu(manualFrame, cycle_1_field_3,plantdat['cycle_1_field_3'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 710, y = ylevel+35,height=24,width=95)
+
+    ttk.Separator(manualFrame,orient="horizontal").place(x=390, y=ylevel+75, width=400, height=2) 
+
+    ylevel = 190
+    tkinter.Label(manualFrame, text = "Cycle 2").place(x = 450, y = ylevel-30)
+    
+    tkinter.Label(manualFrame, text = "Planters").place(x = 390, y = ylevel)
+    dropField = ttk.OptionMenu(manualFrame, cycle_2_planter_1,plantdat['cycle_2_planter_1'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 450, y = ylevel,height=24,width=95)
+    tkinter.Label(manualFrame, text = "Fields").place(x = 390, y = ylevel+35)
+    dropField = ttk.OptionMenu(manualFrame, cycle_2_field_1, plantdat['cycle_2_field_1'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 450, y = ylevel+35,height=24,width=95)
+    
+    dropField = ttk.OptionMenu(manualFrame, cycle_2_planter_2, plantdat['cycle_2_planter_2'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 580, y = ylevel,height=24,width=95)
+    dropField = ttk.OptionMenu(manualFrame, cycle_2_field_2, plantdat['cycle_2_field_2'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 580, y = ylevel+35,height=24,width=95)
+
+    dropField = ttk.OptionMenu(manualFrame, cycle_2_planter_3, plantdat['cycle_2_planter_3'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 710, y = ylevel,height=24,width=95)
+    dropField = ttk.OptionMenu(manualFrame, cycle_2_field_3, plantdat['cycle_2_field_3'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 710, y = ylevel+35,height=24,width=95)
+    
+    ttk.Separator(manualFrame,orient="horizontal").place(x=390, y=ylevel+75, width=400, height=2) 
+
+    ylevel = 300
+    tkinter.Label(manualFrame, text = "Cycle 3").place(x = 450, y = ylevel-30)
+    
+    tkinter.Label(manualFrame, text = "Planters").place(x = 390, y = ylevel)
+    dropField = ttk.OptionMenu(manualFrame, cycle_3_planter_1,plantdat['cycle_3_planter_1'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 450, y = ylevel,height=24,width=95)
+    tkinter.Label(manualFrame, text = "Fields").place(x = 390, y = ylevel+35)
+    dropField = ttk.OptionMenu(manualFrame, cycle_3_field_1,plantdat['cycle_3_field_1'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 450, y = ylevel+35,height=24,width=95)
+    
+    dropField = ttk.OptionMenu(manualFrame, cycle_3_planter_2,plantdat['cycle_3_planter_2'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 580, y = ylevel,height=24,width=95)
+    dropField = ttk.OptionMenu(manualFrame, cycle_3_field_2,plantdat['cycle_3_field_2'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 580, y = ylevel+35,height=24,width=95)
+
+    dropField = ttk.OptionMenu(manualFrame, cycle_3_planter_3,plantdat['cycle_3_planter_3'], *planters,style='smaller.TMenubutton' )
+    dropField.place(x = 710, y = ylevel,height=24,width=95)
+    dropField = ttk.OptionMenu(manualFrame, cycle_3_field_3,plantdat['cycle_3_field_3'], *gather_fields,style='smaller.TMenubutton' )
+    dropField.place(x = 710, y = ylevel+35,height=24,width=95)
+    
     def scaleLabels(value):
         value = int(value)
         slider.config(label=SCALE_LABELS[value])
@@ -4477,8 +4700,10 @@ if __name__ == "__main__":
         else:
             settingsFrame.pack(fill = "both", expand = True)
             if value == 1:
+                manualFrame.forget()
                 automaticFrame.pack(fill="both", expand = True)
             else:
+                manualFrame.pack(fill="both", expand = True)
                 automaticFrame.forget()
             
 
@@ -4488,14 +4713,17 @@ if __name__ == "__main__":
 
     slider.place(x=720,y =10)
     scaleLabels(enable_planters.get())
-    Tooltip(slider, text = "Automatic: Automatically decides, places and collects planters.\
+    Tooltip(slider, text = "Automatic: Automatically decides, places and collects selected planters in the selected fields.\
     \nRotates between fields and planters to avoid degration.\
-    \n\nManual: Set the planters the assigned fields for 3 planter cycles as well as each individual collection time")
+    \n\nManual: Assign planter and fields for up to 3 planter cycles. \
+    \nNote that the cycles will loop infinitely (it will not stop at the last cycle)")
     
     #Tab 6
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
-    tkinter.Label(frame8, text = "Override gather settings (other settings can be changed in gather tab)").place(x = 0, y = 100)
+    label = tkinter.Label(frame8, text = "Override gather settings (other settings can be changed in gather tab)")
+    label.place(x = 0, y = 100)
+    Tooltip(label, text = "When gathering for quests, use these settings instead of the ones set in the gather tab")
     tkinter.Label(frame8, text = "Return to Hive").place(x = 0, y = 135)
     dropField = ttk.OptionMenu(frame8, return_to_hive_override, setdat['return_to_hive_override'], *["No override","Walk","Reset","Rejoin","Whirligig"],style='my.TMenubutton')
     dropField.place(width=100,x = 110, y = 135,height=24)

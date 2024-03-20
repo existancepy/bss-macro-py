@@ -38,17 +38,18 @@ def loadFile(filename):
             else:
                 if l[1].startswith("[") and "]" in l[1]:
                     l[1]  = ast.literal_eval(l[1])
-                    if str(l[1][0]).isdigit():
+                    if l[1]:
+                        if str(l[1][0]).isdigit():
+                            try:
+                                newList = [int(x) for x in l[1]]
+                                l[1] = newList
+                            except:
+                                pass
                         try:
-                            newList = [int(x) for x in l[1]]
+                            newList = [x.lower() for x in l[1]]
                             l[1] = newList
                         except:
                             pass
-                    try:
-                        newList = [x.lower() for x in l[1]]
-                        l[1] = newList
-                    except:
-                        pass
                 else:
                     l[1] = l[1].lower()
                 

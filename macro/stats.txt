@@ -1,9 +1,10 @@
 
-gather_time:[3.02, 3.03]
-convert_time:[0.06, 0.06, 0.09, 3.7]
-bug_time:4.38
+gather_time:[15.22, 15.31]
+convert_time:[2.12, 1.97, 2.0]
+bug_time:0
 rejoin_time:0
 objective_time:0
 vic_kills:0
-bug_kills:8
-quests:1
+bug_kills:7
+quests:0
+planters:5
