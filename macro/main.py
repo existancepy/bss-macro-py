@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.53.1"
+macrov = "1.53.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -4595,6 +4595,7 @@ if __name__ == "__main__":
     tkinter.Label(automaticFrame, text = "Max planters").place(x=545,y=70)
     tkinter.Label(automaticFrame, text = "Harvest Every").place(x=545,y=105)
     harvesttextbox = tkinter.Text(automaticFrame, width = 4, height = 1, bg= wbgc)
+    harvesttextbox.place(x=635,y=108)
     harvesttextbox.bind('<Return>', lambda e: "break")
     Tooltip(harvesttextbox, text = "How often the macro will collect the planters")
     tkinter.Label(automaticFrame, text = "Hours").place(x=674,y=105)
