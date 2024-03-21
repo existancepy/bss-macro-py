@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.53.2"
+macrov = "1.53.3"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -373,6 +373,7 @@ def rebutton():
     return "claim" in getBesideE()
 
 def detectNight(bypasstime=0):
+    setdat = loadsettings.load()
     savedat = loadRes()
     ww = savedat['ww']
     wh = savedat['wh']
@@ -383,7 +384,7 @@ def detectNight(bypasstime=0):
     except KeyError:
         pass
     y = 30
-    if retina:
+    if setdat['display_type'] == "built-in retina display":
         y*=2
     detect = True
     for _ in range(3):
@@ -405,7 +406,8 @@ def detectNight(bypasstime=0):
 
 def getTop(y):
     height = 30
-    if retina:
+    setdat = loadsettings.load()
+    if setdat['display_type'] == "built-in retina display":
         height*=2
         y*=2
     res = customOCR(ww/3.5,y,ww/2.5,height,0)
@@ -2978,7 +2980,8 @@ def setResolution():
     whd = int(pag.size()[1])
     warnings = []
     scw = "\nScreen Coordinates not found in supported list. Contact Existance to get it supported."
-    if retina:
+    sh, sw, _ = np.array(pag.screenshot()).shape
+    if whd*2 == sh:
         try:
             retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
             retout = retout.decode().split("\n")[1].strip().split("x")
@@ -2990,18 +2993,17 @@ def setResolution():
         loadsettings.save('display_type', 'built-in retina display')
         print("display type: retina")
         log("display type: retina")
-        wwd *=2
-        whd *=2
+        
     else:
         loadsettings.save('display_type',"built-in display")
         print("display type: built-in")
         log("display type: built-in")
         nww = wwd
         nwh = whd
-    print("Screen coordinates: {}x{}".format(wwd,whd))
-    log("Screen coordinates: {}x{}".format(wwd,whd))
+    print("Screen coordinates: {}x{}".format(sw,sh))
+    log("Screen coordinates: {}x{}".format(sw,sh))
     with open('save.txt', 'w') as f:
-        f.write('wh:{}\nww:{}\nnww:{}\nnwh:{}'.format(whd,wwd,nww,nwh))
+        f.write('wh:{}\nww:{}\nnww:{}\nnwh:{}'.format(sh,sw,nww,nwh))
     ndisplay = "{}x{}".format(wwd,whd)
 
     multiInfo = {

@@ -183,8 +183,7 @@ for x in range(w):
             break
     if detected: break
 '''
-r = (255,255,254,255)
-log(r)
-passed = 0
-avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
-log(avgDiff)
+import subprocess
+retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
+retout = retout.decode().split("\n")[1].strip().split("x")
+print(retout)
