@@ -91,7 +91,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.53.3"
+macrov = "1.53.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -3004,7 +3004,7 @@ def setResolution():
     log("Screen coordinates: {}x{}".format(sw,sh))
     with open('save.txt', 'w') as f:
         f.write('wh:{}\nww:{}\nnww:{}\nnwh:{}'.format(sh,sw,nww,nwh))
-    ndisplay = "{}x{}".format(wwd,whd)
+    ndisplay = "{}x{}".format(sw,sh)
 
     multiInfo = {
         #ysm, xsm, ylm,  xlm
