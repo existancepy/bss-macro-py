@@ -1,0 +1,10 @@
+
+move.hold("d",6)
+move.hold("w",8)
+move.press(",")
+move.hold("w",12)
+move.press(".")
+move.hold("s",0.2)
+move.hold("d",4)
+move.hold("w",1.4)
+move.hold("s",0.6)

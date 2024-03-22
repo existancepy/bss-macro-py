@@ -5,7 +5,7 @@ import sys
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 if (sv_i[1]>=10):
-    printRed("{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
+    pag.alert(title = "error", text = "{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
     quit()
 print(python_ver)
 try:
@@ -16,13 +16,12 @@ except Exception as e:
     quit()
 
 from difflib import SequenceMatcher
-from tkinter_tooltips import *
 import time, os, ctypes, tty
 import tkinter
 import tkinter.filedialog
 import tkinter as tk
 from tkinter import ttk
-import backpack, reset, loadsettings, move,update,updateexperiment
+import backpack, reset, loadsettings, move,update
 import multiprocessing, webbrowser, imagesearch, discord, subprocess
 from webhook import webhook
 global savedata
@@ -37,7 +36,12 @@ import traceback
 from importlib import reload
 from pynput.keyboard import Key
 from pynput.mouse import Button
-from html2image import Html2Image
+from convertAhkPattern import ahkPatternToPython
+try:
+    from html2image import Html2Image
+except:
+    pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
+\n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
 try:
     import matplotlib.pyplot as plt
 except Exception as e:
@@ -56,27 +60,26 @@ try:
     import ocrpy
     from ocrpy import imToString,customOCR
 except:
-    os.system("pip3 install --user --force-reinstall paddlepaddle==2.5.0")
+    os.system("pip3 install --force-reinstall paddlepaddle==2.5.0")
     import ocrpy
     reload(ocrpy)
     from ocrpy import imToString,customOCR
 import sv_ttk
 import math
 import ast
-import calibrate_hive
 from datetime import datetime
 import pyscreeze
 import shutil
     
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
-    os.system('pip3 install --user "numpy<1.24.0"')
+    os.system('pip3 install "numpy<1.24.0"')
     reload(numpy)
     import numpy as np
     #printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
     #quit()
     
 if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
-    os.system('pip3 install --user "pyscreeze<0.1.29"')
+    os.system('pip3 install "pyscreeze<0.1.29"')
     reload(pyscreeze)
     #printRed("Invalid pyscreeze version. Your current pyscreeze version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
     #quit()
@@ -91,7 +94,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.53.4"
+macrov = "1.54"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -141,6 +144,13 @@ if __name__ == '__main__':
     for i in os.listdir():
         if ".png" in i and not i in reservedImages:
             os.remove(i)
+
+    for file in os.listdir("./patterns"):
+        name, ext = file.rsplit(".",1)
+        if "ahk" in ext:
+            python = ahkPatternToPython(open(f"./patterns/{name}.ahk", "r").read())
+            open(f"./patterns/gather_{name}.py", "w").write(python)
+            
 
 def boolToInt(condition):
     if condition: return 1
@@ -354,6 +364,9 @@ def checkwithOCR(m):
             setStatus("disconnect")
             webhook("","disconnected","red")
             return True
+        elif "planter" in text and "yes" in text:
+            webhook("","Detected planter pop up present","brown",1)
+            clickYes()
     elif m == "dialog":
         if "bear" in text:
             return True
@@ -718,7 +731,7 @@ def walk_to_hive(field):
     ww = savedata['ww']
     wh = savedata['wh']
     webhook("","Going back to hive: {}".format(field.title()),"dark brown")
-    exec(open("walk_{}.py".format(field)).read())
+    exec(open("./paths/walk_{}.py".format(field)).read())
     move.hold("a",(hive-1)*0.9)
     for _ in range(50):
         move.hold("a",0.12)
@@ -734,6 +747,7 @@ def walk_to_hive(field):
     convert()
 
 def keepOldLoop(claim = True):
+    setdat = loadsettings.load()
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
@@ -742,13 +756,16 @@ def keepOldLoop(claim = True):
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
     region = (ww/3.15,wh/2.15,ww/2.7,wh/4.2)
+    multi = 1
+    if setdat['display_type'] == "built-in retina display":
+        multi = 2
     while True:
         ocr = customOCR(*region,0)
         for i in ocr:
             if "kee" in i[1][0].lower():
                 mouse.release(Button.left)
                 if claim:
-                    mouse.position = ((i[0][0][0]+region[0])//2, (i[0][0][1]+region[1])//2)
+                    mouse.position = ((i[0][0][0]+region[0])//multi, (i[0][0][1]+region[1])//multi)
                     mouse.click(Button.left)
                 return
         
@@ -759,7 +776,7 @@ def checkRespawn(m,t):
         respt = respt*60*60
     else:
         respt = respt*60
-    collectList = [x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("collect_")]
+    collectList = [x.split("_",1)[1][:-3] for x in os.listdir("./paths") if x.startswith("collect_") or x.startswith("claim_")]
     collectList+=["mondo_buff","night"]
     if setdat['gifted_vicious_bee'] and m not in collectList:
         respt = respt/100*85
@@ -845,7 +862,7 @@ def resetMobTimer(cfield):
 def antChallenge():
     webhook("","Travelling: Ant Challenge","dark brown")
     canon()
-    exec(open("collect_antpass.py").read())
+    exec(open("./paths/collect_antpass.py").read())
     move.hold("w",4)
     move.hold("d",1.5)
     move.hold("s",0.4)
@@ -896,10 +913,10 @@ def stingerHunt(convert=0,gathering=0):
         killvb = 0
         if not "vb_found" in status: #Status might update after resetting
             if canon(1) == "dc": return "dc"
-            exec(open("field_{}.py".format(field)).read())
+            exec(open("./paths/field_{}.py".format(field)).read())
             webhook("","Finding Vicious Bee ({})".format(field),"dark brown")
             setStatus("finding_vb_{}".format(field))
-            exec(open("vb_{}.py".format(field)).read())
+            exec(open("./paths/vb_{}.py".format(field)).read())
             status = getStatus()
         else:
             fi = fields.index(field)
@@ -915,15 +932,15 @@ def stingerHunt(convert=0,gathering=0):
             reset.reset()
             if canon(1) == "dc": return "dc"
             fieldGoTo = status.split("_")[-1]
-            exec(open("field_{}.py".format(fieldGoTo)).read())
-            exec(open("vb_{}.py".format(fieldGoTo)).read())
+            exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
+            exec(open("./paths/vb_{}.py".format(fieldGoTo)).read())
             killvb = 1
         time.sleep(1)
         if killvb:
             setStatus("killing_vb")
             st = time.time()
             while True:
-                exec(open("killvb_{}.py".format(fieldGoTo)).read())
+                exec(open("./paths/killvb_{}.py".format(fieldGoTo)).read())
                 status = getStatus()
                 if status == "vb_killed":
                     webhook("","Vicious Bee Killed","bright green")
@@ -936,7 +953,7 @@ def stingerHunt(convert=0,gathering=0):
                     webhook("","Died to vicious bee", "red")
                     reset.reset()
                     if canon(1) == "dc": return "dc"
-                    exec(open("field_{}.py".format(fieldGoTo)).read())
+                    exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
                     setStatus("killing_vb")
             reset.reset()
             break
@@ -1086,17 +1103,18 @@ def clickYes():
     mw,mh = pag.size()
     region = (ww/3.2,wh/2.3,ww/2.5,wh/3.4)
     ocr = customOCR(*region,0)
+    multi = 1
+    if setdat['display_type'] == "built-in retina display":
+        multi = 2
+        
     for i in ocr:
         if "yes" in i[1][0].lower():
-            mouse.position = ((i[0][0][0]+region[0])//2, (i[0][0][1]+region[1])//2)
+            mouse.position = ((i[0][0][0]+region[0])//multi, (i[0][0][1]+region[1])//multi)
             mouse.click(Button.left, 1)
             log("OCR yes click")
             return
             
     a = imagesearch.find("yes.png",0.2,0,0,ww,wh)
-    multi = 1
-    if setdat['display_type'] == "built-in retina display":
-        multi = 2
     if a:
         log("image yes click")
         mouse.position = (a[1]//multi+urows//(multi*2),a[2]//multi+ucols//(multi*2))
@@ -1111,7 +1129,7 @@ def clickYes():
     
 def goToPlanter(field,place=0):
     if canon() == "dc": return
-    exec(open("field_{}.py".format(field)).read())
+    exec(open("./paths/field_{}.py".format(field)).read())
     if field == "pine tree":
         move.hold("d",3)
         move.hold("s",4)
@@ -1308,7 +1326,7 @@ def killMob(field,mob,reset):
     convert()
     if canon() == "dc": return
     time.sleep(1)
-    exec(open("field_{}.py".format(field)).read())
+    exec(open("./paths/field_{}.py".format(field)).read())
     if mob == "spider":
         for _ in range(4):
             move.press(",")
@@ -1331,7 +1349,7 @@ def get_booster(booster):
         collected = 0
         if canon() == "dc": return
         webhook("","Traveling: {} Booster".format(booster.title()),"dark brown")
-        exec(open("collect_{}_booster.py".format(booster)).read())
+        exec(open("./paths/collect_{}_booster.py".format(booster)).read())
         if booster == "blue":
             fields = ["pine tree", "blue flower", "bamboo"]
             for _ in range(9):
@@ -1393,7 +1411,7 @@ def collect(name,beesmas=0):
         convert()
         if canon() == "dc": return
         webhook("","Travelling: {}".format(dispname),"dark brown")
-        exec(open("collect_{}.py".format(usename)).read())
+        exec(open("./paths/collect_{}.py".format(usename)).read())
         if usename == "gluedispenser":
             time.sleep(3)
             move.press(str(setdat['gumdrop_slot']))
@@ -1453,7 +1471,7 @@ def collect(name,beesmas=0):
         if name != "stockings":
             sleep(4)
         move.apkey("space")
-        exec(open("claim_{}.py".format(usename)).read())
+        exec(open("./paths/claim_{}.py".format(usename)).read())
     addStat("objective_time",round((time.perf_counter() - st)/60,2))
     reset.reset()
 def rawreset(nowait=0):
@@ -2172,22 +2190,13 @@ def rejoin():
                 currentTime = datetime.now().strftime("%H:%M")
                 if setdat["so_broke"]:
                     pag.typewrite("/")
-                    pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.04)
+                    pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.06)
                     keyboard.press(Key.enter)
                 if setdat['haste_compensation']: openSettings()
                 addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
                 return
         webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
-'''
-root = tkinter.Tk()
-root.withdraw()
-ww,wh = root.winfo_screenwidth(), root.winfo_screenheight()
-print("{},{}".format(ww,wh))
-root.destroy()
 
-updateSave("ww",ww)
-updateSave("wh",wh)
-'''
     
 def gather(gfid, quest = False):
     settings = loadsettings.load()
@@ -2218,7 +2227,7 @@ def gather(gfid, quest = False):
     canon()
     if getStatus() == "disconnect": return
     webhook("","Travelling: {}{}".format(currfield.title(), questMessage),"dark brown")
-    exec(open("field_{}.py".format(currfield)).read())
+    exec(open("./paths/field_{}.py".format(currfield)).read())
     cf = currfield.replace(" ","").lower()
     time.sleep(0.2)
     s_l = setdat['start_location'].lower()
@@ -2275,18 +2284,35 @@ def gather(gfid, quest = False):
     cycleCount = 0
     prev_bp = 0
     repeat_bp = 0
+    
+    sizeword = setdat["gather_size"]
+    width = setdat["gather_width"]
+    facingcorner = 0
+
+    if sizeword.lower() == "xs":
+        size = 0.25
+    elif sizeword.lower() == "s":
+        size = 0.5
+    elif sizeword.lower() == "l":
+        size =1.5
+    elif sizeword.lower() == "xl":
+        size = 2
+    else:
+        size = 1
+        
     while not end_gather:
         time.sleep(0.05)
         mouse.press(Button.left)
         if setdat['shift_lock']: pag.press('shift')
-        exec(open("gather_{}.py".format(gp)).read())
+        exec(open("./patterns/gather_{}.py".format(gp)).read())
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
         status = getStatus()
-        if setdat["pack"] <= 100 and bpcap >= setdat["pack"]:
-            webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
-            end_gather = 1
-            break
+        if setdat["pack"] <= 100:
+            if bpcap >= setdat["pack"]:
+                webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+                end_gather = 1
+                break
         if timespent > setdat["gather_time"]:
             webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
@@ -2479,7 +2505,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 for _ in range(3):
                     canon()
                     webhook("","Travelling: Polar Bear (get quest) ","brown")
-                    exec(open("quest_polar.py").read())
+                    exec(open("./paths/quest_polar.py").read())
                     sleep(0.5)
                     if "talk" in getBesideE():
                         webhook("","Reached Polar Bear","brown",1)
@@ -2522,7 +2548,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     for _ in range(3):
                         canon()
                         webhook("","Travelling: Polar Bear (submit quest) ","brown")
-                        exec(open("quest_polar.py").read())
+                        exec(open("./paths/quest_polar.py").read())
                         sleep(0.5)
                         if "talk" in getBesideE():
                             webhook("","Reached Polar Bear","brown",1)
@@ -2566,7 +2592,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
             canon()
             webhook("","Travelling: Stump snail (stump) ","brown")
-            exec(open("field_stump.py").read())
+            exec(open("./paths/field_stump.py").read())
             time.sleep(0.2)
             placeSprinkler()
             pag.click()
@@ -3505,10 +3531,13 @@ if __name__ == "__main__":
     loadVariables()
     
     slot_options = ["none"]+[x+1 for x in range(7)]
+    sizes = ["XS","S","M","L", "XL"]
+    
     planters = ["None","Paper","Ticket","Candy","Blue Clay","Red Clay","Tacky","Pesticide","Heattreated","Hydroponic","Petal","Planter of Plenty","Festive"]
-    gather_fields = [x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")]
+    gather_fields = [x.split("_")[1][:-3].title() for x in os.listdir("./paths") if x.startswith("field_")]
+    patterns = [x.split("_",1)[1][:-3] for x in os.listdir("./patterns") if x.startswith("gather_")]
+    field_options = tk.Variable(value=gather_fields)
     gather_fields.insert(0,"None")
-    field_options = tk.Variable(value=[x.split("_")[1][:-3].title() for x in os.listdir("./") if x.startswith("field_")])
     profiles = []
 
     def loadTextBoxes():
@@ -3695,7 +3724,49 @@ if __name__ == "__main__":
         reloadProfileList()
         loadProfile(name)
         
+    def exportProfile(nameOri):
+        path = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + os.sep + os.pardir) 
+        path = os.path.join(path, "exports")
+        if not os.path.exists(path):
+            os.mkdir(path)
+        count = 0
+        name = nameOri
         
+        while True:
+            try:
+                shutil.copytree(f"./profiles/{nameOri}", f"{path}/{name}")
+                break
+            except FileExistsError:
+                if count: name = f"{nameOri} ({count})"
+                count += 1
+                
+        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        #window.config(bg=wbgc)
+        selectedProfile = tk.StringVar(window)
+        selectedProfile.set(current_profile.get())
+        label = tk.Label(window, text = f"Profile successfully exported to {path}")
+        button = ttk.Button(window, text="Ok", command=window.destroy, style = "small.TButton")
+
+        label.grid(row = 0, column = 0, sticky = tk.W, pady = 15)
+        button.grid(row=1, column=0)
+                
+        
+    def exportProfileMenu():
+        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        #window.config(bg=wbgc)
+        selectedProfile = tk.StringVar(window)
+        selectedProfile.set(current_profile.get())
+        label = tk.Label(window, text = "Profile name:")
+        dropField = ttk.OptionMenu(window, selectedProfile, current_profile.get(), *profiles)
+        button_yes = ttk.Button(window, text="Export",command=lambda: [exportProfile(selectedProfile.get()), window.destroy()], style = "small.TButton")
+        button_no = ttk.Button(window, text="Cancel", command=window.destroy, style = "small.TButton")
+
+        label.grid(row = 0, column = 0, sticky = tk.W, pady = 2)
+        dropField.grid(row = 0, column = 1, pady = 2)
+        button_yes.grid(row=1, column=0)
+        button_no.grid(row=1, column=1)
+
+            
     def deleteProfile():
         window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
         #window.config(bg=wbgc)
@@ -3924,6 +3995,19 @@ if __name__ == "__main__":
         except:
             pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
             return
+        
+        try:
+            a = float(planterdict["harvest"])
+        except:
+            pag.alert(text="The harvest value of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
+            return
+
+        try:
+            a = float(planterdict["manual_harvest"])
+        except:
+            pag.alert(text="The harvest value of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
+            return
+        
         if float(generalDict["walkspeed"]) > 40:
             pag.alert(text="The walkspeed of {} is unusually high. Make sure that the value is entered correctly and there are no haste stacks")
             return
@@ -4256,10 +4340,10 @@ if __name__ == "__main__":
     checkbox.place(x=140, y = ylevel+85)
     Tooltip(checkbox, text = "Activate shift lock when gathering")
     
-    dropField = ttk.OptionMenu(frame1, gather_pattern_one,gather_pattern_one.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
+    dropField = ttk.OptionMenu(frame1, gather_pattern_one,gather_pattern_one.get(), *patterns,style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
     Tooltip(dropField, text = "The pattern/shape that the player walks when gathering")
-    dropField = ttk.OptionMenu(frame1, gather_size_one,gather_size_one.get(), *["S","M","L"],style='smaller.TMenubutton', command = saveFields )
+    dropField = ttk.OptionMenu(frame1, gather_size_one,gather_size_one.get(), *sizes,style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
     Tooltip(dropField, text = "The size of the shape. Generally affects the area covered")
     dropField = ttk.OptionMenu(frame1, gather_width_one,gather_width_one.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
@@ -4312,10 +4396,10 @@ if __name__ == "__main__":
     checkbox.place(x=140, y = ylevel+85)
     Tooltip(checkbox, text = "Activate shift lock when gathering")
     
-    dropField = ttk.OptionMenu(frame1, gather_pattern_two,gather_pattern_two.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
+    dropField = ttk.OptionMenu(frame1, gather_pattern_two,gather_pattern_two.get(), *patterns,style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
     Tooltip(dropField, text = "The pattern/shape that the player walks when gathering")
-    dropField = ttk.OptionMenu(frame1, gather_size_two,gather_size_two.get().title(), *["S","M","L"],style='smaller.TMenubutton', command = saveFields )
+    dropField = ttk.OptionMenu(frame1, gather_size_two,gather_size_two.get().title(), *sizes,style='smaller.TMenubutton', command = saveFields )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
     Tooltip(dropField, text = "The size of the shape. Generally affects the area covered")
     dropField = ttk.OptionMenu(frame1, gather_width_two,gather_width_two.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton', command = saveFields )
@@ -4368,10 +4452,10 @@ if __name__ == "__main__":
     checkbox.place(x=140, y = ylevel+85)
     Tooltip(checkbox, text = "Activate shift lock when gathering")
     
-    dropField = ttk.OptionMenu(frame1, gather_pattern_three,gather_pattern_three.get(), *[x.split("_",1)[1][:-3] for x in os.listdir("./") if x.startswith("gather_")],style='smaller.TMenubutton', command = saveFields)
+    dropField = ttk.OptionMenu(frame1, gather_pattern_three,gather_pattern_three.get(), *patterns,style='smaller.TMenubutton', command = saveFields)
     dropField.place(width=90,x = 145, y = ylevel+35,height=22)
     Tooltip(dropField, text = "The pattern/shape that the player walks when gathering")
-    dropField = ttk.OptionMenu(frame1, gather_size_three,gather_size_three.get().title(), *["S","M","L"],style='smaller.TMenubutton' )
+    dropField = ttk.OptionMenu(frame1, gather_size_three,gather_size_three.get().title(), *sizes,style='smaller.TMenubutton' )
     dropField.place(width=50,x = 255, y = ylevel+35,height = 22)
     Tooltip(dropField, text = "The size of the shape. Generally affects the area covered")
     dropField = ttk.OptionMenu(frame1, gather_width_three,gather_width_three.get(), *[(x+1) for x in range(10)],style='smaller.TMenubutton' )
@@ -4841,6 +4925,7 @@ if __name__ == "__main__":
     ttk.Button(frame9, text = "New profile", command = newProfile, style='small.TButton').place(x=0,y=140)
     ttk.Button(frame9, text = "Delete profile", command = deleteProfile, style='small.TButton').place(x=130,y=140)
     ttk.Button(frame9, text = "Import profile", command = importProfile, style='small.TButton').place(x=255,y=140)
+    ttk.Button(frame9, text = "Export profile", command = exportProfileMenu, style='small.TButton').place(x=375,y=140)
     
     #Root
     ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=420)

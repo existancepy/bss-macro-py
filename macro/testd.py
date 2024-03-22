@@ -183,7 +183,6 @@ for x in range(w):
             break
     if detected: break
 '''
-import subprocess
-retout = subprocess.check_output("system_profiler SPDisplaysDataType | grep -i 'retina'",shell=True)
-retout = retout.decode().split("\n")[1].strip().split("x")
-print(retout)
+path = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + os.sep + os.pardir) 
+path = os.path.join(path, "exports")
+print(path)

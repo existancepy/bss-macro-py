@@ -6,12 +6,15 @@ import shutil
 from io import BytesIO
 
 def update(t = "m"):
+    destination = os.getcwd().replace("/macro","")
+    
     link = "https://github.com/existancepy/bss-macro-py/archive/master.zip"
+    source = f"{destination}/bss-macro-py-main"
+    
     if t == "e":
         link = "https://github.com/existancepy/bss-macro-py-experimental/archive/master.zip"
-        
-    destination = os.getcwd().replace("/macro","")
-    source = f"{destination}/bss-macro-py-main"
+        source = f"{destination}/bss-macro-py-experimental-main"
+
     print(os.listdir(destination))
     for f in os.listdir(destination):
         if "." in f:

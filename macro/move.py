@@ -80,7 +80,14 @@ def press(k):
     time.sleep(0.08)
     pag.keyUp(k)
 
-
-        
+def tileWait(tiles,hasteCap=0):
+    try:
+        with open("haste.txt","r") as f:
+            ws = float(f.read())
+        f.close()
+    except:
+        settings = loadsettings.load()
+        ws = settings['walkspeed']
+    time.sleep((tiles/8.3)*28/ws)
 
 
