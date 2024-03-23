@@ -70,7 +70,7 @@ import ast
 from datetime import datetime
 import pyscreeze
 import shutil
-    
+'''
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
     os.system('pip3 install "numpy<1.24.0"')
     reload(numpy)
@@ -83,7 +83,7 @@ if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
     reload(pyscreeze)
     #printRed("Invalid pyscreeze version. Your current pyscreeze version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
     #quit()
-
+'''
 info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
 retina = "retina" in info or "m1" in info or "m2" in info
 savedata = {}
@@ -94,7 +94,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.54"
+macrov = "1.54.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
