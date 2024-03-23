@@ -1,15 +1,4 @@
-keyReplace = {
-    "afclr": "d",
-    "right": "a",
-    "tclr": "a",
-    "left": "a",
-    "afcfb": "s",
-    "back": "s",
-    "tcfb": "w",
-    "fwd": "w",
-    "rotleft": ".",
-    "rotright": ",",
-}
+import re
 
 generalReplace = {
     ":=": "=",
@@ -26,8 +15,10 @@ def ahkPatternToPython(ahk):
     for k, v in generalReplace.items():
         ahk = ahk.replace(k,v)
     #convert into lines
-    #remove empty lines, comments and identations
-    ahkCleaned = [x.split(";")[0].strip() for x in ahk.split("\n") if x]
+    #comments and identations
+    ahkCleaned = [x.split(";")[0].strip() for x in ahk.split("\n")]
+    #remove empty lines
+    ahkCleaned = [x for x in ahkCleaned if x]
     #auto indent
     #remove single close brackets
     out = []
@@ -70,29 +61,32 @@ def ahkPatternToPython(ahk):
                     break
                 add = lineCopy[openB:closeB+1]
                 lineCopy = lineCopy.replace(add,"",1)
-                add = add[1:-1].replace("key","")
-                key = add.replace('"',"").replace("up","").replace("down","").replace("'","").strip()
-                for k,v in keyReplace.items():
-                    if k in add:
-                        key = v
-                        break
-                if "up" in add:
-                    cmds.append(f"keyboard.release('{key}')")
-                elif "down" in add:
-                    cmds.append(f"keyboard.press('{key}')")
+                add = add[1:-1].strip()
+                #remove whitespace between quotations
+                add = re.sub(r'"\s*([^"]*?)\s*"', r'"\1"', add)
+                #split into parameters
+                args = add.split(" ")
+
+                #get key
+                key = args[0]
+                #check if variable 
+                if key[0] == '"' and key[-1] == '"':
+                    key = key[1:-1]
                 else:
-                    paras = [x for x in add.replace('"',"").split(" ") if x]
-                    if len(paras) >= 2:
-                        if paras[1].isdigit():
-                            for _ in range(int(paras[1])):
-                                cmds.append(f"keyboard.press('{key}')")
-                                cmds.append(f"time.sleep(0.08)")
-                                cmds.append(f"keyboard.release('{key}')")
+                    key = f'"{key}"'
+                #get command
+                if args[1] == "up":
+                    cmds.append(f"keyboard.release({key})")
+                elif args[1] == "down":
+                    cmds.append(f"keyboard.press({key})")
+                elif args[1].isdigit():
+                    for _ in range(int(args[1])):
+                        cmds.append(f"keyboard.press({key})")
+                        cmds.append(f"time.sleep(0.08)")
+                        cmds.append(f"keyboard.release({key})")
         #deal with waits
         elif line.startswith("walk"):
             out[i] = e.replace("walk", "move.tileWait").replace('"',"")
         elif line.startswith("if"):
             out[i] = e.replace('"',"").replace(" ","").replace("{",":")
-            
     return "\n".join(out)
-

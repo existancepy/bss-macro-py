@@ -70,7 +70,7 @@ import ast
 from datetime import datetime
 import pyscreeze
 import shutil
-    
+'''    
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
     os.system('pip3 install "numpy<1.24.0"')
     reload(numpy)
@@ -83,7 +83,7 @@ if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
     reload(pyscreeze)
     #printRed("Invalid pyscreeze version. Your current pyscreeze version is {} but the required one is < 0.1.29\nTo fix this, run the command\npip3 install \"pyscreeze<0.1.29\"".format(pyscreeze.__version__))
     #quit()
-
+'''
 info  = str(subprocess.check_output("system_profiler SPDisplaysDataType", shell=True)).lower()
 retina = "retina" in info or "m1" in info or "m2" in info
 savedata = {}
@@ -94,7 +94,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.54"
+macrov = "1.54.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -103,7 +103,7 @@ questData = {}
 questBear = ""
 questTitle = ""
 questInfo = []
-with open("quest_data.txt", "r") as f:
+with open("./dataFiles/quest_data.txt", "r") as f:
     qdata = [x for x in f.read().split("\n") if x]
 f.close()
 
@@ -248,7 +248,7 @@ def validateSettings():
     '''
 
 def addStat(name, value):
-    file = loadsettings.load("stats.txt")
+    file = loadsettings.load("./dataFiles/stats.txt")
     if isinstance(file[name], list):
         if len(file[name]) == 1 and file[name][0] == 0:
             file[name][0] = value
@@ -256,10 +256,10 @@ def addStat(name, value):
             file[name].append(value)
     else:
         file[name] += value
-    savesettings(file, "stats.txt")
+    savesettings(file, "./dataFiles/stats.txt")
 
 def resetStats():
-    file = loadsettings.load("stats.txt")
+    file = loadsettings.load("./dataFiles/stats.txt")
     resetStats = {
         "gather_time":[0],
         "convert_time":[0],
@@ -269,10 +269,10 @@ def resetStats():
         "bug_kills":0
         }
     out = {**file, **resetStats}
-    savesettings(out, "stats.txt")
+    savesettings(out, "./dataFiles/stats.txt")
             
 def resetAllStats():
-    file = loadsettings.load("stats.txt")
+    file = loadsettings.load("./dataFiles/stats.txt")
     out = {}
     for k,v in file.items():
         if isinstance(v, list):
@@ -281,7 +281,7 @@ def resetAllStats():
             out[k] = 0
         else:
             out[k] = v
-    savesettings(out, "stats.txt")
+    savesettings(out, "./dataFiles/stats.txt")
     
 def loadSave():
     global savedata
@@ -505,7 +505,7 @@ def hourlyReport(hourly=1):
             data = f.read()
         f.close()
         
-        stats = loadsettings.load("stats.txt")
+        stats = loadsettings.load("./dataFiles/stats.txt")
         rejoin_time = minAndSecs(stats["rejoin_time"])
         gather_time = minAndSecs(sum(stats["gather_time"]))
         convert_time = minAndSecs(sum(stats["convert_time"]))
@@ -601,7 +601,7 @@ def canon(fast=0):
             time.sleep(0.05)
             if "fire" in getBesideE():
                 webhook("","Cannon found","dark brown")
-                with open('canonfails.txt', 'w') as f:
+                with open('./dataFiles/canonfails.txt', 'w') as f:
                     f.write('0')
                 f.close()
                 return
@@ -987,7 +987,7 @@ def removeComments(strng):
         else:
             res += c
     return res
-with open ('natro_ba_config.txt','r') as f:
+with open ('./dataFiles/natro_ba_config.txt','r') as f:
         readdata = f.read()
 f.close()
 lines = readdata.split('\n')
@@ -2300,6 +2300,22 @@ def gather(gfid, quest = False):
     else:
         size = 1
         
+    fwdkey = "w"
+    leftkey = "a" 
+    backkey = "s" 
+    rightkey = "d"
+    rotleft = ","
+    rotright = "."
+    rotup = Key.page_up
+    rotdown = Key.page_down 
+    zoomin = "i"
+    zoomout = "o"
+    sc_space = Key.space
+    tcfbkey = fwdkey
+    afcfbkey = backkey
+    tclrkey = leftkey
+    afclrkey = rightkey
+  
     while not end_gather:
         time.sleep(0.05)
         mouse.press(Button.left)
@@ -2423,7 +2439,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     setStatus()
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    with open('canonfails.txt', 'w') as f:
+    with open('./dataFiles/canonfails.txt', 'w') as f:
         f.write('0')
     f.close()
     if val:
@@ -2436,12 +2452,12 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     savetimings('rejoin_every')
     os.system(cmd)
     continuePlanters = 1
-    with open('firstRun.txt', 'r') as f:
+    with open('./dataFiles/firstRun.txt', 'r') as f:
         if int(f.read()) == 1:
             continuePlanters = 0
             resetAllStats()
     f.close()
-    with open('firstRun.txt', 'w') as f:
+    with open('./dataFiles/firstRun.txt', 'w') as f:
         f.write("0")
     f.close()
     invalid_prev_honey = 0
@@ -3070,7 +3086,7 @@ if __name__ == "__main__":
     global show_haste_warn
     with open('macroLogs.log', 'w'):
         pass
-    with open('firstRun.txt', 'w') as f:
+    with open('./dataFiles/firstRun.txt', 'w') as f:
         f.write("1")
     f.close()
     cmd = 'defaults read -g AppleInterfaceStyle'
@@ -3999,13 +4015,14 @@ if __name__ == "__main__":
         try:
             a = float(planterdict["harvest"])
         except:
-            pag.alert(text="The harvest value of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
-            return
+            if planterdict["harvest"].lower() != "auto" and planterdict["harvest"].lower() != "full":
+                pag.alert(text="The harvest value of {} is not a valid number/decimal".format(planterdict["harvest"]),title="Invalid setting",button="OK")
+                return
 
         try:
             a = float(planterdict["manual_harvest"])
         except:
-            pag.alert(text="The harvest value of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
+            pag.alert(text="The harvest value of {} is not a valid number/decimal".format(planterdict["manual_harvest"]),title="Invalid setting",button="OK")
             return
         
         if float(generalDict["walkspeed"]) > 40:

@@ -1,12 +1,11 @@
-
 paper:0
 ticket:0
 plastic:0
-candy:1710912236.860724
-blueclay:1711107152.649806
-redclay:1711107725.6932638
-tacky:1711107775.989217
-pesticide:1711107659.966652
+candy:0
+blueclay:0
+redclay:0
+tacky:0
+pesticide:0
 heattreated:0
 hydroponic:0
 petal:0
