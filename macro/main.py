@@ -39,9 +39,14 @@ from pynput.mouse import Button
 from convertAhkPattern import ahkPatternToPython
 try:
     from html2image import Html2Image
-except:
+except FileNotFoundError:
     pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
 \n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
+except ModuleNotFoundError:
+    os.system('pip3 install html2image')
+    reload(html2image)
+    from html2image import Html2Image
+    
 try:
     import matplotlib.pyplot as plt
 except Exception as e:
@@ -94,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.54.2"
+macrov = "1.54.3"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -295,16 +300,21 @@ def loadSave():
         savedata[l[0]] = l[1]
 
 def loadRes():
-    outdict =  {}
-    with open('save.txt') as f:
-        lines = f.read().split("\n")
-    f.close()
-    for s in lines:
-        l = s.replace(" ","").split(":")
-        if l[1].isdigit():
-            l[1] = int(l[1])
-        outdict[l[0]] = l[1]
-    return outdict
+
+    while True:
+        try:
+            outdict =  {}
+            with open('save.txt') as f:
+                lines = f.read().split("\n")
+            f.close()
+            for s in lines:
+                l = s.replace(" ","").split(":")
+                if l[1].isdigit():
+                    l[1] = int(l[1])
+                outdict[l[0]] = l[1]
+            return outdict
+        except Exception as e:
+            log(f"loadRes failed: {e}")
 
 def loadtimings():
     tempdict = {}
