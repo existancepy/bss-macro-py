@@ -85,6 +85,7 @@ def imToString(m):
         #print(ocrres)
         try:
             result = [x[1][0] for x in ocrres]
+            log(result)
             for i in result:
                 if i[0].isdigit():
                     honey = i
@@ -92,6 +93,7 @@ def imToString(m):
             honey = int(''.join([x for x in honey if x.isdigit()]))
             log(millify(honey))
         except Exception as e:
+            print(e)
             print(honey)
         os.remove("{}.png".format(sn))
         return honey

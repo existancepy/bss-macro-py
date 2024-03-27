@@ -3,5 +3,5 @@ y_screenshot_multiplier:1
 x_screenshot_multiplier:1
 y_length_multiplier:1
 x_length_multiplier:1
-msh:84.0
-msy:488.0
+msh:79.0
+msy:447.0

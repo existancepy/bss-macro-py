@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.54.3"
+macrov = "1.54.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -473,12 +473,17 @@ def hourlyReport(hourly=1):
         for i, e in enumerate(honeyHist[:]):
             if len(str(e)) <= 4:
                 honeyHist.pop(i)
+                
         #remove values less than the previous one
         honeyHist = honeyHist[1:]
         counter = 1
         while counter < len(honeyHist):
             if honeyHist[counter] < honeyHist[counter-1]:
-                honeyHist.pop(counter)
+                #check if upwards spike
+                if counter > 1 and len(str(honeyHist[counter-2])) == len(str(honeyHist[counter])) and len(str(honeyHist[counter-1])) != len(str(honeyHist[counter])):
+                    honeyHist.pop(counter-1)
+                else:
+                    honeyHist.pop(counter)
             else:
                 counter += 1
         if hourly == 0:
@@ -1247,11 +1252,13 @@ def vic():
             #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
             currtime = time.time()
             for i in range(len(setdat['slot_enable'])):
+                log(f"Checking slot {i+1}")
                 slot_enable = setdat['slot_enable'][i]
                 slot_freq = setdat['slot_freq'][i]
                 slot_use = setdat['slot_use'][i]
                 slot_time = setdat['slot_time'][i]
                 if slot_enable and status != "disconnect":
+                    log(f"Slot {i+1} enabled")
                     if slot_freq == "mins":
                         slot_time*= 60
                     if currtime - slots_last_used[i] < slot_time:
@@ -1262,6 +1269,7 @@ def vic():
                         continue
                     move.press(str(i+1))
                     slots_last_used[i] = currtime
+                    log(f"Used slot {i+1}")
                     
                     
                         
@@ -2130,6 +2138,8 @@ def rejoin():
         subprocess.Popen("osascript -e 'quit app \"Roblox\"'", shell=True)
         time.sleep(3)
         ps = setdat["private_server_link"]
+        if i == 2:
+            webhook("","Fallback to public server","brown")
         if setdat["rejoin_method"] == "deeplink":
             deeplink = "roblox://placeID=1537690962"
             if ps and i < 2:
@@ -2198,6 +2208,7 @@ def rejoin():
                 convert()
                 webhook("","Rejoin successful","dark brown")
                 currentTime = datetime.now().strftime("%H:%M")
+                setStatus()
                 if setdat["so_broke"]:
                     pag.typewrite("/")
                     pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.06)
@@ -2205,7 +2216,7 @@ def rejoin():
                 if setdat['haste_compensation']: openSettings()
                 addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
                 return
-        webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
+        webhook("",'Rejoin unsuccessful, attempt {i+2}','dark brown')
 
     
 def gather(gfid, quest = False):
@@ -2446,7 +2457,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     setStatus()
     setdat = loadsettings.load()
     val = validateSettings()
-    setStatus()
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     with open('./dataFiles/canonfails.txt', 'w') as f:
@@ -2515,7 +2525,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         maxCycles = i
                         break
             
-    
+    log(f"Max Cycles: {maxCycles}")
     while True:
         cmd = """
         osascript -e 'activate application "Roblox"' 
@@ -2785,6 +2795,8 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 collectAnyPlanters = 0
                 fieldsToPlace = []
                 removeFromOccupied = []
+                log(f"max Planters: {maxPlanters}")
+                log(f"planter cycle: {planter_cycle}")
                 for i in range(maxPlanters):
                     if automatic_planters:
                         currPlanter = occupiedStuff[i][0]
@@ -2801,8 +2813,10 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     else:      
                         currPlanter = usablePlanterName(planterset[f"cycle_{planter_cycle}_planter_{i+1}"])
                         currField = planterset[f"cycle_{planter_cycle}_field_{i+1}"]    
+                        log(f"{currPlanter}, {currField}")
                         if currPlanter == "none" or currField == "none": continue
                         growTime = planterset['manual_harvest']
+                        log(growTime)
                         
                     occupiedFields = []
                     if time.time() - planterTimes[currPlanter] > growTime*60*60:
@@ -4034,10 +4048,22 @@ if __name__ == "__main__":
         except:
             pag.alert(text="The harvest value of {} is not a valid number/decimal".format(planterdict["manual_harvest"]),title="Invalid setting",button="OK")
             return
+
+        try:
+            a = float(generalDict["rejoin_delay"])
+        except:
+            pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
+            return
+        
         
         if float(generalDict["walkspeed"]) > 40:
             pag.alert(text="The walkspeed of {} is unusually high. Make sure that the value is entered correctly and there are no haste stacks")
             return
+        
+        if float(generalDict["rejoin_delay"]) <= 20:
+            pag.alert(text="The wait when rejoining value is too low. A value above 20 is recommended to prevent the macro from moving before the game is loaded")
+            return
+        
         if "share" in generalDict["private_server_link"] and generalDict["rejoin_method"] == "deeplink":
             pag.alert(text="You entered a 'share?code' link!\n\nTo fix this:\n1. Paste the link in your browser\n2. Wait for roblox to load in\n3. Copy the link from the top of your browser.  It should be a 'privateServerLinkCode' link", title='Unsupported private server link', button='OK')
             return
@@ -4057,7 +4083,7 @@ if __name__ == "__main__":
                     if suffix == "planter":
                         planterTypes_set.append(info)
 
-            if sorted(planterFields_set) != sorted(planterFields_prev) or sorted(planterTypes_prev) != sorted(planterTypes_set):
+            if sorted(planterFields_set) != sorted(planterFields_prev) or sorted(planterTypes_prev) != sorted(planterTypes_set) or planterdict['enable_planters']==2:
                 
                 with open("planterdata.txt","w") as a:
                     a.write("[]\n{}\n{}".format(planterTypes_set,planterFields_set))
@@ -4389,11 +4415,13 @@ if __name__ == "__main__":
     timetextbox_one.place(x = 400, y=ylevel+35)
     timetextbox_one.bind('<KeyRelease>', saveFields)
     timetextbox_one.bind('<Return>', lambda e: "break")
+    timetextbox_one.bind('<space>', lambda e: "break")
     Tooltip(timetextbox_one, text = "Maximum time to gather for")
     packtextbox_one = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_one.place(x = 460, y=ylevel+35)
     packtextbox_one.bind('<KeyRelease>', saveFields)
     packtextbox_one.bind('<Return>', lambda e: "break")
+    packtextbox_one.bind('<space>', lambda e: "break")
     Tooltip(packtextbox_one, text = "Minimum backpack capacity to gather for.\nSet to 101 to disable")
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_one,return_to_hive_one.get().title(), command = disablews_one, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
@@ -4445,11 +4473,13 @@ if __name__ == "__main__":
     timetextbox_two.place(x = 400, y=ylevel+35)
     timetextbox_two.bind('<KeyRelease>', saveFields)
     timetextbox_two.bind('<Return>', lambda e: "break")
+    timetextbox_two.bind('<space>', lambda e: "break")
     Tooltip(timetextbox_two, text = "Maximum time to gather for")
     packtextbox_two = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_two.place(x = 460, y=ylevel+35)
     packtextbox_two.bind('<KeyRelease>', saveFields)
     packtextbox_two.bind('<Return>', lambda e: "break")
+    packtextbox_two.bind('<space>', lambda e: "break")
     Tooltip(packtextbox_two, text = "Minimum backpack capacity to gather for.\nSet to 101 to disable")
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_two,return_to_hive_two.get().title(), command = disablews_two, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
@@ -4501,11 +4531,13 @@ if __name__ == "__main__":
     timetextbox_three.place(x = 400, y=ylevel+35)
     timetextbox_three.bind('<KeyRelease>', saveFields)
     timetextbox_three.bind('<Return>', lambda e: "break")
+    timetextbox_three.bind('<space>', lambda e: "break")
     Tooltip(timetextbox_three, text = "Maximum time to gather for")
     packtextbox_three = tkinter.Text(frame1, width = 4, height = 1, bg= wbgc)
     packtextbox_three.place(x = 460, y=ylevel+35)
     packtextbox_three.bind('<KeyRelease>', saveFields)
     packtextbox_three.bind('<Return>', lambda e: "break")
+    packtextbox_three.bind('<space>', lambda e: "break")
     Tooltip(packtextbox_three, text = "Minimum backpack capacity to gather for.\nSet to 101 to disable")
     dropConvert = ttk.OptionMenu(frame1 , return_to_hive_three,return_to_hive_three.get().title(), command = disablews_three, *["Walk","Reset","Rejoin","Whirligig"],style='smaller.TMenubutton')
     dropConvert.place(width=75,x = 520, y = ylevel+35,height=22)
@@ -4710,6 +4742,7 @@ if __name__ == "__main__":
     harvesttextbox = tkinter.Text(automaticFrame, width = 4, height = 1, bg= wbgc)
     harvesttextbox.place(x=635,y=108)
     harvesttextbox.bind('<Return>', lambda e: "break")
+    harvesttextbox.bind('<space>', lambda e: "break")
     Tooltip(harvesttextbox, text = "How often the macro will collect the planters")
     tkinter.Label(automaticFrame, text = "Hours").place(x=674,y=105)
     checkbox = tkinter.Checkbutton(automaticFrame, text="Full Grown", variable=harvest_full,command=lambda: changeHarvest("full"))
@@ -4740,6 +4773,7 @@ if __name__ == "__main__":
 
     manualharvesttextbox = tkinter.Text(manualFrame, width = 4, height = 1, bg= wbgc)
     manualharvesttextbox.bind('<Return>', lambda e: "break")
+    manualharvesttextbox.bind('<space>', lambda e: "break")
     manualharvesttextbox.place(x = 92, y=331)    
     Tooltip(manualharvesttextbox, text = "How often the macro will collect the planters")
     tkinter.Label(manualFrame, text = "Hours").place(x=129,y=330) 
@@ -4847,6 +4881,7 @@ if __name__ == "__main__":
     gathertimeoverridetextbox = tkinter.Text(frame8, width = 4, height = 1, bg= wbgc)
     gathertimeoverridetextbox.place(x = 95, y=169)
     gathertimeoverridetextbox.bind('<Return>', lambda e: "break")
+    gathertimeoverridetextbox.bind('<space>', lambda e: "break")
     tkinter.Label(frame8, text = "mins").place(x=130,y=166)
     
 
@@ -4860,6 +4895,7 @@ if __name__ == "__main__":
     speedtextbox.insert("end",walkspeed)
     speedtextbox.place(x = 185, y=52)
     speedtextbox.bind('<Return>', lambda e: "break")
+    speedtextbox.bind('<space>', lambda e: "break")
     Tooltip(speedtextbox, text = "The movespeed of the player without any additional haste.\nThe movespeed can be found in the bee swarm settings")
 
     tkinter.Label(frame3, text = "Sprinkler Type").place(x = 0, y = 85)
@@ -4879,6 +4915,7 @@ if __name__ == "__main__":
     convertwaittextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
     convertwaittextbox.place(x = 40, y=157)
     convertwaittextbox.bind('<Return>', lambda e: "break")
+    convertwaittextbox.bind('<space>', lambda e: "break")
     Tooltip(convertwaittextbox, text = "Time to wait after the macro is done converting. This is useful for converting small amount of excess pollen/balloon")
     tkinter.Label(frame3, text = "secs after converting").place(x = 75, y = 155)
     
@@ -4906,6 +4943,7 @@ if __name__ == "__main__":
     linktextbox.insert("end",private_server_link)
     linktextbox.place(x=190,y=87)
     linktextbox.bind('<Return>', lambda e: "break")
+    linktextbox.bind('<space>', lambda e: "break")
     Tooltip(linktextbox, text = "The private server link the macro will use when rejoining. If no link is provided, the macro will join a public server instead")
     
     checkbox = tkinter.Checkbutton(frame7, text="Enable Discord Bot", variable=enable_discord_bot)
@@ -4916,11 +4954,13 @@ if __name__ == "__main__":
     tokentextbox.insert("end",discord_bot_token)
     tokentextbox.place(x = 300, y=52)
     tokentextbox.bind('<Return>', lambda e: "break")
+    tokentextbox.bind('<space>', lambda e: "break")
 
     tkinter.Checkbutton(frame7, text="Rejoin every", variable=rejoin_every_enabled).place(x=0, y = 120)
     rejoinetextbox = tkinter.Text(frame7, width = 4, height = 1, bg= wbgc)
     rejoinetextbox.place(x=104,y=123)
     rejoinetextbox.bind('<Return>', lambda e: "break")
+    rejoinetextbox.bind('<space>', lambda e: "break")
     tkinter.Label(frame7, text = "hours").place(x = 140, y = 120)
 
     tkinter.Label(frame7, text = "Wait for").place(x = 0, y = 155)
@@ -4928,6 +4968,7 @@ if __name__ == "__main__":
     rejoindelaytextbox.insert("end",rejoin_delay)
     rejoindelaytextbox.place(x=55,y=158)
     rejoindelaytextbox.bind('<Return>', lambda e: "break")
+    rejoindelaytextbox.bind('<space>', lambda e: "break")
     Tooltip(rejoindelaytextbox, text = "The time to wait for bee swarm to load when rejoining")
     tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
     checkbox = tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen)

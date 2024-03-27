@@ -4,7 +4,10 @@ generalReplace = {
     ":=": "=",
     "reps": "width",
     "'": '"',
-    "sqrt": "math.sqrt"
+    "sqrt": "math.sqrt",
+    '""':'"',
+    "\ufeff":"",
+    "a_index":"i"
 }
 
 def ahkPatternToPython(ahk):
@@ -32,22 +35,22 @@ def ahkPatternToPython(ahk):
                 level += 1
         
     #extract out only the pattern code
-    start = 2
-    end = -1
+    start = None
+    end = None
     for i,e in enumerate(out):
         if e.startswith("(LTrimJoin"):
             start = i+1
         elif e == ')"':
             end = i
-    out = out[start:end]
-
+    if not start is None and not end is None:
+        out = out[start:end]
     #convert loop reps
     for i,e in enumerate(out[:]):
         line = e.strip()
         noSpaces = line.replace(" ","")
         #replace loop
-        if noSpaces == 'loop"width"{':
-            out[i] = noSpaces.replace('loop"width"{', 'for _ in range(width):')
+        if noSpaces == 'loop"width"{' or noSpaces == 'loopwidth{':
+            out[i] = e.replace(line, 'for i in range(width):')
         #convert send
         elif line.startswith("send"):
             cmds = []
