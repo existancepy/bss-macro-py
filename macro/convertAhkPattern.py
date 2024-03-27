@@ -50,7 +50,7 @@ def ahkPatternToPython(ahk):
         noSpaces = line.replace(" ","")
         #replace loop
         if noSpaces == 'loop"width"{' or noSpaces == 'loopwidth{':
-            out[i] = e.replace(line, 'for i in range(width):')
+            out[i] = noSpaces.replace(noSpaces, 'for i in range(width):')
         #convert send
         elif line.startswith("send"):
             cmds = []
