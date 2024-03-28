@@ -1,4 +1,4 @@
-
+move.press(".")
 move.press(".")
 move.press(".")
 move.press("e")
@@ -15,8 +15,3 @@ pag.keyUp("w")
 move.press(",")
 move.press(",")
 sleep(0.5)
-
-
-
-
-    
