@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.54.5"
+macrov = "1.54.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1252,7 +1252,6 @@ def vic():
             #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
             currtime = time.time()
             for i in range(len(setdat['slot_enable'])):
-                log(f"Checking slot {i+1}")
                 slot_enable = setdat['slot_enable'][i]
                 slot_freq = setdat['slot_freq'][i]
                 slot_use = setdat['slot_use'][i]
