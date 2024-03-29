@@ -71,8 +71,13 @@ def reset(hiveCheck=False):
                     passed = 1
                 if passed: break
             '''
-            if avgDiff < 6:
+            if avgDiff > 6:
                 time.sleep(0.1)
+                for _ in range(4):
+                    keyboard.press(',')
+                    time.sleep(0.05)
+                    keyboard.release(',')
+                
                 for _ in range(4):
                     keyboard.press('o')
                     time.sleep(0.1)

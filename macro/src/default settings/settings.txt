@@ -29,6 +29,7 @@ samovar:0
 wreath:0
 snow_machine:0
 mondo_buff:0
+mondo_interrupt:0
 lid_art:0
 candles:0
 antpass:0
@@ -45,3 +46,4 @@ backpack_freeze:0
 return_to_hive_override: no override
 gather_time_override:8
 gather_time_override_enabled:0
+bucko_quest:0

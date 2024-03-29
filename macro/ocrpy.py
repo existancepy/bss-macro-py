@@ -20,12 +20,6 @@ def loadRes():
 
 ocr = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
 
-def millify(n):
-    if not n: return 0
-    millnames = ['',' K',' M',' B',' T', 'Qd']
-    n = float(n)
-    millidx = max(0,min(len(millnames)-1,
-                        int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
 def screenshot(**kwargs):
     out = None
     for _ in range(4):
@@ -91,7 +85,6 @@ def imToString(m):
                     honey = i
                     break
             honey = int(''.join([x for x in honey if x.isdigit()]))
-            log(millify(honey))
         except Exception as e:
             print(e)
             print(honey)

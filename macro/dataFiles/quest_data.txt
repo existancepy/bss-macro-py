@@ -91,3 +91,76 @@ kill_2_werewolf
 gather_cactus
 
 ###
+
+==bucko==
+
+-abilities
+misc_blueability
+
+-bamboo
+gather_bamboo
+
+-bombard
+misc_bomb
+kill_10_rhinobeetle
+kill_20_ant
+kill_10_armyant
+
+-booster
+misc_blueboost
+collect_blue_booster
+
+-clean-up
+goo_blue flower
+goo_bamboo
+goo_pine tree
+
+-extraction
+gather_clover
+gather_cactus
+gather_pumpkin
+
+-flowers
+gather_blue flower
+
+-goo
+goo_pine tree
+
+-medley
+misc_blueability
+goo_bamboo
+gather_pine tree
+
+-picnic
+gather_blue flower
+misc_blueberry
+feed_25_blueberry
+kill_5_ant
+kill_5_armyant
+
+-pine trees
+gather_pine tree
+
+-pollen
+gather_pine tree
+
+-scavenge
+gather_pine tree
+misc_blueability
+misc_blueberry
+
+-skirmish
+gather_blue flower
+kill_10_rhinobeetle
+
+-tango
+gather_pine tree
+misc_blueability
+kill_5_mantis
+
+-tour
+gather_blue flower
+gather_bamboo
+gather_pine tree
+kill_5_rhinobeetle
+kill_3_mantis

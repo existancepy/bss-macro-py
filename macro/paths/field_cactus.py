@@ -15,3 +15,8 @@ pag.keyUp("w")
 move.press(",")
 move.press(",")
 sleep(0.5)
+
+
+
+
+    

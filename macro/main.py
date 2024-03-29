@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.54.6"
+macrov = "1.55"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -462,6 +462,8 @@ def hourlyReport(hourly=1):
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
     xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
+    planterset = loadsettings.planterLoad()
+        
     try:
         with open('honey_history.txt','r') as f:
             honeyHist = ast.literal_eval(f.read())
@@ -496,6 +498,7 @@ def hourlyReport(hourly=1):
         if hourly:
             loadsettings.save('prev_honey',currHoney)
             timehour = int(datetime.now().hour) - 1
+            addStat("hourly_honey",hourly_honey)
         else:
             timehour = int(datetime.now().hour)
             
@@ -516,8 +519,12 @@ def hourlyReport(hourly=1):
         #yvals = [1,2,3,4,5,6,7,8]
         xvals = [x+1 for x in range(len(yvals))]
         rootDir = os.path.dirname(os.path.abspath(__file__)) + "/hourlyReport"
+
         with open("./hourlyReport/index.html", "r") as f:
-            data = f.read()
+            data1 = f.read()
+        f.close()
+        with open("./hourlyReport/index2.html", "r") as f:
+            data2 = f.read()
         f.close()
         
         stats = loadsettings.load("./dataFiles/stats.txt")
@@ -530,13 +537,35 @@ def hourlyReport(hourly=1):
         gather_avg = minAndSecs(sum(stats["gather_time"])/len(stats["gather_time"]))
         convert_avg = minAndSecs(sum(stats["convert_time"])/len(stats["convert_time"]))
         
-        log(data)
+        hourly_honeys = stats["hourly_honey"]
+        
+        if planterset["enable_planters"]:
+            showPlanters = "flex"
+        else:
+            showPlanters = "none"
+
+        planterImgDict = {
+            "paper:":"https://cdn.discordapp.com/attachments/670121853238378526/1222887070092230846/paperplanter.png?ex=6617d955&is=66056455&hm=d24f2b0302fdbdd141c0e661f6d72c24e5113e2960986a43a472fd1b7b3dcaed&",
+            "ticket":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047975407747/ticketplanter.png?ex=6617d950&is=66056450&hm=c6f535bcd9b85a60a0fdd94252214a19c0b55e82ca8f77a52e58fcb931efa76e&",
+            "plastic":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047337873468/plasticplanter.png?ex=6617d950&is=66056450&hm=199314f9d587b85dd67e5bbddbcfd36f45b5cda2fb6040d0fa56790000f9c940&",
+            "candy":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069156642986/candyplanter.png?ex=6617d955&is=66056455&hm=9f0d535947b6b7d266274652f691f35b387796323f7ac0ae408046c0ea43ee7a&",
+            "blueclay":"https://cdn.discordapp.com/attachments/670121853238378526/1222887928863264841/blueclayplanter.png?ex=6617da22&is=66056522&hm=12d1ae2c3c111fe6fb9185e86ee084603003a9c970dd1572170ba4631fff909d&",
+            "redclay":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047547584672/redclayplanter.png?ex=6617d950&is=66056450&hm=e0103144f651596892a875546ddf34c0697b11105d42924d87ec17afced198be&",
+            "tacky":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047765950474/tackyplanter.png?ex=6617d950&is=66056450&hm=4d03eb1e0816d2e9a87018d4b9fdecb7f71e50c9c3db57925785f0217b6a04b7&",
+            "pesticide":"https://cdn.discordapp.com/attachments/670121853238378526/1222887046704533675/pesticideplanter.png?ex=6617d950&is=66056450&hm=00c9dfd020c75e7d09d01260cd9a892f6d704921c02e2191b9c9d616005ce7f3&",
+            "heattreated":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069635055646/heattreatedplanter.png?ex=6617d955&is=66056455&hm=bb76a1182da69001febebd6d9626a109126e58bcc9fe94b1be2105b0841ef1e8&",
+            "hydroponic":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069869674586/hydroponicplanter.png?ex=6617d955&is=66056455&hm=cd490ec2b73c79e0d847b71e4f997c1fecefbfa710e543fa096ea2224d13740e&",
+            "petal":"https://cdn.discordapp.com/attachments/670121853238378526/1222887046897467472/petalplanter.png?ex=6617d950&is=66056450&hm=c8634575e49d7c65180e358c9c1b330ceb018c7335be7502f5a8163f44f0d850&",
+            "plenty":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047120027648/planterofplenty.png?ex=6617d950&is=66056450&hm=04c55110a006c6aa9b70264b1a2cca4b16522c47ebe2bedc2f14aebcbd2da275&",
+            "festive":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069442113536/festiveplanter.png?ex=6617d955&is=66056455&hm=f6931f2ab3ab4e529e294f57fa695f680adead513d3e73e65a88f7fc461f7278&"
+
+        }
         replaceDict = {
             "-rejointime": f"Rejoining:\t{rejoin_time}",
             "-gathertime": f"Gathering:\t{gather_time}",
             "-bugruntime": f"Bug Runs:\t{bug_time}",
             "-converttime": f"Converting:\t{convert_time}",
-            "-objectivetime": f"Converting:\t{convert_time}",
+            "-objectivetime": f"Objectives:\t{objective_time}",
             "-buffpath": f"{rootDir}/assets/buffs.png",
             "-sessiontime": session_time,
             "-currenthoney": millify(currHoney),
@@ -549,14 +578,62 @@ def hourlyReport(hourly=1):
             "-bugkills": str(stats["bug_kills"]),
             "const time = []": f"const time = {xvals}",
             "const honey = []": f"const honey = {yvals}",
-            "const times = []":  f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]'
+            "const times = []":  f'const times = [{stats["rejoin_time"]},{sum(stats["gather_time"])},{stats["bug_time"]},{sum(stats["convert_time"])},{stats["objective_time"]}]',
+            "const hours = []": f"const hours = {[i+1 for i in range(len(hourly_honeys))]}",
+            "const hourlyHoney = []": f"const hourlyHoney = {hourly_honeys}",
+            "-showplanters": showPlanters,
+            "-showplanter1": "none",
+            "-showplanter2": "none",
+            "-showplanter3": "none"
         }
 
+        if planterset["enable_planters"]:
+            with open("planterdata.txt","r") as f:
+                lines = f.read().split("\n")
+            f.close()
+            occupiedStuff = ast.literal_eval(lines[0])
+            
+            with open("plantertimings.txt","r") as f:
+                lines = f.read().split("\n")
+            f.close()
+            planterTimes = {}
+            for i in lines:
+                if ":" in i:
+                    p,t = i.split(":")
+                    planterTimes[p] = float(t)
+            planters = [usablePlanterName(x[0]) for x in occupiedStuff]
 
+            for i,currPlanter in enumerate(planters):
+                replaceDict[f"-showplanter{i+1}"] =  "flex"
+                replaceDict[f"-plantername{i+1}"] =  displayPlanterName(currPlanter)
+                replaceDict[f"-planterimg{i+1}"] = planterImgDict[currPlanter]
+                
+                currField = occupiedStuff[i][1]
+                if planterset["enable_planters"] == 1:
+                    if str(planterset['harvest']) == "full":
+                        growTime = planterInfo[currPlanter]['grow_time']
+                        if currField in planterInfo[currPlanter]['grow_fields']:
+                            growTime /= planterInfo[currPlanter]['grow_time_bonus']
+                    elif str(planterset['harvest']) == "auto":
+                        growTime = 1
+                    else:
+                        growTime = planterset['harvest']
+                else:
+                    growTime = planterset['manual_harvest']
+
+                timeRemain = growTime*60*60 - (time.time() - planterTimes[currPlanter])
+                if timeRemain > 0:
+                    mins, _ = divmod(timeRemain, 60)
+                    hours, mins = divmod(mins, 60)
+                    replaceDict[f"-plantertime{i+1}"] =  f"{round(hours)}h {round(mins)}m"
+                else:
+                    replaceDict[f"-plantertime{i+1}"] =  "Ready"
+                    
         for k, v in replaceDict.items():
-            data = data.replace(k,v)
-
-        log(data)
+            data1 = data1.replace(k,v)
+            data2 = data2.replace(k,v)
+        log(data1)
+        log(data2)
 
         if setdat["new_ui"]:
             UI = wh/(16*ysm)
@@ -565,11 +642,21 @@ def hourlyReport(hourly=1):
         buffim = pag.screenshot(region = (0,UI,ww/2.1,wh/(16*ylm)))
         buffim.save("./hourlyReport/assets/buffs.png")
 
-        hti.screenshot(html_str=data, save_as='hourlyReport-resized.png')
+        hti.screenshot(html_str=data1, save_as='hourlyReport1.png')
+        hti.screenshot(html_str=data2, save_as='hourlyReport2.png')
+        img1 = cv2.imread('hourlyReport1.png')
+        height, width, _ = img1.shape
+        img2 = cv2.imread('hourlyReport2.png')
+
+        img1 = img1[0:round(height*0.95), 0:width]
+        img2 = img2[0:round(height/2), 0:width]
+        imgOut = cv2.vconcat([img1, img2]) 
+          
+        cv2.imwrite("hourlyReport-resized.png", imgOut) 
         webhook("**Hourly Report**","","light blue",0,1)
-    except Exception as e:
-        log(e)
-        print(e)
+    except Exception:
+        print(traceback.format_exc())
+        log(traceback.format_exc())
         webhook("","Hourly Report has an error that has been caught. The error can be found in macroLogs.log","red")
 
 
@@ -620,6 +707,7 @@ def canon(fast=0):
                     f.write('0')
                 f.close()
                 return
+        webhook("","Could not find cannon","dark brown",1)
         mouse.position = (mw//2,mh//5*4)
         reset.reset()
     else:
@@ -649,15 +737,32 @@ def acchold(key,duration):
     sleep(duration*ws/28)
     pag.keyUp(key)
 
-def collect_mondo_buff():
+def collect_mondo_buff(gather = False):
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    hour,minute,_ = [int(x) for x in current_time.split(":")]
+    if not (minute < 10 and checkRespawn('mondo_buff','20m')): return False
+    if gather:
+        webhook("Gathering: interrupted","Mondo Buff","dark brown")
+        setStatus()
+        reset.reset()
+    st = time.perf_counter()
+    savetimings("mondo_buff")
     webhook("","Travelling: Mondo Buff","dark brown")
-    if canon() == "dc": return
+    if canon() == "dc": return False
     time.sleep(2)
     move.hold("e",0)
     sleep(2.5)
     move.hold("w",1.4)
     move.hold("d",4)
+    webhook("","Collecting: Mondo Buff","bright green",1)
     sleep(120)
+    webhook("","Collected: Mondo Buff","dark brown")
+    addStat("objective_time",round((time.perf_counter()  - st)/60,2))
+    reset.reset()
+    convert()
+    stingerHunt()
+    return True
 
 def collect_wreath():
     savedata = loadRes()
@@ -1251,18 +1356,20 @@ def vic():
             
             #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
             currtime = time.time()
+            log("Background loop")
             for i in range(len(setdat['slot_enable'])):
                 slot_enable = setdat['slot_enable'][i]
                 slot_freq = setdat['slot_freq'][i]
                 slot_use = setdat['slot_use'][i]
                 slot_time = setdat['slot_time'][i]
                 if slot_enable and status != "disconnect":
-                    log(f"Slot {i+1} enabled")
                     if slot_freq == "mins":
                         slot_time*= 60
                     if currtime - slots_last_used[i] < slot_time:
                         continue
+                    log(f"Slot {i+1} time")
                     if slot_use == "gathering" and status != "gathering":
+                        log(status)
                         continue
                     if slot_use == "hive" and status != "hive":
                         continue
@@ -1644,6 +1751,10 @@ def getQuest(giver):
                 add = True
             #check for kill
             elif a[0] == "kill" and "defeat" in e and a[2] in e:
+                add = True
+            elif a[0] == "misc" and a[1] in e:
+                add = True
+            elif a[0] == "collect" and ''.join(a[1:]) in e:
                 add = True
             if add:
                 print(f"{a}, {e}")
@@ -2063,7 +2174,7 @@ async def asyncRejoin():
         if resetCheck:
             webhook("","Rejoin successful","dark brown")
             break
-        webhook("",'Rejoin unsuccessful, attempt 2','dark brown')
+        webhook("",f'Rejoin unsuccessful, attempt {i+2}','dark brown')
     
 
 def openRoblox(link):
@@ -2123,7 +2234,7 @@ def openRoblox(link):
 def rejoin():
     setdat = loadsettings.load()
     st = time.perf_counter()
-    for i in range(3):
+    for i in range(5):
         savedata = loadRes()
         ww = savedata['ww']
         wh = savedata['wh']
@@ -2137,16 +2248,16 @@ def rejoin():
         subprocess.Popen("osascript -e 'quit app \"Roblox\"'", shell=True)
         time.sleep(3)
         ps = setdat["private_server_link"]
-        if i == 2:
+        if not (i+1)%5:
             webhook("","Fallback to public server","brown")
         if setdat["rejoin_method"] == "deeplink":
             deeplink = "roblox://placeID=1537690962"
-            if ps and i < 2:
+            if ps and not (i+1)%5:
                 deeplink += f"&linkCode={ps.lower().split('code=')[1]}"
             subprocess.call(["open", deeplink])
             
-        elif ps and i < 2:
-            openRoblox(setdat["private_server_link"])
+        elif ps and not (i+1)%5:
+            openRoblox(ps)
         else:
             openRoblox('https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129')
             time.sleep(10)
@@ -2344,11 +2455,10 @@ def gather(gfid, quest = False):
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
         status = getStatus()
-        if setdat["pack"] <= 100:
-            if bpcap >= setdat["pack"]:
-                webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
-                end_gather = 1
-                break
+        if bpcap >= setdat["pack"]:
+            webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+            end_gather = 1
+            break
         if timespent > setdat["gather_time"]:
             webhook("Gathering: ended","Time: {:.2f} - Time Limit - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
@@ -2370,13 +2480,19 @@ def gather(gfid, quest = False):
         if not cycleCount%20:
             if checkwithOCR("disconnect"): return
             
-        if not cycleCount%2:
+        if not cycleCount%2 and (settings["backpack_freeze"] or setdat["pack"] <= 100):
             bpcap = backpack.bpc()
             if bpcap == prev_bp and prev_bp != 0:
                 repeat_bp += 1
             else:
                 prev_bp = bpcap
                 repeat_bp = 0
+        if settings["mondo_buff"] and settings["mondo_interrupt"]:
+            if collect_mondo_buff(gather=True):
+                end_gather = 1
+                break
+            
+            
         if settings["backpack_freeze"]:
             if repeat_bp >= 15:
                 setStatus("disconnect")
@@ -2450,7 +2566,119 @@ def placeSprinkler():
             else:
                 move.press(str(setdat['sprinkler_slot']))
         keyboard.release(Key.space)
+
+def autoHotbar():
+    pag.alert(text="This is an external feature that will only use the slots set in the boost settings.\
+            \nIt will ignore when to use the slots and always use them\
+            \n\nPress ctrl + c in terminal to stop it")
+    cmd = """
+            osascript -e 'activate application "Roblox"' 
+        """
+    os.system(cmd)
+    time.sleep(2)
+    slots_last_used = [0]*7
+    saveSettings(False)
+    setdat = loadsettings.load()
+    try:
+        while True:
+            currtime = time.time()
+            for i in range(len(setdat['slot_enable'])):
+                slot_enable = setdat['slot_enable'][i]
+                slot_freq = setdat['slot_freq'][i]
+                slot_use = setdat['slot_use'][i]
+                slot_time = setdat['slot_time'][i]
+                if slot_enable:
+                    if slot_freq == "mins":
+                        slot_time*= 60
+                    if currtime - slots_last_used[i] < slot_time:
+                        continue
+                    move.press(str(i+1))
+                    slots_last_used[i] = currtime
+                    log(f"Used slot {i+1}")
+    except KeyboardInterrupt:
+        pag.alert("auto hotbar stopped.")
+    
+def quest(giver, session_start = 0):
+    #check if quest done, else read curr quest
+    if giver == "polar":
+        giverName = "Polar Bear"
+    elif giver == "bucko":
+        giverName = "Bucko Bee"
+    else:
+        giverName = "Riley Bee"
         
+    if session_start:
+        reach = False
+        for _ in range(3):
+            canon()
+            webhook("",f"Travelling: {giverName} (get quest) ","brown")
+            exec(open(f"./paths/quest_{giver}.py").read())
+            sleep(0.5)
+            if "talk" in getBesideE():
+                webhook("",f"Reached {giverName}","brown",1)
+                move.press("e")
+                sleep(0.2)
+                move.press("e")
+                reach = True
+                break
+            else:
+                webhook("",f"Unable to reach {giverName}","brown")
+            reset.reset()
+            sleep(0.7)
+        if reach:
+            clickdialog()
+            quest = ""
+            for _ in range(2):
+                quest = getQuest(giver)
+                if quest:
+                    break
+                webhook("","Getting new quest", "brown")
+                move.press("e")
+                clickdialog()
+                time.sleep(1)
+                    
+            polar_quest = {}
+            reset.reset()
+            print(quest)
+            return quest
+    else:
+        quest = getQuest(giver)
+        if quest == ["done"]:
+            reach = False
+            for _ in range(3):
+                canon()
+                webhook("",f"Travelling: {giverName} (submit quest) ","brown")
+                exec(open(f"./paths/quest_{giver}.py").read())
+                sleep(0.5)
+                if "talk" in getBesideE():
+                    webhook("",f"Reached {giverName}","brown",1)
+                    move.press("e")
+                    sleep(0.2)
+                    move.press("e")
+                    reach = True
+                    break
+                else:
+                    webhook("",f"Unable to reach {giverName}","brown")
+            if reach:
+                clickdialog()
+                quest = False
+                webhook("","Getting new quest", "brown")
+                for _ in range(2):
+                    move.press("e")
+                    sleep(0.2)
+                    move.press("e")
+                    clickdialog()
+                    quest = getQuest(giver)
+                    if quest: break
+                addStat("quests",1)
+                reset.reset()
+        print(quest)
+        if quest:
+            return quest
+        else:
+            webhook("","Could not find quest","red")
+
+                    
 def startLoop(planterTypes_prev, planterFields_prev,session_start):
     global invalid_prev_honey, quest_kills, quest_gathers
     setStatus()
@@ -2532,95 +2760,38 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         os.system(cmd)
         timings = loadtimings()
         setdat = loadsettings.load()
+        log("Loop start")
         #quests
         if setdat["polar_quest"]:
-            #check if quest done, else read curr quest
-            if session_start:
-                reach = False
-                for _ in range(3):
-                    canon()
-                    webhook("","Travelling: Polar Bear (get quest) ","brown")
-                    exec(open("./paths/quest_polar.py").read())
-                    sleep(0.5)
-                    if "talk" in getBesideE():
-                        webhook("","Reached Polar Bear","brown",1)
-                        move.press("e")
-                        sleep(0.2)
-                        move.press("e")
-                        reach = True
-                        break
-                    else:
-                        webhook("","Unable to reach Polar Bear","brown")
-                    reset.reset()
-                    sleep(0.7)
-                if reach:
-                    clickdialog()
-                    quest = ""
-                    for _ in range(2):
-                        quest = getQuest("polar")
-                        if quest:
-                            break
-                        webhook("","Getting new quest", "brown")
-                        move.press("e")
-                        clickdialog()
-                        time.sleep(1)
-                            
-                    polar_quest = {}
-                    reset.reset()
-                    print(quest)
-                    for i in quest:
-                        if i.startswith("gather"):
-                            f = i.split("_")[1]
-                            quest_gathers[f] = ["polar", 0, 1]
-                        elif i.startswith("kill"):
-                            _,c,m = i.split("_")
-                            setdat[m] = 1
-                            #quest_kills[m] = ["polar",0, int(c)]
-            else:
-                quest = getQuest("polar")
-                if quest == ["done"]:
-                    reach = False
-                    for _ in range(3):
-                        canon()
-                        webhook("","Travelling: Polar Bear (submit quest) ","brown")
-                        exec(open("./paths/quest_polar.py").read())
-                        sleep(0.5)
-                        if "talk" in getBesideE():
-                            webhook("","Reached Polar Bear","brown",1)
-                            move.press("e")
-                            sleep(0.2)
-                            move.press("e")
-                            reach = True
-                            break
+            objs = quest("polar",session_start)
+            if objs:
+                for i in objs:
+                    if i.startswith("gather"):
+                        f = i.split("_")[1]
+                        quest_gathers[f] = ["polar", 0, 1]
+                    elif i.startswith("kill"):
+                        _,c,m = i.split("_")
+                        setdat[m] = 1
+                        
+        if setdat["bucko_quest"]:
+            objs = quest("bucko",session_start)
+            if objs:
+                for i in objs:
+                    if i.startswith("gather"):
+                        f = i.split("_")[1]
+                        quest_gathers[f] = ["bucko", 0, 1]
+                    elif i.startswith("kill"):
+                        _,c,m = i.split("_")
+                        if "ant" in m:
+                            setdat["ant_challenge"] = 1
+                            setdat["antpass"] = 1
+                            setdat[""]
                         else:
-                            webhook("","Unable to reach Polar Bear","brown")
-                    if reach:
-                        clickdialog()
-                        quest = False
-                        webhook("","Getting new quest", "brown")
-                        for _ in range(2):
-                            move.press("e")
-                            sleep(0.2)
-                            move.press("e")
-                            clickdialog()
-                            quest = getQuest("polar")
-                            if quest: break
-                        addStat("quests",1)
-                        reset.reset()
-                print(quest)
-                if quest:
-                    for i in quest:
-                        if i.startswith("gather"):
-                            f = i.split("_")[1]
-                            quest_gathers[f] = ["polar", 0, 1]
-                        elif i.startswith("kill"):
-                            _,c,m = i.split("_")
                             setdat[m] = 1
-                            #quest_kills[m] = ["polar",0, int(c)]
-                else:
-                    webhook("","Could not find quest","red")
-                    
-                
+                    elif i.startswith("collect"):
+                        o = i.split("_",1)[1]
+                        setdat[o] = 1
+
                 
             
         #Stump snail check
@@ -2727,26 +2898,8 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             if getStatus() == "disconnect": return
             
         if setdat['mondo_buff']:
-
-            now = datetime.now()
-            current_time = now.strftime("%H:%M:%S")
-            hour,minute,_ = [int(x) for x in current_time.split(":")]
-            if minute < 10 and checkRespawn('mondo_buff','20m'):
-                tempdict = loadtimings()
-                tempdict['mondo_buff'] = time.time()//3600
-                templist = []
-                
-                for i in tempdict:
-                    templist.append("\n{}:{}".format(i,tempdict[i]))
-                with open('timings.txt','w') as f:
-                    f.writelines(templist)
-                f.close()
-                collect_mondo_buff()
-                webhook("","Collected: Mondo Buff","bright green",1)
-                reset.reset()
-                convert()
-                stingerHunt()
-                if getStatus() == "disconnect": return
+            collect_mondo_buff()
+            if getStatus() == "disconnect": return
    
             
         
@@ -2754,14 +2907,15 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         
         if planterset['enable_planters']:
             if not continuePlanters or (not occupiedStuff and automatic_planters):
+                occupiedStuff = []
                 if automatic_planters:
-                
-                    occupiedStuff = []
                     for i in range(maxPlanters):
                         bestPlanter = getBestPlanter(planterFields[i],occupiedStuff,planterTypes)
                         webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),planterFields[i].title()),"dark brown")
                         goToPlanter(planterFields[i],1)
-                        if getStatus() == "disconnect": return
+                        while getStatus() == "disconnect":
+                            rejoin()
+                            goToPlanter(planterFields[i],1)
                         placePlanter(bestPlanter)
                         occupiedStuff.append((bestPlanter,planterFields[i]))
                     log(occupiedStuff)
@@ -2775,9 +2929,14 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         if planter == "none" or field == "none": continue
                         webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(planter.title(),field.title()),"dark brown")
                         goToPlanter(field,1)
-                        if getStatus() == "disconnect": return
+                        while getStatus() == "disconnect":
+                            rejoin()
+                            goToPlanter(usablePlanterName(planter))
                         placePlanter(usablePlanterName(planter))
-                    occupiedStuff.append("a")
+                        occupiedStuff.append((planter,field))
+                    with open("planterdata.txt","w") as f:
+                        f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
+                    f.close()
                 continuePlanters = 1
                 
             else:
@@ -2818,12 +2977,13 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         log(growTime)
                         
                     occupiedFields = []
-                    if time.time() - planterTimes[currPlanter] > growTime*60*60:
+                    if (time.time() - planterTimes[currPlanter] > growTime*60*60) or (collectAnyPlanters and not automatic_planters):
                         collectAnyPlanters += 1
-                        time.sleep(2)
                         for i in range(2):
                             goToPlanter(currField)
-                            if getStatus() == "disconnect": return
+                            while getStatus() == "disconnect":
+                                rejoin()
+                                goToPlanter(currField)
                             webhook('',"Travelling: {} ({})\nObjective: Collect Planter, Attempt: {}".format(displayPlanterName(currPlanter),currField.title(),i+1),"dark brown")
                             getBeside = getBesideE()
                             if "harv" in getBeside or "plant" in getBeside:
@@ -2837,7 +2997,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                                         move.press(".")
                                         move.press(".")
                                 starttime = time.time()
-                                move.apkey("space")
                                 while True:
                                     if time.time() - starttime > 20:
                                         break
@@ -2889,6 +3048,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     f.close()
 
                 elif collectAnyPlanters:
+                    occupiedStuff = []
                     planter_cycle += 1
                     if planter_cycle > maxCycles:
                         planter_cycle = 1
@@ -2901,6 +3061,11 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         goToPlanter(field,1)
                         if getStatus() == "disconnect": return
                         placePlanter(usablePlanterName(planter))
+                        occupiedStuff.append((planter,field))
+                    with open("planterdata.txt","w") as f:
+                        f.write("{}\n{}\n{}".format(occupiedStuff,planterTypes,planterFields))
+                    f.close()
+                    
                     
                                                                                                             
         #Mob run check
@@ -3027,8 +3192,9 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 
         else:
             mouse.click(Button.left, 1)
-
+            
         if quest_gathers:
+            print("a")
             for i in quest_gathers.copy():
                 gather(i, quest = True)
                 quest_gathers.pop(i)
@@ -3210,7 +3376,7 @@ if __name__ == "__main__":
     notebook.add(frame9, text='Profile')    
 
     #get variables
-    gather_enable = tk.IntVar(value=setdat["gather_enable"])
+    gather_enable = tk.IntVar()
     gather_field_one = tk.StringVar(root)
     gather_field_two = tk.StringVar(root)
     gather_field_three = tk.StringVar(root)
@@ -3359,6 +3525,7 @@ if __name__ == "__main__":
     wreath = tk.IntVar()
     snow_machine = tk.IntVar()
     mondo_buff = tk.IntVar()
+    mondo_interrupt = tk.IntVar()
     lid_art = tk.IntVar()
     candles = tk.IntVar()
     antpass = tk.IntVar()
@@ -3370,6 +3537,7 @@ if __name__ == "__main__":
     gather_in_boosted = tk.IntVar()
 
     polar_quest = tk.IntVar()
+    bucko_quest = tk.IntVar()
 
     backpack_freeze = tk.IntVar()
 
@@ -3439,6 +3607,7 @@ if __name__ == "__main__":
     def loadVariables():
         global walkspeed, discord_webhook_url, private_server_link, discord_bot_token, planter_fields,convert_wait
 
+        gather_enable.set(setdat["gather_enable"])
         gather_field_one.set(setdat["gather_field"][0].title())
         gather_field_two.set(setdat["gather_field"][1].title())
         gather_field_three.set(setdat["gather_field"][2].title())
@@ -3490,6 +3659,7 @@ if __name__ == "__main__":
         wreath.set(setdat["wreath"])
         snow_machine.set(setdat["snow_machine"])
         mondo_buff.set(setdat["mondo_buff"])
+        mondo_interrupt.set(setdat["mondo_interrupt"])
         lid_art.set(setdat["lid_art"])
         candles.set(setdat["candles"])
         antpass.set(setdat["antpass"])
@@ -3501,6 +3671,7 @@ if __name__ == "__main__":
         gather_in_boosted.set(setdat["gather_in_boosted"])
 
         polar_quest.set(setdat["polar_quest"])
+        bucko_quest.set(setdat["bucko_quest"])
 
         backpack_freeze.set(setdat["backpack_freeze"])
 
@@ -3852,12 +4023,8 @@ if __name__ == "__main__":
         current_profile.set(name)
         reloadProfileList()
         loadProfile(name)
-        
-    def startGo():
-        global setdat, stop, planterTypes_prev, planterFields_prev, quest_kill, quest_gathers
-        quest_kills = {}
-        quest_gathers = {}
-        setdat = loadsettings.load()
+
+    def saveSettings(verify=True):
         planterFields_set = []
         for i in listbox.curselection():
             planterFields_set.append(listbox.get(i).lower())
@@ -3934,6 +4101,7 @@ if __name__ == "__main__":
             "wreath": wreath.get(),
             "snow_machine": snow_machine.get(),
             "mondo_buff": mondo_buff.get(),
+            "mondo_interrupt": mondo_interrupt.get(),
             "lid_art":lid_art.get(),
             "candles": candles.get(),
             "antpass": antpass.get(),
@@ -3948,6 +4116,7 @@ if __name__ == "__main__":
             "slot_freq": slot_freq_list,
             "slot_use": slot_use_list,
             "polar_quest": polar_quest.get(),
+            "bucko_quest": bucko_quest.get(),
             "backpack_freeze": backpack_freeze.get(),
 
             "return_to_hive_override": return_to_hive_override.get(),
@@ -4029,43 +4198,44 @@ if __name__ == "__main__":
             "coconut_field":coconut_field.get(),
             "pepper_field":pepper_field.get(),
         '''
-        try:
-            a = float(generalDict["walkspeed"])
-        except:
-            pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
-            return
-        
-        try:
-            a = float(planterdict["harvest"])
-        except:
-            if planterdict["harvest"].lower() != "auto" and planterdict["harvest"].lower() != "full":
-                pag.alert(text="The harvest value of {} is not a valid number/decimal".format(planterdict["harvest"]),title="Invalid setting",button="OK")
+        if verify:
+            try:
+                a = float(generalDict["walkspeed"])
+            except:
+                pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
+                return
+            
+            try:
+                a = float(planterdict["harvest"])
+            except:
+                if planterdict["harvest"].lower() != "auto" and planterdict["harvest"].lower() != "full":
+                    pag.alert(text="The harvest value of {} is not a valid number/decimal".format(planterdict["harvest"]),title="Invalid setting",button="OK")
+                    return
+
+            try:
+                a = float(planterdict["manual_harvest"])
+            except:
+                pag.alert(text="The harvest value of {} is not a valid number/decimal".format(planterdict["manual_harvest"]),title="Invalid setting",button="OK")
                 return
 
-        try:
-            a = float(planterdict["manual_harvest"])
-        except:
-            pag.alert(text="The harvest value of {} is not a valid number/decimal".format(planterdict["manual_harvest"]),title="Invalid setting",button="OK")
-            return
-
-        try:
-            a = float(generalDict["rejoin_delay"])
-        except:
-            pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
-            return
-        
-        
-        if float(generalDict["walkspeed"]) > 40:
-            pag.alert(text="The walkspeed of {} is unusually high. Make sure that the value is entered correctly and there are no haste stacks")
-            return
-        
-        if float(generalDict["rejoin_delay"]) <= 20:
-            pag.alert(text="The wait when rejoining value is too low. A value above 20 is recommended to prevent the macro from moving before the game is loaded")
-            return
-        
-        if "share" in generalDict["private_server_link"] and generalDict["rejoin_method"] == "deeplink":
-            pag.alert(text="You entered a 'share?code' link!\n\nTo fix this:\n1. Paste the link in your browser\n2. Wait for roblox to load in\n3. Copy the link from the top of your browser.  It should be a 'privateServerLinkCode' link", title='Unsupported private server link', button='OK')
-            return
+            try:
+                a = float(generalDict["rejoin_delay"])
+            except:
+                pag.alert(text="The walkspeed of {} is not a valid number/decimal".format(generalDict['walkspeed']),title="Invalid setting",button="OK")
+                return
+            
+            
+            if float(generalDict["walkspeed"]) > 40:
+                pag.alert(text="The walkspeed of {} is unusually high. Make sure that the value is entered correctly and there are no haste stacks")
+                return
+            
+            if float(generalDict["rejoin_delay"]) <= 20:
+                pag.alert(text="The wait when rejoining value is too low. A value above 20 is recommended to prevent the macro from moving before the game is loaded")
+                return
+            
+            if "share" in generalDict["private_server_link"] and generalDict["rejoin_method"] == "deeplink":
+                pag.alert(text="You entered a 'share?code' link!\n\nTo fix this:\n1. Paste the link in your browser\n2. Wait for roblox to load in\n3. Copy the link from the top of your browser.  It should be a 'privateServerLinkCode' link", title='Unsupported private server link', button='OK')
+                return
             
         savesettings(generalDict,"generalsettings.txt")
         savesettings(planterdict,f"./profiles/{current_profile.get()}/plantersettings.txt")
@@ -4073,6 +4243,16 @@ if __name__ == "__main__":
         with open("haste.txt","w") as a:
             a.write(generalDict["walkspeed"])
         a.close()
+        return [planterFields_set, generalDict, setDict, planterdict]
+        
+    def startGo():
+        global setdat, stop, planterTypes_prev, planterFields_prev, quest_kill, quest_gathers
+        quest_kills = {}
+        quest_gathers = {}
+        saved = saveSettings()
+        if not saved: return
+        planterFields_set, generalDict, setDict, planterdict = saved
+        
         if planterdict['enable_planters']:
             planterTypes_set = []
             for s in planterdict:
@@ -4577,6 +4757,9 @@ if __name__ == "__main__":
     checkbox = tkinter.Checkbutton(frame4, text="Mondo Buff", variable=mondo_buff)
     checkbox.place(x=120, y = 15)
     Tooltip(checkbox, text = "Goes to the mondo chick within the first 20mins of the hour.\n Stays for 2mins")
+    checkbox = tkinter.Checkbutton(frame4, text="Mondo Interrupts Gathering", variable=mondo_interrupt)
+    checkbox.place(x=240, y = 15)
+    Tooltip(checkbox, text = "Interrupts gathering when mondo respawns")
     tkinter.Checkbutton(frame4, text="Blueberry Dispenser", variable=blueberrydispenser).place(x=0, y = 50)
     tkinter.Checkbutton(frame4, text="Strawberry Dispenser", variable=strawberrydispenser).place(x=160, y = 50)
     tkinter.Checkbutton(frame4, text="(Free) Royal Jelly Dispenser", variable=royaljellydispenser).place(x=320, y = 50)
@@ -4662,6 +4845,7 @@ if __name__ == "__main__":
     dropField.place(width=65,x = 430, y = 235,height=20)
     dropField = ttk.OptionMenu(frame5, slot_freq_7, slot_freq_7.get().title(), *timeOptions,style='smaller.TMenubutton')
     dropField.place(width=65,x = 430, y = 270,height=20)
+    ttk.Button(frame5, text="Auto hotbar", command = autoHotbar,style = "small.TButton").place(x=210, y=330)
     
     #Tab 5
     
@@ -4869,6 +5053,7 @@ if __name__ == "__main__":
     #Tab 6
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
+    #tkinter.Checkbutton(frame8, text="Bucko Bee Quest", variable=bucko_quest).place(x=0, y = 65)
     label = tkinter.Label(frame8, text = "Override gather settings (other settings can be changed in gather tab)")
     label.place(x = 0, y = 100)
     Tooltip(label, text = "When gathering for quests, use these settings instead of the ones set in the gather tab")
