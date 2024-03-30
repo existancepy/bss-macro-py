@@ -221,7 +221,11 @@ def getStatus():
     return out
 
 def setStatus(msg="none"):
-    if msg != "none" and getStatus() == "disconnect": return
+    if msg != "none" and getStatus() == "disconnect": 
+        log("failed to updated status")
+        return
+    if msg == "none":
+        log("cleared status")
     with open("status.txt","w") as f:
         f.write(msg)
     f.close()
@@ -2406,6 +2410,8 @@ def gather(gfid, quest = False):
     webhook("Gathering: {}".format(currfield),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
     if stingerHunt(0,1) == "success": return
     setStatus("gathering")
+    log("Gather status:")
+    log(getStatus())
     time.sleep(0.2)
     timestart = time.perf_counter()
     fullTime = 0
@@ -2455,6 +2461,7 @@ def gather(gfid, quest = False):
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
         status = getStatus()
+        log(status)
         if bpcap >= setdat["pack"]:
             webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
             end_gather = 1
