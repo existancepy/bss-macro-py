@@ -1,24 +1,3 @@
-
-import pyautogui as pag
-import time
-import os
-import tkinter
-import loadsettings
-import move
-ws = loadsettings.load()["walkspeed"]
-
-def apd(k):
-    cmd = """
-        osascript -e  'tell application "System Events" to key down "{}"'
-    """.format(k)
-    os.system(cmd)
-def apu(k):
-    cmd = """
-        osascript -e  'tell application "System Events" to key up "{}"'
-    """.format(k)
-    os.system(cmd)
-
-
 move.hold("d",5)
 move.hold("s",7)
 move.apkey('space')
@@ -34,7 +13,7 @@ time.sleep(0.1)
 move.press("space")
 time.sleep(8)
 move.hold("w",13)
-move.hold("s",0.7)
+move.hold("s",0.55)
 move.hold("d",5)
 move.hold("w",1)
 move.hold("s",0.65)

@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.55"
+macrov = "1.55.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -850,6 +850,7 @@ def walk_to_hive(field):
     savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
+    ws = setdat["walkspeed"]
     webhook("","Going back to hive: {}".format(field.title()),"dark brown")
     exec(open("./paths/walk_{}.py".format(field)).read())
     move.hold("a",(hive-1)*0.9)
@@ -1356,7 +1357,6 @@ def vic():
             
             #r = imagesearch.find('disconnect.png',0.7,ww//3,wh//2.8,ww//2.3,wh//2.5)
             currtime = time.time()
-            log("Background loop")
             for i in range(len(setdat['slot_enable'])):
                 slot_enable = setdat['slot_enable'][i]
                 slot_freq = setdat['slot_freq'][i]
@@ -1367,9 +1367,7 @@ def vic():
                         slot_time*= 60
                     if currtime - slots_last_used[i] < slot_time:
                         continue
-                    log(f"Slot {i+1} time")
                     if slot_use == "gathering" and status != "gathering":
-                        log(status)
                         continue
                     if slot_use == "hive" and status != "hive":
                         continue
@@ -1615,7 +1613,9 @@ def clickdialog(t=60):
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
     ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-    mouse.position = (mw//2,mh*(7.3/10))
+    for _ in range(3):
+        mouse.position = (mw//2,mh*(7.3/10))
+        sleep(0.5)
     for _ in range(t):
         mouse.press(Button.left)
         sleep(0.1)
@@ -2487,10 +2487,10 @@ def gather(gfid, quest = False):
             else:
                 prev_bp = bpcap
                 repeat_bp = 0
+                
         if settings["mondo_buff"] and settings["mondo_interrupt"]:
             if collect_mondo_buff(gather=True):
-                end_gather = 1
-                break
+                return
             
             
         if settings["backpack_freeze"]:
@@ -2760,7 +2760,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         os.system(cmd)
         timings = loadtimings()
         setdat = loadsettings.load()
-        log("Loop start")
         #quests
         if setdat["polar_quest"]:
             objs = quest("polar",session_start)
@@ -4756,7 +4755,7 @@ if __name__ == "__main__":
     tkinter.Checkbutton(frame4, text="Wealth Clock", variable=wealthclock).place(x=0, y = 15)
     checkbox = tkinter.Checkbutton(frame4, text="Mondo Buff", variable=mondo_buff)
     checkbox.place(x=120, y = 15)
-    Tooltip(checkbox, text = "Goes to the mondo chick within the first 20mins of the hour.\n Stays for 2mins")
+    Tooltip(checkbox, text = "Goes to the mondo chick within the first 10mins of the hour.\n Stays for 2mins")
     checkbox = tkinter.Checkbutton(frame4, text="Mondo Interrupts Gathering", variable=mondo_interrupt)
     checkbox.place(x=240, y = 15)
     Tooltip(checkbox, text = "Interrupts gathering when mondo respawns")
@@ -5053,7 +5052,7 @@ if __name__ == "__main__":
     #Tab 6
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
-    #tkinter.Checkbutton(frame8, text="Bucko Bee Quest", variable=bucko_quest).place(x=0, y = 65)
+    tkinter.Checkbutton(frame8, text="Bucko Bee Quest", variable=bucko_quest).place(x=0, y = 65)
     label = tkinter.Label(frame8, text = "Override gather settings (other settings can be changed in gather tab)")
     label.place(x = 0, y = 100)
     Tooltip(label, text = "When gathering for quests, use these settings instead of the ones set in the gather tab")

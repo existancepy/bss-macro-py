@@ -38,8 +38,8 @@ def ahkPatternToPython(ahk):
     start = None
     end = None
     for i,e in enumerate(out):
-        if e.startswith("(LTrimJoin"):
-            start = i+1
+        if e.startswith("patterns["):
+            start = i+2
         elif e == ')"':
             end = i
     if not start is None and not end is None:
