@@ -5052,7 +5052,7 @@ if __name__ == "__main__":
     #Tab 6
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
-    tkinter.Checkbutton(frame8, text="Bucko Bee Quest", variable=bucko_quest).place(x=0, y = 65)
+    #tkinter.Checkbutton(frame8, text="Bucko Bee Quest", variable=bucko_quest).place(x=0, y = 65)
     label = tkinter.Label(frame8, text = "Override gather settings (other settings can be changed in gather tab)")
     label.place(x = 0, y = 100)
     Tooltip(label, text = "When gathering for quests, use these settings instead of the ones set in the gather tab")
