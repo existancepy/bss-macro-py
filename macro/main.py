@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.55.1"
+macrov = "1.55.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1371,6 +1371,8 @@ def vic():
                         slot_time*= 60
                     if currtime - slots_last_used[i] < slot_time:
                         continue
+                    log(f"slot {i+1} time")
+                    status = getStatus()
                     if slot_use == "gathering" and status != "gathering":
                         continue
                     if slot_use == "hive" and status != "hive":
