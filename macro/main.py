@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.55.3"
+macrov = "1.55.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1370,6 +1370,7 @@ def vic():
                     if slot_freq == "mins":
                         slot_time*= 60
                     if time.time() - slots_last_used[i] < slot_time:
+                        log(time.time() - slots_last_used[i])
                         continue
                     log(f"slot {i+1} time, {slot_time}")
                     status = getStatus()
