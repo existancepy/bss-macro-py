@@ -1369,16 +1369,16 @@ def vic():
                 if slot_enable and status != "disconnect":
                     if slot_freq == "mins":
                         slot_time*= 60
-                    if currtime - slots_last_used[i] < slot_time:
+                    if time.time() - slots_last_used[i] < slot_time:
                         continue
-                    log(f"slot {i+1} time")
+                    log(f"slot {i+1} time, {slot_time}")
                     status = getStatus()
                     if slot_use == "gathering" and status != "gathering":
                         continue
                     if slot_use == "hive" and status != "hive":
                         continue
                     move.press(str(i+1))
-                    slots_last_used[i] = currtime
+                    slots_last_used[i] = time.time()
                     log(f"Used slot {i+1}")
                     
                     
