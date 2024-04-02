@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56"
+macrov = "1.56.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -164,12 +164,16 @@ def is_running(app):
     return app in tmp[:]
 
 def lowBattery():
-    ps = subprocess.Popen(
-        'pmset -g batt', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = ps.communicate()[0].decode("utf-8").split(";")
-    charging = not "discharging" in output[1].lower()
-    batt = int(output[0].split("\t")[1].split("%")[0])
-    return batt < 10 and not charging
+    ps = subprocess.Popen('pmset -g batt', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        output = ps.communicate()[0].decode("utf-8").split(";")
+        charging = not "discharging" in output[1].lower()
+        batt = int(output[0].split("\t")[1].split("%")[0])
+        return batt < 10 and not charging
+    except:
+        log("battery detection error")
+        log(ps)
+        return False
 
 def pagmove(k,t):
     pag.keyDown(k)
