@@ -1313,7 +1313,7 @@ def goToPlanter(field,place=0):
     elif field == "blue flower":
         move.hold("s",2)
         move.hold("a",4)
-        move.hold("d",1.2)
+        move.hold("d",1)
     else:
         time.sleep(0.8)
     time.sleep(0.2)
@@ -2487,6 +2487,7 @@ def gather(gfid, quest = False, questGoo = False):
         mouse.press(Button.left)
         if setdat['shift_lock']: pag.press('shift')
         exec(open("./patterns/gather_{}.py".format(gp)).read())
+        mouse.release(Button.left)
         if setdat['shift_lock']: pag.press('shift')
         resetMobTimer(cf.lower())
         timespent = (time.perf_counter() - timestart)/60
@@ -2539,7 +2540,6 @@ def gather(gfid, quest = False, questGoo = False):
                 webhook("","Backpack has not changed. Roblox is frozen","red")
                 addStat("gather_time",round(timespent,2))
                 return 
-        mouse.release(Button.left)
         cycleCount += 1
     time.sleep(0.5)
     setStatus()
