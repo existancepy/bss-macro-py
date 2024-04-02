@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.2"
+macrov = "1.56.3"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2942,7 +2942,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                 #check if there is a need to force gather a field to collect tokens/pollen
                 gatherFields = list(quest_gathers.keys())
                 if setdat["gather_enable"]:
-                    fields += [x.lower() for x in setdat['gather_field'] if x.lower() != "none"]
+                    gatherFields += [x.lower() for x in setdat['gather_field'] if x.lower() != "none"]
                 gatherFields = set(gatherFields)
 
                 defaultField = "pine tree"
