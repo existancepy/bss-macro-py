@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.1"
+macrov = "1.56.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2340,6 +2340,7 @@ def rejoin():
         move.press(".")
         move.hold("w",6+(i*2),0)
         move.press(",")
+        time.sleep(0.3)
         move.hold("s",0.6,0)
         time.sleep(0.5)
         webhook("","Finding Hive", "dark brown",1)
@@ -2364,7 +2365,7 @@ def rejoin():
                 if setdat['haste_compensation']: openSettings()
                 addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
                 return
-        webhook("",'Rejoin unsuccessful, attempt {i+2}','dark brown')
+        webhook("",f'Rejoin unsuccessful, attempt {i+2}','dark brown')
 
     
 def gather(gfid, quest = False, questGoo = False):
