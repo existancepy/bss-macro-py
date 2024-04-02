@@ -47,3 +47,5 @@ return_to_hive_override: no override
 gather_time_override:8
 gather_time_override_enabled:0
 bucko_quest:0
+enable_quest_gumdrop:0
+quest_gumdrop_slot:1

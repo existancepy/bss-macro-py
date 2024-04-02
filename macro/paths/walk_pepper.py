@@ -28,7 +28,7 @@ move.hold("w",4)
 move.hold("s",0.3)
 move.hold("d",3)
 move.hold("w",1)
-move.hold("s",0.6)
+move.hold("s",0.5)
 
 
 

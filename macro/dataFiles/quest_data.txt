@@ -95,25 +95,25 @@ gather_cactus
 ==bucko==
 
 -abilities
-misc_blueability
+token_blueability
 
 -bamboo
 gather_bamboo
 
 -bombard
-misc_bomb
+token_bomb
 kill_10_rhinobeetle
 kill_20_ant
 kill_10_armyant
 
 -booster
-misc_blueboost
+token_blueboost
 collect_blue_booster
 
 -clean-up
-goo_blue flower
-goo_bamboo
-goo_pine tree
+gathergoo_blue flower
+gathergoo_bamboo
+gathergoo_pine tree
 
 -extraction
 gather_clover
@@ -124,16 +124,16 @@ gather_pumpkin
 gather_blue flower
 
 -goo
-goo_pine tree
+pollengoo_blue
 
 -medley
-misc_blueability
-goo_bamboo
+token_blueability
+gathergoo_bamboo
 gather_pine tree
 
 -picnic
 gather_blue flower
-misc_blueberry
+fieldtoken_blueberry
 feed_25_blueberry
 kill_5_ant
 kill_5_armyant
@@ -142,20 +142,20 @@ kill_5_armyant
 gather_pine tree
 
 -pollen
-gather_pine tree
+pollen_blue
 
 -scavenge
-gather_pine tree
-misc_blueability
-misc_blueberry
+pollen_blue
+token_blueability
+fieldtoken_blueberry
 
 -skirmish
 gather_blue flower
 kill_10_rhinobeetle
 
 -tango
-gather_pine tree
-misc_blueability
+pollen_blue
+token_blueability
 kill_5_mantis
 
 -tour

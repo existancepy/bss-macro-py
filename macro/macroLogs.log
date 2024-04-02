@@ -1,5 +1,242 @@
-Your macro version is 1.55
+Your macro version is 1.56
 
 
 display type: retina
 Screen coordinates: 2880x1800
+[11:48:32] Macro started - Report - exih_macro
+Version 1.56
+Screen Coordinates: 2880x1800
+Python 3.9.5
+[]
+OCR for Custom
+[[[[[29.0, 22.0], [122.0, 26.0], [120.0, 54.0], [27.0, 50.0]], ('Honey', 0.9989259839057922)], [[[148.0, 25.0], [391.0, 25.0], [391.0, 51.0], [148.0, 51.0]], ('14,228,539,170,835', 0.9970368146896362)], [[[432.0, 26.0], [564.0, 26.0], [564.0, 50.0], [432.0, 50.0]], ('(+16,799/sec)', 0.997320830821991)], [[[630.0, 22.0], [726.0, 22.0], [726.0, 52.0], [630.0, 52.0]], ('Pollen', 0.9985288977622986)], [[[745.0, 21.0], [991.0, 21.0], [991.0, 52.0], [745.0, 52.0]], ('0/148,253,674', 0.9975687265396118)]]]
+0,[[[[29.0, 22.0], [122.0, 26.0], [120.0, 54.0], [27.0, 50.0]], ('Honey', 0.9989259839057922)], [[[148.0, 25.0], [391.0, 25.0], [391.0, 51.0], [148.0, 51.0]], ('14,228,539,170,835', 0.9970368146896362)], [[[432.0, 26.0], [564.0, 26.0], [564.0, 50.0], [432.0, 50.0]], ('(+16,799/sec)', 0.997320830821991)], [[[630.0, 22.0], [726.0, 22.0], [726.0, 52.0], [630.0, 52.0]], ('Pollen', 0.9985288977622986)], [[[745.0, 21.0], [991.0, 21.0], [991.0, 52.0], [745.0, 52.0]], ('0/148,253,674', 0.9975687265396118)]]
+[11:48:55]  - Detected: Old UI
+Session Start
+['14,228,539,170,835']
+[11:48:58]  - Resetting character, Attempt: 1
+[255, 255, 255]
+0
+0
+0
+real
+0.0
+[184, 133, 46]
+87
+138
+51
+real
+92.0
+OCR for bee bear
+
+To Make Honey, Collect PollenFrom FIower Fields
+to make honey, collect pollenfrom fiower fields
+OCR for bee bear
+
+To Make Honey, Collect PollenFrom FIower Fields
+to make honey, collect pollenfrom fiower fields
+Max Cycles: 1
+OCR for disconnect
+
+17token slav17
+[11:49:32]  - Moving to cannon
+
+
+OCR for bee bear
+
+Fire the Red Cannon
+fire the red cannon
+[11:49:47]  - Cannon found
+[11:49:48]  - Travelling: Bucko Bee (get quest) 
+['14,228,539,177,827', '(+520/sec)']
+[11:50:03]  - First Honey detected: 14.23 T
+14228539177827
+OCR for bee bear
+
+
+
+[11:50:24]  - Unable to reach Bucko Bee
+[11:50:24]  - Resetting character, Attempt: 1
+[255, 255, 255]
+0
+0
+0
+real
+0.0
+[184, 133, 46]
+87
+138
+51
+real
+92.0
+OCR for disconnect
+
+17token slav17.
+[11:50:46]  - Moving to cannon
+
+
+['14,228,539,252,729']
+14228539252729
+OCR for bee bear
+
+Fire the Red Cannon
+fire the red cannon
+[11:51:06]  - Cannon found
+[11:51:06]  - Travelling: Bucko Bee (get quest) 
+OCR for bee bear
+
+BeeTalk to Gifted Bucko
+beetalk to gifted bucko
+[11:51:42]  - Reached Bucko Bee
+['14,228,539,258,762']
+14228539258762
+OCR for Custom
+[[[[[167.0, 73.0], [474.0, 73.0], [474.0, 104.0], [167.0, 104.0]], ('Bucko Bee: Picnic', 0.9962261319160461)], [[[70.0, 152.0], [570.0, 152.0], [570.0, 172.0], [70.0, 172.0]], ('Collect 277.000.000 Pollen from the Blue', 0.9550912976264954)], [[[181.0, 182.0], [460.0, 183.0], [460.0, 209.0], [181.0, 208.0]], ('Flower Field. Complete!', 0.9683017134666443)], [[[141.0, 250.0], [497.0, 253.0], [497.0, 277.0], [141.0, 275.0]], ('Collect 160 Blueberry Tokens', 0.958644449710846)], [[[262.0, 284.0], [381.0, 284.0], [381.0, 310.0], [262.0, 310.0]], ('Complete!', 0.995803713798523)], [[[115.0, 350.0], [522.0, 352.0], [522.0, 377.0], [114.0, 375.0]], ('Feed50Blueberries to your Bees', 0.9509748220443726)], [[[261.0, 383.0], [380.0, 383.0], [380.0, 408.0], [261.0, 408.0]], ('Complete!', 0.9978687763214111)], [[[221.0, 449.0], [415.0, 451.0], [415.0, 476.0], [221.0, 473.0]], ('Defeat 145 Ants', 0.9989751577377319)], [[[261.0, 483.0], [382.0, 483.0], [382.0, 511.0], [261.0, 511.0]], ('Complete!', 0.9926314949989319)], [[[182.0, 550.0], [452.0, 552.0], [452.0, 578.0], [182.0, 576.0]], ('Defeat 140 Army Ants', 0.9925181269645691)], [[[277.0, 581.0], [363.0, 581.0], [363.0, 610.0], [277.0, 610.0]], ('81/140', 0.9998481869697571)], [[[92.0, 671.0], [547.0, 672.0], [546.0, 707.0], [92.0, 706.0]], ('Polar Bear: Spider Pot-Pie', 0.999340295791626)], [[[65.0, 749.0], [574.0, 751.0], [574.0, 776.0], [65.0, 774.0]], ('Collect 160,000 Pollen from the Mushroom', 0.9975333213806152)]]]
+[11:52:19]  - Quest detected: Picnic
+['gather_blue flower', 'fieldtoken_blueberry', 'feed_25_blueberry', 'kill_5_ant', 'kill_5_armyant']
+['bucko bee: picnic', 'collect 277.000.000 pollen from the blue flower field. complete! complete', 'collect 160 blueberry tokens complete! complete', 'feed50blueberries to your bees complete! complete', 'defeat 145 ants complete! complete', 'defeat 140 army ants', '81/140 polar bear: spider pot-pie', 'collect 160,000 pollen from the mushroom']
+['gather', 'blue flower'], collect277.000.000pollenfromtheblueflowerfield.complete!complete
+['fieldtoken', 'blueberry'], collect160blueberrytokenscomplete!complete
+['feed', '50', 'blueberry'], feed50blueberrytoyourbeescomplete!complete
+['kill', '5', 'ant'], defeat145antscomplete!complete
+['kill', '5', 'armyant'], defeat140armyants
+['kill_5_armyant']
+[11:52:19]  - Objectives Detected:
+
+kill_5_armyant
+[11:52:19]  - Resetting character, Attempt: 1
+[255, 255, 255]
+0
+0
+0
+real
+0.0
+[184, 133, 46]
+87
+138
+51
+real
+92.0
+OCR for disconnect
+
+Blessing x412,85917toker171717P
+[11:52:49]  - Travelling: Ant Challenge
+OCR for disconnect
+
+17toker larBlessing x4
+[11:52:56]  - Moving to cannon
+['14,228,539,258,762']
+14228539258762
+
+
+OCR for bee bear
+
+Fire the Red Cannon
+fire the red cannon
+[11:53:12]  - Cannon found
+OCR for bee bear
+
+the Ant ChallengeYou need 1 Ant Pass to Play
+the ant challengeyou need 1 ant pass to play
+[11:53:45]  - Cant start ant challenge
+[11:53:50]  - Resetting character, Attempt: 1
+[255, 255, 255]
+0
+0
+0
+real
+0.0
+['14,228,539,421,469']
+14228539421469
+[184, 133, 46]
+87
+138
+51
+real
+92.0
+OCR for disconnect
+
+1712,807Blessing x4tokerT
+OCR for Custom
+[[[[[167.0, 73.0], [474.0, 73.0], [474.0, 104.0], [167.0, 104.0]], ('Bucko Bee: Picnic', 0.9962261319160461)], [[[70.0, 152.0], [570.0, 152.0], [570.0, 172.0], [70.0, 172.0]], ('Collect 277.000.000 Pollen from the Blue', 0.9539585113525391)], [[[181.0, 182.0], [460.0, 183.0], [460.0, 209.0], [181.0, 208.0]], ('Flower Field. Complete!', 0.9667540192604065)], [[[142.0, 249.0], [497.0, 253.0], [497.0, 277.0], [141.0, 274.0]], ('Collect 160 Blueberry Tokens', 0.9632053971290588)], [[[262.0, 284.0], [380.0, 284.0], [380.0, 310.0], [262.0, 310.0]], ('Complete!', 0.9950479865074158)], [[[115.0, 350.0], [522.0, 352.0], [522.0, 377.0], [114.0, 375.0]], ('Feed50Blueberries to your Bees', 0.9498322606086731)], [[[262.0, 384.0], [381.0, 384.0], [381.0, 409.0], [262.0, 409.0]], ('Complete!', 0.994727373123169)], [[[221.0, 449.0], [415.0, 451.0], [415.0, 476.0], [221.0, 473.0]], ('Defeat 145 Ants', 0.9988101720809937)], [[[261.0, 483.0], [382.0, 483.0], [382.0, 511.0], [261.0, 511.0]], ('Complete!', 0.9893632531166077)], [[[182.0, 550.0], [452.0, 552.0], [452.0, 578.0], [182.0, 576.0]], ('Defeat 140 Army Ants', 0.9925181269645691)], [[[277.0, 581.0], [363.0, 581.0], [363.0, 610.0], [277.0, 610.0]], ('81/140', 0.9998481869697571)], [[[93.0, 671.0], [546.0, 672.0], [546.0, 707.0], [93.0, 706.0]], ('Polar Bear: Spider Pot-Pie', 0.9929358959197998)], [[[65.0, 749.0], [574.0, 751.0], [574.0, 776.0], [65.0, 774.0]], ('Collect 160,000 Pollen from the Mushroom', 0.9975333213806152)]]]
+[11:54:30]  - Quest detected: Picnic
+['gather_blue flower', 'fieldtoken_blueberry', 'feed_25_blueberry', 'kill_5_ant', 'kill_5_armyant']
+['bucko bee: picnic', 'collect 277.000.000 pollen from the blue flower field. complete! complete', 'collect 160 blueberry tokens complete! complete', 'feed50blueberries to your bees complete! complete', 'defeat 145 ants complete! complete', 'defeat 140 army ants', '81/140 polar bear: spider pot-pie', 'collect 160,000 pollen from the mushroom']
+['gather', 'blue flower'], collect277.000.000pollenfromtheblueflowerfield.complete!complete
+['fieldtoken', 'blueberry'], collect160blueberrytokenscomplete!complete
+['feed', '50', 'blueberry'], feed50blueberrytoyourbeescomplete!complete
+['kill', '5', 'ant'], defeat145antscomplete!complete
+['kill', '5', 'armyant'], defeat140armyants
+['kill_5_armyant']
+[11:54:31]  - Objectives Detected:
+
+kill_5_armyant
+OCR for disconnect
+
+12,7897
+[11:54:41]  - Travelling: Ant Challenge
+OCR for disconnect
+
+12,783 token slay7.
+[11:54:48]  - Moving to cannon
+
+
+['14,228,539,421,469']
+14228539421469
+OCR for bee bear
+
+Fire the Red Cannon
+fire the red cannon
+[11:55:03]  - Cannon found
+OCR for bee bear
+
+the Ant ChallengeYou need 1 Ant Pass to Play
+the ant challengeyou need 1 ant pass to play
+[11:55:36]  - Cant start ant challenge
+[11:55:40]  - Resetting character, Attempt: 1
+[255, 255, 255]
+0
+0
+0
+real
+0.0
+[184, 133, 46]
+87
+138
+51
+real
+92.0
+['14,228,539,584,176']
+14228539584176
+OCR for disconnect
+
+Blessing x4token171T
+OCR for Custom
+[[[[[167.0, 73.0], [474.0, 73.0], [474.0, 104.0], [167.0, 104.0]], ('Bucko Bee: Picnic', 0.9962261319160461)], [[[70.0, 152.0], [570.0, 152.0], [570.0, 172.0], [70.0, 172.0]], ('Collect 277.000.000 Pollen from the Blue', 0.9539585113525391)], [[[181.0, 182.0], [460.0, 183.0], [460.0, 209.0], [181.0, 208.0]], ('Flower Field. Complete!', 0.9667540192604065)], [[[142.0, 249.0], [497.0, 253.0], [497.0, 277.0], [141.0, 274.0]], ('Collect 160 Blueberry Tokens', 0.9632053971290588)], [[[262.0, 284.0], [380.0, 284.0], [380.0, 310.0], [262.0, 310.0]], ('Complete!', 0.9950479865074158)], [[[115.0, 350.0], [522.0, 352.0], [522.0, 377.0], [114.0, 375.0]], ('Feed50Blueberries to your Bees', 0.9498322606086731)], [[[262.0, 384.0], [381.0, 384.0], [381.0, 409.0], [262.0, 409.0]], ('Complete!', 0.994727373123169)], [[[221.0, 449.0], [415.0, 451.0], [415.0, 476.0], [221.0, 473.0]], ('Defeat 145 Ants', 0.9988101720809937)], [[[261.0, 483.0], [382.0, 483.0], [382.0, 511.0], [261.0, 511.0]], ('Complete!', 0.9893632531166077)], [[[182.0, 550.0], [452.0, 552.0], [452.0, 578.0], [182.0, 576.0]], ('Defeat 140 Army Ants', 0.9925181269645691)], [[[277.0, 581.0], [363.0, 581.0], [363.0, 610.0], [277.0, 610.0]], ('81/140', 0.9998481869697571)], [[[93.0, 671.0], [546.0, 672.0], [546.0, 707.0], [93.0, 706.0]], ('Polar Bear: Spider Pot-Pie', 0.9929358959197998)], [[[65.0, 749.0], [574.0, 751.0], [574.0, 776.0], [65.0, 774.0]], ('Collect 160,000 Pollen from the Mushroom', 0.9975333213806152)]]]
+[11:56:20]  - Quest detected: Picnic
+['gather_blue flower', 'fieldtoken_blueberry', 'feed_25_blueberry', 'kill_5_ant', 'kill_5_armyant']
+['bucko bee: picnic', 'collect 277.000.000 pollen from the blue flower field. complete! complete', 'collect 160 blueberry tokens complete! complete', 'feed50blueberries to your bees complete! complete', 'defeat 145 ants complete! complete', 'defeat 140 army ants', '81/140 polar bear: spider pot-pie', 'collect 160,000 pollen from the mushroom']
+['gather', 'blue flower'], collect277.000.000pollenfromtheblueflowerfield.complete!complete
+['fieldtoken', 'blueberry'], collect160blueberrytokenscomplete!complete
+['feed', '50', 'blueberry'], feed50blueberrytoyourbeescomplete!complete
+['kill', '5', 'ant'], defeat145antscomplete!complete
+['kill', '5', 'armyant'], defeat140armyants
+['kill_5_armyant']
+[11:56:21]  - Objectives Detected:
+
+kill_5_armyant
+OCR for disconnect
+
+tokensBlessing x4.12.726.717
+[11:56:34]  - Travelling: Ant Challenge
+OCR for disconnect
+
+Blessing x412.720
+[11:56:40]  - Moving to cannon
+
+
+OCR for bee bear
+
+Fire the Red Cannon
+fire the red cannon
+[11:56:55]  - Cannon found

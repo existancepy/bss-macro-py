@@ -19,7 +19,6 @@ from webhook import webhook
 import webbrowser
 import reset
 import ast
-import getHaste
 from datetime import datetime
 import matplotlib.pyplot as plt
 import random
@@ -35,6 +34,7 @@ import reset
 from pixelcolour import getPixelColor
 import pygetwindow as gw
 from logpy import log
+from ocrpy import customOCR, imToString
 import backpack
 keyboard = Controller()
 mouse = pynput.mouse.Controller()
@@ -101,14 +101,7 @@ def loadRes():
             l[1] = int(l[1])
         outdict[l[0]] = l[1]
     return outdict
-'''
-savedat = loadRes()
-ww = savedat['ww']
-wh = savedat['wh']
-roblox()
-a = pag.screenshot(region=(0,wh/7,ww/4.5,wh/2))
-a.save("b.png")
-'''
+
 savedat = loadRes()
 ww = savedat['ww']
 wh = savedat['wh']
@@ -120,15 +113,92 @@ cmd = """
         osascript -e 'activate application "Roblox"' 
     """
 os.system(cmd)
-keyboard.press(Key.cmd)
-time.sleep(0.05)
-keyboard.press(Key.ctrl)
-time.sleep(0.05)
-keyboard.press("f")
-time.sleep(0.1)
-keyboard.release(Key.cmd)
-keyboard.release(Key.ctrl)
-keyboard.release("f")
+
+def getBesideE():
+    text = imToString("bee bear").lower()
+    log(text)
+    return text
+
+def checkwithOCR(m):
+    text = imToString(m).lower()
+    if m == "bee bear":
+        if "bear" in text or "talk" in text:
+            return True
+    elif m == "egg shop":
+        if "bee egg" in text or "basic bee" in text or "small bag" in text or ("blue" in text and "bubble" in text):
+            return True
+    elif m == "disconnect":
+        if "disconnected" in text or "join error" in text:
+            setStatus("disconnect")
+            webhook("","disconnected","red")
+            return True
+        elif "planter" in text and "yes" in text:
+            webhook("","Detected planter pop up present","brown",1)
+            clickYes()
+    elif m == "dialog":
+        if "bear" in text:
+            return True
+    return False
+
+def canon(fast=0):
+    savedata = loadRes()
+    setdat = loadsettings.load()
+    ww = savedata['ww']
+    wh = savedata['wh']
+    disconnect = False
+    eb_freeze = False
+    for i in range(3):
+        #Move to canon:
+        if not fast:
+            if checkwithOCR("disconnect"):
+                return "dc"
+            webhook("","Moving to cannon","dark brown")
+        time.sleep(1)
+        move.hold("w",0.8)
+        move.hold("d",0.9*(setdat["hive_number"])+1)
+        pag.keyDown("d")
+        time.sleep(0.5)
+        move.press("space")
+        time.sleep(0.2)
+        r = ""
+        pag.keyUp("d")
+        move.hold("w",0.2)
+        if eb_freeze:
+            webhook("","E button detected. Roblox is frozen", "red",1)
+            disconnect = True
+            break
+        if fast:
+            move.hold("d",0.95)
+            time.sleep(0.1)
+            return
+        move.hold("d",0.35)
+        move.hold("s",0.15)
+        for _ in range(6):
+            move.hold("d",0.2)
+            time.sleep(0.05)
+            if "fire" in getBesideE():
+                webhook("","Cannon found","dark brown")
+                with open('./dataFiles/canonfails.txt', 'w') as f:
+                    f.write('0')
+                f.close()
+                return
+        webhook("","Could not find cannon","dark brown",1)
+        mouse.position = (mw//2,mh//5*4)
+        reset.reset()
+    else:
+        webhook("","Cannon failed too many times, rejoining", "red")
+        disconnect = True
+        
+    if disconnect:
+        setStatus("disconnect")
+        time.sleep(1)
+        return "dc"
+    
+
+while True:
+    reset.reset()
+    canon()
+
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
 small_image = cv2.imread('./images/general/nightsky.png')

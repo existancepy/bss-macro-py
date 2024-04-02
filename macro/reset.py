@@ -15,7 +15,7 @@ keyboard = pynput.keyboard.Controller()
 mouse = Controller()
 savedata = {}
 mw,mh = pag.size()
-tar =  [(250, 250, 250),(150,150,150)] #(127, 108, 41)
+tar = (165, 119, 41)
 var = 20
 def loadSave():
     with open('save.txt') as f:
@@ -61,32 +61,26 @@ def reset(hiveCheck=False):
             log("real")
             avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
             log(avgDiff)
-            '''
-            for x in tar: 
-                for i in range(len(x)):
-                    print(x,r)
-                    if not (x[i]-var <= r[i] <= x[i]+var):
+            if avgDiff > 10:
+                passed = True
+                print(r)
+                for i in range(len(tar)):
+                    if not( tar[i]-var <= r[i] <= tar[i]+var):        
+                        passed = False
                         break
-                else:
-                    passed = 1
-                if passed: break
-            '''
-            if avgDiff > 6:
-                time.sleep(0.1)
-                for _ in range(4):
-                    keyboard.press(',')
-                    time.sleep(0.05)
-                    keyboard.release(',')
-                
-                for _ in range(4):
-                    keyboard.press('o')
+                    
+                if passed:
                     time.sleep(0.1)
-                    keyboard.release('o')
-                return True
+                    for _ in range(4):
+                        pag.press(".")
+                    time.sleep(0.1)
+                    for _ in range(6):
+                        keyboard.press('o')
+                        time.sleep(0.08)
+                        keyboard.release('o')
+                    return True
             for _ in range(4):
-                keyboard.press(',')
-                time.sleep(0.05)
-                keyboard.release(',')
+                pag.press(".")
             
             time.sleep(0.5)
         time.sleep(1)

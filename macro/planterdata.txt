@@ -1,3 +1,3 @@
-[('blue clay', 'pine tree'), ('tacky', 'sunflower')]
+[('red clay', 'rose'), ('tacky', 'pumpkin')]
 []
 []
