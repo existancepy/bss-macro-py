@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.3"
+macrov = "1.56.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1651,6 +1651,7 @@ def clickdialog(t=60):
 def seqMatch(string1, string2, threshold):
     return SequenceMatcher(None, string1, string2).ratio() > threshold
 
+
 def hasNumber(string):
     return any(char.isdigit() for char in string)
 
@@ -1697,7 +1698,7 @@ def getQuest(giver):
     q_title = ""
     lines = []
     for j in range(10):
-        ocr = customOCR(0,wh/(7),ww/(4.3),wh/2.3,0)
+        ocr = customOCR(0,wh/7,ww/(4.3),wh/1.9,0)
         lines = [x[1][0].lower() for x in ocr]
         #log(lines)
         #search for quest title in only the first 8 lines
@@ -1770,8 +1771,19 @@ def getQuest(giver):
     finalLines = []
     detectedObjs =  []
     #match the detected text with the objectives from the database
+
+    replaceDict = {
+        " ":"",
+        "wolves":"wolf",
+        "blueberries": "blueberry",
+        "flowe": "flower",
+        "bamboc": "bamboo",
+        "bamcc": "bamboo"
+    }
+    
     for i,e in enumerate(completeLines):
-        e = e.replace(" ","").replace("wolves","wolf").replace("blueberries","blueberry")
+        for k,v in replaceDict.items():
+            e.replace(k,v)
         for x in quest:
             a = x.split("_")
             #check for gather
@@ -2308,20 +2320,20 @@ def rejoin():
         """
         os.system(cmd)
         time.sleep(1)
-        if setdat['manual_fullscreen']:
-            menubarRaw = customOCR(0, 0, 300, 60, 0)
-            menubar = ""
-            try:
-                for x in menubarRaw:
-                    menubar += x[1][0]
-            except:
-                pass
-            menubar = menubar.lower()
-            if "rob" in menubar or "lox" in menubar:
-                webhook("","Roblox is not in fullscreen, activating fullscreen", "dark brown",1)
-                fullscreen()
-            else:
-                webhook("","Roblox is already in fullscreen, not activating fullscreen", "dark brown",1)
+ 
+        menubarRaw = customOCR(0, 0, 300, 60, 0)
+        menubar = ""
+        try:
+            for x in menubarRaw:
+                menubar += x[1][0]
+        except:
+            pass
+        menubar = menubar.lower()
+        if "rob" in menubar or "lox" in menubar:
+            webhook("","Roblox is not in fullscreen, activating fullscreen", "dark brown",1)
+            fullscreen()
+        else:
+            webhook("","Roblox is already in fullscreen, not activating fullscreen", "dark brown",1)
 
         if setdat["rejoin_method"] != "deeplink":
             time.sleep(2)
@@ -3675,7 +3687,6 @@ if __name__ == "__main__":
     rejoin_every = setdat['rejoin_every']
     rejoin_delay = setdat['rejoin_delay']
     rejoin_method = tk.StringVar(root)
-    manual_fullscreen = tk.IntVar()
     
     convert_wait = ""
     #convert_every_enabled = tk.IntVar()
@@ -3707,6 +3718,7 @@ if __name__ == "__main__":
 
     polar_quest = tk.IntVar()
     bucko_quest = tk.IntVar()
+    riley_quest = tk.IntVar()
     enable_quest_gumdrop = tk.IntVar()
     quest_gumdrop_slot = tk.StringVar()
     
@@ -3811,7 +3823,6 @@ if __name__ == "__main__":
         rejoin_every = setdat['rejoin_every']
         rejoin_delay = setdat['rejoin_delay']
         rejoin_method.set(setdat['rejoin_method'])
-        manual_fullscreen.set(setdat['manual_fullscreen'])
         
         convert_wait = setdat['convert_wait']
         #convert_every_enabled.set(setdat["convert_every_enabled"])
@@ -3843,6 +3854,7 @@ if __name__ == "__main__":
 
         polar_quest.set(setdat["polar_quest"])
         bucko_quest.set(setdat["bucko_quest"])
+        riley_quest.set(setdat["riley_quest"])
         enable_quest_gumdrop.set(setdat["enable_quest_gumdrop"])
         quest_gumdrop_slot.set(setdat["quest_gumdrop_slot"])
 
@@ -4243,7 +4255,6 @@ if __name__ == "__main__":
             "haste_compensation": haste_compensation.get(),
             "rejoin_every_enabled": rejoin_every_enabled.get(),
             "rejoin_every": rejoinetextbox.get(1.0,"end").replace("\n",""),
-            "manual_fullscreen": manual_fullscreen.get(),
             "convert_wait": convertwaittextbox.get(1.0,"end").replace("\n",""),
             #"convert_every_enabled": convert_every_enabled.get(),
             #"convert_every": converttextbox.get(1.0,"end").replace("\n",""),
@@ -4292,6 +4303,7 @@ if __name__ == "__main__":
             
             "polar_quest": polar_quest.get(),
             "bucko_quest": bucko_quest.get(),
+            "riley_quest": riley_quest.get(),
             "enable_quest_gumdrop": enable_quest_gumdrop.get(),
             "quest_gumdrop_slot": quest_gumdrop_slot.get(),
             
@@ -5235,6 +5247,7 @@ if __name__ == "__main__":
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
     tkinter.Checkbutton(frame8, text="Bucko Bee Quest", variable=bucko_quest).place(x=180, y = 30)
+    #tkinter.Checkbutton(frame8, text="Riley Bee Quest", variable=riley_quest).place(x=360, y = 30)
 
     tkinter.Checkbutton(frame8, text="Use Gumdrops for goo quests", variable=enable_quest_gumdrop).place(x=0, y = 66)
     tkinter.Label(frame8, text = "Gumdrop Slot").place(x = 230, y = 65)
@@ -5342,18 +5355,16 @@ if __name__ == "__main__":
     rejoindelaytextbox.bind('<space>', lambda e: "break")
     Tooltip(rejoindelaytextbox, text = "The time to wait for bee swarm to load when rejoining")
     tkinter.Label(frame7, text = "secs when rejoining").place(x = 90, y = 155)
-    checkbox = tkinter.Checkbutton(frame7, text="Manually fullscreen when rejoining (Enable when roblox doesnt launch in fullscreen)", variable=manual_fullscreen)
-    checkbox.place(x=0, y = 190)
-    Tooltip(checkbox, text = "Fullscreens roblox when rejoining.")
+
     tkinter.Label(frame7, text = "Rejoin method").place(x = 250, y = 155)
     dropField = ttk.OptionMenu(frame7, rejoin_method, setdat['rejoin_method'].title(), *["New Tab","Type In Link", "Copy Paste", "Reload", "Deeplink"],style='my.TMenubutton' )
     dropField.place(width=90,x = 360, y = 155,height=24)
     Tooltip(dropField, text = "How the macro interacts with the browser when rejoining. Different rejoin methods work for different users.\n\nIt is recommended to experiment to see which one works for you.")
     checkbox = tkinter.Checkbutton(frame7, text="Backpack freeze detection", variable=backpack_freeze)
-    checkbox.place(x=0, y = 225)
+    checkbox.place(x=0, y = 190)
     Tooltip(checkbox, text = "Detects roblox as frozen when the backpack has not changed for a while.\nThis detection only occurs when the macro is gathering")
     checkbox = tkinter.Checkbutton(frame7, text="Existance so broke", variable=so_broke)
-    checkbox.place(x=0, y = 260)
+    checkbox.place(x=0, y = 225)
     Tooltip(checkbox, text = "Sends 'Existance so broke' when rejoining. This is a reference to Natro's 'Natro so broke'")
 
     #Tab 9

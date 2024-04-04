@@ -15,8 +15,8 @@ keyboard = pynput.keyboard.Controller()
 mouse = Controller()
 savedata = {}
 mw,mh = pag.size()
-tar = (165, 119, 41)
-var = 20
+tar = (170, 125, 41)
+var = 25
 def loadSave():
     with open('save.txt') as f:
         lines = f.read().split("\n")
