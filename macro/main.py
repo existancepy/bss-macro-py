@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.4"
+macrov = "1.56.5"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -452,7 +452,7 @@ def getTop(y):
     res = customOCR(ww/3.5,y,ww/2.5,height,0)
     log(f"{y},{res}")
     if not res: return False
-    text = [x[1][0].lower() for x in res]
+    text = ''.join([x[1][0].lower() for x in res])
     
     return "honey" in text or "pollen" in text
 
@@ -718,7 +718,8 @@ def canon(fast=0):
         for _ in range(6):
             move.hold("d",0.2)
             time.sleep(0.05)
-            if "fire" in getBesideE():
+            beside = getBesideE()
+            if "fire" in beside or "red" in beside:
                 webhook("","Cannon found","dark brown")
                 with open('./dataFiles/canonfails.txt', 'w') as f:
                     f.write('0')
@@ -1698,7 +1699,7 @@ def getQuest(giver):
     q_title = ""
     lines = []
     for j in range(10):
-        ocr = customOCR(0,wh/7,ww/(4.3),wh/1.9,0)
+        ocr = customOCR(0,wh/7,ww/4.3,wh/1.9,0)
         lines = [x[1][0].lower() for x in ocr]
         #log(lines)
         #search for quest title in only the first 8 lines
@@ -1783,7 +1784,7 @@ def getQuest(giver):
     
     for i,e in enumerate(completeLines):
         for k,v in replaceDict.items():
-            e.replace(k,v)
+            e = e.replace(k,v)
         for x in quest:
             a = x.split("_")
             #check for gather
@@ -1873,17 +1874,20 @@ def openSettings():
         time.sleep(0.02)
         keyboard.release(Key.page_down)
     time.sleep(0.5)
-    for _ in range(1):
+    for _ in range(3):
         keyboard.press(Key.page_up)
         time.sleep(0.02)
         keyboard.release(Key.page_up)
     for _ in range(8):
         statData = customOCR(0,wh/7,ww/7,wh/2)
-        statNames = ''.join([x[1][0] for x in statData]).lower()
-        print(statNames)
-        if 'speed'in statNames:
-            pag.typewrite("\\")
-            break
+        found = False
+        for i, e in enumerate(statData):
+            if 'speed' in e[1][0].lower():
+                pag.typewrite("\\")
+                movespeedInfo = e
+                found = True
+                break
+        if found: break
         keyboard.press(Key.page_up)
         time.sleep(0.02)
         keyboard.release(Key.page_up)
@@ -1893,16 +1897,12 @@ def openSettings():
         loadsettings.save("msh",-1,"multipliers.txt")
         loadsettings.save("msy",-1,"multipliers.txt")
         return
-    time.sleep(0.3)
-    check = customOCR(0,0,ww/7,wh)
-    for i, e in enumerate(check):
-        if 'speed' in e[1][0]:
-            movespeedInfo = e
-    print(movespeedInfo)
+    
+    log(movespeedInfo)
     coords = movespeedInfo[0]
     start,_,end,_ = coords
-    x,y, = start[0],start[1]-20
-    h = end[1] - y+20
+    y = (start[1] + wh/7) - 30
+    h = (end[1] - start[1]) + 60
     
     im = pag.screenshot(region=(ww/8,y,ww/10,h))
     im.save('test.png')
@@ -2361,7 +2361,7 @@ def rejoin():
             move.hold("a",0.4)
             time.sleep(0.06)
             text = getBesideE()
-            if "claim" in text:
+            if "claim" in text or "hive" in text:
                 move.press("e")
                 log(j)
                 log((j+1)//2)
@@ -2783,7 +2783,7 @@ def quest(giver, session_start = 0):
                 reach = True
                 break
             else:
-                webhook("",f"Unable to reach {giverName}","brown")
+                webhook("",f"Unable to reach {giverName}","brown",1)
             reset.reset()
             sleep(0.7)
         if reach:
@@ -3432,7 +3432,7 @@ def setResolution():
         "3600x2338": [1.45,0.93,1.2,1.6],
         "3584x2240": [1.3, 0.93, 1.2, 1.5],
         "1280x800": [0.9,1.03,1,1],
-        "3840x2160": [1.08,0.92,1.3,1.5],
+        "3840x2160": [1.13,0.92,1.3,1.5],
         "3456x2234": [1.2, 0.93, 1.3, 1.6],
         "2560x1600": [0.9, 1.02, 1, 1.1],
         "2560x1440": [1.45,0.87,1.8,2.2],
