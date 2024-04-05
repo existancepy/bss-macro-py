@@ -14,6 +14,7 @@ Made and tested on mac, currently untested for windows/linux.
 - Haste Compensation
 - Discord webhook
 - Hourly Reports
+- Quests
 - Disconnect check + auto reconnect
 - GUI for setup
 
