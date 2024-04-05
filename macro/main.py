@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.5"
+macrov = "1.56.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2775,7 +2775,8 @@ def quest(giver, session_start = 0):
             webhook("",f"Travelling: {giverName} (get quest) ","brown")
             exec(open(f"./paths/quest_{giver}.py").read())
             sleep(0.5)
-            if "talk" in getBesideE():
+            besideE = getBesideE()
+            if "talk" in besideE or giver in besideE: 
                 webhook("",f"Reached {giverName}","brown",1)
                 move.press("e")
                 sleep(0.2)
