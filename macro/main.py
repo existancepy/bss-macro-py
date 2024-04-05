@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.6"
+macrov = "1.56.7"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -705,10 +705,12 @@ def canon(fast=0):
         r = ""
         pag.keyUp("d")
         move.hold("w",0.2)
+        '''
         if ebutton() and eb_freeze:
             webhook("","E button detected. Roblox is frozen", "red",1)
             disconnect = True
             break
+        '''
         if fast:
             move.hold("d",0.95)
             time.sleep(0.1)
@@ -885,8 +887,8 @@ def walk_to_hive(field):
     webhook("","Cant find hive, resetting","dark brown",1)
     reset.reset()
     convert()
-
-def keepOldLoop(claim = True):
+    
+def keepOld(claim = True):
     setdat = loadsettings.load()
     savedata = loadRes()
     ww = savedata['ww']
@@ -899,15 +901,21 @@ def keepOldLoop(claim = True):
     multi = 1
     if setdat['display_type'] == "built-in retina display":
         multi = 2
+    ocr = customOCR(*region,0)
+    for i in ocr:
+        if "kee" in i[1][0].lower():
+            mouse.release(Button.left)
+            if claim:
+                mouse.position = ((i[0][0][0]+region[0])//multi, (i[0][0][1]+region[1])//multi)
+                mouse.click(Button.left)
+            return True
+    return False
+            
+def keepOldLoop(claim = True):
+    
     while True:
-        ocr = customOCR(*region,0)
-        for i in ocr:
-            if "kee" in i[1][0].lower():
-                mouse.release(Button.left)
-                if claim:
-                    mouse.position = ((i[0][0][0]+region[0])//multi, (i[0][0][1]+region[1])//multi)
-                    mouse.click(Button.left)
-                return
+        if keepOld(claim):
+            return
         
 def checkRespawn(m,t):
     timing = float(loadtimings()[m])
@@ -1824,7 +1832,10 @@ def getQuest(giver):
         for i in quest:
             if not i in detectedObjs:
                 finalLines.append(i)
+        if setdat["haste_compensation"]: openSettings()
         return finalLines
+
+    if setdat["haste_compensation"]: openSettings()
     log(finalLines)
     print(finalLines)
     if finalLines:
@@ -1833,7 +1844,6 @@ def getQuest(giver):
     else:
         webhook('','Quest Completed',"bright green")
         return ["done"]
-    if setdat["haste_compensation"]: openSettings()
     
 def openSettings():
     savedat = loadRes()
@@ -2772,6 +2782,7 @@ def quest(giver, session_start = 0):
         reach = False
         for _ in range(3):
             canon()
+            if getStatus() == "disconnect": return
             webhook("",f"Travelling: {giverName} (get quest) ","brown")
             exec(open(f"./paths/quest_{giver}.py").read())
             sleep(0.5)
@@ -2790,6 +2801,7 @@ def quest(giver, session_start = 0):
         if reach:
             clickdialog()
             quest = ""
+            if getStatus() == "disconnect": return
             for _ in range(2):
                 quest = getQuest(giver)
                 if quest:
@@ -2812,7 +2824,8 @@ def quest(giver, session_start = 0):
                 webhook("",f"Travelling: {giverName} (submit quest) ","brown")
                 exec(open(f"./paths/quest_{giver}.py").read())
                 sleep(0.5)
-                if "talk" in getBesideE():
+                besideE = getBesideE()
+                if "talk" in besideE or giver in besideE:
                     webhook("",f"Reached {giverName}","brown",1)
                     move.press("e")
                     sleep(0.2)
@@ -2825,6 +2838,7 @@ def quest(giver, session_start = 0):
                 clickdialog()
                 quest = False
                 webhook("","Getting new quest", "brown")
+                if getStatus() == "disconnect": return
                 for _ in range(2):
                     move.press("e")
                     sleep(0.2)
@@ -2925,6 +2939,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         #quests
         if setdat["polar_quest"]:
             objs = quest("polar",session_start)
+            if getStatus() == "disconnect": return
             if objs:
                 for i in objs:
                     if i.startswith("gather"):
@@ -2936,6 +2951,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         
         if setdat["bucko_quest"]:
             objs = quest("bucko",session_start)
+            if getStatus() == "disconnect": return
             blueFields = ["blue flower", "bamboo", "pine tree", "stump"]
             if objs:
                 for i in objs:
@@ -2985,16 +3001,17 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             time.sleep(0.2)
             placeSprinkler()
             pag.click()
-            webhook("","Starting stump snail","brown")
+            webhook("","Starting stump snail","brown",1)
             while True:
-                time.sleep(10)
                 pag.click()
                 if checkwithOCR("disconnect"):
                     return
-                if imagesearch.find("keepold.png",0.9):
+                if keepOld(False):
                     savetimings("stump_snail")
-                    if setdat['continue_after_stump_snail']:break
-            webhook("","Stump snail killed, keeping amulet","bright green")
+                    if setdat['continue_after_stump_snail']:
+                        keepOld(True)
+                        break
+            webhook("","Stump snail killed, keeping amulet","bright green",1)
             mouse.move(mw//2-30,mh//100*60)
             pag.click()
             reset.reset()
