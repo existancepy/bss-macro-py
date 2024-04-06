@@ -37,6 +37,7 @@ from importlib import reload
 from pynput.keyboard import Key
 from pynput.mouse import Button
 from convertAhkPattern import ahkPatternToPython
+from pixelcolour import getPixelColor
 try:
     from html2image import Html2Image
 except FileNotFoundError:
@@ -179,6 +180,12 @@ def pagmove(k,t):
     pag.keyDown(k)
     time.sleep(t)
     pag.keyUp(k)
+
+def pagPress(key, delay = 0.02):
+    pag.keyDown(key, _pause = False)
+    time.sleep(delay)
+    pag.keyUp(key, _pause = False)
+    
 def fullscreen():
     cmd = """
             osascript -e 'activate application "Roblox"' 
@@ -674,11 +681,60 @@ def hourlyReport(hourly=1):
         print(traceback.format_exc())
         log(traceback.format_exc())
         webhook("","Hourly Report has an error that has been caught. The error can be found in macroLogs.log","red")
-
-
+   
+def reset(hiveCheck=False):
+    setdat = loadsettings.load()
+    yOffset = 0
+    if setdat["new_ui"]: yOffset = 20
+    loadSave()
+    rhd = setdat["reverse_hive_direction"]
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    ww = savedata["ww"]
+    wh = savedata["wh"]
+    xo = ww//4
+    yo = wh//4*3
+    xt = xo*3-xo
+    yt = wh-yo
+    i = 1
+    while True:
+        webhook("","Resetting character, Attempt: {}".format(i),"dark brown")
+        mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
+        time.sleep(0.5)
+        pagPress('esc')
+        time.sleep(0.1)
+        pagPress('r')
+        time.sleep(0.2)
+        pagPress('enter')
+        time.sleep(8.5)
+        besideE = getBesideE()
+        if "make" in besideE or "honey" in besideE:
+            break
+        i += 1
+    for _ in range(4):
+        pix = getPixelColor(ww//2,wh-2)
+        r = [int(x) for x in pix]
+        log(r)
+        log(abs(r[2]-r[1]))
+        log(abs(r[2]-r[0]))
+        log(abs(r[1]-r[0]))
+        log("real")
+        avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
+        log(avgDiff)
+        if avgDiff < 10:
+            for _ in range(8):
+                pagPress("o")
+            time.sleep(0.3)
+            return True
         
-
-
+        for _ in range(4):
+            pagPress(".")
+    time.sleep(0.3)
+    if hiveCheck:
+        webhook("Notice","Hive not found.","red",1)
+    else:
+        webhook("Notice","Hive not found. Assume that player is facing the right direction","red",1)
+    return False
 
 def canon(fast=0):
     savedata = loadRes()
@@ -696,8 +752,6 @@ def canon(fast=0):
         time.sleep(1)
         move.hold("w",0.8)
         move.hold("d",0.9*(setdat["hive_number"])+1)
-        if ebutton():
-            eb_freeze = True
         pag.keyDown("d")
         time.sleep(0.5)
         move.press("space")
@@ -705,12 +759,7 @@ def canon(fast=0):
         r = ""
         pag.keyUp("d")
         move.hold("w",0.2)
-        '''
-        if ebutton() and eb_freeze:
-            webhook("","E button detected. Roblox is frozen", "red",1)
-            disconnect = True
-            break
-        '''
+        
         if fast:
             move.hold("d",0.95)
             time.sleep(0.1)
@@ -729,7 +778,7 @@ def canon(fast=0):
                 return
         webhook("","Could not find cannon","dark brown",1)
         mouse.position = (mw//2,mh//5*4)
-        reset.reset()
+        reset()
     else:
         webhook("","Cannon failed too many times, rejoining", "red")
         disconnect = True
@@ -765,7 +814,7 @@ def collect_mondo_buff(gather = False):
     if gather:
         webhook("Gathering: interrupted","Mondo Buff","dark brown")
         setStatus()
-        reset.reset()
+        reset()
     st = time.perf_counter()
     savetimings("mondo_buff")
     webhook("","Travelling: Mondo Buff","dark brown")
@@ -779,7 +828,7 @@ def collect_mondo_buff(gather = False):
     sleep(120)
     webhook("","Collected: Mondo Buff","dark brown")
     addStat("objective_time",round((time.perf_counter()  - st)/60,2))
-    reset.reset()
+    reset()
     convert()
     stingerHunt()
     return True
@@ -819,10 +868,10 @@ def collect_wreath():
                     acchold("a",0.3)
                     acchold("w",0.4)
                     acchold("d",0.3)
-                reset.reset()
+                reset()
                 return
         webhook("","Honey Wreath not found, resetting","dark brown",1)
-        reset.reset()
+        reset()
     
 def convert(bypass=0):
     savedata = loadRes()
@@ -881,11 +930,11 @@ def walk_to_hive(field):
         text = getBesideE()
         if "make" in text:
             convert(1)
-            reset.reset()
+            reset()
             return
         
     webhook("","Cant find hive, resetting","dark brown",1)
-    reset.reset()
+    reset()
     convert()
     
 def keepOld(claim = True):
@@ -1028,10 +1077,10 @@ def antChallenge():
         move.hold("d",0.3)
         keepOldLoop()
         webhook("","Ant Challenge Complete","bright green",1)
-        reset.reset()
+        reset()
         return
     webhook("", "Cant start ant challenge", "red", 1)
-    reset.reset()
+    reset()
     return
     
 def stingerHunt(convert=0,gathering=0):
@@ -1056,7 +1105,7 @@ def stingerHunt(convert=0,gathering=0):
         move.press(".")
     if gathering:
         webhook("Gathering: interrupted","Vicious Bee","dark brown")
-        reset.reset()
+        reset()
     for field in fields:
         status = getStatus()
         fieldGoTo = field
@@ -1080,7 +1129,7 @@ def stingerHunt(convert=0,gathering=0):
         if "vb_found_right_field" in status:
             killvb = 1
         elif "vb_found_wrong_field" in status:
-            reset.reset()
+            reset()
             if canon(1) == "dc": return "dc"
             fieldGoTo = status.split("_")[-1]
             exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
@@ -1102,13 +1151,13 @@ def stingerHunt(convert=0,gathering=0):
                     break
                 if status == "killing_vb_died":
                     webhook("","Died to vicious bee", "red")
-                    reset.reset()
+                    reset()
                     if canon(1) == "dc": return "dc"
                     exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
                     setStatus("killing_vb")
-            reset.reset()
+            reset()
             break
-        reset.reset()
+        reset()
     setStatus()
     return "success"
 sat_image = cv2.imread('./images/retina/saturator.png')
@@ -1240,7 +1289,7 @@ def placePlanter(planter):
         mouse.click(Button.left, 2)
     savePlanterTimings(planter)
     webhook("","Placed Planter: {}".format(displayPlanterName(planter)),"bright green",1)
-    reset.reset()
+    reset()
     stingerHunt()
 
 
@@ -1500,7 +1549,7 @@ def lootMob(field,mob,resetCheck):
             break
     resetMobTimer(field.replace(" ","").lower())
     if resetCheck:
-        reset.reset()
+        reset()
 
 def get_booster(booster):
     for i in range(2):
@@ -1550,11 +1599,11 @@ def get_booster(booster):
                         break
                 if boostedField: break
             webhook("","Collected: {} Booster.\n Boosted Field: {}".format(booster.title(), boostedField.title()),"bright green",1)
-            reset.reset()
+            reset()
             return boostedField
         
         webhook("","Unable To Collect: {} Booster".format((booster.title())),"dark brown",1)
-        reset.reset()
+        reset()
     return
             
 def collect(name,beesmas=0):
@@ -1571,7 +1620,7 @@ def collect(name,beesmas=0):
         webhook("","Travelling: {}".format(dispname),"dark brown")
         exec(open("./paths/collect_{}.py".format(usename)).read())
         if usename == "gluedispenser":
-            time.sleep(3)
+            time.sleep(2)
             move.press(str(setdat['gumdrop_slot']))
             time.sleep(2)
             move.hold("w",2.5)
@@ -1621,7 +1670,7 @@ def collect(name,beesmas=0):
             webhook("","Collected: {}".format(dispname),"bright green",1)
             break
         webhook("","Unable To Collect: {}".format(dispname),"dark brown",1)
-        reset.reset()
+        reset()
     savetimings(usename)
     move.press('e')
     time.sleep(0.5)
@@ -1631,7 +1680,7 @@ def collect(name,beesmas=0):
         move.apkey("space")
         exec(open("./paths/claim_{}.py".format(usename)).read())
     addStat("objective_time",round((time.perf_counter() - st)/60,2))
-    reset.reset()
+
 def rawreset(nowait=0):
     pag.press('esc')
     time.sleep(0.1)
@@ -2582,12 +2631,12 @@ def gather(gfid, quest = False, questGoo = False):
         if setdat['return_to_hive'] == "walk":
             walk_to_hive(currfield)
         elif setdat['return_to_hive'] == "reset":
-            reset.reset()
+            reset()
             convert()
         elif setdat['return_to_hive'] == "rejoin":
             rejoin()
             convert()
-            reset.reset()
+            reset()
         elif setdat['return_to_hive'] == "whirligig":
             webhook("","Activating whirligig","dark brown")
             if setdat['whirligig_slot'] == "none":
@@ -2602,7 +2651,7 @@ def gather(gfid, quest = False, questGoo = False):
                         r = 1
                 if r:
                     convert()
-                    reset.reset()
+                    reset()
                 else:
                     webhook("Notice","Whirligig failed to activate, walking back","red")
                     walk_to_hive(currfield)
@@ -2670,7 +2719,7 @@ def feed(name, quantity):
     ww = savedata['ww']
     wh = savedata['wh']
     mw,mh = pag.size()
-    while not reset.reset():
+    while not reset():
         pass
     
     pag.typewrite("\\")
@@ -2719,7 +2768,7 @@ def feed(name, quantity):
        webhook("",f"Found {name} item in inventory", "brown")
     else:
         webhook("",f"Couldnt find {name} item in inventory", "red")
-        reset.reset()
+        reset()
         if setdat["haste_compensation"]: openSettings()
         return
     
@@ -2795,7 +2844,7 @@ def quest(giver, session_start = 0):
                 break
             else:
                 webhook("",f"Unable to reach {giverName}","brown",1)
-            reset.reset()
+            reset()
             sleep(0.7)
         if reach:
             clickdialog()
@@ -2811,7 +2860,7 @@ def quest(giver, session_start = 0):
                 time.sleep(1)
                     
             polar_quest = {}
-            reset.reset()
+            reset()
             print(quest)
             return quest
     else:
@@ -2846,7 +2895,7 @@ def quest(giver, session_start = 0):
                     quest = getQuest(giver)
                     if quest: break
                 addStat("quests",1)
-                reset.reset()
+                reset()
         print(quest)
         if quest:
             return quest
@@ -2893,7 +2942,8 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         loadsettings.save('prev_honey',currHoney)
         if honeyHist[0] == 0:
             invalid_prev_honey = 1
-    reset.reset()
+    reset()
+    st = time.time()
     convert()
     savedata = loadRes()
     planterset = loadsettings.planterLoad()
@@ -3013,7 +3063,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             webhook("","Stump snail killed, keeping amulet","bright green",1)
             mouse.move(mw//2-30,mh//100*60)
             pag.click()
-            reset.reset()
+            reset()
             
         #Collect check
         stingerHunt()
@@ -3080,7 +3130,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             collect('candles',1)
             stingerHunt()
             if getStatus() == "disconnect": return
-        
         if setdat['gluedispenser'] and checkRespawn('gluedispenser','22h'):
             collect('glue dispenser')
             stingerHunt()
@@ -3201,7 +3250,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                                         break
                                     moblootPattern(1.1,1.4,"none",2)
                                 stingerHunt()
-                                reset.reset()
+                                reset()
                                 if automatic_planters:
                                     cycleFields.remove(currField)
                                     cycleFields.append(currField)
@@ -3209,7 +3258,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                                 break
                             else:
                                 webhook("","Cant find Planter","red",1)
-                                reset.reset()
+                                reset()
                         else:
                             if automatic_planters:
                                 cycleFields.remove(currField)

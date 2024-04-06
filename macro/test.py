@@ -34,7 +34,7 @@ import reset
 from pixelcolour import getPixelColor
 import pygetwindow as gw
 from logpy import log
-#from ocrpy import customOCR, imToString
+from ocrpy import customOCR, imToString
 import backpack
 keyboard = Controller()
 mouse = pynput.mouse.Controller()
@@ -90,8 +90,6 @@ def getBesideE():
     log(text)
     return text
 
-tar = (170, 125, 41)
-var = 25
 def resete(hiveCheck=False):
     st = time.time()
     setdat = loadsettings.load()
@@ -107,9 +105,7 @@ def resete(hiveCheck=False):
     yo = wh//4*3
     xt = xo*3-xo
     yt = wh-yo
-    print(time.time()-st)
-    for i in range(2):
-        webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
+    while True:
         mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
         time.sleep(0.5)
         pag.press('esc')
@@ -118,54 +114,41 @@ def resete(hiveCheck=False):
         time.sleep(0.2)
         pag.press('enter')
         time.sleep(8.5)
+        besideE = getBesideE()
+        r = "make" in besideE or "honey" in besideE:
+            break
+    for _ in range(4):
+        pix = getPixelColor(ww//2,wh-2)
+        r = [int(x) for x in pix]
+        log(r)
+        log(abs(r[2]-r[1]))
+        log(abs(r[2]-r[0]))
+        log(abs(r[1]-r[0]))
+        log("real")
+        avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
+        print(time.time()-st)
+        log(avgDiff)
+        if avgDiff < 10:
+            for _ in range(6):
+                keyboard.press('o')
+                time.sleep(0.08)
+                keyboard.release('o')
+            return True
         for _ in range(4):
-            st = time.time()
-            pix = getPixelColor(ww//2,wh-2)[:-1]
-            print(time.time()-st)
-            r = [int(x) for x in pix]
-            st = time.time()
-            log(r)
-            log(abs(r[2]-r[1]))
-            log(abs(r[2]-r[0]))
-            log(abs(r[1]-r[0]))
-            log("real")
-            avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
-            print(time.time()-st)
-            log(avgDiff)
-            if avgDiff > 10:
-                passed = True
-                print(r)
-                st = time.time()
-                for i in range(len(tar)):
-                    if not( tar[i]-var <= r[i] <= tar[i]+var):        
-                        passed = False
-                        break
-                print(time.time()-st)
-                if passed or r[2] == 0:
-                    time.sleep(0.1)
-                    for _ in range(4):
-                        pag.press(".")
-                    time.sleep(0.1)
-                    for _ in range(6):
-                        keyboard.press('o')
-                        time.sleep(0.08)
-                        keyboard.release('o')
-                    return True
-            for _ in range(4):
-                pag.press(".")
-            
-            time.sleep(0.5)
-        time.sleep(1)
+            pag.press(".")
+        
+        time.sleep(0.5)
+    time.sleep(1)
     return False
     if hiveCheck:
         webhook("Notice","Hive not found.","red",1)
     else:
         webhook("Notice","Hive not found. Assume that player is facing the right direction","red",1)
 
-    
+
 
 roblox()
-reset.reset()
+resete()
 terminal()
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)

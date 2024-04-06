@@ -1,4 +1,4 @@
-import pyautogui as pg
+import pyautogui as pag
 import time
 import os
 import tkinter
@@ -14,7 +14,7 @@ from logpy import log
 keyboard = pynput.keyboard.Controller()
 mouse = Controller()
 savedata = {}
-mw,mh = pg.size()
+mw,mh = pag.size()
 #pg.PAUSE = 0.02
 tar = (170, 125, 41)
 var = 25
@@ -27,7 +27,11 @@ def loadSave():
         if l[1].isdigit():
             l[1] = int(l[1])
         savedata[l[0]] = l[1]
-        
+def pagPress(key, delay = 0.02):
+    pag.keyDown(key, _pause = False)
+    time.sleep(delay)
+    pag.keyUp(key, _pause = False)
+    
 def reset(hiveCheck=False):
     setdat = loadsettings.load()
     yOffset = 0
@@ -46,11 +50,11 @@ def reset(hiveCheck=False):
         webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
         mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
         time.sleep(0.5)
-        pg.press('esc')
+        pagPress('esc')
         time.sleep(0.1)
-        pg.press('r')
+        pagPress('r')
         time.sleep(0.2)
-        pg.press('enter')
+        pagPress('enter')
         sleep(8.5)
         for _ in range(4):
             pix = getPixelColor(ww//2,wh-2)
@@ -73,13 +77,14 @@ def reset(hiveCheck=False):
                 if passed or r[2] == 0:
                     time.sleep(0.1)
                     for _ in range(4):
-                        pg.press(".")
+                        pagPress(".")
                     time.sleep(0.1)
                     for _ in range(6):
-                        pg.press("o")
+                        pagPress("o")
+                    time.sleep(0.4)
                     return True
             for _ in range(4):
-                pg.press(".")
+                pagPress(".")
         time.sleep(0.2)
     return False
     if hiveCheck:
