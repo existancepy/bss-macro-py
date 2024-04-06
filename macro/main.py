@@ -98,7 +98,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.7"
+macrov = "1.56.8"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -716,7 +716,7 @@ def canon(fast=0):
             time.sleep(0.1)
             return
         move.hold("d",0.35)
-        move.hold("s",0.15)
+        move.hold("s",0.1)
         for _ in range(6):
             move.hold("d",0.2)
             time.sleep(0.05)
@@ -1241,6 +1241,7 @@ def placePlanter(planter):
     savePlanterTimings(planter)
     webhook("","Placed Planter: {}".format(displayPlanterName(planter)),"bright green",1)
     reset.reset()
+    stingerHunt()
 
 
 urows,ucols = cv2.imread('./images/retina/yes.png').shape[:2]
@@ -1603,11 +1604,11 @@ def collect(name,beesmas=0):
                 move.apkey("space")
                 time.sleep(1.5)
                 pag.keyUp("w")
-        elif usename == "blueberrydispenser":
+        elif usename == "blueberrydispenser" or usename == "royaljellydispenser":
             for _ in range(6):
                 move.hold("a",0.2)
                 besideE = getBesideE()
-                if "use" in besideE or "dispenser" in besideE:
+                if "use" in besideE or "dispenser" in besideE or "claim" in besideE:
                     claimLoot = 1
                     break
         else:
@@ -1707,11 +1708,11 @@ def getQuest(giver):
     q_title = ""
     lines = []
     for j in range(10):
-        ocr = customOCR(0,wh/7,ww/4.3,wh/1.9,0)
+        ocr = customOCR(0,wh/7,ww/4.3,wh/1.6,0)
         lines = [x[1][0].lower() for x in ocr]
         #log(lines)
-        #search for quest title in only the first 8 lines
-        lineCount = min(len(lines),8)
+        #search for quest title in only the first 6 lines
+        lineCount = min(len(lines),6)
         #check all lines on the last iteration, detect quest at bottom of page
         if j == 9:
             lineCount = len(lines)
@@ -2359,14 +2360,12 @@ def rejoin():
                 osascript -e 'activate application "Roblox"' 
             """
         os.system(cmd)
-        move.press(".")
-        move.hold("w",6+(i*2),0)
-        move.press(",")
-        time.sleep(0.3)
-        move.hold("s",0.6,0)
+        move.hold("w",5+(i*0.5),0)
+        move.hold("s",0.3,0)
+        move.hold("d",4,0)
+        move.hold("s",0.3,0)
         time.sleep(0.5)
         webhook("","Finding Hive", "dark brown",1)
-        move.hold("d",4)
         for j in range(40):
             move.hold("a",0.4)
             time.sleep(0.06)
@@ -2382,7 +2381,7 @@ def rejoin():
                 setStatus()
                 if setdat["so_broke"]:
                     pag.typewrite("/")
-                    pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.06)
+                    pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.1)
                     keyboard.press(Key.enter)
                 if setdat['haste_compensation']: openSettings()
                 addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
@@ -3201,6 +3200,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                                     if time.time() - starttime > 20:
                                         break
                                     moblootPattern(1.1,1.4,"none",2)
+                                stingerHunt()
                                 reset.reset()
                                 if automatic_planters:
                                     cycleFields.remove(currField)

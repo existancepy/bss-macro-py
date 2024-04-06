@@ -195,10 +195,26 @@ def canon(fast=0):
         return "dc"
     
 
-while True:
-    reset.reset()
-    canon()
+cmd = """
+        osascript -e 'activate application "Roblox"' 
+    """
+os.system(cmd)
+setdat = loadsettings.load()
+savedata = loadRes()
+ww = savedata['ww']
+wh = savedata['wh']
+ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
+xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
+region = (ww/3.15,wh/2.15,ww/2.7,wh/4.2)
+ocr = customOCR(*region,0)
+print(ocr)
 
+cmd = """
+        osascript -e 'activate application "Terminal"' 
+    """
+os.system(cmd)
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
 small_image = cv2.imread('./images/general/nightsky.png')

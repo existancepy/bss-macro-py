@@ -1,14 +1,18 @@
-move.press(",")
+move.press(".")
 move.press("e")
-pag.keyDown("w")
 time.sleep(0.12)
+pag.keyDown("w")
 move.press("space")
 move.press("space")
-time.sleep(3.5)
+time.sleep(3.55)
+move.press(".")
+time.sleep(0.1)
 pag.keyUp("w")
 move.press("space")
 time.sleep(0.5)
-move.hold("w",3.5)
-move.hold("d",2.5)
-move.hold("s",1.5)
+move.hold("d",1)
+
+
+
+
     
