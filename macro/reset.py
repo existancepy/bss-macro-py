@@ -15,7 +15,7 @@ keyboard = pynput.keyboard.Controller()
 mouse = Controller()
 savedata = {}
 mw,mh = pg.size()
-pg.PAUSE = 0.02
+#pg.PAUSE = 0.02
 tar = (170, 125, 41)
 var = 25
 def loadSave():
