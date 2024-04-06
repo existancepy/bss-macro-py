@@ -34,49 +34,24 @@ import reset
 from pixelcolour import getPixelColor
 import pygetwindow as gw
 from logpy import log
-from ocrpy import customOCR, imToString
+#from ocrpy import customOCR, imToString
 import backpack
 keyboard = Controller()
 mouse = pynput.mouse.Controller()
 ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
 xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
 mw,mh = pag.size()
-def canon():
-    savedata = loadRes()
-    setdat = loadsettings.load()
-    ww = savedata['ww']
-    wh = savedata['wh']
-    #Move to canon:
-    webhook("","Moving to canon","dark brown")
-    move.hold("w",0.8)
-    move.hold("d",0.9*(setdat["hive_number"])+1)
-    pag.keyDown("d")
-    time.sleep(0.5)
-    move.press("space")
-    time.sleep(0.2)
-    r = ""
-    pag.keyUp("d")
-    move.hold("d",0.3)
-    for _ in range(3):
-        move.hold("d",0.2)
-        time.sleep(0.05)
-    webhook("","Canon found","dark brown")
-    with open('canonfails.txt', 'w') as f:
-        f.write('0')
+savedata = {}
+def loadSave():
+    with open('save.txt') as f:
+        lines = f.read().split("\n")
     f.close()
-    return
-    mouse.position = (mw//2,mh//5*4)
-    with open('canonfails.txt','r') as f:
-        cfCount = int(f.read())
-        cfCount += 1
-    f.close()
-    webhook("","Cannon not found, attempt: {},resetting".format(cf),"dark brown",1)
-    with open('canonfails.txt','w') as f:
-        f.write(str(cfCount))
-    f.close()
-        
-    reset.reset()   
-    canon()
+    for s in lines:
+        l = s.replace(" ","").split(":")
+        if l[1].isdigit():
+            l[1] = int(l[1])
+        savedata[l[0]] = l[1]
+
 def roblox():
     cmd = """
     osascript -e 'activate application "Roblox"' 
@@ -109,112 +84,89 @@ ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
 xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
 ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
 xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-cmd = """
-        osascript -e 'activate application "Roblox"' 
-    """
-os.system(cmd)
 
 def getBesideE():
     text = imToString("bee bear").lower()
     log(text)
     return text
 
-def checkwithOCR(m):
-    text = imToString(m).lower()
-    if m == "bee bear":
-        if "bear" in text or "talk" in text:
-            return True
-    elif m == "egg shop":
-        if "bee egg" in text or "basic bee" in text or "small bag" in text or ("blue" in text and "bubble" in text):
-            return True
-    elif m == "disconnect":
-        if "disconnected" in text or "join error" in text:
-            setStatus("disconnect")
-            webhook("","disconnected","red")
-            return True
-        elif "planter" in text and "yes" in text:
-            webhook("","Detected planter pop up present","brown",1)
-            clickYes()
-    elif m == "dialog":
-        if "bear" in text:
-            return True
-    return False
-
-def canon(fast=0):
-    savedata = loadRes()
+tar = (170, 125, 41)
+var = 25
+def resete(hiveCheck=False):
+    st = time.time()
     setdat = loadsettings.load()
-    ww = savedata['ww']
-    wh = savedata['wh']
-    disconnect = False
-    eb_freeze = False
-    for i in range(3):
-        #Move to canon:
-        if not fast:
-            if checkwithOCR("disconnect"):
-                return "dc"
-            webhook("","Moving to cannon","dark brown")
-        time.sleep(1)
-        move.hold("w",0.8)
-        move.hold("d",0.9*(setdat["hive_number"])+1)
-        pag.keyDown("d")
+    yOffset = 0
+    if setdat["new_ui"]: yOffset = 20
+    loadSave()
+    rhd = setdat["reverse_hive_direction"]
+    ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
+    xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
+    ww = savedata["ww"]
+    wh = savedata["wh"]
+    xo = ww//4
+    yo = wh//4*3
+    xt = xo*3-xo
+    yt = wh-yo
+    print(time.time()-st)
+    for i in range(2):
+        webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
+        mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
         time.sleep(0.5)
-        move.press("space")
+        pag.press('esc')
+        time.sleep(0.1)
+        pag.press('r')
         time.sleep(0.2)
-        r = ""
-        pag.keyUp("d")
-        move.hold("w",0.2)
-        if eb_freeze:
-            webhook("","E button detected. Roblox is frozen", "red",1)
-            disconnect = True
-            break
-        if fast:
-            move.hold("d",0.95)
-            time.sleep(0.1)
-            return
-        move.hold("d",0.35)
-        move.hold("s",0.15)
-        for _ in range(6):
-            move.hold("d",0.2)
-            time.sleep(0.05)
-            if "fire" in getBesideE():
-                webhook("","Cannon found","dark brown")
-                with open('./dataFiles/canonfails.txt', 'w') as f:
-                    f.write('0')
-                f.close()
-                return
-        webhook("","Could not find cannon","dark brown",1)
-        mouse.position = (mw//2,mh//5*4)
-        reset.reset()
-    else:
-        webhook("","Cannon failed too many times, rejoining", "red")
-        disconnect = True
-        
-    if disconnect:
-        setStatus("disconnect")
+        pag.press('enter')
+        time.sleep(8.5)
+        for _ in range(4):
+            st = time.time()
+            pix = getPixelColor(ww//2,wh-2)[:-1]
+            print(time.time()-st)
+            r = [int(x) for x in pix]
+            st = time.time()
+            log(r)
+            log(abs(r[2]-r[1]))
+            log(abs(r[2]-r[0]))
+            log(abs(r[1]-r[0]))
+            log("real")
+            avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
+            print(time.time()-st)
+            log(avgDiff)
+            if avgDiff > 10:
+                passed = True
+                print(r)
+                st = time.time()
+                for i in range(len(tar)):
+                    if not( tar[i]-var <= r[i] <= tar[i]+var):        
+                        passed = False
+                        break
+                print(time.time()-st)
+                if passed or r[2] == 0:
+                    time.sleep(0.1)
+                    for _ in range(4):
+                        pag.press(".")
+                    time.sleep(0.1)
+                    for _ in range(6):
+                        keyboard.press('o')
+                        time.sleep(0.08)
+                        keyboard.release('o')
+                    return True
+            for _ in range(4):
+                pag.press(".")
+            
+            time.sleep(0.5)
         time.sleep(1)
-        return "dc"
+    return False
+    if hiveCheck:
+        webhook("Notice","Hive not found.","red",1)
+    else:
+        webhook("Notice","Hive not found. Assume that player is facing the right direction","red",1)
+
     
 
-cmd = """
-        osascript -e 'activate application "Roblox"' 
-    """
-os.system(cmd)
-setdat = loadsettings.load()
-savedata = loadRes()
-ww = savedata['ww']
-wh = savedata['wh']
-ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
-xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-ylm = loadsettings.load('multipliers.txt')['y_length_multiplier']
-xlm = loadsettings.load('multipliers.txt')['x_length_multiplier']
-region = (ww/3.15,wh/2.15,ww/2.7,wh/4.2)
-ocr = customOCR(*region,0)
-print(ocr)
-
-cmd = """
-        osascript -e 'activate application "Terminal"' 
-    """
-os.system(cmd)
+roblox()
+reset.reset()
+terminal()
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
 small_image = cv2.imread('./images/general/nightsky.png')

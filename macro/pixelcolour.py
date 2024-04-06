@@ -3,6 +3,10 @@ import Quartz.CoreGraphics as CG
 import struct
 import numpy as np
 import pyautogui as pag
+import time
+import loadsettings
+
+
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -15,6 +19,24 @@ def loadRes():
         outdict[l[0]] = l[1]
     return outdict
 
+def mssPixelScreenshot(X1,Y1):
+    if loadsettings.load()["display_type"] == "built-in retina display":
+        X1/=2
+        Y1/=2
+    region = {'top': Y1, 'left': X1, 'width': 1, 'height': 1}
+    
+    with mss.mss() as sct:
+        img = sct.grab(region)
+        mss.tools.to_png(img.rgb, img.size, output='test.png')
+        im = np.array(img)
+        col = tuple(im[0,0])[:-1][::-1]
+        return col
+
+def pagPixelScreenshot(X1,Y1):
+    im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
+    col = tuple(im[0,0])
+    return col[:-1]
+    
 class ScreenPixel(object):
     """Captures the screen using CoreGraphics, and provides access to
     the pixel values.
@@ -79,20 +101,15 @@ class ScreenPixel(object):
         # Return BGRA as RGBA
         return (r, g, b, a)
 
-
+        
 def rgb_to_hex(r, g, b):
       return ('0x{:X}{:X}{:X}').format(r, g, b)
 
-def getPixelColor(X1,Y1):
-    im = np.array(pag.screenshot(region = (X1,Y1,1,1) ))
-    col = tuple(im[0,0])
-    return col
-    '''
-    sp = ScreenPixel()
-    sp.capture()
-    col = sp.pixel(X1, Y1)
-    return (col[0],col[1],col[2])
-    '''
+try:
+    import mss
+    getPixelColor = mssPixelScreenshot
+except ImportError:
+    getPixelColor = pagPixelScreenshot
 
 '''
 
