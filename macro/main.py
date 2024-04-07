@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.11"
+macrov = "1.56.12"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -696,9 +696,8 @@ def reset(hiveCheck=False):
     yo = wh//4*3
     xt = xo*3-xo
     yt = wh-yo
-    i = 1
-    while True:
-        webhook("","Resetting character, Attempt: {}".format(i),"dark brown")
+    for i in range(5):
+        webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
         mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
         time.sleep(0.5)
         pagPress('esc')
@@ -708,9 +707,9 @@ def reset(hiveCheck=False):
         pagPress('enter')
         time.sleep(8.5)
         besideE = getBesideE()
-        if "make" in besideE or "honey" in besideE:
+        if "make" in besideE or "honey" in besideE or "flower" in besideE or "field" in besideE:
             break
-        i += 1
+
     for _ in range(4):
         pix = getPixelColor(ww//2,wh-2)
         r = [int(x) for x in pix]
@@ -1679,6 +1678,7 @@ def collect(name,beesmas=0):
             sleep(4)
         move.apkey("space")
         exec(open("./paths/claim_{}.py".format(usename)).read())
+    reset()
     addStat("objective_time",round((time.perf_counter() - st)/60,2))
 
 def rawreset(nowait=0):
