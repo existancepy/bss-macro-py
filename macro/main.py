@@ -40,9 +40,6 @@ from convertAhkPattern import ahkPatternToPython
 from pixelcolour import getPixelColor
 try:
     from html2image import Html2Image
-except FileNotFoundError:
-    pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
-\n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
 except ModuleNotFoundError:
     os.system('pip3 install html2image')
     reload(html2image)
@@ -99,11 +96,17 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.12"
+macrov = "1.56.13"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
-hti = Html2Image()
+try:
+    hti = Html2Image()
+except FileNotFoundError:
+    pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
+\n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
+    quit()
+    
 questData = {}
 questBear = ""
 questTitle = ""
@@ -568,19 +571,19 @@ def hourlyReport(hourly=1):
             showPlanters = "none"
 
         planterImgDict = {
-            "paper:":"https://cdn.discordapp.com/attachments/670121853238378526/1222887070092230846/paperplanter.png?ex=6617d955&is=66056455&hm=d24f2b0302fdbdd141c0e661f6d72c24e5113e2960986a43a472fd1b7b3dcaed&",
-            "ticket":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047975407747/ticketplanter.png?ex=6617d950&is=66056450&hm=c6f535bcd9b85a60a0fdd94252214a19c0b55e82ca8f77a52e58fcb931efa76e&",
-            "plastic":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047337873468/plasticplanter.png?ex=6617d950&is=66056450&hm=199314f9d587b85dd67e5bbddbcfd36f45b5cda2fb6040d0fa56790000f9c940&",
-            "candy":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069156642986/candyplanter.png?ex=6617d955&is=66056455&hm=9f0d535947b6b7d266274652f691f35b387796323f7ac0ae408046c0ea43ee7a&",
-            "blueclay":"https://cdn.discordapp.com/attachments/670121853238378526/1222887928863264841/blueclayplanter.png?ex=6617da22&is=66056522&hm=12d1ae2c3c111fe6fb9185e86ee084603003a9c970dd1572170ba4631fff909d&",
-            "redclay":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047547584672/redclayplanter.png?ex=6617d950&is=66056450&hm=e0103144f651596892a875546ddf34c0697b11105d42924d87ec17afced198be&",
-            "tacky":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047765950474/tackyplanter.png?ex=6617d950&is=66056450&hm=4d03eb1e0816d2e9a87018d4b9fdecb7f71e50c9c3db57925785f0217b6a04b7&",
-            "pesticide":"https://cdn.discordapp.com/attachments/670121853238378526/1222887046704533675/pesticideplanter.png?ex=6617d950&is=66056450&hm=00c9dfd020c75e7d09d01260cd9a892f6d704921c02e2191b9c9d616005ce7f3&",
-            "heattreated":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069635055646/heattreatedplanter.png?ex=6617d955&is=66056455&hm=bb76a1182da69001febebd6d9626a109126e58bcc9fe94b1be2105b0841ef1e8&",
-            "hydroponic":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069869674586/hydroponicplanter.png?ex=6617d955&is=66056455&hm=cd490ec2b73c79e0d847b71e4f997c1fecefbfa710e543fa096ea2224d13740e&",
-            "petal":"https://cdn.discordapp.com/attachments/670121853238378526/1222887046897467472/petalplanter.png?ex=6617d950&is=66056450&hm=c8634575e49d7c65180e358c9c1b330ceb018c7335be7502f5a8163f44f0d850&",
-            "plenty":"https://cdn.discordapp.com/attachments/670121853238378526/1222887047120027648/planterofplenty.png?ex=6617d950&is=66056450&hm=04c55110a006c6aa9b70264b1a2cca4b16522c47ebe2bedc2f14aebcbd2da275&",
-            "festive":"https://cdn.discordapp.com/attachments/670121853238378526/1222887069442113536/festiveplanter.png?ex=6617d955&is=66056455&hm=f6931f2ab3ab4e529e294f57fa695f680adead513d3e73e65a88f7fc461f7278&"
+            "paper:":"https://i.imgur.com/oLb7SBN.png",
+            "ticket":"https://i.imgur.com/TSApLK0.png",
+            "plastic":"https://i.imgur.com/Pzlx8vd.png",
+            "candy":"https://i.imgur.com/HDSd7Vm.png",
+            "blueclay":"https://i.imgur.com/UEd6dCk.png",
+            "redclay":"https://i.imgur.com/2xsPftv.png",
+            "tacky":"https://i.imgur.com/pyHSZNq.png",
+            "pesticide":"https://i.imgur.com/8wAAa5K.png",
+            "heattreated":"https://i.imgur.com/GHY8OE0.png",
+            "hydroponic":"https://i.imgur.com/ZZNmG5y.png",
+            "petal":"https://i.imgur.com/GoJJ4I2.png",
+            "plenty":"https://i.imgur.com/BPsawqC.png",
+            "festive":"https://i.imgur.com/V47F8RX.png"
 
         }
         replaceDict = {
@@ -588,7 +591,7 @@ def hourlyReport(hourly=1):
             "-gathertime": f"Gathering:\t{gather_time}",
             "-bugruntime": f"Bug Runs:\t{bug_time}",
             "-converttime": f"Converting:\t{convert_time}",
-            "-objectivetime": f"Objectives:\t{objective_time}",
+            "-objectivetime": f"Misc:\t{objective_time}",
             "-buffpath": f"{rootDir}/assets/buffs.png",
             "-sessiontime": session_time,
             "-currenthoney": millify(currHoney),
@@ -709,6 +712,9 @@ def reset(hiveCheck=False):
         besideE = getBesideE()
         if "make" in besideE or "honey" in besideE or "flower" in besideE or "field" in besideE:
             break
+    else:
+        webhook("Notice","Unable to detect that player has respawned at hive, continuing","red",1)
+        return False
 
     for _ in range(4):
         pix = getPixelColor(ww//2,wh-2)
@@ -723,7 +729,7 @@ def reset(hiveCheck=False):
         if avgDiff < 10:
             for _ in range(8):
                 pagPress("o")
-            time.sleep(0.3)
+            time.sleep(0.8)
             return True
         
         for _ in range(4):
@@ -888,14 +894,14 @@ def convert(bypass=0):
     move.press("e")
     if setdat['stinger']:
         move.press(",")
+    sh = stingerHunt(1)
+    if sh == "dc" or sh == "success":
+        return
     webhook("","Starting convert","brown",1)
     st = time.perf_counter()
     setStatus("hive")
-    sh = stingerHunt()
-    if sh == "dc" or sh == "success":
-        return
     while True:
-        sh = stingerHunt(1,1)
+        sh = stingerHunt(1)
         if sh == "dc" or sh == "success":
             return
         c = "stop" in getBesideE()
@@ -1102,9 +1108,11 @@ def stingerHunt(convert=0,gathering=0):
     if status != "night": return False
     if convert:
         move.press(".")
+        webhook("Converting: interrupted","Stinger Hunt","dark brown")
     if gathering:
-        webhook("Gathering: interrupted","Vicious Bee","dark brown")
+        webhook("Gathering: interrupted","Stinger Hunt","dark brown")
         reset()
+    sst = time.perf_counter()
     for field in fields:
         status = getStatus()
         fieldGoTo = field
@@ -1115,7 +1123,7 @@ def stingerHunt(convert=0,gathering=0):
             webhook("","Finding Vicious Bee ({})".format(field),"dark brown")
             setStatus("finding_vb_{}".format(field))
             exec(open("./paths/vb_{}.py".format(field)).read())
-            time.sleep(2)
+            time.sleep(4)
             status = getStatus()
         else:
             fi = fields.index(field)
@@ -1125,11 +1133,18 @@ def stingerHunt(convert=0,gathering=0):
                 prev_field = fields[fi]
             status = "vb_found_wrong_field_{}".format(prev_field)
         print(status)
+        if "vb_left" in status:
+            webhook("","Vicious bee has left/been defeated","red")
+            reset()
+            addStat("objective_time",round((time.perf_counter() - sst)/60,2))
+            return "success"
         if "vb_found_right_field" in status:
             killvb = 1
         elif "vb_found_wrong_field" in status:
             reset()
-            if canon(1) == "dc": return "dc"
+            if canon(1) == "dc":
+                addStat("objective_time",round((time.perf_counter() - sst)/60,2))
+                return "dc"
             fieldGoTo = status.split("_")[-1]
             exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
             exec(open("./paths/vb_{}.py".format(fieldGoTo)).read())
@@ -1151,13 +1166,16 @@ def stingerHunt(convert=0,gathering=0):
                 if status == "killing_vb_died":
                     webhook("","Died to vicious bee", "red")
                     reset()
-                    if canon(1) == "dc": return "dc"
+                    if canon(1) == "dc":
+                        addStat("objective_time",round((time.perf_counter() - st)/60,2))
+                        return "dc"
                     exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
                     setStatus("killing_vb")
             reset()
             break
         reset()
     setStatus()
+    addStat("objective_time",round((time.perf_counter() - sst)/60,2))
     return "success"
 sat_image = cv2.imread('./images/retina/saturator.png')
 method = cv2.TM_SQDIFF_NORMED
@@ -1331,6 +1349,8 @@ def clickYes():
     mouse.click(Button.left, 1)
     
 def goToPlanter(field,place=0):
+    st = time.perf_counter()
+    stingerHunt()
     if canon() == "dc": return
     exec(open("./paths/field_{}.py".format(field)).read())
     if field == "pine tree":
@@ -1379,6 +1399,7 @@ def goToPlanter(field,place=0):
     else:
         time.sleep(0.8)
     time.sleep(0.2)
+    addStat("objective_time",round((time.perf_counter() - st)/60,2))
         
 def fieldDriftCompensation():
     res = loadRes()
@@ -1470,7 +1491,9 @@ def vic():
             elif "vb" in status:
                 bluetexts = imToString("blue").lower()
                 print(bluetexts)
-                if "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
+                if "vicious" in bluetexts and "left" in bluetexts:
+                    setStatus("vb_left")
+                elif "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
                     currField = status.split("_")[2]
                     targetField = "none"
                     for fd in fields:
@@ -1485,11 +1508,14 @@ def vic():
                         setStatus("vb_found_right_field")
                     else:
                         setStatus("vb_found_wrong_field_{}".format(targetField))
+                elif "finding_vb" in status and "vicious" in bluetexts and "defeated" in bluetexts:
+                    setStatus("vb_killed")
                 elif "killing_vb" in status:
                     if "vicious" in bluetexts and "defeated" in bluetexts:
                         setStatus("vb_killed")
                     elif "died" in bluetexts:
                         setStatus("killing_vb_died")
+                
             elif setdat['stinger']:
                 if detectNight():
                     setStatus("night")
@@ -3238,7 +3264,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                                 move.press('e')
                                 clickYes()
                                 addStat("planters",1)
-                                if currField == "pumpkin":
+                                if currField == "pumpkin" or currField == "blue flower":
                                     for _ in range(4):
                                         move.press(",")
                                 elif currField == "pine tree" or currField == "strawberry" or currField == "pineapple":

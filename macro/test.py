@@ -90,8 +90,12 @@ def getBesideE():
     log(text)
     return text
 
-def resete(hiveCheck=False):
-    st = time.time()
+def pagPress(key, delay = 0.02):
+    pag.keyDown(key, _pause = False)
+    time.sleep(delay)
+    pag.keyUp(key, _pause = False)
+    
+def reset(hiveCheck=False):
     setdat = loadsettings.load()
     yOffset = 0
     if setdat["new_ui"]: yOffset = 20
@@ -105,18 +109,21 @@ def resete(hiveCheck=False):
     yo = wh//4*3
     xt = xo*3-xo
     yt = wh-yo
+    i = 1
     while True:
+        webhook("","Resetting character, Attempt: {}".format(i),"dark brown")
         mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
         time.sleep(0.5)
-        pag.press('esc')
+        pagPress('esc')
         time.sleep(0.1)
-        pag.press('r')
+        pagPress('r')
         time.sleep(0.2)
-        pag.press('enter')
+        pagPress('enter')
         time.sleep(8.5)
         besideE = getBesideE()
-        r = "make" in besideE or "honey" in besideE:
+        if "make" in besideE or "honey" in besideE:
             break
+        i += 1
     for _ in range(4):
         pix = getPixelColor(ww//2,wh-2)
         r = [int(x) for x in pix]
@@ -126,19 +133,15 @@ def resete(hiveCheck=False):
         log(abs(r[1]-r[0]))
         log("real")
         avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
-        print(time.time()-st)
         log(avgDiff)
         if avgDiff < 10:
             for _ in range(6):
-                keyboard.press('o')
-                time.sleep(0.08)
-                keyboard.release('o')
+                pagPress("o")
+            time.sleep(0.3)
             return True
         for _ in range(4):
-            pag.press(".")
-        
-        time.sleep(0.5)
-    time.sleep(1)
+            pagPress(".")
+    time.sleep(0.3)
     return False
     if hiveCheck:
         webhook("Notice","Hive not found.","red",1)
@@ -148,7 +151,12 @@ def resete(hiveCheck=False):
 
 
 roblox()
+st = time.time()
 resete()
+print(time.time()-st)
+st = time.time()
+reset.reset()
+print(time.time()-st)
 terminal()
 '''
 screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
