@@ -38,6 +38,7 @@ from pynput.keyboard import Key
 from pynput.mouse import Button
 from convertAhkPattern import ahkPatternToPython
 from pixelcolour import getPixelColor
+import platform
 try:
     from html2image import Html2Image
 except ModuleNotFoundError:
@@ -100,12 +101,19 @@ macrov = "1.56.13"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
+def versionTuple(v):
+    return tuple(map(int, (v.split("."))))
+macVer = platform.mac_ver()[0]
 try:
     hti = Html2Image()
 except FileNotFoundError:
-    pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
-\n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
-    quit()
+    if versionTuple(macVer) >= versionTuple("10.15"):
+        pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
+    \n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
+        quit()
+    else:
+        hti = None
+        pass
     
 questData = {}
 questBear = ""
