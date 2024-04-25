@@ -1175,7 +1175,7 @@ def stingerHunt(convert=0,gathering=0):
                     webhook("","Died to vicious bee", "red")
                     reset()
                     if canon(1) == "dc":
-                        addStat("objective_time",round((time.perf_counter() - st)/60,2))
+                        addStat("objective_time",round((time.perf_counter() - sst)/60,2))
                         return "dc"
                     exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
                     setStatus("killing_vb")
@@ -1503,7 +1503,7 @@ def vic():
                     setStatus("vb_left")
                 elif "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
                     currField = status.split("_")[2]
-                    targetField = "none"
+                    targetField = None
                     for fd in fields:
                         if fd in bluetexts:
                             if fd == "mountain":
@@ -1511,7 +1511,7 @@ def vic():
                             else:
                                 targetField = fd
                             break
-                    webhook("","Found Vicious Bee In {} Field".format(fd.title()),"light green")
+                    webhook("","Found Vicious Bee In {} Field".format(targetField.title()),"light green")
                     if currField.lower() == targetField.lower():
                         setStatus("vb_found_right_field")
                     else:
