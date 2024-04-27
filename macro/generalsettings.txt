@@ -9,7 +9,7 @@ sprinkler_slot:1
 display_type:built-in retina display
 new_ui:0
 private_server_link:
-enable_discord_bot:1
+enable_discord_bot:0
 discord_bot_token:
 show_haste_warn:
 current_profile:first profile

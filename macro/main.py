@@ -1,5 +1,12 @@
 def printRed(txt):
     print("\033[0;31m{}\033[00m".format(txt))
+try:
+    import pyautogui as pag
+except Exception as e:
+    print(e)
+    printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
+    quit()
+
     
 import sys
 sv_i = sys.version_info
@@ -8,12 +15,7 @@ if (sv_i[1]>=10):
     pag.alert(title = "error", text = "{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
     quit()
 print(python_ver)
-try:
-    import pyautogui as pag
-except Exception as e:
-    print(e)
-    printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
-    quit()
+
 
 from difflib import SequenceMatcher
 import time, os, ctypes, tty
@@ -97,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.13"
+macrov = "1.56.14"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1503,7 +1505,7 @@ def vic():
                     setStatus("vb_left")
                 elif "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
                     currField = status.split("_")[2]
-                    targetField = None
+                    targetField = "none"
                     for fd in fields:
                         if fd in bluetexts:
                             if fd == "mountain":
@@ -1801,9 +1803,10 @@ def getQuest(giver):
             lineCount = len(lines)
         for i in range(lineCount):
             x = lines[i]
-            if giver in x:
-                if ":" in x: x  = x.split(":")[1]
-                q_title = x.replace(giver,"").replace("bear","").replace("bee","")
+            if giver in x and ":" in x:
+                q_title_raw = x.split(":")[1]
+                q_title = q_title_raw.replace(giver,"").replace("bear","").replace("bee","")
+                lines.remove(x)
                 break
         if q_title:
             break
@@ -1877,6 +1880,7 @@ def getQuest(giver):
     for i,e in enumerate(completeLines):
         for k,v in replaceDict.items():
             e = e.replace(k,v)
+        
         for x in quest:
             a = x.split("_")
             #check for gather
@@ -3043,7 +3047,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         quest_gathers[f] = "goo" in i
                     elif i.startswith("kill"):
                         _,c,m = i.split("_")
-                        if "ant" in m:
+                        if "ant" in m and m != "mantis":
                             setdat["ant_challenge"] = 1
                             setdat["antpass"] = 1
                         else:
