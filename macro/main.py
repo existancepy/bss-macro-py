@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.14"
+macrov = "1.56.15"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -970,8 +970,9 @@ def keepOld(claim = True):
         if "kee" in i[1][0].lower():
             mouse.release(Button.left)
             if claim:
-                mouse.position = ((i[0][0][0]+region[0])//multi, (i[0][0][1]+region[1])//multi)
-                mouse.click(Button.left)
+                pag.click(x = (i[0][0][0]+region[0])//multi, y = (i[0][0][1]+region[1])//multi)
+                #mouse.position = ((i[0][0][0]+region[0])//multi, (i[0][0][1]+region[1])//multi)
+                #mouse.click(Button.left)
             return True
     return False
             
