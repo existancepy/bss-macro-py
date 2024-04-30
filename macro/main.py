@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.15"
+macrov = "1.56.16"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1902,7 +1902,7 @@ def getQuest(giver):
                 for j in collectObj:
                     if not j in e: break
                 else: add = True
-            elif (a[0] == "pollen" and "pollen" in e) or (a[0] == "pollengoo" and "goo" in e) and a[1] in e:
+            elif ((a[0] == "pollen" and "pollen" in e) or (a[0] == "pollengoo" and "goo" in e)) and a[1] in e:
                 add = True
             if add and not x in detectedObjs:
                 print(f"{a}, {e}")
