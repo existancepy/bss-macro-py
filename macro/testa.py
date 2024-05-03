@@ -1,25 +1,8 @@
-
-import pyautogui as pag
 import time
 import os
-import tkinter
-import move
-import sys
-import cv2
-from PIL import ImageGrab
-import numpy as np
-import imagesearch
+import pyautogui as pag
 import loadsettings
-import subprocess
-import tkinter as tk
-import tty
-from tkinter import ttk
-import backpack
-from webhook import webhook
-import webbrowser
-import reset
-import ast
-import getHaste
+
 
 def roblox():
     cmd = """
@@ -42,33 +25,7 @@ def loadRes():
 savedata = loadRes()
 ww = savedata['ww']
 wh = savedata['wh']
-def imToString(m):
-    savedata = loadRes()
-    ww = savedata['ww']
-    wh = savedata['wh']
-    print("Screen Coordinates: {}x{}".format(ww,wh))
-    # Path of tesseract executable
-    #pytesseract.pytesseract.tesseract_cmd ='**Path to tesseract executable**'
-    # ImageGrab-To capture the screen image in a loop. 
-    # Bbox used to capture a specific area.
-    if m == "bee bear":
-        cap = pag.screenshot(region=(ww//3,wh//20,ww//3,wh//7))
-    elif m == "egg shop":
-        cap = pag.screenshot(region=(ww//1.2,wh//3,ww-ww//1.2,wh//5))
-    elif m == "ebutton":
-        cap = pag.screenshot(region=(ww//2.65,wh//20,ww//21,wh//17))
-        img = cv2.cvtColor(np.array(cap), cv2.COLOR_RGB2BGR)
-        img = cv2.resize(img, None, fx=2, fy=2)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        config = '--oem 3 --psm %d' % 10
-        tesstr = pytesseract.image_to_string(img, config = config, lang ='eng')
-        print(tesstr)
-        return tesstr
 
-    # Converted the image to monochrome for it to be easily 
-    # read by the OCR and obtained the output String.
-    tesstr = pytesseract.image_to_string(cv2.cvtColor(np.array(cap), cv2.COLOR_BGR2GRAY), lang ='eng')
-    return tesstr
 mx = float(input("input x screenshot multiplier: "))
 my = float(input("input y screenshot multiplier: "))
 lx = float(input("input x length multiplier: "))
