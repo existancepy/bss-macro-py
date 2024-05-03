@@ -1992,6 +1992,23 @@ def openSettings():
         keyboard.press(Key.page_up)
         time.sleep(0.02)
         keyboard.release(Key.page_up)
+    else:
+        pag.typewrite("\\")
+        webhook("","Unable to locate the walkspeed stat, haste compensation is disabled","red")
+        loadsettings.save("msh",-1,"multipliers.txt")
+        loadsettings.save("msy",-1,"multipliers.txt")
+        return
+    
+    log(movespeedInfo)
+    coords = movespeedInfo[0]
+    start,_,end,_ = coords
+    y = (start[1] + wh/7) - 30
+    h = (end[1] - start[1]) + 60
+    
+    im = pag.screenshot(region=(ww/8,y,ww/10,h))
+    im.save('test.png')
+    loadsettings.save("msh",h,"multipliers.txt")
+    loadsettings.save("msy",y,"multipliers.txt")
 
 
 def getHaste():
