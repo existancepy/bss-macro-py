@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.18"
+macrov = "1.56.19"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1808,7 +1808,7 @@ def getQuest(giver):
                 if ":" in x:
                     x = x.split(":")[1]
                 q_title = x.replace(giver,"").replace("bear","").replace("bee","")
-                lines.remove(x)
+                lines.remove(lines[i])
                 break
         if q_title:
             break
