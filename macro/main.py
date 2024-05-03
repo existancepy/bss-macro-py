@@ -1945,30 +1945,31 @@ def openSettings():
     webhook('','Opening Stats',"brown")
     promoCode = ''.join([x[1][0] for x in customOCR(0,wh/7,ww/3,wh/8)]).lower()
     pag.typewrite("\\")
+    time.sleep(0.5)
     if not "code" in promoCode:
         for _ in range(5):
-            keyboard.press(Key.up)
+            keyboard.press("w")
             time.sleep(0.05)
-            keyboard.release(Key.up)
+            keyboard.release("w")
             time.sleep(0.1)
-        keyboard.press(Key.down)
+        keyboard.press("s")
         time.sleep(0.05)
-        keyboard.release(Key.down)
+        keyboard.release("s")
         for _ in range(9):
-            keyboard.press(Key.left)
+            keyboard.press("a")
             time.sleep(0.05)
-            keyboard.release(Key.left)
+            keyboard.release("a")
         for _ in range(4):
-            keyboard.press(Key.right)
+            keyboard.press("d")
             time.sleep(0.05)
-            keyboard.release(Key.right)
+            keyboard.release("d")
         move.press('enter')
         promoCode = ''.join([x[1][0] for x in customOCR(0,wh/7,ww/3,wh/8)]).lower()
         if not "code" in promoCode:
             move.press('enter')
-    keyboard.press(Key.down)
+    keyboard.press("s")
     time.sleep(0.05)
-    keyboard.release(Key.down)
+    keyboard.release("s")
     for _ in range(35):
         keyboard.press(Key.page_down)
         time.sleep(0.02)
@@ -1991,23 +1992,6 @@ def openSettings():
         keyboard.press(Key.page_up)
         time.sleep(0.02)
         keyboard.release(Key.page_up)
-    else:
-        pag.typewrite("\\")
-        webhook("","Unable to locate the walkspeed stat, haste compensation is disabled","red")
-        loadsettings.save("msh",-1,"multipliers.txt")
-        loadsettings.save("msy",-1,"multipliers.txt")
-        return
-    
-    log(movespeedInfo)
-    coords = movespeedInfo[0]
-    start,_,end,_ = coords
-    y = (start[1] + wh/7) - 30
-    h = (end[1] - start[1]) + 60
-    
-    im = pag.screenshot(region=(ww/8,y,ww/10,h))
-    im.save('test.png')
-    loadsettings.save("msh",h,"multipliers.txt")
-    loadsettings.save("msy",y,"multipliers.txt")
 
 
 def getHaste():
