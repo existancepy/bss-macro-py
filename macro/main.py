@@ -1803,10 +1803,11 @@ def getQuest(giver):
         if j == 9:
             lineCount = len(lines)
         for i in range(lineCount):
-            x = lines[i].lower()
-            if giver in x and ":" in x:
-                q_title_raw = x.split(":")[1]
-                q_title = q_title_raw.replace(giver,"").replace("bear","").replace("bee","")
+            x = lines[i]
+            if giver in x:
+                if ":" in x:
+                    x = x.split(":")[1]
+                q_title = x.replace(giver,"").replace("bear","").replace("bee","")
                 lines.remove(x)
                 break
         if q_title:
