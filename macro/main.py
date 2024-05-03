@@ -1969,7 +1969,7 @@ def openSettings():
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
-    for _ in range(26):
+    for _ in range(35):
         keyboard.press(Key.page_down)
         time.sleep(0.02)
         keyboard.release(Key.page_down)
