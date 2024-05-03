@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.16"
+macrov = "1.56.17"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1803,7 +1803,7 @@ def getQuest(giver):
         if j == 9:
             lineCount = len(lines)
         for i in range(lineCount):
-            x = lines[i]
+            x = lines[i].lower()
             if giver in x and ":" in x:
                 q_title_raw = x.split(":")[1]
                 q_title = q_title_raw.replace(giver,"").replace("bear","").replace("bee","")
