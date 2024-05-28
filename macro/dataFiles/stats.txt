@@ -1,11 +1,11 @@
 
-gather_time:[5.55, 15.16]
-convert_time:[1.4]
-hourly_honey:[26056241153, 24169450395, 57091094279]
+gather_time:[9.27, 9.23, 6.56]
+convert_time:[2.35]
+hourly_honey:[18779942613, 45098574332]
 bug_time:0
-rejoin_time:0
-objective_time:5.44
-vic_kills:2
-bug_kills:5
+rejoin_time:4.47
+objective_time:4.21
+vic_kills:0
+bug_kills:4
 quests:0
-planters:1
+planters:5

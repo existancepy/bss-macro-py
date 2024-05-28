@@ -49,3 +49,4 @@ bucko_quest:0
 enable_quest_gumdrop:0
 quest_gumdrop_slot:1
 riley_quest:0
+cps:10

@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.56.19"
+macrov = "1.57.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1531,7 +1531,7 @@ def vic():
                 if detectNight():
                     setStatus("night")
                     
-            if setdat['enable_discord_webhook'] and setdat['send_screenshot']:
+            if setdat['enable_discord_webhook'] and setdat['hourly_report']:
                 sysTime = datetime.now()
                 sysHour = sysTime.hour
                 sysMin = sysTime.minute
@@ -1794,7 +1794,7 @@ def getQuest(giver):
     q_title = ""
     lines = []
     for j in range(10):
-        ocr = customOCR(0,wh/7,ww/4.3,wh/1.6,0)
+        ocr = customOCR(0,wh/7,ww/4.1,wh/1.6,0)
         lines = [x[1][0].lower() for x in ocr]
         #log(lines)
         #search for quest title in only the first 6 lines
@@ -1887,7 +1887,7 @@ def getQuest(giver):
             a = x.split("_")
             #check for gather
             add = False
-            if ((a[0] ==  "gather" and "pollen" in e) or (a[0] == "gathergoo" and "goo" in e)) and a[1].replace(" ","") in e:
+            if ((a[0] ==  "gather" and "pollen" in e) or (a[0] == "gathergoo" and "goo" in e)) and a[1].replace(" ","")[:-1] in e:
                 add = True
             #check for kill
             elif a[0] == "kill" and "defeat" in e and a[2] in e:
@@ -2945,7 +2945,7 @@ def quest(giver, session_start = 0):
 
                     
 def startLoop(planterTypes_prev, planterFields_prev,session_start):
-    global invalid_prev_honey, quest_kills, quest_gathers
+    global invalid_prev_honey, planter_cycle, quest_gathers
     setStatus()
     setdat = loadsettings.load()
     val = validateSettings()
@@ -2991,7 +2991,6 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
     ww = savedata['ww']
     wh = savedata['wh']
     gfid = 0
-    planter_cycle = 1
     maxPlanters = 3
     maxCycles = 1
     automatic_planters = bool(planterset['enable_planters'] == 1)
@@ -3012,7 +3011,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
             if len(planterFields) < maxPlanters:
                 maxPlanters = len(planterFields)
         else:
-            for i in range(1,4):
+            for i in range(1,6):
                 for j in range(1,4):
                     if planterset[f"cycle_{i}_planter_{j}"] != "none" and planterset[f"cycle_{i}_field_{j}"] != "none":
                         maxCycles = i
@@ -3069,6 +3068,46 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                     if i.startswith("fieldtoken") or i.startswith("pollen"):
                         for field in gatherFields:
                             if field in blueFields: break
+                        else: quest_gathers[defaultField] = "goo" in i
+                        
+                    elif i.startswith("token") and not gatherFields and not defaultField in quest_gathers:
+                        quest_gathers[defaultField] = 0
+                #do feeding
+                for i in objs:
+                    if i.startswith("feed"):
+                        _,q,a = i.split("_")
+                        feed(a, int(q))
+                        
+        if setdat["riley_quest"]:
+            objs = quest("riley",session_start)
+            if getStatus() == "disconnect": return
+            redFields = ["mushroom", "strawberry", "rose", "pepper"]
+            if objs:
+                for i in objs:
+                    if i.startswith("gather"):
+                        f = i.split("_")[1]
+                        quest_gathers[f] = "goo" in i
+                    elif i.startswith("kill"):
+                        _,c,m = i.split("_")
+                        if "ant" in m and m != "mantis":
+                            setdat["ant_challenge"] = 1
+                            setdat["antpass"] = 1
+                        else:
+                            setdat[m] = 1
+                    elif i.startswith("collect"):
+                        o = i.split("_",1)[1]
+                        setdat[o] = 1
+                #check if there is a need to force gather a field to collect tokens/pollen
+                gatherFields = list(quest_gathers.keys())
+                if setdat["gather_enable"]:
+                    gatherFields += [x.lower() for x in setdat['gather_field'] if x.lower() != "none"]
+                gatherFields = set(gatherFields)
+
+                defaultField = "pepper"
+                for i in objs:
+                    if i.startswith("fieldtoken") or i.startswith("pollen"):
+                        for field in gatherFields:
+                            if field in redFields: break
                         else: quest_gathers[defaultField] = "goo" in i
                         
                     elif i.startswith("token") and not gatherFields and not defaultField in quest_gathers:
@@ -3195,14 +3234,14 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         #Planter check
         
         if planterset['enable_planters']:
-            if not continuePlanters or (not occupiedStuff and automatic_planters):
+            if not continuePlanters or not occupiedStuff:
                 occupiedStuff = []
                 if automatic_planters:
                     for i in range(maxPlanters):
                         bestPlanter = getBestPlanter(planterFields[i],occupiedStuff,planterTypes)
                         webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(displayPlanterName(bestPlanter),planterFields[i].title()),"dark brown")
                         goToPlanter(planterFields[i],1)
-                        while getStatus() == "disconnect":
+                        if getStatus() == "disconnect":
                             rejoin()
                             goToPlanter(planterFields[i],1)
                         placePlanter(bestPlanter)
@@ -3218,9 +3257,9 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         if planter == "none" or field == "none": continue
                         webhook('',"Travelling: {} ({})\nObjective: Place Planter".format(planter.title(),field.title()),"dark brown")
                         goToPlanter(field,1)
-                        while getStatus() == "disconnect":
+                        if getStatus() == "disconnect":
                             rejoin()
-                            goToPlanter(usablePlanterName(planter))
+                            goToPlanter(field,1)
                         placePlanter(usablePlanterName(planter))
                         occupiedStuff.append((planter,field))
                     with open("planterdata.txt","w") as f:
@@ -3270,7 +3309,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                         collectAnyPlanters += 1
                         for i in range(2):
                             goToPlanter(currField)
-                            while getStatus() == "disconnect":
+                            if getStatus() == "disconnect":
                                 rejoin()
                                 goToPlanter(currField)
                             webhook('',"Travelling: {} ({})\nObjective: Collect Planter, Attempt: {}".format(displayPlanterName(currPlanter),currField.title(),i+1),"dark brown")
@@ -3547,7 +3586,8 @@ def setResolution():
         "5120x2880": [1.4,0.87,1.7,2],
         "3420x2224":[0.81, 0.95, 1.12, 1.24],
         "3840x2486": [1.3, 0.92, 1.45, 1.45],
-        "3420x2214":[0.9, 0.95, 1.1, 1.15]
+        "3420x2214":[0.9, 0.95, 1.1, 1.15],
+        "3440x1440": [1.6, 0.84, 1.6, 2.3]
         }
     if ndisplay in multiInfo:
         loadsettings.save("y_screenshot_multiplier",multiInfo[ndisplay][0],"multipliers.txt")
@@ -3583,7 +3623,7 @@ if __name__ == "__main__":
     ww = savedata["ww"]
     wh = savedata["wh"]
     root = tk.Tk(className='exih_macro')
-    root.geometry('840x470')
+    root.geometry('880x470')
     s = ttk.Style()
     if p:
         sv_ttk.set_theme("dark")
@@ -3643,6 +3683,7 @@ if __name__ == "__main__":
     frame5 = ttk.Frame(notebook, width=780, height=460)
     frame8 = ttk.Frame(notebook, width=780, height=460)
     frame9 = ttk.Frame(notebook, width=780, height=460)
+    frame10 = ttk.Frame(notebook, width=780, height=460)
     
     frame1.pack(fill='both', expand=True)
     frame2.pack(fill='both', expand=True)
@@ -3653,15 +3694,17 @@ if __name__ == "__main__":
     frame5.pack(fill='both', expand=True)
     frame8.pack(fill='both', expand=True)
     frame9.pack(fill='both', expand=True)
+    frame10.pack(fill='both', expand=True)
 
     notebook.add(frame1, text='Gather')
-    notebook.add(frame2, text='Bug run')
+    notebook.add(frame2, text='Bug Run')
     notebook.add(frame4, text='Collect')
     notebook.add(frame5, text='Boost')
     notebook.add(frame6, text='Planters')
     notebook.add(frame8, text='Quests')
-    notebook.add(frame3, text='In Game Settings')
+    notebook.add(frame3, text='Game Settings')
     notebook.add(frame7, text='Other Settings')
+    notebook.add(frame10, text='Tools')
     notebook.add(frame9, text='Profile')    
 
     #get variables
@@ -3780,6 +3823,7 @@ if __name__ == "__main__":
     enable_discord_webhook = tk.IntVar()
     discord_webhook_url= ""
     send_screenshot  = tk.IntVar()
+    hourly_report = tk.IntVar()
     walkspeed = ""
     hive_number = tk.IntVar()
     display_type = tk.StringVar(root)
@@ -3892,6 +3936,21 @@ if __name__ == "__main__":
     cycle_3_field_2 = tk.StringVar(root)
     cycle_3_planter_3 = tk.StringVar(root)
     cycle_3_field_3 = tk.StringVar(root)
+    cycle_4_planter_1 = tk.StringVar(root)
+    cycle_4_field_1 = tk.StringVar(root)
+    cycle_4_planter_2 = tk.StringVar(root)
+    cycle_4_field_2 = tk.StringVar(root)
+    cycle_4_planter_3 = tk.StringVar(root)
+    cycle_4_field_3 = tk.StringVar(root)
+    cycle_5_planter_1 = tk.StringVar(root)
+    cycle_5_field_1 = tk.StringVar(root)
+    cycle_5_planter_2 = tk.StringVar(root)
+    cycle_5_field_2 = tk.StringVar(root)
+    cycle_5_planter_3 = tk.StringVar(root)
+    cycle_5_field_3 = tk.StringVar(root)
+    
+    
+    
 
     current_profile = tk.StringVar(root)
 
@@ -3916,6 +3975,7 @@ if __name__ == "__main__":
         enable_discord_webhook.set(setdat["enable_discord_webhook"])
         discord_webhook_url= setdat["discord_webhook_url"]
         send_screenshot.set(setdat["send_screenshot"])
+        hourly_report.set(setdat["hourly_report"])
         walkspeed = setdat["walkspeed"]
         hive_number.set(setdat["hive_number"])
         display_type.set(setdat["display_type"].capitalize())
@@ -4027,6 +4087,19 @@ if __name__ == "__main__":
         cycle_3_field_2.set(plantdat['cycle_3_field_2'])
         cycle_3_planter_3.set(plantdat['cycle_3_planter_3'])
         cycle_3_field_3.set(plantdat['cycle_3_field_3'])
+        cycle_4_planter_1.set(plantdat['cycle_4_planter_1'])
+        cycle_4_field_1.set(plantdat['cycle_4_field_1'])
+        cycle_4_planter_2.set(plantdat['cycle_4_planter_2'])
+        cycle_4_field_2.set(plantdat['cycle_4_field_2'])
+        cycle_4_planter_3.set(plantdat['cycle_4_planter_3'])
+        cycle_4_field_3.set(plantdat['cycle_4_field_3'])
+        cycle_5_planter_1.set(plantdat['cycle_5_planter_1'])
+        cycle_5_field_1.set(plantdat['cycle_5_field_1'])
+        cycle_5_planter_2.set(plantdat['cycle_5_planter_2'])
+        cycle_5_field_2.set(plantdat['cycle_5_field_2'])
+        cycle_5_planter_3.set(plantdat['cycle_5_planter_3'])
+        cycle_5_field_3.set(plantdat['cycle_5_field_3'])
+        
 
         #current_profile.set(setdat["current_profile"])
 
@@ -4341,6 +4414,7 @@ if __name__ == "__main__":
             "enable_discord_webhook": enable_discord_webhook.get(),
             "discord_webhook_url": urltextbox.get(1.0,"end").replace("\n",""),
             "send_screenshot": send_screenshot.get(),
+            "hourly_report": hourly_report.get(),
             "sprinkler_slot": sprinkler_slot.get(),
             "display_type": display_type.get().lower(),
             "new_ui": new_ui.get(),
@@ -4473,8 +4547,19 @@ if __name__ == "__main__":
             "cycle_3_planter_2":cycle_3_planter_2.get().lower(),
             "cycle_3_field_2":cycle_3_field_2.get().lower(),
             "cycle_3_planter_3":cycle_3_planter_3.get().lower(),
-            "cycle_3_field_3":cycle_3_field_3.get().lower()
-        
+            "cycle_3_field_3":cycle_3_field_3.get().lower(),
+            "cycle_4_planter_1":cycle_4_planter_1.get().lower(),
+            "cycle_4_field_1":cycle_4_field_1.get().lower(),
+            "cycle_4_planter_2":cycle_4_planter_2.get().lower(),
+            "cycle_4_field_2":cycle_4_field_2.get().lower(),
+            "cycle_4_planter_3":cycle_4_planter_3.get().lower(),
+            "cycle_4_field_3":cycle_4_field_3.get().lower(),
+            "cycle_5_planter_1":cycle_5_planter_1.get().lower(),
+            "cycle_5_field_1":cycle_5_field_1.get().lower(),
+            "cycle_5_planter_2":cycle_5_planter_2.get().lower(),
+            "cycle_5_field_2":cycle_5_field_2.get().lower(),
+            "cycle_5_planter_3":cycle_5_planter_3.get().lower(),
+            "cycle_5_field_3":cycle_5_field_3.get().lower(),
             }
 
         '''
@@ -4545,8 +4630,8 @@ if __name__ == "__main__":
         return [planterFields_set, generalDict, setDict, planterdict]
         
     def startGo():
-        global setdat, stop, planterTypes_prev, planterFields_prev, quest_kill, quest_gathers
-        quest_kills = {}
+        global setdat, stop, planterTypes_prev, planterFields_prev, planter_cycle, quest_gathers
+        planter_cycle = 1
         quest_gathers = {}
         saved = saveSettings()
         if not saved: return
@@ -5093,7 +5178,9 @@ if __name__ == "__main__":
     Tooltip(checkbox, text = "Gather in the field with the field boost for 15mins")
     ttk.Separator(frame5,orient="vertical").place(x=190, y=15, width=2, height=310)
     label = tkinter.Label(frame5, text = "Slot")
-    label.place(x = 300, y = 15)
+    tkinter.Label(frame5, text = "Use When").place(x = 300, y = 15)
+    tkinter.Label(frame5, text = "Every").place(x = 420, y = 15)
+    label.place(x = 220, y = 15)
     Tooltip(label, text = "Use the item in the associated hotbar slot")
     tkinter.Checkbutton(frame5, text="Slot 1", variable=slot_enable_1).place(x=210, y = 60)
     tkinter.Checkbutton(frame5, text="Slot 2", variable=slot_enable_2).place(x=210, y = 95)
@@ -5261,70 +5348,140 @@ if __name__ == "__main__":
     manualharvesttextbox.place(x = 92, y=331)    
     Tooltip(manualharvesttextbox, text = "How often the macro will collect the planters")
     tkinter.Label(manualFrame, text = "Hours").place(x=129,y=330) 
+    #scrollbar = ttk.Scrollbar(manualFrame,orient=tk.VERTICAL,command=manualFrame.yview)
+    #manualFrame['yscrollcommand'] = scrollbar.set
 
-    ylevel = 80
-    tkinter.Label(manualFrame, text = "Cycle 1").place(x = 450, y = ylevel-30)
-    
-    tkinter.Label(manualFrame, text = "Planters").place(x = 390, y = ylevel)
-    dropField = ttk.OptionMenu(manualFrame, cycle_1_planter_1,plantdat['cycle_1_planter_1'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 450, y = ylevel,height=24,width=95)
-    tkinter.Label(manualFrame, text = "Fields").place(x = 390, y = ylevel+35)
-    dropField = ttk.OptionMenu(manualFrame, cycle_1_field_1,plantdat['cycle_1_field_1'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 450, y = ylevel+35,height=24,width=95)
-    
-    dropField = ttk.OptionMenu(manualFrame, cycle_1_planter_2,plantdat['cycle_1_planter_2'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 580, y = ylevel,height=24,width=95)
-    dropField = ttk.OptionMenu(manualFrame, cycle_1_field_2,plantdat['cycle_1_field_2'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 580, y = ylevel+35,height=24,width=95)
+    cycleCanvas = tk.Canvas(manualFrame, height = 320, width = 410, scrollregion=(0,0,500,800))
+    vbar = ttk.Scrollbar(manualFrame,orient = tk.VERTICAL)
+    vbar.pack(side = tk.RIGHT,fill = tk.Y)
+    vbar.config(command=cycleCanvas.yview)
+    cycleCanvas.config(yscrollcommand=vbar.set)
+    cycleCanvas.place(x = 390, y = 70)
 
-    dropField = ttk.OptionMenu(manualFrame, cycle_1_planter_3,plantdat['cycle_1_planter_3'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 710, y = ylevel,height=24,width=95)
-    dropField = ttk.OptionMenu(manualFrame, cycle_1_field_3,plantdat['cycle_1_field_3'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 710, y = ylevel+35,height=24,width=95)
-
-    ttk.Separator(manualFrame,orient="horizontal").place(x=390, y=ylevel+75, width=400, height=2) 
-
-    ylevel = 190
-    tkinter.Label(manualFrame, text = "Cycle 2").place(x = 450, y = ylevel-30)
+    def on_vertical(event):
+        cycleCanvas.yview_scroll(-1 * event.delta, 'units')
+    cycleCanvas.bind_all('<MouseWheel>', on_vertical)
     
-    tkinter.Label(manualFrame, text = "Planters").place(x = 390, y = ylevel)
-    dropField = ttk.OptionMenu(manualFrame, cycle_2_planter_1,plantdat['cycle_2_planter_1'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 450, y = ylevel,height=24,width=95)
-    tkinter.Label(manualFrame, text = "Fields").place(x = 390, y = ylevel+35)
-    dropField = ttk.OptionMenu(manualFrame, cycle_2_field_1, plantdat['cycle_2_field_1'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 450, y = ylevel+35,height=24,width=95)
-    
-    dropField = ttk.OptionMenu(manualFrame, cycle_2_planter_2, plantdat['cycle_2_planter_2'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 580, y = ylevel,height=24,width=95)
-    dropField = ttk.OptionMenu(manualFrame, cycle_2_field_2, plantdat['cycle_2_field_2'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 580, y = ylevel+35,height=24,width=95)
+    ylevel = 50
 
-    dropField = ttk.OptionMenu(manualFrame, cycle_2_planter_3, plantdat['cycle_2_planter_3'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 710, y = ylevel,height=24,width=95)
-    dropField = ttk.OptionMenu(manualFrame, cycle_2_field_3, plantdat['cycle_2_field_3'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 710, y = ylevel+35,height=24,width=95)
-    
-    ttk.Separator(manualFrame,orient="horizontal").place(x=390, y=ylevel+75, width=400, height=2) 
+    cycleCanvas.create_window(60, ylevel-40, window = tkinter.Label(cycleCanvas, text = "Cycle 1"))
 
-    ylevel = 300
-    tkinter.Label(manualFrame, text = "Cycle 3").place(x = 450, y = ylevel-30)
-    
-    tkinter.Label(manualFrame, text = "Planters").place(x = 390, y = ylevel)
-    dropField = ttk.OptionMenu(manualFrame, cycle_3_planter_1,plantdat['cycle_3_planter_1'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 450, y = ylevel,height=24,width=95)
-    tkinter.Label(manualFrame, text = "Fields").place(x = 390, y = ylevel+35)
-    dropField = ttk.OptionMenu(manualFrame, cycle_3_field_1,plantdat['cycle_3_field_1'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 450, y = ylevel+35,height=24,width=95)
-    
-    dropField = ttk.OptionMenu(manualFrame, cycle_3_planter_2,plantdat['cycle_3_planter_2'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 580, y = ylevel,height=24,width=95)
-    dropField = ttk.OptionMenu(manualFrame, cycle_3_field_2,plantdat['cycle_3_field_2'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 580, y = ylevel+35,height=24,width=95)
+    cycleCanvas.create_window(30, ylevel, window = tkinter.Label(cycleCanvas, text = "Planters", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_1_planter_1,plantdat['cycle_1_planter_1'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel, height=24, width=95, window = dropField)
+    cycleCanvas.create_window(25, ylevel+35, window = tkinter.Label(cycleCanvas, text = "Fields", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_1_field_1,plantdat['cycle_1_field_1'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel+35, height=24, width=95, window = dropField)
 
-    dropField = ttk.OptionMenu(manualFrame, cycle_3_planter_3,plantdat['cycle_3_planter_3'], *planters,style='smaller.TMenubutton' )
-    dropField.place(x = 710, y = ylevel,height=24,width=95)
-    dropField = ttk.OptionMenu(manualFrame, cycle_3_field_3,plantdat['cycle_3_field_3'], *gather_fields,style='smaller.TMenubutton' )
-    dropField.place(x = 710, y = ylevel+35,height=24,width=95)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_1_planter_2,plantdat['cycle_1_planter_2'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_1_field_2,plantdat['cycle_1_field_2'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_1_planter_3,plantdat['cycle_1_planter_3'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_1_field_3,plantdat['cycle_1_field_3'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel+35, height=24, width=95, window = dropField)
+
+    cycleCanvas.create_window(0, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+    cycleCanvas.create_window(200, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+
+
+    ylevel = 200
+    cycleCanvas.create_window(60, ylevel-40, window = tkinter.Label(cycleCanvas, text = "Cycle 2"))
+
+    cycleCanvas.create_window(30, ylevel, window = tkinter.Label(cycleCanvas, text = "Planters", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_2_planter_1,plantdat['cycle_2_planter_1'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel, height=24, width=95, window = dropField)
+    cycleCanvas.create_window(25, ylevel+35, window = tkinter.Label(cycleCanvas, text = "Fields", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_2_field_1,plantdat['cycle_2_field_1'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_2_planter_2,plantdat['cycle_2_planter_2'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_2_field_2,plantdat['cycle_2_field_2'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_2_planter_3,plantdat['cycle_2_planter_3'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_2_field_3,plantdat['cycle_2_field_3'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel+35, height=24, width=95, window = dropField)
+
+    cycleCanvas.create_window(0, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+    cycleCanvas.create_window(200, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+
+
+    ylevel += 150
+    cycleCanvas.create_window(60, ylevel-40, window = tkinter.Label(cycleCanvas, text = "Cycle 3"))
+
+    cycleCanvas.create_window(30, ylevel, window = tkinter.Label(cycleCanvas, text = "Planters", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_3_planter_1,plantdat['cycle_3_planter_1'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel, height=24, width=95, window = dropField)
+    cycleCanvas.create_window(25, ylevel+35, window = tkinter.Label(cycleCanvas, text = "Fields", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_3_field_1,plantdat['cycle_3_field_1'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_3_planter_2,plantdat['cycle_3_planter_2'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_3_field_2,plantdat['cycle_3_field_2'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_3_planter_3,plantdat['cycle_3_planter_3'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_3_field_3,plantdat['cycle_3_field_3'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel+35, height=24, width=95, window = dropField)
+
+    cycleCanvas.create_window(0, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+    cycleCanvas.create_window(200, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+
+
+    ylevel += 150
+    cycleCanvas.create_window(60, ylevel-40, window = tkinter.Label(cycleCanvas, text = "Cycle 4"))
+
+    cycleCanvas.create_window(30, ylevel, window = tkinter.Label(cycleCanvas, text = "Planters", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_4_planter_1,plantdat['cycle_4_planter_1'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel, height=24, width=95, window = dropField)
+    cycleCanvas.create_window(25, ylevel+35, window = tkinter.Label(cycleCanvas, text = "Fields", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_4_field_1,plantdat['cycle_4_field_1'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_4_planter_2,plantdat['cycle_4_planter_2'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_4_field_2,plantdat['cycle_4_field_2'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_4_planter_3,plantdat['cycle_4_planter_3'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_4_field_3,plantdat['cycle_4_field_3'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel+35, height=24, width=95, window = dropField)
+
+    cycleCanvas.create_window(0, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+    cycleCanvas.create_window(200, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+
+
+    ylevel += 150
+    cycleCanvas.create_window(60, ylevel-40, window = tkinter.Label(cycleCanvas, text = "Cycle 5"))
+
+    cycleCanvas.create_window(30, ylevel, window = tkinter.Label(cycleCanvas, text = "Planters", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_5_planter_1,plantdat['cycle_5_planter_1'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel, height=24, width=95, window = dropField)
+    cycleCanvas.create_window(25, ylevel+35, window = tkinter.Label(cycleCanvas, text = "Fields", justify="left"))
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_5_field_1,plantdat['cycle_5_field_1'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(120, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_5_planter_2,plantdat['cycle_5_planter_2'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_5_field_2,plantdat['cycle_5_field_2'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(250, ylevel+35, height=24, width=95, window = dropField)
+
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_5_planter_3,plantdat['cycle_5_planter_3'], *planters,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel, height=24, width=95, window = dropField)
+    dropField = ttk.OptionMenu(cycleCanvas, cycle_5_field_3,plantdat['cycle_5_field_3'], *gather_fields,style='smaller.TMenubutton')
+    cycleCanvas.create_window(380, ylevel+35, height=24, width=95, window = dropField)
+
+    cycleCanvas.create_window(0, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+    cycleCanvas.create_window(200, ylevel+75, width=400, height=2, window = ttk.Separator(cycleCanvas,orient="horizontal"))
+
     
     def scaleLabels(value):
         value = int(value)
@@ -5355,7 +5512,7 @@ if __name__ == "__main__":
 
     tkinter.Checkbutton(frame8, text="Polar Bear Quest", variable=polar_quest).place(x=0, y = 30)
     tkinter.Checkbutton(frame8, text="Bucko Bee Quest", variable=bucko_quest).place(x=180, y = 30)
-    #tkinter.Checkbutton(frame8, text="Riley Bee Quest", variable=riley_quest).place(x=360, y = 30)
+    tkinter.Checkbutton(frame8, text="Riley Bee Quest", variable=riley_quest).place(x=360, y = 30)
 
     tkinter.Checkbutton(frame8, text="Use Gumdrops for goo quests", variable=enable_quest_gumdrop).place(x=0, y = 66)
     tkinter.Label(frame8, text = "Gumdrop Slot").place(x = 230, y = 65)
@@ -5422,13 +5579,16 @@ if __name__ == "__main__":
     checkbox = tkinter.Checkbutton(frame7, text="Enable Discord Webhook", command = disabledw,variable=enable_discord_webhook)
     checkbox.place(x=0, y = 15)
     Tooltip(checkbox, text = "Uses a discord webhook to send status messages")
-    tkinter.Label(frame7, text = "Discord Webhook Link").place(x = 350, y = 15)
+    tkinter.Label(frame7, text = "Discord Webhook Link").place(x = 470, y = 15)
     urltextbox = tkinter.Text(frame7, width = 24, height = 1, yscrollcommand = True, bg= wbgc)
     urltextbox.insert("end",discord_webhook_url)
     sendss = tkinter.Checkbutton(frame7, text="Send screenshots", variable=send_screenshot)
     sendss.place(x=200, y = 15)
-    Tooltip(sendss, text = "Sends screenshots along with the status messages.\nAlso enables the hourly report, which is sent at the start of every hour")
-    urltextbox.place(x = 500, y=17)
+    Tooltip(sendss, text = "Sends screenshots along with the status messages.")
+    sendhr = tkinter.Checkbutton(frame7, text="Hourly report", variable=hourly_report)
+    sendhr.place(x=350, y = 15)
+    Tooltip(sendhr, text = "Sends a hourly report at the start of every hour")
+    urltextbox.place(x = 620, y=17)
     
     tkinter.Label(frame7, text = "Private Server Link (optional)").place(x = 0, y = 85)
     linktextbox = tkinter.Text(frame7, width = 24, height = 1, bg= wbgc)
@@ -5476,6 +5636,42 @@ if __name__ == "__main__":
     Tooltip(checkbox, text = "Sends 'Existance so broke' when rejoining. This is a reference to Natro's 'Natro so broke'")
 
     #Tab 9
+
+    def startAutoClick(cps):
+        cps = int(cps)
+        loadsettings.save("cps", cps, "profile")
+        setdat = loadsettings.load()
+        delay = 0.05
+        while True:
+            mouse.press(Button.left)
+            sleep(delay)
+            mouse.release(Button.left)
+            time.sleep(abs(1/cps-delay))
+            x, y  = mouse.position
+            if x < 5 and y < 5:
+                break
+            
+    def autoClick():
+        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        window.geometry('250x150')
+        
+        tkinter.Label(window, text = "Clicks per second").place(x = 10, y = 10)
+        
+        cpstextbox = tkinter.Text(window, width = 4, height = 1, bg= wbgc)
+        cpstextbox.insert("end",setdat["cps"])
+        cpstextbox.place(x=130,y=11)
+        cpstextbox.bind('<Return>', lambda e: "break")
+        cpstextbox.bind('<space>', lambda e: "break")
+        
+        tkinter.Label(window, text = "Move the mouse to the top left corner\nto stop the auto clicker", justify="left").place(x = 10, y = 50)
+        ttk.Button(window, text = "Start", command = lambda: startAutoClick(cpstextbox.get(1.0,"end").replace("\n","")), style='small.TButton').place(x=10,y=100)
+        
+        
+    ttk.Button(frame10, text = "Autoclicker", command = autoClick, style='small.TButton').place(x=20,y=50)
+    
+    
+    
+    #Tab 10
     tkinter.Label(frame9, justify=tk.LEFT, text = "Profiles store settings individually to allow you to swap between them.\nThey do not store discord bot, discord webhook, rejoin method, rejoin wait,\nvicious bonus, hive number and walkspeed settings").place(x = 0, y = 10)
     tkinter.Label(frame9, text = "Current profile").place(x = 0, y = 105)
     profileField = ttk.OptionMenu(frame9, current_profile, setdat["current_profile"], *profiles,style='my.TMenubutton', command = loadProfile)

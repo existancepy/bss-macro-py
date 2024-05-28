@@ -80,6 +80,10 @@ def planterLoad(profile = None):
     return info
     
 def save(setting,value,filename = "generalsettings.txt"):
+    if filename == "profile":
+        profile = loadFile("generalsettings.txt")['current_profile']
+        filename = f"./profiles/{profile}/settings.txt"
+        
     info = load(filename)
     info[setting] = value
     out = ''
