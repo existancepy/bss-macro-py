@@ -1980,6 +1980,7 @@ def openSettings():
         time.sleep(0.02)
         keyboard.release(Key.page_up)
     for _ in range(8):
+        log("reading haste comp")
         statData = customOCR(0,wh/7,ww/7,wh/2)
         found = False
         for i, e in enumerate(statData):
