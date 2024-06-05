@@ -4284,7 +4284,7 @@ if __name__ == "__main__":
         print(files)
         for i in validFiles:
             if i not in files:
-                pag.alert("Not a valid profile folder")
+                pag.alert("Not a valid profile folder. The folder must contain the following files: plantersettings.txt, settings.txt and fieldsettings.txt")
                 return
                 path = f"./profiles/{name}"
         count = 0
