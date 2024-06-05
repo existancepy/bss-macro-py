@@ -191,7 +191,7 @@ pollengoo_red
 
 -medley
 token_redability
-gathergoo_stawberry
+gathergoo_strawberry
 gather_rose
 
 -mushrooms
