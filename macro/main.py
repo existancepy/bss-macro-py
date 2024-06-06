@@ -1167,12 +1167,16 @@ def stingerHunt(convert=0,gathering=0):
             while True:
                 exec(open("./paths/killvb_{}.py".format(fieldGoTo)).read())
                 status = getStatus()
+                log(f"stingerHunt status: {status}")
                 if status == "vb_killed":
                     webhook("","Vicious Bee Killed","bright green")
                     addStat("vic_kills", 1)
                     break
                 if time.time()-st > 300:
                     webhook("","Took too long to kill vicious bee, leaving","red")
+                    break
+                if "vb_left" in status:
+                    webhook("","Vicious bee has left","red")
                     break
                 if status == "killing_vb_died":
                     webhook("","Died to vicious bee", "red")
@@ -1501,7 +1505,7 @@ def vic():
                 
             elif "vb" in status:
                 bluetexts = imToString("blue").lower()
-                log(status)
+                log(f"vic status: {status}")
                 if "vicious" in bluetexts and "left" in bluetexts:
                     setStatus("vb_left")
                 elif "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
