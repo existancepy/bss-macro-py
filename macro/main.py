@@ -1157,6 +1157,7 @@ def stingerHunt(convert=0,gathering=0):
                 addStat("objective_time",round((time.perf_counter() - sst)/60,2))
                 return "dc"
             fieldGoTo = status.split("_")[-1]
+            webhook("","Travelling to {fieldGoTo} field (vicious bee)","dark brown")
             exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
             exec(open("./paths/vb_{}.py".format(fieldGoTo)).read())
             killvb = 1
