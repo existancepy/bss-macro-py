@@ -1501,7 +1501,7 @@ def vic():
                 
             elif "vb" in status:
                 bluetexts = imToString("blue").lower()
-                print(bluetexts)
+                log(status)
                 if "vicious" in bluetexts and "left" in bluetexts:
                     setStatus("vb_left")
                 elif "finding_vb" in status and "vicious" in bluetexts and "attack" in bluetexts:
