@@ -1883,6 +1883,11 @@ def getQuest(giver):
         "bamboc": "bamboo",
         "bamcc": "bamboo"
     }
+
+    feedSynonymDict = {
+        "strawberry": "strawberries",
+        "blueberry": "blueberries"
+    }
     
     for i,e in enumerate(completeLines):
         for k,v in replaceDict.items():
@@ -1897,10 +1902,14 @@ def getQuest(giver):
             #check for kill
             elif a[0] == "kill" and "defeat" in e and a[2] in e:
                 add = True
-            elif a[0] == "feed" and "feed" in e and a[2] in e:
-                a[1] = ''.join([m for m in e[e.find("feed"): e.find(a[2])] if m.isdigit()])
-                x = "_".join(a)
-                add = True
+            elif a[0] == "feed" and "feed" in e:
+                for k,v in feedSynonymDict.items():
+                    if a[2] == k and v in e: 
+                        a[2] = e
+                if a[2] in e:
+                    a[1] = ''.join([m for m in e[e.find("feed"): e.find(a[2])] if m.isdigit()])
+                    x = "_".join(a)
+                    add = True
             elif (a[0] == "misc" or a[0] == "token"  or a[0] == "fieldtoken") and a[1] in e:
                 add = True
             elif a[0] == "collect":
