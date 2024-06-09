@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.4"
+macrov = "1.57.5"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2794,10 +2794,11 @@ def feed(name, quantity):
         time.sleep(0.1)
 
     move.press("enter")
-    keyboard.press(Key.down)
+    time.sleep(1)
+    keyboard.press("s")
     time.sleep(0.05)
-    keyboard.release(Key.down)
-
+    keyboard.release("s")
+    time.sleep(0.5)
     for _ in range(20):
         keyboard.press(Key.page_up)
         time.sleep(0.02)
