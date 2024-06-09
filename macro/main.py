@@ -2829,6 +2829,7 @@ def feed(name, quantity):
         return
     
     print(foundItem)
+    multi = 1
     if setdat['display_type'] == "built-in retina display":
         multi = 2
     startY = ((wh/7 + foundItem[0][0][1])//multi)+30
