@@ -62,14 +62,9 @@ except Exception as e:
     quit()
 if __name__ == '__main__':
     print("\033[1;35m\nStarting Macro...  \n")
-try:
-    import ocrpy
-    from ocrpy import imToString,customOCR
-except:
-    os.system("pip3 install --force-reinstall paddlepaddle==2.5.0")
-    import ocrpy
-    reload(ocrpy)
-    from ocrpy import imToString,customOCR
+    
+import ocrpy
+from ocrpy import imToString,customOCR
 import sv_ttk
 import math
 import ast
