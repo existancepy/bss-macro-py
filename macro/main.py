@@ -354,6 +354,7 @@ def loadtimings():
         if l[1].isdigit():
             l[1] = int(l[1])
         tempdict[l[0]] = l[1]
+    log(str(tempdict))
     return tempdict
 
 def savetimings(m):
