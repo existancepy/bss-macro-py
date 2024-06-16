@@ -62,7 +62,6 @@ except Exception as e:
     quit()
 if __name__ == '__main__':
     print("\033[1;35m\nStarting Macro...  \n")
-    
 import ocrpy
 from ocrpy import imToString,customOCR
 import sv_ttk
@@ -94,7 +93,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.5"
+macrov = "1.57.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1901,7 +1900,7 @@ def getQuest(giver):
             elif a[0] == "feed" and "feed" in e:
                 for k,v in feedSynonymDict.items():
                     if a[2] == k and v in e: 
-                        a[2] = e
+                        a[2] = v
                 if a[2] in e:
                     a[1] = ''.join([m for m in e[e.find("feed"): e.find(a[2])] if m.isdigit()])
                     x = "_".join(a)
