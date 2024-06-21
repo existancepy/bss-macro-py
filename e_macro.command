@@ -8,6 +8,7 @@ pkill -9 Python3.7
 cd "$(dirname "$0")"
 if [ -d bin ]; then
    source ./bin/activate
+   printf "activating virtual environment"
 fi
 cd macro
 python3 main.py
