@@ -5644,7 +5644,7 @@ if __name__ == "__main__":
     Tooltip(checkbox, text = "Detects roblox as frozen when the backpack has not changed for a while.\nThis detection only occurs when the macro is gathering")
     checkbox = tkinter.Checkbutton(frame7, text="Existance so broke", variable=so_broke)
     checkbox.place(x=0, y = 225)
-    Tooltip(checkbox, text = "Sends 'Existance so broke' when rejoining. This is a reference to Natro's 'Natro so broke'")
+    Tooltip(checkbox, text = "Sends 'Existance so broke' in chat after rejoining. This is a reference to Natro Macro's so broke message'")
 
     #Tab 9
 
