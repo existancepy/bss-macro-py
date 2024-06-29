@@ -1,13 +1,6 @@
 def printRed(txt):
     print("\033[0;31m{}\033[00m".format(txt))
-try:
-    import pyautogui as pag
-except Exception as e:
-    print(e)
-    printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
-    quit()
 
-    
 import sys
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
@@ -15,6 +8,13 @@ if (sv_i[1]>=10):
     pag.alert(title = "error", text = "{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
     quit()
 print(python_ver)
+
+try:
+    import pyautogui as pag
+except Exception as e:
+    print(e)
+    printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
+    quit()
 
 
 from difflib import SequenceMatcher
