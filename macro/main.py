@@ -93,7 +93,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.6"
+macrov = "1.57.7"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -427,6 +427,7 @@ def rebutton():
     return "claim" in getBesideE()
 
 def detectNight(bypasstime=0):
+    if getStatus() == "disconnect": return False
     setdat = loadsettings.load()
     savedat = loadRes()
     ww = savedat['ww']
