@@ -427,7 +427,7 @@ def rebutton():
     return "claim" in getBesideE()
 
 def detectNight(bypasstime=0):
-    if getStatus() == "disconnect": return False
+    if getStatus() in ["disconnect","noNight"]: return False
     setdat = loadsettings.load()
     savedat = loadRes()
     ww = savedat['ww']
@@ -1661,6 +1661,7 @@ def collect(name,beesmas=0):
             move.press(str(setdat['gumdrop_slot']))
             time.sleep(2)
             move.hold("w",2.5)
+            setStatus("noNight")
                 
         if usename == "wealthclock" or usename == "samovar" or usename == "treatdispenser":
             for _ in range(6):
@@ -1703,6 +1704,7 @@ def collect(name,beesmas=0):
                 if "use" in besideE or "dispenser" in besideE:
                     claimLoot =  1
                     break
+        setStatus()
         if claimLoot:
             webhook("","Collected: {}".format(dispname),"bright green",1)
             break
