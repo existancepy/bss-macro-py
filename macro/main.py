@@ -5,7 +5,7 @@ import sys
 sv_i = sys.version_info
 python_ver = '.'.join([str(sv_i[i]) for i in range(0,3)])
 if (sv_i[1]>=10):
-    pag.alert(title = "error", text = "{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
+    printRed("{} is an incorrect python version. Visit #common-fixes 'resintalling-python' to fix it.".format(python_ver))
     quit()
 print(python_ver)
 
