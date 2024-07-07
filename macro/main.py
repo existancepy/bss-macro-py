@@ -62,8 +62,14 @@ except Exception as e:
     quit()
 if __name__ == '__main__':
     print("\033[1;35m\nStarting Macro...  \n")
-import ocrpy
-from ocrpy import imToString,customOCR
+
+try:
+    import ocrmac #see if ocr mac is installed
+    from macocrpy import imToString,customOCR
+    print("Imported macocr")
+except:
+    from ocrpy import imToString,customOCR
+    print("Imported paddleocr")
 import sv_ttk
 import math
 import ast
@@ -93,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.7"
+macrov = "1.57.8"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -465,6 +471,7 @@ def getTop(y):
         height*=2
         y*=2
     res = customOCR(ww/3.5,y,ww/2.5,height,0)
+    print(res)
     log(f"{y},{res}")
     if not res: return False
     text = ''.join([x[1][0].lower() for x in res])
