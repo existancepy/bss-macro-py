@@ -15,6 +15,13 @@ except Exception as e:
     print(e)
     printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
     quit()
+    
+import numpy as np
+if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
+    os.system('pip3 install "numpy<1.24.0"')
+    import numpy as np
+    #printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
+    #quit()
 
 
 from difflib import SequenceMatcher
@@ -29,7 +36,6 @@ from webhook import webhook
 global savedata
 global setdat
 from tkinter import messagebox
-import numpy as np
 import asyncio
 from logpy import log
 import logging
@@ -76,12 +82,6 @@ import ast
 from datetime import datetime
 import pyscreeze
 import shutil
-  
-if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
-    os.system('pip3 install "numpy<1.24.0"')
-    import numpy as np
-    #printRed("Invalid numpy version. Your current numpy version is {} but the required one is < 1.24.0.\nTo fix this, run the command\npip3 install \"numpy<1.24.0\"".format(np.__version__))
-    #quit()
     
 if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
     os.system('pip3 install "pyscreeze<0.1.29"')
