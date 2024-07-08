@@ -25,7 +25,7 @@ def paddleBounding(b):
     return ([x1,y1],[x2,y1],[x2,y2],[x1,y2])
     
 def ocr(img):
-    result = ocrmac.OCR(img,language_preference=['en-US']).recognize(px=True)
+    result = ocrmac.OCR(img).recognize(px=True)
     #convert it to the same format as paddleocr
     return [ [paddleBounding(x[2]),(x[0],x[1]) ] for x in result]
 
