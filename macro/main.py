@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.8"
+macrov = "1.57.9"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1710,12 +1710,12 @@ def collect(name,beesmas=0):
                 if "use" in besideE or "dispenser" in besideE:
                     claimLoot =  1
                     break
-        setStatus()
         if claimLoot:
             webhook("","Collected: {}".format(dispname),"bright green",1)
             break
         webhook("","Unable To Collect: {}".format(dispname),"dark brown",1)
         reset()
+        setStatus()
     savetimings(usename)
     move.press('e')
     time.sleep(0.5)
@@ -1726,6 +1726,7 @@ def collect(name,beesmas=0):
         exec(open("./paths/claim_{}.py".format(usename)).read())
     reset()
     addStat("objective_time",round((time.perf_counter() - st)/60,2))
+    setStatus()
 
 def rawreset(nowait=0):
     pag.press('esc')
