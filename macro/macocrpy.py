@@ -85,15 +85,16 @@ def imToString(m):
         cap = pag.screenshot(region=(ww//(xm*xsm),honeyY,ww//(wm*xlm),wh//(ylm*25)))
         if not cap: return ""
         ocrres = ocr(cap)
-        honey = 0
+        honey = ""
         try:
-            result = [x[1][0] for x in ocrres]
+            result = ''.join([x[1][0] for x in ocrres])
             log(result)
             for i in result:
-                if i[0].isdigit():
-                    honey = i
+                if i == "(" or i == "+":
                     break
-            honey = int(''.join([x for x in honey if x.isdigit()]))
+                elif i.isdigit():
+                    honey += i
+            honey = int(honey)
         except Exception as e:
             print(e)
             print(honey)
