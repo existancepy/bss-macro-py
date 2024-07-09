@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.9"
+macrov = "1.57.10"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -150,14 +150,6 @@ if __name__ == '__main__':
         occupiedStuff = ast.literal_eval(lines[0])
         planterTypes_prev = ast.literal_eval(lines[1])
         planterFields_prev = ast.literal_eval(lines[2])
-    manager = multiprocessing.Manager()
-    currentfield = manager.Value(ctypes.c_wchar_p, "")
-    bpc = multiprocessing.Value('i', 0)
-    rejoinval = multiprocessing.Value('i', 0)
-    gather = multiprocessing.Value('i', 0)
-    disconnected = multiprocessing.Value('i', 0)
-    timeupdate = multiprocessing.Value('i', 0)
-    night = manager.Value(ctypes.c_wchar_p, "")
     reservedImages = ['test.png','roblox.png','night.png']
     for i in os.listdir():
         if ".png" in i and not i in reservedImages:
@@ -2399,10 +2391,21 @@ def openRoblox(link):
         keyboard.type(link)
         time.sleep(0.5)
         keyboard.press(Key.enter)
+
+def findHive(setdat):
+    move.hold("a",0.4)
+    time.sleep(0.06)
+    text = getBesideE()
+    if "claim" in text or "hive" in text:
+        move.press("e")
+        return True
+    return False
     
 def rejoin():
     setdat = loadsettings.load()
+    hiveNumber = setdat['hive_number']
     st = time.perf_counter()
+    rejoinSuccess = False
     for i in range(5):
         savedata = loadRes()
         ww = savedata['ww']
@@ -2474,27 +2477,47 @@ def rejoin():
         move.hold("d",4,0)
         move.hold("s",0.3,0)
         time.sleep(0.5)
-        webhook("","Finding Hive", "dark brown",1)
-        for j in range(40):
+        webhook("",f'Claiming hive {hiveNumber} (guessing hive location)', "dark brown",1)
+        
+        steps = round(hiveNumber*2.5)
+        if hiveNumber == 1: steps = 1
+        for _ in range(steps):
             move.hold("a",0.4)
-            time.sleep(0.06)
-            text = getBesideE()
-            if "claim" in text or "hive" in text:
-                move.press("e")
-                log(j)
-                log((j+1)//2)
-                updateHive(max(1,min(6,round((j+1)//2.5))))
-                convert()
-                webhook("","Rejoin successful","dark brown")
-                currentTime = datetime.now().strftime("%H:%M")
-                setStatus()
-                if setdat["so_broke"]:
-                    pag.typewrite("/")
-                    pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.1)
-                    keyboard.press(Key.enter)
-                if setdat['haste_compensation']: openSettings()
-                addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
-                return
+
+        for _ in range(3):
+            if findHive(setdat):
+                webhook("",f'Claimed hive {hiveNumber}', "dark brown",1)
+                rejoinSuccess = True
+                break
+        else:
+            webhook("",f'Hive is {hiveNumber} already claimed, finding new hive','dark brown')
+            rawreset()
+            move.hold("w",5+(i*0.5),0)
+            move.hold("s",0.3,0)
+            move.hold("d",4,0)
+            move.hold("s",0.3,0)
+            time.sleep(0.5)
+            for j in range(40):
+                if findHive(setdat):
+                    log(j)
+                    log((j+1)//2)
+                    updateHive(max(1,min(6,round((j+1)//2.5))))
+                    rejoinSuccess = True
+                    break
+                
+        if rejoinSuccess:
+            convert()
+            webhook("","Rejoin successful","dark brown")
+            currentTime = datetime.now().strftime("%H:%M")
+            setStatus()
+            if setdat["so_broke"]:
+                pag.typewrite("/")
+                pag.typewrite(f'Existance so broke :weary: {currentTime}', interval = 0.1)
+                keyboard.press(Key.enter)
+            if setdat['haste_compensation']: openSettings()
+            addStat("rejoin_time", round((time.perf_counter() - st)/60, 2))
+            return
+
         webhook("",f'Rejoin unsuccessful, attempt {i+2}','dark brown')
 
     
@@ -3335,7 +3358,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
                                 goToPlanter(currField)
                             webhook('',"Travelling: {} ({})\nObjective: Collect Planter, Attempt: {}".format(displayPlanterName(currPlanter),currField.title(),i+1),"dark brown")
                             getBeside = getBesideE()
-                            if "harv" in getBeside or "plant" in getBeside:
+                            if "harv" in getBeside or "plant" in getBeside or "grow" in getBeside:
                                 move.press('e')
                                 clickYes()
                                 addStat("planters",1)
@@ -4244,7 +4267,6 @@ if __name__ == "__main__":
 
                                                   }
         if gather_field_two.get().lower() != "none":
-            print('saved field 2')
             fields[gather_field_two.get().lower()] = {'gather_pattern': gather_pattern_two.get(),
                                               'gather_size': gather_size_two.get(),
                                               'gather_width': gather_width_two.get(),
@@ -4262,8 +4284,7 @@ if __name__ == "__main__":
                                                       }
 
         if gather_field_three.get().lower() != "none":
-            print('saved field 3')
-            fields[gather_field_two.get().lower()] = {'gather_pattern': gather_pattern_three.get(),
+            fields[gather_field_three.get().lower()] = {'gather_pattern': gather_pattern_three.get(),
                                               'gather_size': gather_size_three.get(),
                                               'gather_width': gather_width_three.get(),
                                               'gather_time': timetextbox_three.get(1.0,"end").replace("\n",""),
@@ -4727,8 +4748,6 @@ if __name__ == "__main__":
             newUI = 0    
         loadsettings.save("new_ui",newUI)
         
-        gather.value = 0
-        timeupdate.value = int(time.time())
         time.sleep(0.5)
         prevHour = datetime.now().hour
         prevMin = datetime.now().minute
