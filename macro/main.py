@@ -121,10 +121,11 @@ cmd = """
     osascript -e 'tell application "Image Events" to display profile of display 1' 
     """
 colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
+colorProfile = colorProfile.strip()
+if colorProfile == "missing value": colorProfile = "Color LCD"
 if not "sRGB IEC61966" in colorProfile:
-    pag.alert(title = "Color Profile warning", text = f'Your current color profile is {colorProfile}.\
-    The recommended one is sRGB IEC61966-2.1\
-    \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1')
+    pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1\
+    \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1"')
     
 questData = {}
 questBear = ""
