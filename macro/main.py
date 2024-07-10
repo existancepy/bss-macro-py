@@ -15,7 +15,8 @@ except Exception as e:
     print(e)
     printRed("This error means that libraries arent installed. Here are some common causes:\n1. You didnt run the commands to install the library\n2. An incorrect version of python (such as 3.11) was installed. Visit #common-fixes 'reinstalling python' in the discord server\n3. There was an error when installing the libraries, preventing them from being downloaded. Create a support ticket in the discord server ")
     quit()
-    
+
+import time, os, ctypes, tty
 import numpy as np
 if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
     os.system('pip3 install "numpy<1.24.0"')
@@ -25,7 +26,6 @@ if tuple(map(int, np.__version__.split("."))) >= (1,24,0):
 
 
 from difflib import SequenceMatcher
-import time, os, ctypes, tty
 import tkinter
 import tkinter.filedialog
 import tkinter as tk
