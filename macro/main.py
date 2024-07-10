@@ -99,7 +99,7 @@ mw = ms[0]
 mh = ms[1]
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.10"
+macrov = "1.57.11"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -116,6 +116,15 @@ except FileNotFoundError:
     else:
         hti = None
         pass
+    
+cmd = """
+    osascript -e 'tell application "Image Events" to display profile of display 1' 
+    """
+colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
+if not "sRGB IEC61966" in colorProfile:
+    pag.alert(title = "Color Profile warning", text = f'Your current color profile is {colorProfile}.\
+    The recommended one is sRGB IEC61966-2.1\
+    \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1')
     
 questData = {}
 questBear = ""
@@ -2652,7 +2661,7 @@ def gather(gfid, quest = False, questGoo = False):
         status = getStatus()
         
         if bpcap >= setdat["pack"]:
-            webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green")
+            webhook("Gathering: ended","Time: {:.2f} - Backpack - Return: {}".format(timespent, setdat["return_to_hive"]),"light green",1)
             end_gather = 1
             break
         if timespent > setdat["gather_time"]:
@@ -2673,9 +2682,9 @@ def gather(gfid, quest = False, questGoo = False):
         if  shv == "success":
             stingerFound = 1
             break
-        if not cycleCount%20:
+        if not cycleCount%10:
             if checkwithOCR("disconnect"): return
-            
+        print(cycleCount) 
         if not cycleCount%2:
             if (settings["backpack_freeze"] or setdat["pack"] <= 100):
                 bpcap = backpack.bpc()
