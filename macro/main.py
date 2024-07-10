@@ -122,7 +122,7 @@ cmd = """
     """
 colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
 if not "sRGB IEC61966" in colorProfile:
-    pag.alert(title = "Color Profile warning", text = f'Your current color profile is {colorProfile}.\
+    pag.alert(title = "Color Profile warning", text = f'Your current display's color profile is {colorProfile}.\
     The recommended one is sRGB IEC61966-2.1\
     \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1')
     
