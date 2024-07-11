@@ -740,7 +740,7 @@ def reset(hiveCheck=False):
         log("real")
         avgDiff = (abs(r[2]-r[1])+abs(r[2]-r[0])+abs(r[1]-r[0]))/3
         log(avgDiff)
-        if avgDiff < 10:
+        if avgDiff < 20:
             for _ in range(8):
                 pagPress("o")
             time.sleep(0.8)
@@ -748,6 +748,7 @@ def reset(hiveCheck=False):
         
         for _ in range(4):
             pagPress(".")
+            time.sleep(0.3)
     time.sleep(0.3)
     if hiveCheck:
         webhook("Notice","Hive not found.","red",1)
