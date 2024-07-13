@@ -3,7 +3,7 @@ import os
 import loadsettings
 from discord_webhook import DiscordWebhook, DiscordEmbed
 import pyautogui
-import PIL
+from PIL import ImageGrab
 from io import BytesIO
 from logpy import log
 def webhook(title,desc,colour,ss=0,hr=0):
@@ -31,7 +31,7 @@ def webhook(title,desc,colour,ss=0,hr=0):
     else:
         embed = DiscordEmbed(title=title, description="[{}] {}".format(current_time,desc), color=colours[colour])
     if ss and sendscreenshot:
-        screenshot = PIL.ImageGrab.grab()
+        screenshot = ImageGrab.grab()
         screenshot.convert('RGB').save("screenshot.jpg")
         with open("screenshot.jpg", "rb") as f:
             webhook.add_file(file=f.read(), filename='screenshot.jpg')
