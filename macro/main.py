@@ -124,7 +124,8 @@ colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encodi
 colorProfile = colorProfile.strip()
 if colorProfile == "missing value": colorProfile = "Color LCD"
 if not "sRGB IEC61966" in colorProfile:
-    pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1\
+    pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
+    \n(This is optional, but some features like backpack detection wont work)\
     \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1"')
     
 questData = {}
@@ -731,7 +732,7 @@ def reset(hiveCheck=False):
         return False
 
     for _ in range(4):
-        pix = getPixelColor(ww//2,wh-2)
+        pix = getPixelColor((ww//2)+15,wh-2)
         r = [int(x) for x in pix]
         log(r)
         log(abs(r[2]-r[1]))
@@ -748,7 +749,7 @@ def reset(hiveCheck=False):
         
         for _ in range(4):
             pagPress(".")
-            time.sleep(0.3)
+            time.sleep(0.4)
     time.sleep(0.3)
     if hiveCheck:
         webhook("Notice","Hive not found.","red",1)
@@ -1807,7 +1808,7 @@ def getQuest(giver):
     q_title = ""
     lines = []
     for j in range(10):
-        ocr = customOCR(0,wh/7,ww/4.1,wh/1.6,0)
+        ocr = customOCR(0,wh/6,ww/4.1,wh/1.6,0)
         lines = [x[1][0].lower() for x in ocr]
         #log(lines)
         #search for quest title in only the first 6 lines
@@ -2996,7 +2997,7 @@ def quest(giver, session_start = 0):
         if quest:
             return quest
         else:
-            webhook("","Could not find quest","red")
+            webhook("",f'Could not find {giverName} quest',"red")
 
                     
 def startLoop(planterTypes_prev, planterFields_prev,session_start):
