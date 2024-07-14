@@ -111,7 +111,7 @@ try:
 except FileNotFoundError:
     if versionTuple(macVer) >= versionTuple("10.15"):
         pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
-    \n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
+    \n1. Google Chrome is installed\n2. Google chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)\n\nRefer to step 10 of the installation guide in the discord for more info")
         quit()
     else:
         hti = None
