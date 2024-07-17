@@ -349,7 +349,6 @@ def loadSave():
         savedata[l[0]] = l[1]
 
 def loadRes():
-
     while True:
         try:
             outdict =  {}
@@ -775,7 +774,7 @@ def reset(hiveCheck=False):
         
         for _ in range(4):
             pagPress(".")
-            time.sleep(0.4)
+            time.sleep(0.1)
     time.sleep(0.3)
     if hiveCheck:
         webhook("Notice","Hive not found.","red",1)
@@ -1889,7 +1888,7 @@ def collect(name,beesmas=0):
                 if "use" in besideE or "dispenser" in besideE or "claim" in besideE:
                     claimLoot = 1
                     break
-        elif usename = "stockings":
+        elif usename == "stockings":
             for _ in range(2):
                 besideE = getBesideE()
                 if "check" in besideE or "stockings" in besideE or "inside" in besideE:
