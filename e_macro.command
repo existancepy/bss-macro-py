@@ -28,4 +28,4 @@ if [ -d bin ]; then
    printf "activating virtual environment"
 fi
 cd macro
-python3 main.py
+python"${python_ver}" main.py
