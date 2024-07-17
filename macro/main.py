@@ -47,6 +47,9 @@ from pynput.mouse import Button
 from convertAhkPattern import ahkPatternToPython
 from pixelcolour import getPixelColor
 import platform
+import imagehash
+import random
+
 try:
     from html2image import Html2Image
 except ModuleNotFoundError:
@@ -71,10 +74,10 @@ if __name__ == '__main__':
 
 try:
     import ocrmac #see if ocr mac is installed
-    from macocrpy import imToString,customOCR
+    from macocrpy import imToString,customOCR,ocrRead
     print("Imported macocr")
 except:
-    from ocrpy import imToString,customOCR
+    from ocrpy import imToString,customOCR,ocrRead
     print("Imported paddleocr")
 import sv_ttk
 import math
@@ -83,6 +86,7 @@ from datetime import datetime
 import pyscreeze
 import shutil
 import mss
+import mss.tools
     
 if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
     os.system('pip3 install "pyscreeze<0.1.29"')
@@ -98,7 +102,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58"
+macrov = "1.58.1"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1125,7 +1129,163 @@ def antChallenge():
     webhook("", "Cant start ant challenge", "red", 1)
     reset()
     return
+
+def solveMemoryMatch(mmType=""):
     
+    def mmclick(x,y):
+        pag.moveTo(x = x, y = y)
+        time.sleep(0.3)
+        pag.mouseDown()
+        time.sleep(0.3)
+        pag.mouseUp()
+
+    gridSize = [4,4]
+    
+    #return true if img1 and img2 are similar
+    #img1, img2 are hash values of the images
+    def similarImages(img1,img2):
+        return img1 - img2 < 2
+
+    #return a pillow obj of the item at the tile
+    def screenshotItem(x,y):
+        with mss.mss() as sct:
+            # The screen part to capture
+            monitor = {"left": x-30, "top": y-20, "width": 50, "height": 30}
+            # Grab the data and convert to pillow img
+            sct_img = sct.grab(monitor)
+            img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+            
+            #save it as a img
+            #output = "{}.png".format(time.time())
+            #mss.tools.to_png(sct_img.rgb, sct_img.size, output=output)
+
+        #then convert it to a hash
+        return imagehash.average_hash(img)
+
+    cmd = """
+    osascript -e 'activate application "Roblox"' 
+    """
+    os.system(cmd)
+    time.sleep(3)
+    
+    #get coordinates of grid
+    gridCoords = []
+    mmData = [None]*(gridSize[0]*gridSize[1]) #store the hashed images of each mm tile
+    checkedCoords = set() #store the coords the macro has checked
+    claimedCoords = set() #store the index that has been claimed
+    middleX = mw//2
+    middleY = mh//2
+    offsetX = 0
+    offsetY = 0
+    if mmType.lower() in ["extreme","winter"]:
+        offsetX = 40
+        gridSize = [5,4]
+    for i in range(1,gridSize[0]+1):
+        x = middleX-200+80*i
+        for j in range(1,gridSize[1]+1):
+            y = middleY-200+80*j
+            gridCoords.append([x,y])
+    #randomiswe the grid positions
+    random.shuffle(gridCoords)
+
+    #get number of attempts (defaults to 10)
+    attempts = 10
+    try:
+        cap = mssScreenshot(middleX-275-offsetX, middleY-146, 100, 100)
+        #read the attempt screen
+        #get only numbers from the ocr result
+        attemptsOCR = int(''.join([x[1][0] for x in ocrRead(cap) if x[1][0].isdigit()]))
+        #min 6, max 10
+        if 6 <= attemptsOCR <= 10:
+            attempts = attemptsOCR
+            print(f"Number of attempts: {attempts}")
+    except Exception as e:
+        print(e)
+            
+    matchFound = None #store the value of the match
+    skipAttempt = False
+    for _ in range(attempts):
+        if skipAttempt:
+            skipAttempt = False
+            continue
+
+        firstTile = None
+        matchFound = None
+        #open first tile
+        for i,e in enumerate(gridCoords):
+            xr,yr = e
+            if (xr,yr) in checkedCoords: continue
+            x = xr-offsetX
+            y = yr-offsetY
+            mmclick(x,y)
+            time.sleep(0.1)
+            pag.moveTo(x = middleX, y = middleY-190) #move the mouse out of the way of the img
+            time.sleep(0.6)
+            tileImg = screenshotItem(x,y)
+            checkedCoords.add((xr,yr))
+            #check if the image matches with anything
+            for j,img in enumerate(mmData):
+                if not img: continue
+                if j in claimedCoords: continue
+                if similarImages(tileImg,img):
+                    matchFound = j
+                    claimedCoords.add(i)
+                    claimedCoords.add(j)
+                    break
+            mmData[i] = tileImg #add the img
+            firstTile = i
+            break
+        
+        time.sleep(0.8)
+        #second tile
+
+        if matchFound:
+            print("match found, 1st tile")
+            mmclick(*gridCoords[matchFound])
+        else:
+            for i,e in enumerate(gridCoords):
+                xr,yr = e
+                if (xr,yr) in checkedCoords: continue
+                x = xr-offsetX
+                y = yr-offsetY
+                mmclick(x,y)
+                time.sleep(0.1)
+                pag.moveTo(x = middleX, y = middleY-190) #move the mouse out of the way of the img
+                time.sleep(0.3)
+                tileImg = screenshotItem(x,y)
+                checkedCoords.add((xr,yr))
+                #check if the image matches with anything
+                for j,img in enumerate(mmData):
+                    if not img: continue
+                    if j in claimedCoords: continue
+                    if similarImages(tileImg,img):
+                        #check if the 1st tile = 2nd tile, got lucky
+                        if (j == firstTile):
+                            print("match found, same attempt")
+                            claimedCoords.add(i)
+                            claimedCoords.add(j)
+                            break
+                        print("match found, 2nd tile")
+                        #since its the 2nd tile, its a new "turn"
+                        time.sleep(2)
+                        mmclick(x,y) #first tile, click the prev 2nd tile
+                        time.sleep(1)
+                        xr2,yr2 = gridCoords[j]
+                        x2 = xr2-offsetX
+                        y2 = yr2-offsetY
+                        mmclick(x2,y2) #click the tile that matches
+                        skipAttempt = True
+                        claimedCoords.add(i)
+                        claimedCoords.add(j)
+                        break
+                mmData[i] = tileImg #add the img 
+                break
+        time.sleep(0.8)
+    cmd = """
+    osascript -e 'activate application "Terminal"' 
+    """
+    os.system(cmd)
+        
 def stingerHunt(convert=0,gathering=0):
     setdat = loadsettings.load()
     fields = ['pepper','mountain top','rose','cactus','spider','clover']
@@ -1696,7 +1856,8 @@ def collect(name,beesmas=0):
         if usename == "wealthclock" or usename == "samovar" or usename == "treatdispenser":
             for _ in range(6):
                 move.hold("w",0.2)
-                if "use" in getBesideE():
+                besideE = getBesideE()
+                if "use" in besideE or "heat" in besideE or "samovar" in besideE:
                     claimLoot = 1
                     break
                 
@@ -1727,6 +1888,12 @@ def collect(name,beesmas=0):
                 besideE = getBesideE()
                 if "use" in besideE or "dispenser" in besideE or "claim" in besideE:
                     claimLoot = 1
+                    break
+        elif usename = "stockings":
+            for _ in range(2):
+                besideE = getBesideE()
+                if "check" in besideE or "stockings" in besideE or "inside" in besideE:
+                    claimLoot =  1
                     break
         else:
             for _ in range(2):
@@ -5722,7 +5889,7 @@ if __name__ == "__main__":
                 break
             
     def autoClick():
-        window = tk.Toplevel() #creates a window to confirm if the user wants to start deleting files
+        window = tk.Toplevel() #creates a window for autoclicker settings
         window.geometry('250x150')
         
         tkinter.Label(window, text = "Clicks per second").place(x = 10, y = 10)
@@ -5735,9 +5902,23 @@ if __name__ == "__main__":
         
         tkinter.Label(window, text = "Move the mouse to the top left corner\nto stop the auto clicker", justify="left").place(x = 10, y = 50)
         ttk.Button(window, text = "Start", command = lambda: startAutoClick(cpstextbox.get(1.0,"end").replace("\n","")), style='small.TButton').place(x=10,y=100)
+    
+    def mmWindow():
+        window = tk.Toplevel() #creates a window for memory match
+        window.geometry('280x210')
+
+        mmType = tk.StringVar(window,"Basic")
+        
+        tkinter.Label(window, justify="left", text = "Instructions\n1.In-game, start the memory match\n2.Select the memory match type\n3.Click the start button below").place(x = 10, y = 10)
+        tkinter.Label(window, text = "Memory Match Type:").place(x = 10, y = 100)
+        dropField = ttk.OptionMenu(window, mmType, "Basic", *["Basic","Mega","Night","Extreme","Winter"],style='my.TMenubutton')
+        dropField.place(width=100,x = 10, y = 130)
+    
+        ttk.Button(window, text = "Start", command = lambda: solveMemoryMatch(mmType.get()), style='small.TButton').place(x=10,y=180)
         
         
     ttk.Button(frame10, text = "Autoclicker", command = autoClick, style='small.TButton').place(x=20,y=50)
+    ttk.Button(frame10, text = "Memory Match Solver", command = mmWindow, style='small.TButton', width = 20).place(x=150,y=50)
     
     
     
