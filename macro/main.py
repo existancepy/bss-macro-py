@@ -102,7 +102,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.1"
+macrov = "1.58.2"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -139,7 +139,7 @@ with open("./dataFiles/quest_data.txt", "r") as f:
     qdata = [x for x in f.read().split("\n") if x]
 f.close()
 
-redcannon = cv2.imread('./images/general/e2.png')
+redcannon = cv2.imread('./images/general/redcannon.png')
 for i in qdata:
     if i.startswith("="):
         i = i.replace("=","")
@@ -440,11 +440,16 @@ def getBesideE():
     return text
 
 def ebutton(pagmode=0):
+    '''
     img = mssScreenshot(mw//2-200,20,400,125)
     img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
     res = cv2.matchTemplate(img_cv, redcannon, cv2.TM_CCOEFF_NORMED)
     #print(res)
     return (res >= 0.9).any()
+    '''
+    ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
+    log(ocrval)
+    return "E" in ocrval and len(ocrval) <= 3
 
 def rebutton():
     return "claim" in getBesideE()
@@ -815,7 +820,8 @@ def canon(fast=0):
         for _ in range(6):
             move.hold("d",0.2)
             time.sleep(0.05)
-            if ebutton():
+            beside = getBesideE()
+            if "fire" in beside or "red" in beside:
                 #webhook("","Cannon found","dark brown")
                 with open('./dataFiles/canonfails.txt', 'w') as f:
                     f.write('0')
@@ -925,10 +931,10 @@ def convert(bypass=0):
     setdat = loadsettings.load()
     if not bypass:
         r = False
-        for _ in range(2):
-            #besideE = getBesideE()
-            #r = "make" in besideE and not "to" in besideE
-            r = ebutton()
+        for _ in range(1):
+            besideE = getBesideE()
+            r = "make" in besideE and not "to" in besideE
+            #r = ebutton()
             if r: break
             time.sleep(0.25)
         if not r: return
@@ -973,7 +979,8 @@ def walk_to_hive(field):
     for _ in range(50):
         move.hold("a",0.2)
         time.sleep(0.06)
-        if ebutton():
+        text = getBesideE()
+        if "make" in text:
             convert(1)
             reset()
             return
