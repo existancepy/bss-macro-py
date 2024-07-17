@@ -82,6 +82,7 @@ import ast
 from datetime import datetime
 import pyscreeze
 import shutil
+import mss
     
 if tuple(map(int, pyscreeze.__version__.split("."))) >= (0,1,29):
     os.system('pip3 install "pyscreeze<0.1.29"')
@@ -94,12 +95,10 @@ retina = "retina" in info or "m1" in info or "m2" in info
 savedata = {}
 ww = ""
 wh = ""
-ms = pag.size()
-mw = ms[0]
-mh = ms[1]
+mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.57.13"
+macrov = "1.58"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -111,7 +110,7 @@ try:
 except FileNotFoundError:
     if versionTuple(macVer) >= versionTuple("10.15"):
         pag.alert(title = "error", text = "Google Chrome could not be found. Ensure that:\
-    \n1. Google Chrome is installed\n2. Google chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)\n\nRefer to step 10 of the installation guide in the discord for more info")
+    \n1. Google Chrome is installed\nGoogle chrome is in the applications folder (open the google chrome dmg file. From the pop up, drag the icon into the folder)")
         quit()
     else:
         hti = None
@@ -136,6 +135,7 @@ with open("./dataFiles/quest_data.txt", "r") as f:
     qdata = [x for x in f.read().split("\n") if x]
 f.close()
 
+redcannon = cv2.imread('./images/general/e2.png')
 for i in qdata:
     if i.startswith("="):
         i = i.replace("=","")
@@ -216,6 +216,16 @@ def fullscreen():
     keyboard.release(Key.cmd)
     keyboard.release(Key.ctrl)
     keyboard.release("f")
+    
+def mssScreenshot(x,y,w,h):
+    with mss.mss() as sct:
+        # The screen part to capture
+        monitor = {"left": x, "top": y, "width": w, "height": h}
+        # Grab the data and convert to pillow img
+        sct_img = sct.grab(monitor)
+        img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+        return img
+    
 def discord_bot():
     setdat = loadsettings.load()
     intents = discord.Intents.default()
@@ -427,9 +437,11 @@ def getBesideE():
     return text
 
 def ebutton(pagmode=0):
-    ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
-    log(ocrval)
-    return "E" in ocrval and len(ocrval) <= 3
+    img = mssScreenshot(mw//2-200,20,400,125)
+    img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    res = cv2.matchTemplate(img_cv, redcannon, cv2.TM_CCOEFF_NORMED)
+    #print(res)
+    return (res >= 0.9).any()
 
 def rebutton():
     return "claim" in getBesideE()
@@ -579,6 +591,14 @@ def hourlyReport(hourly=1):
         convert_avg = minAndSecs(sum(stats["convert_time"])/len(stats["convert_time"]))
         
         hourly_honeys = stats["hourly_honey"]
+        hourly_honey_change = 0
+        hourly_honey_colour = "#05f515"
+        hhc_prefix = "+"
+        if len(hourly_honeys) > 1:
+            if hourly_honeys[-2] > hourly_honey:
+                hourly_honey_colour = "#fa4343"
+                hhc_prefix = "-"
+            hourly_honey_change = round(abs((hourly_honey - hourly_honeys[-2])/hourly_honeys[-2]*100))
         
         if planterset["enable_planters"]:
             showPlanters = "flex"
@@ -614,6 +634,8 @@ def hourlyReport(hourly=1):
             "-vickills": str(stats["vic_kills"]),
             "-quests": str(stats["quests"]),
             "-hourlyhoney": millify(hourly_honey),
+            "-hhc": f"({hhc_prefix}{hourly_honey_change}%)",
+            "-changecolor": hourly_honey_colour,
             "-gatheravg": gather_avg,
             "-convertavg": convert_avg,
             "-bugkills": str(stats["bug_kills"]),
@@ -790,9 +812,8 @@ def canon(fast=0):
         for _ in range(6):
             move.hold("d",0.2)
             time.sleep(0.05)
-            beside = getBesideE()
-            if "fire" in beside or "red" in beside:
-                webhook("","Cannon found","dark brown")
+            if ebutton():
+                #webhook("","Cannon found","dark brown")
                 with open('./dataFiles/canonfails.txt', 'w') as f:
                     f.write('0')
                 f.close()
@@ -902,8 +923,9 @@ def convert(bypass=0):
     if not bypass:
         r = False
         for _ in range(2):
-            besideE = getBesideE()
-            r = "make" in besideE and not "to" in besideE
+            #besideE = getBesideE()
+            #r = "make" in besideE and not "to" in besideE
+            r = ebutton()
             if r: break
             time.sleep(0.25)
         if not r: return
@@ -948,8 +970,7 @@ def walk_to_hive(field):
     for _ in range(50):
         move.hold("a",0.2)
         time.sleep(0.06)
-        text = getBesideE()
-        if "make" in text:
+        if ebutton():
             convert(1)
             reset()
             return
@@ -1163,7 +1184,7 @@ def stingerHunt(convert=0,gathering=0):
                 addStat("objective_time",round((time.perf_counter() - sst)/60,2))
                 return "dc"
             fieldGoTo = status.split("_")[-1]
-            webhook("","Travelling to {fieldGoTo} field (vicious bee)","dark brown")
+            webhook("",f"Travelling to {fieldGoTo} field (vicious bee)","dark brown")
             exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
             exec(open("./paths/vb_{}.py".format(fieldGoTo)).read())
             killvb = 1
@@ -1340,7 +1361,6 @@ def clickYes():
     setdat = loadsettings.load()
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
     xsm = loadsettings.load('multipliers.txt')['x_screenshot_multiplier']
-    mw,mh = pag.size()
     region = (ww/3.2,wh/2.3,ww/2.5,wh/3.4)
     ocr = customOCR(*region,0)
     multi = 1
@@ -1960,7 +1980,6 @@ def getQuest(giver):
     
 def openSettings():
     savedat = loadRes()
-    mw, mh = pag.size()
     ww = savedat['ww']
     wh = savedat['wh']
     ysm = loadsettings.load('multipliers.txt')['y_screenshot_multiplier']
@@ -2813,7 +2832,6 @@ def feed(name, quantity):
     setdat = loadsettings.load()
     ww = savedata['ww']
     wh = savedata['wh']
-    mw,mh = pag.size()
     while not reset():
         pass
     

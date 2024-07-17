@@ -243,10 +243,9 @@ def _locateAll_opencv(needleImage, haystackImage, grayscale=None, limit=10000, r
         yield Box(x, y, needleWidth, needleHeight)
 
 def pixelMatch(pixel1, pixel2, var):
-    for i in range(3):
-        if not (pixel1[i]-var <= pixel2[i] <= pixel1[i]+var):
-            return False
-    return True
+    return (pixel1[0]-pixel2[0] < var) and (pixel1[1]-pixel2[1] < var) and (pixel1[2]-pixel2[2] < var)
+
+
 # TODO - We should consider renaming _locateAll_python to _locateAll_pillow, since Pillow is the real dependency.
 @requiresPillow
 def _locateAll_python(needleImage, haystackImage, grayscale=None, limit=None, region=None, step=1, confidence=None, var = 0):
@@ -648,9 +647,4 @@ grab = screenshot # for compatibility with Pillow/PIL's ImageGrab module.
 
 # set the locateAll function to use opencv if possible; python 3 needs opencv 3.0+
 # TODO - Should this raise an exception if zero instances of the image can be found on the screen, instead of always returning a generator?
-if useOpenCV:
-    locateAll = _locateAll_opencv
-    if not RUNNING_PYTHON_2 and cv2.__version__ < '3':
-        locateAll = _locateAll_python
-else:
-    locateAll = _locateAll_python
+locateAll = _locateAll_python

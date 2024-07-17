@@ -1,3 +1,4 @@
+
 from paddleocr import PaddleOCR
 import loadsettings
 import pyautogui as pag
