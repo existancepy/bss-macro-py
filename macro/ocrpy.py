@@ -7,6 +7,8 @@ from logpy import log
 import os
 import subprocess
 import time
+import numpy as np
+
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -63,9 +65,7 @@ def imToString(m):
     elif m == "ebutton":
         cap = screenshot(region=(ww//(2.65*xsm),ebY,ww//(21*xlm),wh//(17*ylm)))
         if not cap: return ""
-        cap.save("{}.png".format(sn))
-        result = ocr.ocr("{}.png".format(sn),cls=False)[0]
-        os.remove("{}.png".format(sn))
+        result = ocr.ocr(np.array(cap),cls=False)[0]
         try:
             result = sorted(result, key = lambda x: x[1][1], reverse = True)
             return result[0][1][0]
@@ -79,8 +79,7 @@ def imToString(m):
             wm = 5
         cap = pag.screenshot(region=(ww//(xm*xsm),honeyY,ww//(wm*xlm),wh//(ylm*25)))
         if not cap: return ""
-        cap.save("{}.png".format(sn))  
-        ocrres = ocr.ocr("{}.png".format(sn),cls=False)[0]
+        ocrres = ocr.ocr(np.array(cap),cls=False)[0]
         honey = 0
         #print(ocrres)
         try:
@@ -94,21 +93,18 @@ def imToString(m):
         except Exception as e:
             print(e)
             print(honey)
-        os.remove("{}.png".format(sn))
         return honey
     elif m == "disconnect":
         cap = screenshot(region=(ww//(3),wh//(2.8),ww//(2.3),wh//(5)))
     elif m == "dialog":
         cap = screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
-    if not cap: return ""
-    cap.save("{}.png".format(sn))  
-    result = ocr.ocr("{}.png".format(sn),cls=False)[0]
+    if not cap: return ""  
+    result = ocr.ocr(np.array(cap),cls=False)[0]
     try:
         result = sorted(result, key = lambda x: x[1][1], reverse = True)
         out = ''.join([x[1][0] for x in result])
     except:
         out = ""
-    os.remove("{}.png".format(sn))
     log("OCR for {}\n\n{}".format(m,out))
     return out
 def customOCR(X1,Y1,W1,H1,applym=1):
@@ -121,11 +117,13 @@ def customOCR(X1,Y1,W1,H1,applym=1):
         cap = screenshot(region=(X1/xsm,Y1/ysm,W1/xlm,H1/ylm))
     else:
         cap = screenshot(region=(X1,Y1,W1,H1))
-    cap.save("{}.png".format(sn)) 
-    out = ocr.ocr("{}.png".format(sn),cls=False)
+    out = ocr.ocr(np.array(cap),cls=False)
     log("OCR for Custom\n{}".format(out))
-    os.remove("{}.png".format(sn))
     if not out is None:
         return out[0]
     else:
-        return [[[""],["",0]]]
+    return [[[""],["",0]]]
+
+#accept pillow img
+def ocrRead(img):
+    return ocr.ocr(np.array(cap),cls=False)

@@ -129,5 +129,8 @@ def customOCR(X1,Y1,W1,H1,applym=1):
         return out
     else:
         return [[[""],["",0]]]
-    
 
+#accept pillow img
+def ocrRead(img):
+    return ocr(img)
+    
