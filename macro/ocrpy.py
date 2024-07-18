@@ -2,6 +2,7 @@ import loadsettings
 import pyautogui as pag
 import numpy as np
 from logpy import log
+from PIL import Image
 import os
 import subprocess
 import time
@@ -9,14 +10,14 @@ import mss
 
 useOCRMac = False
 try:
-    import ocrmac #see if ocr mac is installed
+    from ocrmac import ocrmac #see if ocr mac is installed
     useOCRMac = True
     print("Imported macocr")
 except:
     from paddleocr import PaddleOCR
     ocrP = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
     print("Imported paddleocr")
-    
+ 
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -44,7 +45,7 @@ def paddleBounding(b):
     x1,y1,x2,y2 = [int(x) for x in b]
     return ([x1,y1],[x2,y1],[x2,y2],[x1,y2])
     
-def ocrMac(img):
+def ocrMac_(img):
     result = ocrmac.OCR(img).recognize(px=True)
     #convert it to the same format as paddleocr
     return [ [paddleBounding(x[2]),(x[0],x[1]) ] for x in result]
@@ -96,7 +97,7 @@ def imToString(m):
         cap = screenshot(region=(ww*3//4, 0, ww//4,wh//3))
     elif m == "ebutton":
         cap = screenshot(region=(ww//(2.65*xsm),ebY,ww//(21*xlm),wh//(17*ylm)))
-        result = ocr(cap)
+        result = ocrFunc(cap)
         try:
             result = sorted(result, key = lambda x: x[1][1], reverse = True)
             return result[0][1][0]
@@ -105,7 +106,7 @@ def imToString(m):
     elif m == "honey":
         cap = mssScreenshot(mw//2-241, honeyY, 140, 36)
         if not cap: return ""
-        ocrres = ocr(cap)
+        ocrres = ocrFunc(cap)
         honey = ""
         try:
             result = ''.join([x[1][0] for x in ocrres])
@@ -125,7 +126,7 @@ def imToString(m):
     elif m == "dialog":
         cap = screenshot(region=(ww//(3*xsm),wh//(1.6*ysm),ww//(8*xlm),wh//(ylm*15)))
     if not cap: return ""
-    result = ocr(cap)
+    result = ocrFunc(cap)
     try:
         result = sorted(result, key = lambda x: x[1][1], reverse = True)
         out = ''.join([x[1][0] for x in result])
@@ -144,7 +145,7 @@ def customOCR(X1,Y1,W1,H1,applym=1):
         cap = screenshot(region=(X1/xsm,Y1/ysm,W1/xlm,H1/ylm))
     else:
         cap = screenshot(region=(X1,Y1,W1,H1))
-    out = ocr(cap)
+    out = ocrFunc(cap)
     log("OCR for Custom\n{}".format(out))
     if not out is None:
         return out
@@ -155,18 +156,7 @@ def customOCR(X1,Y1,W1,H1,applym=1):
 def ocrRead(img):
     return ocr(img)
     
-
-try:
-    import ocrmac #see if ocr mac is installed
-    ocr = ocrMac
-    print("Imported macocr")
-except:
-    from paddleocr import PaddleOCR
-    ocrP = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
-    ocr = ocrPaddle
-    print("Imported paddleocr")
-    
 if useOCRMac:
-    ocr = ocrMac
+    ocrFunc = ocrMac_
 else:
-    ocr = ocrPaddle
+    ocrFunc = ocrPaddle
