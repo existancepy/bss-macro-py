@@ -7,6 +7,16 @@ import subprocess
 import time
 import mss
 
+useOCRMac = False
+try:
+    import ocrmac #see if ocr mac is installed
+    useOCRMac = True
+    print("Imported macocr")
+except:
+    from paddleocr import PaddleOCR
+    ocrP = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
+    print("Imported paddleocr")
+    
 def loadRes():
     outdict =  {}
     with open('save.txt') as f:
@@ -156,3 +166,7 @@ except:
     ocr = ocrPaddle
     print("Imported paddleocr")
     
+if useOCRMac:
+    ocr = ocrMac
+else:
+    ocr = ocrPaddle
