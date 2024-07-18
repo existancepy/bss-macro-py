@@ -148,11 +148,10 @@ def ocrRead(img):
 
 try:
     import ocrmac #see if ocr mac is installed
-    from macocrpy import imToString,customOCR,ocrRead
     ocr = ocrMac
     print("Imported macocr")
 except:
-    from ocrpy import imToString,customOCR,ocrRead
+    from paddleocr import PaddleOCR
     ocrP = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
     ocr = ocrPaddle
     print("Imported paddleocr")
