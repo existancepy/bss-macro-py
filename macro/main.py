@@ -102,7 +102,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.3"
+macrov = "1.58.4"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -139,7 +139,7 @@ with open("./dataFiles/quest_data.txt", "r") as f:
     qdata = [x for x in f.read().split("\n") if x]
 f.close()
 
-redcannon = cv2.imread('./images/general/redcannon.png')
+#redcannon = cv2.imread('./images/general/redcannon.png')
 for i in qdata:
     if i.startswith("="):
         i = i.replace("=","")
@@ -2696,11 +2696,7 @@ def rejoin():
                 break
         else:
             webhook("",f'Hive is {hiveNumber} already claimed, finding new hive','dark brown')
-            rawreset()
-            move.hold("w",5+(i*0.5),0)
-            move.hold("s",0.3,0)
-            move.hold("d",4,0)
-            move.hold("s",0.3,0)
+            move.hold("d",0.9*(hivenumber)+1)
             time.sleep(0.5)
             for j in range(40):
                 if findHive(setdat):
