@@ -2690,7 +2690,7 @@ def rejoin():
                 break
         else:
             webhook("",f'Hive is {hiveNumber} already claimed, finding new hive','dark brown')
-            move.hold("d",0.9*(hivenumber)+1)
+            move.hold("d",0.9*(hiveNumber)+1)
             time.sleep(0.5)
             for j in range(40):
                 if findHive(setdat):
