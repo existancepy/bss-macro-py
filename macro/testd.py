@@ -6,15 +6,19 @@ import time
 import os
 import mss
 import mss.tools
+import pyautogui as pag
 
 REGION = (0, 0, 400, 400)
-GAME_OVER_PICTURE_PIL = Image.open("./images/general/e2.png")
-GAME_OVER_PICTURE_CV = cv.imread('./images/general/e2.png')
+imgNames = ["day", "night", "day-gifted", "night-gifted", "noshadow-gifted", "noshadow-day", "noshadow-night", "wing"]
+imgs = []
+for x in imgNames:
+    imgs.append(cv.imread(f'./images/general/{x}.png'))
 
+mw, mh = pag.size()
 def screenshot():
     with mss.mss() as sct:
         # The screen part to capture
-        monitor = {"left": 1440/2-200, "top": 20, "width": 400, "height": 125}
+        monitor = {"left": 0, "top": 3/4*mh, "width": mw, "height": mh/4}
         # Grab the data and convert to pillow img
         sct_img = sct.grab(monitor)
         img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
@@ -32,20 +36,12 @@ def timing(f):
     return wrap
 
 
-@timing
-def benchmark_pyautogui():
-    res = pg.locateOnScreen(GAME_OVER_PICTURE_PIL,
-                            grayscale=True,  # should provied a speed up
-                            confidence=0.8,
-                            region=REGION)
-    return res is not None
-
 
 @timing
-def benchmark_opencv_pil(method):
+def benchmark_opencv_pil(x, method = 'cv.TM_CCOEFF_NORMED'):
     img = screenshot()
     img_cv = cv.cvtColor(np.array(img), cv.COLOR_RGB2BGR)
-    res = cv.matchTemplate(img_cv, GAME_OVER_PICTURE_CV, method)
+    res = cv.matchTemplate(img_cv, x, method)
     print(cv.minMaxLoc(res))
     return (res >= 0.9).any()
 
@@ -57,14 +53,10 @@ if __name__ == "__main__":
     os.system(cmd)
     time.sleep(2)
 
-    methods = ['cv.TM_CCOEFF_NORMED','cv.TM_CCOEFF','cv.TM_CCORR', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
-
-
-    # cv.TM_CCOEFF_NORMED actually seems to be the most relevant method
-    for method in methods:
-        print(method)
-        im_opencv = benchmark_opencv_pil(eval(method))
+    for x in imgs:
+        im_opencv = benchmark_opencv_pil(x)
         print(im_opencv)
+
         
     cmd = """
     osascript -e 'activate application "Terminal"' 

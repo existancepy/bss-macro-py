@@ -34,7 +34,7 @@ def screenshot(**kwargs):
     for _ in range(4):
         try: 
             if "region" in kwargs:
-                out = pag.screenshot(region=kwargs['region'])
+                out = pag.screenshot(region=[int(x) for x in kwargs['region']])
             else:
                 out = pag.screenshot()
             break

@@ -1,147 +1,55 @@
-Your macro version is 1.57.14
+Your macro version is 1.58.4
 
 
-display type: retina
-Screen coordinates: 2880x1800
-[10:28:30] Macro started - Report - exih_macro
-Version 1.57.14
-Screen Coordinates: 2880x1800
-Python 3.9.5
-[]
-[10:29:18] Macro started - Report - exih_macro
-Version 1.57.14
+[13:50:20] Macro started - Report - exih_macro
+Version 1.58.4
 Screen Coordinates: 2880x1800
 Python 3.9.5
 []
 OCR for Custom
-[[([30, 24], [396, 24], [396, 54], [30, 54]), ('Honey 15,139,633,096,547', 1.0)], [([627, 19], [997, 19], [997, 57], [627, 57]), ('Pollen 0/130,771,436', 1.0)]]
-0,[[([30, 24], [396, 24], [396, 54], [30, 54]), ('Honey 15,139,633,096,547', 1.0)], [([627, 19], [997, 19], [997, 57], [627, 57]), ('Pollen 0/130,771,436', 1.0)]]
-[10:29:34]  - Detected: Old UI
+[[([30, 19], [352, 19], [352, 60], [30, 60]), ('Honey 6,751,176', 1.0)], [([429, 25], [569, 25], [569, 49], [429, 49]), ('(+10,098/sec)', 0.5)], [([628, 16], [994, 16], [994, 60], [628, 60]), ('Pollen 0/1,260,000', 1.0)]]
+0,[[([30, 19], [352, 19], [352, 60], [30, 60]), ('Honey 6,751,176', 1.0)], [([429, 25], [569, 25], [569, 49], [429, 49]), ('(+10,098/sec)', 0.5)], [([628, 16], [994, 16], [994, 60], [628, 60]), ('Pollen 0/1,260,000', 1.0)]]
+[13:50:25]  - Detected: Old UI
 Session Start
-15,139,633,096,547
-[10:29:37]  - Resetting character, Attempt: 1
+6,751,176
+[13:50:27]  - Resetting character, Attempt: 1
 OCR for bee bear
 
 To Make Honey, Collect PollenFrom Flower Fields
 to make honey, collect pollenfrom flower fields
-[255, 255, 255]
-0
-0
-0
-real
-0.0
-Max Cycles: 1
-OCR for disconnect
-
-08
-OCR for disconnect
-
-08
-[10:30:00]  - Moving to cannon
-15,139,633,096,547
-[10:30:07]  - First Honey detected: 15.14 T
-15139633096547
-[10:30:08]  - Could not find cannon
-[10:30:13]  - Resetting character, Attempt: 1
-OCR for bee bear
-
-To Make Honey, Collect PollenFrom Flower Fieldsco
-to make honey, collect pollenfrom flower fieldsco
-[255, 255, 255]
-0
-0
-0
-real
-0.0
-OCR for disconnect
-
-token slav0B
-[10:30:28]  - Moving to cannon
-[10:30:34]  - Travelling: Pine Tree
-[10:30:48] Gathering: pine tree - Limit: 0.00 - stationary - Backpack: 100%
-[10:30:49] Gathering: ended - Time: 0.00 - Time Limit - Return: walk
-[10:30:50]  - Going back to hive: Pine Tree
-OCR for blue
-
-8
-15,139,633,464,239(+29,527/sec)
-15139633464239
-15,139,633,979,468
-15139633979468
-OCR for disconnect
-
-Existe17ens
-[10:32:08]  - Starting convert
-OCR for disconnect
-
-17 Fxistanoken slav
-OCR for bee bear
-
-To Make Honey. Collect PollenFrom Flower Fields
-to make honey. collect pollenfrom flower fields
-[10:32:20]  - Convert done
-[10:32:20]  - Resetting character, Attempt: 1
-OCR for bee bear
-
-To Make Honey, Collect PollenFrom Flower FieldsCO
-to make honey, collect pollenfrom flower fieldsco
-[255, 255, 255]
-0
-0
-0
-real
-0.0
-OCR for disconnect
-
-token slav08
-OCR for disconnect
-
-token08* 222k / 54.6M294k / 43.0CATE
-OCR for disconnect
-
-Blessing x5517,016850k / 28.0M247.0k / 28.0M08
-[10:32:50]  - Moving to cannon
-[10:32:57]  - Travelling: Pine Tree
-15,139,634,855,384
-15139634855384
-[10:33:11] Gathering: pine tree - Limit: 0.00 - stationary - Backpack: 100%
-[10:33:12] Gathering: ended - Time: 0.00 - Time Limit - Return: walk
-[10:33:13]  - Going back to hive: Pine Tree
-OCR for blue
-
-+1 Blueberry (from Pine Tree Forest)I di
-15,139,635,360,711
-15139635360711
-OCR for disconnect
-
-1,436,649Exist08Blessing x617
-[10:34:27]  - Starting convert
-OCR for disconnect
-
-08tokensExT
-OCR for bee bear
-
-To Make Honey, Collect PollenFrom Flower Fields
-to make honey, collect pollenfrom flower fields
-[10:34:36]  - Convert done
-[10:34:36]  - Resetting character, Attempt: 1
-OCR for bee bear
-
-10
-10
-[10:34:50]  - Resetting character, Attempt: 2
-15,139,639,170,186
-15139639170186
-OCR for bee bear
-
-To Make Honey, Collect PollenFrom Flower Fields•
-to make honey, collect pollenfrom flower fields•
-[160, 160, 159]
+[159, 159, 158]
 1
 1
 0
 real
 0.6666666666666666
+OCR for bee bear
+
+To Make Honey, Collect PollenFrom Flower Fields
+to make honey, collect pollenfrom flower fields
+Max Cycles: 1
 OCR for disconnect
 
-08
+7. R,SUIt
+OCR for disconnect
+
+73SUIt
+[13:50:58]  - Moving to cannon
+6,751,176
+[13:51:03]  - First Honey detected: 6.75 M
+6751176
+OCR for bee bear
+
+
+
+OCR for bee bear
+
+Discover 25 Bee Types to Firethe Red Cannon
+discover 25 bee types to firethe red cannon
+[13:51:08]  - Travelling: Pine Tree
+[13:51:21] Gathering: pine tree - Limit: 0.00 - stationary - Backpack: 100%
+[13:51:22] Gathering: ended - Time: 0.00 - Time Limit - Return: walk
+[13:51:24]  - Going back to hive: Pine Tree
+OCR for blue
+
+You must be standing in a field to build a Sprinkler.

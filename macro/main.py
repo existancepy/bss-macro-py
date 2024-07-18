@@ -72,13 +72,7 @@ except Exception as e:
 if __name__ == '__main__':
     print("\033[1;35m\nStarting Macro...  \n")
 
-try:
-    import ocrmac #see if ocr mac is installed
-    from macocrpy import imToString,customOCR,ocrRead
-    print("Imported macocr")
-except:
-    from ocrpy import imToString,customOCR,ocrRead
-    print("Imported paddleocr")
+from ocrpy import imToString,customOCR,ocrRead
 import sv_ttk
 import math
 import ast
