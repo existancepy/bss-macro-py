@@ -102,7 +102,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.2"
+macrov = "1.58.3"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1870,7 +1870,8 @@ def collect(name,beesmas=0):
         elif usename == "candles":
             for _ in range(7):
                 move.hold("w",0.2)
-                if ebutton():
+                besideE = getBesideE()
+                if "claim" in besideE or "candle" in besideE:
                     claimLoot = 1
                     break
                 
