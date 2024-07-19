@@ -7,9 +7,9 @@ import os
 import subprocess
 import time
 import mss
-import mss.tools
 
-useOCRMac = False
+useOCRMac = True
+useLangPref = True
 try:
     from ocrmac import ocrmac #see if ocr mac is installed
     useOCRMac = True
@@ -32,16 +32,12 @@ def loadRes():
     return outdict
 
 mw, mh = pag.size()
-def mssScreenshot(x,y,w,h, saveName = "honey.png"):
+def mssScreenshot(x,y,w,h):
     with mss.mss() as sct:
         # The screen part to capture
         monitor = {"left": x, "top": y, "width": w, "height": h}
         # Grab the data and convert to pillow img
         sct_img = sct.grab(monitor)
-        if saveName:
-            # Save to the picture file
-            mss.tools.to_png(sct_img.rgb, sct_img.size, output=saveName)
-
         img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
         return img
 
@@ -51,7 +47,10 @@ def paddleBounding(b):
     return ([x1,y1],[x2,y1],[x2,y2],[x1,y2])
     
 def ocrMac_(img):
-    result = ocrmac.OCR(img).recognize(px=True)
+    if useLangPref:
+        result = ocrmac.OCR(img,language_preference=['en-US']).recognize(px=True)
+    else:
+        result = ocrmac.OCR(img).recognize(px=True)
     #convert it to the same format as paddleocr
     return [ [paddleBounding(x[2]),(x[0],x[1]) ] for x in result]
 
@@ -163,5 +162,10 @@ def ocrRead(img):
     
 if useOCRMac:
     ocrFunc = ocrMac_
+    try:
+        ocrFunc(mssScreenshot(1,1,10,10))
+    except:
+        print("Language Preferences for ocrmac is disabled")
+        useLangPref = False
 else:
     ocrFunc = ocrPaddle

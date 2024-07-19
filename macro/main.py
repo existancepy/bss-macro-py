@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.5"
+macrov = "1.58.6"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -264,7 +264,7 @@ def getStatus():
     return out
 
 def setStatus(msg="none"):
-    if msg != "none" and getStatus() == "disconnect": return
+    if msg != "none" and "disconnect" in getStatus(): return
     with open("status.txt","w") as f:
         f.write(msg)
     f.close()
@@ -738,6 +738,7 @@ def reset(hiveCheck=False):
     yo = wh//4*3
     xt = xo*3-xo
     yt = wh-yo
+    
     for i in range(5):
         webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
         mouse.position = (mw/(xsm*4.11)+40,(mh/(9*ysm))+yOffset)
@@ -747,7 +748,11 @@ def reset(hiveCheck=False):
         pagPress('r')
         time.sleep(0.2)
         pagPress('enter')
-        time.sleep(8.5)
+        if not i:
+            if checkwithOCR("disconnect"): return
+            time.sleep(7)
+        else:
+            time.sleep(8.5)
         besideE = getBesideE()
         if "make" in besideE or "honey" in besideE or "flower" in besideE or "field" in besideE:
             break
@@ -768,7 +773,6 @@ def reset(hiveCheck=False):
         if avgDiff < 20:
             for _ in range(8):
                 pagPress("o")
-            time.sleep(0.8)
             return True
         
         for _ in range(4):
@@ -790,11 +794,7 @@ def canon(fast=0):
     eb_freeze = False
     for i in range(3):
         #Move to canon:
-        if not fast:
-            if checkwithOCR("disconnect"):
-                return "dc"
-            webhook("","Moving to cannon","dark brown")
-        time.sleep(1)
+        #webhook("","Moving to cannon","dark brown")
         move.hold("w",0.8)
         move.hold("d",0.9*(setdat["hive_number"])+1)
         pag.keyDown("d")
@@ -863,7 +863,8 @@ def collect_mondo_buff(gather = False):
     st = time.perf_counter()
     savetimings("mondo_buff")
     webhook("","Travelling: Mondo Buff","dark brown")
-    if canon() == "dc": return False
+    canon()
+    if getStatus() == "disconnect": return
     time.sleep(2)
     move.hold("e",0)
     sleep(2.5)
@@ -1316,7 +1317,7 @@ def stingerHunt(convert=0,gathering=0):
         fieldGoTo = field
         killvb = 0
         if not "vb_found" in status: #Status might update after resetting
-            if canon(1) == "dc": return "dc"
+            cwanon(1)
             exec(open("./paths/field_{}.py".format(field)).read())
             webhook("","Finding Vicious Bee ({})".format(field),"dark brown")
             setStatus("finding_vb_{}".format(field))
@@ -1553,7 +1554,8 @@ def clickYes():
 def goToPlanter(field,place=0):
     st = time.perf_counter()
     stingerHunt()
-    if canon() == "dc": return
+    canon()
+    if getStatus() == "disconnect": return
     exec(open("./paths/field_{}.py".format(field)).read())
     if field == "pine tree":
         move.hold("d",3)
@@ -1758,7 +1760,8 @@ def killMob(field,mob,reset):
     st = time.perf_counter()
     webhook("","Travelling: {} ({})".format(mob.title(),field.title()),"dark brown")
     convert()
-    if canon() == "dc": return
+    canon()
+    if getStatus() == "disconnect": return
     time.sleep(1)
     exec(open("./paths/field_{}.py".format(field)).read())
     if mob == "spider":
@@ -1781,7 +1784,8 @@ def lootMob(field,mob,resetCheck):
 def get_booster(booster):
     for i in range(2):
         collected = 0
-        if canon() == "dc": return
+        canon()
+        if getStatus() == "disconnect": return
         webhook("","Traveling: {} Booster".format(booster.title()),"dark brown")
         exec(open("./paths/collect_{}_booster.py".format(booster)).read())
         if booster == "blue":
@@ -1843,7 +1847,8 @@ def collect(name,beesmas=0):
     claimLoot = 0
     for _ in range(2):
         convert()
-        if canon() == "dc": return
+        canon()
+        if getStatus() == "disconnect": return
         webhook("","Travelling: {}".format(dispname),"dark brown")
         exec(open("./paths/collect_{}.py".format(usename)).read())
         if usename == "gluedispenser":
@@ -1872,7 +1877,8 @@ def collect(name,beesmas=0):
         elif usename == "lid_art" or usename == "feast":
             for _ in range(7):
                 move.hold("s",0.2)
-                if ebutton():
+                besideE = getBesideE()
+                if "dig" in besideE or "beesmas" in besideE or "gander" in besideE or "onett" in besideE or "art" in besideE:
                     claimLoot = 1
                     break
             
@@ -1909,7 +1915,9 @@ def collect(name,beesmas=0):
         reset()
         setStatus()
     savetimings(usename)
-    move.press('e')
+    for _ in range(2):
+        move.press('e')
+        time.sleep(0.2)
     time.sleep(0.5)
     if claimLoot and beesmas:
         if name != "stockings":
@@ -2218,7 +2226,7 @@ def openSettings():
     im = pag.screenshot(region=(ww/8,y,ww/10,h))
     im.save('test.png')
     loadsettings.save("msh",h,"multipliers.txt")
-    loadsettings.save("msy",y,"multipliers.txt")
+    loadsettings.save("msy",int(y),"multipliers.txt")
 
 
 def getHaste():
@@ -2690,7 +2698,7 @@ def rejoin():
                 break
         else:
             webhook("",f'Hive is {hiveNumber} already claimed, finding new hive','dark brown')
-            move.hold("d",0.9*(hiveNumber)+1)
+            move.hold("d",0.9*(hivenumber)+1)
             time.sleep(0.5)
             for j in range(40):
                 if findHive(setdat):
@@ -2742,52 +2750,58 @@ def gather(gfid, quest = False, questGoo = False):
             setdat["return_to_hive"] = settings["return_to_hive_override"]
         if settings["gather_time_override_enabled"]:
              setdat["gather_time"] = settings["gather_time_override"]
-    canon()
-    if getStatus() == "disconnect": return
-    webhook("","Travelling: {}{}".format(currfield.title(), questMessage),"dark brown")
-    exec(open("./paths/field_{}.py".format(currfield)).read())
-    cf = currfield.replace(" ","").lower()
-    time.sleep(0.2)
-    s_l = setdat['start_location'].lower()
-    rotTowards = []
-    rotBack = []
-    if s_l != 'center':
-        if s_l == "upper right":
-            rotTowards = ["."]
-        elif s_l == "right":
-            rotTowards = ["."]*2
-        elif s_l == "lower right":
-            rotTowards = ["."]*3
-        elif s_l == "bottom":
-            rotTowards = ["."]*4
-        elif s_l == "lower left":
-            rotTowards = [","]*3
-        elif s_l == "left":
-            rotTowards = [","]*2
-        elif s_l == "upper left":
-            rotTowards = [","]
-        for i in rotTowards:
-            move.press(i)
-            if i == ".":
-                rotBack.append(",")
-            elif i:
-                rotBack.append(".")
-        
-        move.hold("w",setdat['distance_from_center']/2.5)
-        
-        for i in rotBack:
-            move.press(i)
+    for _ in range(3):
+        canon()
+        if getStatus() == "disconnect": return
+        webhook("","Travelling: {}{}".format(currfield.title(), questMessage),"dark brown")
+        exec(open("./paths/field_{}.py".format(currfield)).read())
+        cf = currfield.replace(" ","").lower()
+        time.sleep(0.2)
+        s_l = setdat['start_location'].lower()
+        rotTowards = []
+        rotBack = []
+        if s_l != 'center':
+            if s_l == "upper right":
+                rotTowards = ["."]
+            elif s_l == "right":
+                rotTowards = ["."]*2
+            elif s_l == "lower right":
+                rotTowards = ["."]*3
+            elif s_l == "bottom":
+                rotTowards = ["."]*4
+            elif s_l == "lower left":
+                rotTowards = [","]*3
+            elif s_l == "left":
+                rotTowards = [","]*2
+            elif s_l == "upper left":
+                rotTowards = [","]
+            for i in rotTowards:
+                move.press(i)
+                if i == ".":
+                    rotBack.append(",")
+                elif i:
+                    rotBack.append(".")
+            
+            move.hold("w",setdat['distance_from_center']/2.5)
+            
+            for i in rotBack:
+                move.press(i)
 
-       
-    if setdat["before_gather_turn"] == "left":
-        for _ in range(setdat["turn_times"]):
-            move.press(",")
-    elif setdat["before_gather_turn"] == "right":
-        for _ in range(setdat["turn_times"]):
-            move.press(".")
-    
-    time.sleep(0.2)
-    placeSprinkler()
+           
+        if setdat["before_gather_turn"] == "left":
+            for _ in range(setdat["turn_times"]):
+                move.press(",")
+        elif setdat["before_gather_turn"] == "right":
+            for _ in range(setdat["turn_times"]):
+                move.press(".")
+        
+        time.sleep(0.2)
+        if placeSprinkler():
+            break
+        else:
+            webhook("Notice","Failed to reach field","dark brown",1)
+            reset()
+            
     pag.click()
     gp = setdat["gather_pattern"].lower()
     webhook("Gathering: {}".format(currfield),"Limit: {}.00 - {} - Backpack: {}%".format(setdat["gather_time"],setdat["gather_pattern"],setdat["pack"]),"light green")
@@ -2946,12 +2960,14 @@ def placeSprinkler():
         }
     setdat = loadsettings.load()
     times = sprinklerCount[setdat['sprinkler_type']]
-    if times == 1:
-        move.press(str(setdat['sprinkler_slot']))
-        keyboard.press(Key.space)
-        time.sleep(0.1)
-        keyboard.release(Key.space)
-    else:
+    #try to place sprinkler and detect if it can be placed
+    move.press(str(setdat['sprinkler_slot']))
+    time.sleep(0.3)
+    bluetexts = imToString("blue").lower()
+    if "must" in bluetexts or "standing" in bluetexts or "field" in bluetexts or "place" in bluetexts:
+        return False
+
+    if times > 1:
         keyboard.press(Key.space)
         st = time.time()
         while True:
@@ -2960,6 +2976,11 @@ def placeSprinkler():
             else:
                 move.press(str(setdat['sprinkler_slot']))
         keyboard.release(Key.space)
+    else:
+        keyboard.press(Key.space)
+        time.sleep(0.1)
+        keyboard.release(Key.space)
+    return True
 
 def autoHotbar():
     pag.alert(text="This is an external feature that will only use the slots set in the boost settings.\
@@ -3111,7 +3132,10 @@ def quest(giver, session_start = 0):
             canon()
             if getStatus() == "disconnect": return
             webhook("",f"Travelling: {giverName} (get quest) ","brown")
-            exec(open(f"./paths/quest_{giver}.py").read())
+            if giver == "riley":
+                os.system("/usr/bin/automator ./paths/quest_riley.workflow")
+            else:
+                exec(open(f"./paths/quest_{giver}.py").read())
             sleep(0.5)
             besideE = getBesideE()
             if "talk" in besideE or giver in besideE: 
@@ -3149,7 +3173,10 @@ def quest(giver, session_start = 0):
             for _ in range(3):
                 canon()
                 webhook("",f"Travelling: {giverName} (submit quest) ","brown")
-                exec(open(f"./paths/quest_{giver}.py").read())
+                if giver == "riley":
+                    os.system("/usr/bin/automator ./paths/quest_riley.workflow")
+                else:
+                    exec(open(f"./paths/quest_{giver}.py").read())
                 sleep(0.5)
                 besideE = getBesideE()
                 if "talk" in besideE or giver in besideE:
@@ -3160,7 +3187,7 @@ def quest(giver, session_start = 0):
                     reach = True
                     break
                 else:
-                    webhook("",f"Unable to reach {giverName}","brown")
+                    webhook("",f"Unable to reach {giverName}","brown",1)
             if reach:
                 clickdialog()
                 quest = False
