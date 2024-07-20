@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.6"
+macrov = "1.58.7"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1881,14 +1881,7 @@ def collect(name,beesmas=0):
                 if "dig" in besideE or "beesmas" in besideE or "gander" in besideE or "onett" in besideE or "art" in besideE:
                     claimLoot = 1
                     break
-            
-        elif usename == "feast":
-            if checkwithOCR("bee bear"):
-                pag.keyDown("w")
-                time.sleep(1)
-                move.apkey("space")
-                time.sleep(1.5)
-                pag.keyUp("w")
+                
         elif usename == "blueberrydispenser" or usename == "royaljellydispenser":
             for _ in range(6):
                 move.hold("a",0.2)
@@ -1908,6 +1901,14 @@ def collect(name,beesmas=0):
                 if "use" in besideE or "dispenser" in besideE:
                     claimLoot =  1
                     break
+                
+        if usename == "feast":
+            if checkwithOCR("bee bear"):
+                pag.keyDown("w")
+                time.sleep(1)
+                move.apkey("space")
+                time.sleep(1.5)
+                pag.keyUp("w")
         if claimLoot:
             webhook("","Collected: {}".format(dispname),"bright green",1)
             break
@@ -2698,7 +2699,7 @@ def rejoin():
                 break
         else:
             webhook("",f'Hive is {hiveNumber} already claimed, finding new hive','dark brown')
-            move.hold("d",0.9*(hivenumber)+1)
+            move.hold("d",0.9*(hiveNumber)+1)
             time.sleep(0.5)
             for j in range(40):
                 if findHive(setdat):
