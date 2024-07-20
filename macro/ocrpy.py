@@ -8,7 +8,7 @@ import subprocess
 import time
 import mss
 
-useOCRMac = True
+useOCRMac = False
 useLangPref = True
 try:
     from ocrmac import ocrmac #see if ocr mac is installed
