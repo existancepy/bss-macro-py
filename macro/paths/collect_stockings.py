@@ -14,5 +14,6 @@ move.press(".")
 sleep(3.55*ct)
 pag.keyUp("w")
 move.press("space")
+sleep(0.8)
 
     

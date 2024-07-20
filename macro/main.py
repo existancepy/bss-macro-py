@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.7"
+macrov = "1.58.8"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -810,7 +810,7 @@ def canon(fast=0):
             time.sleep(0.1)
             return
         move.hold("d",0.35)
-        move.hold("s",0.1)
+        move.hold("s",0.07)
         for _ in range(6):
             move.hold("d",0.2)
             time.sleep(0.05)
@@ -1317,7 +1317,7 @@ def stingerHunt(convert=0,gathering=0):
         fieldGoTo = field
         killvb = 0
         if not "vb_found" in status: #Status might update after resetting
-            cwanon(1)
+            canon(1)
             exec(open("./paths/field_{}.py".format(field)).read())
             webhook("","Finding Vicious Bee ({})".format(field),"dark brown")
             setStatus("finding_vb_{}".format(field))
@@ -2699,7 +2699,7 @@ def rejoin():
                 break
         else:
             webhook("",f'Hive is {hiveNumber} already claimed, finding new hive','dark brown')
-            move.hold("d",0.9*(hiveNumber)+1)
+            move.hold("d",0.9*(hiveNumber)+1,0)
             time.sleep(0.5)
             for j in range(40):
                 if findHive(setdat):
@@ -2965,7 +2965,7 @@ def placeSprinkler():
     move.press(str(setdat['sprinkler_slot']))
     time.sleep(0.3)
     bluetexts = imToString("blue").lower()
-    if "must" in bluetexts or "standing" in bluetexts or "field" in bluetexts or "place" in bluetexts:
+    if "must" in bluetexts or "standing" in bluetexts or "place" in bluetexts:
         return False
 
     if times > 1:
@@ -3016,6 +3016,7 @@ def autoHotbar():
         
 def feed(name, quantity):
     setdat = loadsettings.load()
+    savedata = loadRes()
     ww = savedata['ww']
     wh = savedata['wh']
     while not reset():
@@ -3092,17 +3093,36 @@ def feed(name, quantity):
     for _ in range(2):
         pag.moveTo(40,startY)
         time.sleep(0.3)
-        pag.dragTo(mw//2, mh//2,0.7, button='left')
+        pag.dragTo(mw//2, mh//2-80, 0.6, button='left')
         
     time.sleep(0.5)
     pag.typewrite("\\")
-    time.sleep(0.2)
-    keyboard.press(Key.right)
-    time.sleep(4)
-    keyboard.release(Key.right)
+    time.sleep(0.5)
+    for _ in range(10):
+        keyboard.press(Key.up)
+        time.sleep(0.05)
+        keyboard.release(Key.up)
+        time.sleep(0.1)
+        
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
+
+    for _ in range(8):
+        keyboard.press(Key.right)
+        time.sleep(0.05)
+        keyboard.release(Key.right)
+        time.sleep(0.1)
+        
+    keyboard.press(Key.down)
+    time.sleep(0.05)
+    keyboard.release(Key.down)
+    
+    keyboard.press(Key.left)
+    time.sleep(0.05)
+    keyboard.release(Key.left)
+    time.sleep(0.1)
+    
     move.press("enter")
     time.sleep(0.2)
     pag.write(str(quantity), interval = 0.25)
@@ -3114,6 +3134,26 @@ def feed(name, quantity):
     keyboard.release(Key.left)
     move.press("enter")
     pag.typewrite("\\")
+    time.sleep(0.6)
+    pag.typewrite("\\")
+    for _ in range(5):
+        keyboard.press(Key.up)
+        time.sleep(0.05)
+        keyboard.release(Key.up)
+        time.sleep(0.1)   
+    keyboard.press(Key.down)
+    time.sleep(0.05)
+    keyboard.release(Key.down)
+    
+    for _ in range(4):
+        keyboard.press(Key.left)
+        time.sleep(0.05)
+        keyboard.release(Key.left)
+        time.sleep(0.1)
+
+    move.press("enter")
+    pag.typewrite("\\")
+    
     webhook("",f"Fed {quantity} {name}", "bright green")
     if setdat["haste_compensation"]: openSettings()
     
