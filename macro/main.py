@@ -124,7 +124,7 @@ try:
     if not "sRGB IEC61966" in colorProfile:
         pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
         \n(This is optional, but some features like backpack detection wont work)\
-        \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1"')
+        \nFor instructions to change it, go to step 6 of the installation guide in the discord')
 except:
     pass
     
