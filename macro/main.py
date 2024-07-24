@@ -113,17 +113,20 @@ except FileNotFoundError:
     else:
         hti = None
         pass
-    
-cmd = """
-    osascript -e 'tell application "Image Events" to display profile of display 1' 
-    """
-colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
-colorProfile = colorProfile.strip()
-if colorProfile == "missing value": colorProfile = "Color LCD"
-if not "sRGB IEC61966" in colorProfile:
-    pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
-    \n(This is optional, but some features like backpack detection wont work)\
-    \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1"')
+
+try:
+    cmd = """
+        osascript -e 'tell application "Image Events" to display profile of display 1' 
+        """
+    colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
+    colorProfile = colorProfile.strip()
+    if colorProfile == "missing value": colorProfile = "Color LCD"
+    if not "sRGB IEC61966" in colorProfile:
+        pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
+        \n(This is optional, but some features like backpack detection wont work)\
+        \nTo change it, go to system settings -> display and set the Color Profile to "sRGB IEC61966-2.1"')
+except:
+    pass
     
 questData = {}
 questBear = ""
