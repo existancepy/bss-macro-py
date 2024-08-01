@@ -113,20 +113,6 @@ except FileNotFoundError:
     else:
         hti = None
         pass
-
-try:
-    cmd = """
-        osascript -e 'tell application "Image Events" to display profile of display 1' 
-        """
-    colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
-    colorProfile = colorProfile.strip()
-    if colorProfile == "missing value": colorProfile = "Color LCD"
-    if not "sRGB IEC61966" in colorProfile:
-        pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
-        \n(This is optional, but some features like backpack detection wont work)\
-        \nFor instructions to change it, go to step 6 of the installation guide in the discord')
-except:
-    pass
     
 questData = {}
 questBear = ""
@@ -172,6 +158,19 @@ if __name__ == '__main__':
         if "ahk" in ext:
             python = ahkPatternToPython(open(f"./patterns/{name}.ahk", "r").read())
             open(f"./patterns/gather_{name}.py", "w").write(python)
+    try:
+    cmd = """
+        osascript -e 'tell application "Image Events" to display profile of display 1' 
+        """
+    colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
+    colorProfile = colorProfile.strip()
+    if colorProfile == "missing value": colorProfile = "Color LCD"
+    if not "sRGB IEC61966" in colorProfile:
+        pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
+        \n(This is optional, but some features like backpack detection wont work)\
+        \nFor instructions to change it, go to step 6 of the installation guide in the discord')
+    except:
+        pass
             
 
 def boolToInt(condition):
