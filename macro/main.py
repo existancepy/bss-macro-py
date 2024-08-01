@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.8"
+macrov = "1.58.9"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -113,7 +113,7 @@ except FileNotFoundError:
     else:
         hti = None
         pass
-    
+
 questData = {}
 questBear = ""
 questTitle = ""
@@ -122,7 +122,7 @@ with open("./dataFiles/quest_data.txt", "r") as f:
     qdata = [x for x in f.read().split("\n") if x]
 f.close()
 
-#redcannon = cv2.imread('./images/general/redcannon.png')
+redcannon = cv2.imread('./images/general/e2.png')
 for i in qdata:
     if i.startswith("="):
         i = i.replace("=","")
@@ -139,6 +139,19 @@ for i in qdata:
         questInfo.append(i)
 print()
 if __name__ == '__main__':
+    try:
+        cmd = """
+            osascript -e 'tell application "Image Events" to display profile of display 1' 
+            """
+        colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
+        colorProfile = colorProfile.strip()
+        if colorProfile == "missing value": colorProfile = "Color LCD"
+        if not "sRGB IEC61966" in colorProfile:
+            pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
+            \n(This is optional, but some features like backpack detection wont work)\
+            \nTVisit step 6 of the macro installation guide in the discord for instructions"')
+    except:
+        pass
     planterTypes_prev = []
     planterFields_prev = []
     if not os.stat("planterdata.txt").st_size == 0:
@@ -158,19 +171,6 @@ if __name__ == '__main__':
         if "ahk" in ext:
             python = ahkPatternToPython(open(f"./patterns/{name}.ahk", "r").read())
             open(f"./patterns/gather_{name}.py", "w").write(python)
-    try:
-        cmd = """
-            osascript -e 'tell application "Image Events" to display profile of display 1' 
-            """
-        colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
-        colorProfile = colorProfile.strip()
-        if colorProfile == "missing value": colorProfile = "Color LCD"
-        if not "sRGB IEC61966" in colorProfile:
-            pag.alert(text = f'Your current color profile is {colorProfile}.The recommended one is sRGB IEC61966-2.1.\
-            \n(This is optional, but some features like backpack detection wont work)\
-            \nFor instructions to change it, go to step 6 of the installation guide in the discord')
-    except:
-        pass
             
 
 def boolToInt(condition):
@@ -192,6 +192,17 @@ def lowBattery():
         log(ps)
         return False
 
+def runPath(name):
+    path = f"./paths/{name}"
+    #try running a automator workflow
+    #if it doesnt exist, run the .py file instead
+    setdat = loadsettings.load()
+    ws = setdat["walkspeed"]
+    if os.path.exists(path+".workflow"):
+        os.system(f"/usr/bin/automator {path}.workflow")
+    else:
+        exec(open(f"{path}.py").read())
+        
 def pagmove(k,t):
     pag.keyDown(k)
     time.sleep(t)
@@ -435,14 +446,23 @@ def getBesideE():
     log(text)
     return text
 
+def isBesideE(texts):
+    setdat = loadsettings.load()
+    if setdat["fast_detection"]:
+        #cv2 thing here
+        img = mssScreenshot(mw//2-200,20,400,125)
+        img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        res = cv2.matchTemplate(img_cv, redcannon, cv2.TM_CCOEFF_NORMED)
+        #print(res)
+        return (res >= 0.9).any()
+    else:
+        #get beside E
+        besideE = getBesideE()
+        for x in texts:
+            if x in besideE: return True
+        return False
+    
 def ebutton(pagmode=0):
-    '''
-    img = mssScreenshot(mw//2-200,20,400,125)
-    img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-    res = cv2.matchTemplate(img_cv, redcannon, cv2.TM_CCOEFF_NORMED)
-    #print(res)
-    return (res >= 0.9).any()
-    '''
     ocrval = ''.join([x for x in list(imToString('ebutton').strip()) if x.isalpha()])
     log(ocrval)
     return "E" in ocrval and len(ocrval) <= 3
@@ -726,7 +746,7 @@ def hourlyReport(hourly=1):
         log(traceback.format_exc())
         webhook("","Hourly Report has an error that has been caught. The error can be found in macroLogs.log","red")
    
-def reset(hiveCheck=False):
+def reset():
     setdat = loadsettings.load()
     yOffset = 0
     if setdat["new_ui"]: yOffset = 20
@@ -740,6 +760,7 @@ def reset(hiveCheck=False):
     yo = wh//4*3
     xt = xo*3-xo
     yt = wh-yo
+    canConvert = False
     
     for i in range(5):
         webhook("","Resetting character, Attempt: {}".format(i+1),"dark brown")
@@ -756,7 +777,10 @@ def reset(hiveCheck=False):
         else:
             time.sleep(8.5)
         besideE = getBesideE()
-        if "make" in besideE or "honey" in besideE or "flower" in besideE or "field" in besideE:
+        if "make" in besideE and not "to" in besideE:
+            canConvert = True
+            break
+        elif "make" in besideE or "honey" in besideE or "flower" in besideE or "field" in besideE:
             break
     else:
         webhook("Notice","Unable to detect that player has respawned at hive, continuing","red",1)
@@ -877,7 +901,7 @@ def collect_mondo_buff(gather = False):
     webhook("","Collected: Mondo Buff","dark brown")
     addStat("objective_time",round((time.perf_counter()  - st)/60,2))
     reset()
-    convert()
+    convert(bypass=)
     stingerHunt()
     return True
 
@@ -929,9 +953,11 @@ def convert(bypass=0):
     if not bypass:
         r = False
         for _ in range(1):
-            besideE = getBesideE()
-            r = "make" in besideE and not "to" in besideE
-            #r = ebutton()
+            if setdat["fast_detection"]:
+                r = isBesideE()
+            else:
+                besideE = getBesideE()
+                r = "make" in besideE and not "to" in besideE
             if r: break
             time.sleep(0.25)
         if not r: return
@@ -971,13 +997,12 @@ def walk_to_hive(field):
     wh = savedata['wh']
     ws = setdat["walkspeed"]
     webhook("","Going back to hive: {}".format(field.title()),"dark brown")
-    exec(open("./paths/walk_{}.py".format(field)).read())
+    runPath(f"walk_{field}")
     move.hold("a",(hive-1)*0.9)
     for _ in range(50):
         move.hold("a",0.2)
         time.sleep(0.06)
-        text = getBesideE()
-        if "make" in text:
+        if isBesideE(["make"]):
             convert(1)
             reset()
             return
@@ -1109,7 +1134,7 @@ def resetMobTimer(cfield):
 def antChallenge():
     webhook("","Travelling: Ant Challenge","dark brown")
     canon()
-    exec(open("./paths/collect_antpass.py").read())
+    runPath("collect_antpass")
     move.hold("w",4)
     move.hold("a",3)
     move.hold("d",3)
@@ -1320,10 +1345,10 @@ def stingerHunt(convert=0,gathering=0):
         killvb = 0
         if not "vb_found" in status: #Status might update after resetting
             canon(1)
-            exec(open("./paths/field_{}.py".format(field)).read())
+            runPath(f"field_{field}")
             webhook("","Finding Vicious Bee ({})".format(field),"dark brown")
             setStatus("finding_vb_{}".format(field))
-            exec(open("./paths/vb_{}.py".format(field)).read())
+            runPath(f"vb_{field}")
             time.sleep(4)
             status = getStatus()
         else:
@@ -1348,15 +1373,15 @@ def stingerHunt(convert=0,gathering=0):
                 return "dc"
             fieldGoTo = status.split("_")[-1]
             webhook("",f"Travelling to {fieldGoTo} field (vicious bee)","dark brown")
-            exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
-            exec(open("./paths/vb_{}.py".format(fieldGoTo)).read())
+            runPath(f"field_{fieldGoTo}")
+            runPath(f"vb_{fieldGoTo}")
             killvb = 1
         time.sleep(1)
         if killvb:
             setStatus("killing_vb")
             st = time.time()
             while True:
-                exec(open("./paths/killvb_{}.py".format(fieldGoTo)).read())
+                runPath(f"killvb_{fieldGoTo}")
                 status = getStatus()
                 log(f"stingerHunt status: {status}")
                 if status == "vb_killed":
@@ -1375,7 +1400,7 @@ def stingerHunt(convert=0,gathering=0):
                     if canon(1) == "dc":
                         addStat("objective_time",round((time.perf_counter() - sst)/60,2))
                         return "dc"
-                    exec(open("./paths/field_{}.py".format(fieldGoTo)).read())
+                    runPath(f"field_{fieldGoTo}")
                     setStatus("killing_vb")
             reset()
             break
@@ -1558,7 +1583,7 @@ def goToPlanter(field,place=0):
     stingerHunt()
     canon()
     if getStatus() == "disconnect": return
-    exec(open("./paths/field_{}.py".format(field)).read())
+    runPath(f"field_{field}")
     if field == "pine tree":
         move.hold("d",3)
         move.hold("s",4)
@@ -1765,7 +1790,7 @@ def killMob(field,mob,reset):
     canon()
     if getStatus() == "disconnect": return
     time.sleep(1)
-    exec(open("./paths/field_{}.py".format(field)).read())
+    runPath(f"field_{field}")
     if mob == "spider":
         for _ in range(4):
             move.press(",")
@@ -1789,7 +1814,7 @@ def get_booster(booster):
         canon()
         if getStatus() == "disconnect": return
         webhook("","Traveling: {} Booster".format(booster.title()),"dark brown")
-        exec(open("./paths/collect_{}_booster.py".format(booster)).read())
+        runPath(f"collect_{field}_booster")
         if booster == "blue":
             fields = ["pine tree", "blue flower", "bamboo"]
             for _ in range(9):
@@ -1852,7 +1877,7 @@ def collect(name,beesmas=0):
         canon()
         if getStatus() == "disconnect": return
         webhook("","Travelling: {}".format(dispname),"dark brown")
-        exec(open("./paths/collect_{}.py".format(usename)).read())
+        runPath(f"collect_{usename}")
         if usename == "gluedispenser":
             time.sleep(2)
             move.press(str(setdat['gumdrop_slot']))
@@ -1872,7 +1897,7 @@ def collect(name,beesmas=0):
             for _ in range(7):
                 move.hold("w",0.2)
                 besideE = getBesideE()
-                if "claim" in besideE or "candle" in besideE:
+                if "admire" in besideE or "candle" in besideE or "honey" in besideE:
                     claimLoot = 1
                     break
                 
@@ -1900,7 +1925,7 @@ def collect(name,beesmas=0):
         else:
             for _ in range(2):
                 besideE = getBesideE()
-                if "use" in besideE or "dispenser" in besideE:
+                if "use" in besideE or "dispenser" in besideE or "activate" in besideE:
                     claimLoot =  1
                     break
                 
@@ -1918,6 +1943,7 @@ def collect(name,beesmas=0):
         reset()
         setStatus()
     savetimings(usename)
+    
     for _ in range(2):
         move.press('e')
         time.sleep(0.2)
@@ -1926,7 +1952,7 @@ def collect(name,beesmas=0):
         if name != "stockings":
             sleep(4)
         move.apkey("space")
-        exec(open("./paths/claim_{}.py".format(usename)).read())
+        runPath(f"claim_{usename}")
     reset()
     addStat("objective_time",round((time.perf_counter() - st)/60,2))
     setStatus()
@@ -2757,7 +2783,7 @@ def gather(gfid, quest = False, questGoo = False):
         canon()
         if getStatus() == "disconnect": return
         webhook("","Travelling: {}{}".format(currfield.title(), questMessage),"dark brown")
-        exec(open("./paths/field_{}.py".format(currfield)).read())
+        runPath(f"field_{currfield}")
         cf = currfield.replace(" ","").lower()
         time.sleep(0.2)
         s_l = setdat['start_location'].lower()
@@ -3175,10 +3201,7 @@ def quest(giver, session_start = 0):
             canon()
             if getStatus() == "disconnect": return
             webhook("",f"Travelling: {giverName} (get quest) ","brown")
-            if giver == "riley":
-                os.system("/usr/bin/automator ./paths/quest_riley.workflow")
-            else:
-                exec(open(f"./paths/quest_{giver}.py").read())
+            runPath(f"quest_{giver}")
             sleep(0.5)
             besideE = getBesideE()
             if "talk" in besideE or giver in besideE: 
@@ -3216,10 +3239,7 @@ def quest(giver, session_start = 0):
             for _ in range(3):
                 canon()
                 webhook("",f"Travelling: {giverName} (submit quest) ","brown")
-                if giver == "riley":
-                    os.system("/usr/bin/automator ./paths/quest_riley.workflow")
-                else:
-                    exec(open(f"./paths/quest_{giver}.py").read())
+                runPath(f"quest_{giver}")
                 sleep(0.5)
                 besideE = getBesideE()
                 if "talk" in besideE or giver in besideE:
@@ -3434,7 +3454,7 @@ def startLoop(planterTypes_prev, planterFields_prev,session_start):
         if setdat['stump_snail'] and checkRespawn("stump_snail","96h"):
             canon()
             webhook("","Travelling: Stump snail (stump) ","brown")
-            exec(open("./paths/field_stump.py").read())
+            runPath(f"field_stump")
             time.sleep(0.2)
             placeSprinkler()
             pag.click()
@@ -4191,6 +4211,8 @@ if __name__ == "__main__":
     reverse_hive_direction = tk.IntVar()
     so_broke = tk.IntVar()
 
+    fast_detection = tk.IntVar()
+
     enable_planters = tk.IntVar()
     paper_planter = tk.IntVar()
     ticket_planter = tk.IntVar()
@@ -4303,6 +4325,7 @@ if __name__ == "__main__":
         convert_wait = setdat['convert_wait']
         #convert_every_enabled.set(setdat["convert_every_enabled"])
         #convert_every = setdat['convert_every']
+        fast_detection.set(setdat["fast_detection"])
         
         wealthclock.set(setdat["wealthclock"])
         blueberrydispenser.set(setdat["blueberrydispenser"])
@@ -4737,7 +4760,8 @@ if __name__ == "__main__":
             "rejoin_delay": rejoindelaytextbox.get(1.0,"end").replace("\n",""),
             "rejoin_method": rejoin_method.get().lower(),
             "sprinkler_type": sprinkler_type.get(),
-            "so_broke": so_broke.get()
+            "so_broke": so_broke.get(),
+            "fast_detection": fast_detection.get()
         } 
         setDict = {
             "haste_compensation": haste_compensation.get(),
@@ -5939,6 +5963,8 @@ if __name__ == "__main__":
     checkbox.place(x=0, y = 225)
     Tooltip(checkbox, text = "Sends 'Existance so broke' in chat after rejoining. This is a reference to Natro Macro's so broke message'")
 
+    #checkbox = tkinter.Checkbutton(frame7, text="Faster detection", variable=fast_detection)
+    #checkbox.place(x=0, y = 260)
     #Tab 9
 
     def startAutoClick(cps):

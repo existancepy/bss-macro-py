@@ -23,3 +23,4 @@ rejoin_delay:30
 rejoin_method:deeplink
 sprinkler_type:saturator
 so_broke:0
+fast_detection:0
