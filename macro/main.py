@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.9"
+macrov = "1.58.10"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -901,7 +901,7 @@ def collect_mondo_buff(gather = False):
     webhook("","Collected: Mondo Buff","dark brown")
     addStat("objective_time",round((time.perf_counter()  - st)/60,2))
     reset()
-    convert(bypass=)
+    convert()
     stingerHunt()
     return True
 
