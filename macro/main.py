@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.10"
+macrov = "1.58.11"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -1814,7 +1814,7 @@ def get_booster(booster):
         canon()
         if getStatus() == "disconnect": return
         webhook("","Traveling: {} Booster".format(booster.title()),"dark brown")
-        runPath(f"collect_{field}_booster")
+        runPath(f"collect_{booster}_booster")
         if booster == "blue":
             fields = ["pine tree", "blue flower", "bamboo"]
             for _ in range(9):
