@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.11"
+macrov = "1.58.12"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -957,7 +957,7 @@ def convert(bypass=0):
                 r = isBesideE()
             else:
                 besideE = getBesideE()
-                r = "make" in besideE and not "to" in besideE
+                r = ("make" in besideE and not "to" in besideE) or "maman" in besideE
             if r: break
             time.sleep(0.25)
         if not r: return
