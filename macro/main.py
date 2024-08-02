@@ -746,7 +746,7 @@ def hourlyReport(hourly=1):
         log(traceback.format_exc())
         webhook("","Hourly Report has an error that has been caught. The error can be found in macroLogs.log","red")
    
-def reset():
+def reset(hiveCheck=False):
     setdat = loadsettings.load()
     yOffset = 0
     if setdat["new_ui"]: yOffset = 20
