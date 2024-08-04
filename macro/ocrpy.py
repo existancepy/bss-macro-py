@@ -100,7 +100,8 @@ def imToString(m):
     elif m == "chat":
         cap = screenshot(region=(ww*3//4, 0, ww//4,wh//3))
     elif m == "ebutton":
-        cap = screenshot(region=(ww//(2.65*xsm),ebY,ww//(21*xlm),wh//(17*ylm)))
+        #cap = screenshot(region=(ww//(2.65*xsm),ebY,ww//(21*xlm),wh//(17*ylm)))
+        cap = mssScreenshot(mw//2-200,20,400,125)
         result = ocrFunc(cap)
         try:
             result = sorted(result, key = lambda x: x[1][1], reverse = True)
