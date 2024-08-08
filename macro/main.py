@@ -2024,7 +2024,7 @@ def getQuest(giver):
     keyboard.press(Key.down)
     time.sleep(0.05)
     keyboard.release(Key.down)
-    for _ in range(10):
+    for _ in range(17):
         keyboard.press(Key.page_up)
         time.sleep(0.02)
         keyboard.release(Key.page_up)
