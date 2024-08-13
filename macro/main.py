@@ -2184,6 +2184,7 @@ def getQuest(giver):
         return ["done"]
     
 def openSettings():
+    return
     savedat = loadRes()
     ww = savedat['ww']
     wh = savedat['wh']
@@ -5046,7 +5047,8 @@ if __name__ == "__main__":
         if setdat['enable_discord_bot']:
             discord_bot_proc.start()
         if setdat['haste_compensation']:
-            hastecompbg_proc.start()
+            #hastecompbg_proc.start()
+            pass
         
         vic_proc.start()
         try:
