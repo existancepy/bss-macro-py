@@ -5886,9 +5886,9 @@ if __name__ == "__main__":
     dropField.place(width=60,x = 245, y = 85,height=24)
     Tooltip(dropField, text = "The hotbar slot of the sprinkler")
 
-    checkbox = tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation, command = warnHasteComp)
-    checkbox.place(x=0, y = 120)
-    Tooltip(checkbox, text = "Requires UI Navigagtion to be enabled.\n\nConstantly reads the movespeed stat from the in-game settings to compensate for any of its changes.\nCan be inconsistent as it takes 1-3 seconds to detect.")
+    #checkbox = tkinter.Checkbutton(frame3, text="Enable Haste Compensation", variable=haste_compensation, command = warnHasteComp)
+    #checkbox.place(x=0, y = 120)
+    #Tooltip(checkbox, text = "Requires UI Navigagtion to be enabled.\n\nConstantly reads the movespeed stat from the in-game settings to compensate for any of its changes.\nCan be inconsistent as it takes 1-3 seconds to detect.")
     
     tkinter.Label(frame3, text = "Wait").place(x = 0, y = 155)
     convertwaittextbox = tkinter.Text(frame3, width = 4, height = 1, bg= wbgc)
