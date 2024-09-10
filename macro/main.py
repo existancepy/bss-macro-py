@@ -96,7 +96,7 @@ wh = ""
 mw, mh = pag.size()
 stop = 1
 setdat = loadsettings.load()
-macrov = "1.58.13"
+macrov = "1.58.14"
 planterInfo = loadsettings.planterInfo()
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -2113,14 +2113,10 @@ def getQuest(giver):
         " ":"",
         "wolves":"wolf",
         "blueberries": "blueberry",
+        "strawberries": "strawberry"
         "flowe": "flower",
         "bamboc": "bamboo",
         "bamcc": "bamboo"
-    }
-
-    feedSynonymDict = {
-        "strawberry": "strawberries",
-        "blueberry": "blueberries"
     }
     
     for i,e in enumerate(completeLines):
@@ -2137,9 +2133,6 @@ def getQuest(giver):
             elif a[0] == "kill" and "defeat" in e and a[2] in e:
                 add = True
             elif a[0] == "feed" and "feed" in e:
-                for k,v in feedSynonymDict.items():
-                    if a[2] == k and v in e: 
-                        a[2] = v
                 if a[2] in e:
                     a[1] = ''.join([m for m in e[e.find("feed"): e.find(a[2])] if m.isdigit()])
                     x = "_".join(a)
