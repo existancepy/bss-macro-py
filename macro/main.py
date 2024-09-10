@@ -2113,7 +2113,7 @@ def getQuest(giver):
         " ":"",
         "wolves":"wolf",
         "blueberries": "blueberry",
-        "strawberries": "strawberry"
+        "strawberries": "strawberry",
         "flowe": "flower",
         "bamboc": "bamboo",
         "bamcc": "bamboo"
