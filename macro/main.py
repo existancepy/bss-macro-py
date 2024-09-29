@@ -6023,7 +6023,7 @@ if __name__ == "__main__":
     #Root
     ttk.Button(root, text = "Start", command = startGo, width = 7 ).place(x=10,y=420)
     ttk.Button(root, text = "Update",command = updateFiles, width = 9,).place(x=150,y=420)
-    ttk.Button(root, text = "Experimental update",command = expu, width = 16,).place(x=300,y=420)
+    #ttk.Button(root, text = "Experimental update",command = expu, width = 16,).place(x=300,y=420)
     ttk.Label(root, text = "version {}".format(macrov)).place(x = 680, y = 440)
 
     disablews_one()
