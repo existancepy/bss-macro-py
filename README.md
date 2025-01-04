@@ -2,7 +2,7 @@
 
 Made and tested on mac, currently untested for windows/linux.
 
-
+## **This version of the macro (v1) is no longer under active development. I am currently working on a new version, v2: https://github.com/existancepy/bss-macro-py-experimental**
 
 ## Features
 
