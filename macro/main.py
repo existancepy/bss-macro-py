@@ -5908,9 +5908,9 @@ if __name__ == "__main__":
     sendss = tkinter.Checkbutton(frame7, text="Send screenshots", variable=send_screenshot)
     sendss.place(x=200, y = 15)
     Tooltip(sendss, text = "Sends screenshots along with the status messages.")
-    sendhr = tkinter.Checkbutton(frame7, text="Hourly report", variable=hourly_report)
-    sendhr.place(x=350, y = 15)
-    Tooltip(sendhr, text = "Sends a hourly report at the start of every hour")
+    # sendhr = tkinter.Checkbutton(frame7, text="Hourly report", variable=hourly_report)
+    # sendhr.place(x=350, y = 15)
+    # Tooltip(sendhr, text = "Sends a hourly report at the start of every hour")
     urltextbox.place(x = 620, y=17)
     
     tkinter.Label(frame7, text = "Private Server Link (optional)").place(x = 0, y = 85)
