@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hourly Report</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
+
+            .canvas1{
+                height: 38vh;
+                max-height: 38vh;
+            }
+
+            #task-times-legend{
+                display: flex;
+                flex-direction: column;
+                gap: 0.4rem;
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            #planter-stats{
+                display: flex; 
+                justify-content: space-between;
+            }
+
+            .planter-container{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-top: 2rem;
+            }
+
+            .planter-container .planter-img{
+                width: 4rem;
+            }
+
+            .planter-container .field{
+                font-size: 1.1rem;
+                margin-top: 1rem;
+                white-space: nowrap;
+                display:flex; 
+                align-items: center; 
+                gap: 0.4rem;
+            }
+
+            .planter-container .time{
+                font-size: 1.1rem;
+                margin-top: 0.5rem;
+            }
+
+            .buff-bg{
+                height: 4rem; 
+                width: 4rem; 
+                background-position: center; 
+                background-size: cover; 
+                background-repeat: no-repeat; 
+                display: flex; 
+                align-items: end; 
+                justify-content: end;
+                margin-right: 0.2rem;
+                text-shadow: -1px 0 #000, 0 1px #000, 0 -1px #000, 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
+                font-size: 1.1rem;
+            }
+
+            .buff-bg.inactive{
+                background-color: rgba(0,0,0,0.4);
+                background-blend-mode: darken;
+            }
+
+            .buff-2-bg{
+                height: 3.8rem; 
+                width: 3.8rem;
+            }
+
+            .buff-2-bg.inactive{
+                opacity: 0.6;
+            }
+
+            .buff-2-text{
+                position: absolute; 
+                bottom: 0.05rem; 
+                right: 0.1rem; 
+                text-shadow: -1px 0 #000, 0 1px #000, 0 -1px #000, 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000; 
+                font-size: 1rem;
+            }
+            
+            /*Easy chart CSS*/
+            .chart {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                font-size: 0.95rem;
+            }
+            .chart canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+            
+            /*nectar container*/
+            .nectar-container{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nectar-container img{
+                margin-top: 0.9rem;
+                width: 1.5rem;
+            }
+
+            .buff-uptime-container img{
+                width: 3rem;
+                height: 3rem;
+            }
+
+            .buff-uptime-container .label{
+                display: flex;
+                gap: 1rem;
+                font-size: 1rem;
+                align-items: center;
+                margin-bottom: 0.5rem;
+            }
+        </style>
+    </head>
+    <body style="background-color: #0E0F13; color: #FFFFFF; display: flex; justify-content: space-between;">
+        <div style="padding: 1.6rem 3rem 0 2.5rem; flex-grow: 1; height: 96vh; display: flex; flex-direction: column;">
+            <div style="font-size:1.6rem; margin-top: 1rem;">
+                    <h2 class="inter-bold" style="margin-bottom: 2rem; display: inline-block;">Backpack</h2>
+                    <div class="canvas1">
+                        <canvas id="backpackChart"></canvas>
+                    </div>
+                <!-- <div style="flex-grow: 1; margin-left: 6rem;">
+                    <h2 class="inter-bold" style="margin-bottom: 1rem; display: inline-block;">Task Times</h2>
+                    <div id="task-times-legend" class="inter-semibold">
+                    </div>
+                    <div style="height: calc(38vh - 2rem * 4.5);">
+                        <canvas id="taskTimesChart"></canvas>
+                    </div>
+                </div> -->
+            </div>
+            <div style="font-size:1.6rem; margin-top: 3rem;">
+                <h2 class="inter-bold" style="margin-bottom: 1rem; display: inline-block;">Buff Uptime</h2>
+                <div class="buff-uptime-container">
+                    <div class="label inter-semibold">
+                        <img src="assets/boost_buff.png">
+                        <div style="display: flex; flex-direction: column; gap: 0.1rem;">
+                            <p style="color: #56a4e4;">-blue-boost-avg</p>
+                            <p style="color: #e46156;">-red-boost-avg</p>
+                            <p>-white-boost-avg</p>
+                        </div>
+                    </div>
+                    <div class="canvas2">
+                        <canvas id="boostBuffChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <aside style="background-color: #17191D; width: 25%; height: 100vh; box-sizing:border-box; padding-left: 2rem; padding-right: 1.5rem;">
+            <div id="planter-section">
+                <h3 class="inter-semibold title">Planters</h3>
+                <div id = "planter-stats">
+                </div>
+            </div>
+            <h3 class="inter-semibold title">Buffs</h3>
+            <div id = "buffs" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.2rem; width: 100%;">
+            </div>
+            <h3 class="inter-semibold title">Nectars</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.2rem; width: 100%;">
+                <div id="comforting-chart" class="nectar-container">
+                    <div class="chart inter-medium"></div>
+                    <img src="assets/comforting.png">
+                </div>
+                <div id = "invigorating-chart" class="nectar-container">
+                    <div class="chart inter-medium"></div>
+                    <img src="assets/invigorating.png">
+                </div>
+                <div id = "motivating-chart" class="nectar-container">
+                    <div class="chart inter-medium"></div>
+                    <img src="assets/motivating.png">
+                </div>
+                <div id = "refreshing-chart" class="nectar-container">
+                    <div class="chart inter-medium"></div>
+                    <img src="assets/refreshing.png">
+                </div>
+                <div id = "satisfying-chart" class="nectar-container">
+                    <div class="chart inter-medium"></div>
+                    <div style="width: 1.5rem; display: flex; align-items: center; height: 2.8rem;"><img src="assets/satisfying.png"></div>
+                </div>
+            </div>
+        </aside>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <script>
+        var backpackPerMin = []
+        for(let i = backpackPerMin.length; i < 60; i++){
+            backpackPerMin.unshift(0)
+        }
+
+        function getBackpackGradient(context, border){
+            const gradientData = {
+                0: '#41ff80',
+                0.6: '#C9A324',
+                0.9: '#ff4154'
+            }
+            if (!border){
+                Object.keys(gradientData).forEach((k) => {
+                    gradientData[k] += '66'
+                })
+            }
+            const chart = context.chart
+            const {ctx, chartArea} = chart
+
+            if (!chartArea) {
+            // This case happens on initial chart load
+            return;
+            }
+            const chartWidth = chartArea.right - chartArea.left
+            const chartHeight = chartArea.bottom - chartArea.top
+            width = chartWidth
+            height = chartHeight
+            gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+            for (const [k,v] of Object.entries(gradientData)) {
+                gradient.addColorStop(k,v)    
+            }
+            return gradient
+        }
+        new Chart(document.getElementById('backpackChart'), {
+          type: 'line',
+          data: {
+            labels: hourArray,
+            datasets: [{
+                data: backpackPerMin,
+                fill: false,
+                borderColor: (context => getBackpackGradient(context, true)),
+                tension: 0.3,
+                fill: {
+                    target: 'origin',
+                    above: (context => getBackpackGradient(context, false))
+                }
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                grid: {
+                    color: "#1F1F20"
+                },
+                ticks: {
+                    maxTicksLimit: 6,
+                    autoSkip: false,
+                },
+                min: 0,
+                max: 100,
+              },
+              x: {
+                ticks: {
+                    callback: function(value, index, values) {
+                        if (value == 60) return `${leadingZero(hourNum+1)}:00`
+                        if (!(value%10)) return `${hour}:${leadingZero(value)}`
+                    }
+                }
+              }
+            },
+            elements: {
+                point: {
+                    pointStyle: false,
+                }
+            },
+            plugins:{
+                legend: {
+                    display: false
+                }
+            },
+          }
+        })
+
+        function convertMins(time){
+            const minutes = Math.floor(time / 60)
+            const seconds = Math.floor(time - minutes * 60)
+            return `${minutes}m ${seconds}s`
+        }
+
+        // const taskTimesColors = ["#A909F9","#C95EFF","#DFA0FF","#EDC9FF"]
+        // const tasks = ["Gathering", "Converting", "Bug Runs", "Misc"]
+        // const taskTimes = []
+        // const taskLegendEle = document.getElementById("task-times-legend")
+        // for (let i = 0; i < taskTimes.length; i++){
+        //     taskLegendEle.innerHTML += `
+        //     <div style="display: flex; align-items: center;">
+        //         <div style="height: 1rem; aspect-ratio: 1/1; background-color: ${taskTimesColors[i]}; margin-right: 0.9rem;"></div>
+        //         ${tasks[i]}:<div style="margin-left:1rem">${convertMins(taskTimes[i])}</div>
+        //     </div>
+        //     `
+        // }
+        // new Chart(document.getElementById('taskTimesChart'), {
+        //     type: 'doughnut',
+        //     data: {
+        //         labels: tasks,
+        //         datasets: [
+        //             {
+        //                 data: taskTimes,
+        //                 backgroundColor: taskTimesColors,
+        //                 borderWidth: 0
+        //             }
+        //         ]
+        //     },
+        //     options: {
+        //         responsive: true,
+        //         maintainAspectRatio: false,
+        //         plugins:{
+        //             legend: {
+        //                 display: false
+        //             },
+        //         },
+        //         cutout: "65%"
+        //     }
+        // })
+
+        //planters
+        function secondsToMinsAndHours(time){
+            if (time < 0) return "Ready!"
+            const hours = Math.floor(time / 3600)
+            const minutes = Math.floor((time - hours*3600)/60)
+            return `${hours}h ${minutes}m`
+        }
+        function toTitleCase(str) {
+            return str.replace(
+                /\w\S*/g,
+                text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+            )
+        }
+        const fieldNectarIcons = {
+            sunflower: "satisfying",
+            dandelion: "comforting",
+            mushroom: "motivating",
+            blue_flower: "refreshing",
+            clover: "invigorating",
+            strawberry: "refreshing",
+            spider: "motivating",
+            bamboo: "comforting",
+            pineapple: "satisfying",
+            stump: "motivating",
+            cactus: "invigorating",
+            pumpkin: "satisfying",
+            pine_tree: "comforting",
+            rose: "motivating",
+            mountain_top: "invigorating",
+            pepper: "invigorating",
+            coconut: "refreshing"
+        }
+        const planterStatParent = document.getElementById("planter-stats")
+        const planterNames = []
+        const planterTimes = []
+        const planterFields = []
+        if (planterNames.length){
+            document.getElementById("planter-section").style.display = "block"
+        }else{
+            document.getElementById("planter-section").style.display = "none"
+        }
+        for(let i=0; i < planterNames.length; i++){
+            const imgPath = `assets/${planterNames[i].replaceAll(" ", "_")}_planter.png`
+            const nectarPath = `assets/${fieldNectarIcons[planterFields[i].replaceAll(" ", "_")]}.png`
+            planterStatParent.innerHTML += `
+                <div class="planter-container">
+                    <img src="${imgPath}" class="planter-img">
+                    <div class = "field">
+                        <div class="inter-semibold">${toTitleCase(planterFields[i])}</div>
+                        <img style="height:1rem" src="${nectarPath}">
+                    </div>
+                    <div class="inter-semibold time">${secondsToMinsAndHours(planterTimes[i])}</div>
+                </div>
+            `
+        }
+
+        const buffParent = document.getElementById("buffs")
+        const buffNames = []
+        const buffValues = []
+        //const buffNames = ['tabby_love', 'polar_power', 'wealth_clock', 'bloat', 'blessing']
+        //const buffValues = ['1000', '263', '0', '5.98', '37']
+
+        for (let i=0; i < buffNames.length; i++){
+            //buffParent.innerHTML += `<div style="background-image: url(assets/${buffNames[i]}_buff.png);" class="buff-bg inter-semibold ${buffValues[i] == "0" ? "inactive" : ""}">x${buffValues[i]}</div>`
+            buffParent.innerHTML += `
+                <div style="position: relative;">
+                    <img src="assets/${buffNames[i]}_buff.png" class=" buff-2-bg ${buffValues[i] == "0" ? "inactive" : ""}">
+                    <div class="inter-semibold buff-2-text">x${buffValues[i]}</div>
+                </div>
+                `
+        }
+
+        //the source code for easy pie chart
+        //https://github.com/rendro/easy-pie-chart
+    /**!
+     * easy-pie-chart
+     * Lightweight plugin to render simple, animated and retina optimized pie charts
+     *
+     * @license 
+     * @author Robert Fleischmann <rendro87@gmail.com> (http://robert-fleischmann.de)
+     * @version 2.1.7
+     **/
+
+    (function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module unless amdModuleId is set
+        define([], function () {
+        return (root['EasyPieChart'] = factory());
+        });
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        root['EasyPieChart'] = factory();
+    }
+    }(this, function () {
+
+    /**
+     * Renderer to render the chart on a canvas object
+     * @param {DOMElement} el      DOM element to host the canvas (root of the plugin)
+     * @param {object}     options options object of the plugin
+     */
+    var CanvasRenderer = function(el, options) {
+        var cachedBackground;
+        var canvas = document.createElement('canvas');
+
+        el.appendChild(canvas);
+
+        if (typeof(G_vmlCanvasManager) === 'object') {
+            G_vmlCanvasManager.initElement(canvas);
+        }
+
+        var ctx = canvas.getContext('2d');
+
+        canvas.width = canvas.height = options.size;
+
+        // canvas on retina devices
+        var scaleBy = 1;
+        if (window.devicePixelRatio > 1) {
+            scaleBy = window.devicePixelRatio;
+            canvas.style.width = canvas.style.height = [options.size, 'px'].join('');
+            canvas.width = canvas.height = options.size * scaleBy;
+            ctx.scale(scaleBy, scaleBy);
+        }
+
+        // move 0,0 coordinates to the center
+        ctx.translate(options.size / 2, options.size / 2);
+
+        // rotate canvas -90deg
+        ctx.rotate((-1 / 2 + options.rotate / 180) * Math.PI);
+
+        var radius = (options.size - options.lineWidth) / 2;
+        if (options.scaleColor && options.scaleLength) {
+            radius -= options.scaleLength + 2; // 2 is the distance between scale and bar
+        }
+
+        // IE polyfill for Date
+        Date.now = Date.now || function() {
+            return +(new Date());
+        };
+
+        /**
+         * Draw a circle around the center of the canvas
+         * @param {strong} color     Valid CSS color string
+         * @param {number} lineWidth Width of the line in px
+         * @param {number} percent   Percentage to draw (float between -1 and 1)
+         */
+        var drawCircle = function(color, lineWidth, percent) {
+            percent = Math.min(Math.max(-1, percent || 0), 1);
+            var isNegative = percent <= 0 ? true : false;
+
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2 * percent, isNegative);
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+
+            ctx.stroke();
+        };
+
+        /**
+         * Draw the scale of the chart
+         */
+        var drawScale = function() {
+            var offset;
+            var length;
+
+            ctx.lineWidth = 1;
+            ctx.fillStyle = options.scaleColor;
+
+            ctx.save();
+            for (var i = 24; i > 0; --i) {
+                if (i % 6 === 0) {
+                    length = options.scaleLength;
+                    offset = 0;
+                } else {
+                    length = options.scaleLength * 0.6;
+                    offset = options.scaleLength - length;
+                }
+                ctx.fillRect(-options.size/2 + offset, 0, length, 1);
+                ctx.rotate(Math.PI / 12);
+            }
+            ctx.restore();
+        };
+
+        /**
+         * Request animation frame wrapper with polyfill
+         * @return {function} Request animation frame method or timeout fallback
+         */
+        var reqAnimationFrame = (function() {
+            return  window.requestAnimationFrame ||
+                    window.webkitRequestAnimationFrame ||
+                    window.mozRequestAnimationFrame ||
+                    function(callback) {
+                        window.setTimeout(callback, 1000 / 60);
+                    };
+        }());
+
+        /**
+         * Draw the background of the plugin including the scale and the track
+         */
+        var drawBackground = function() {
+            if(options.scaleColor) drawScale();
+            if(options.trackColor) drawCircle(options.trackColor, options.trackWidth || options.lineWidth, 1);
+        };
+
+    /**
+        * Canvas accessor
+    */
+    this.getCanvas = function() {
+        return canvas;
+    };
+
+    /**
+        * Canvas 2D context 'ctx' accessor
+    */
+    this.getCtx = function() {
+        return ctx;
+    };
+
+        /**
+         * Clear the complete canvas
+         */
+        this.clear = function() {
+            ctx.clearRect(options.size / -2, options.size / -2, options.size, options.size);
+        };
+
+        /**
+         * Draw the complete chart
+         * @param {number} percent Percent shown by the chart between -100 and 100
+         */
+        this.draw = function(percent) {
+            // do we need to render a background
+            if (!!options.scaleColor || !!options.trackColor) {
+                // getImageData and putImageData are supported
+                if (ctx.getImageData && ctx.putImageData) {
+                    if (!cachedBackground) {
+                        drawBackground();
+                        cachedBackground = ctx.getImageData(0, 0, options.size * scaleBy, options.size * scaleBy);
+                    } else {
+                        ctx.putImageData(cachedBackground, 0, 0);
+                    }
+                } else {
+                    this.clear();
+                    drawBackground();
+                }
+            } else {
+                this.clear();
+            }
+
+            ctx.lineCap = options.lineCap;
+
+            // if barcolor is a function execute it and pass the percent as a value
+            var color;
+            if (typeof(options.barColor) === 'function') {
+                color = options.barColor(percent);
+            } else {
+                color = options.barColor;
+            }
+
+            // draw bar
+            drawCircle(color, options.lineWidth, percent / 100);
+        }.bind(this);
+
+        /**
+         * Animate from some percent to some other percentage
+         * @param {number} from Starting percentage
+         * @param {number} to   Final percentage
+         */
+        this.animate = function(from, to) {
+            var startTime = Date.now();
+            options.onStart(from, to);
+            var animation = function() {
+                var process = Math.min(Date.now() - startTime, options.animate.duration);
+                var currentValue = options.easing(this, process, from, to - from, options.animate.duration);
+                this.draw(currentValue);
+                options.onStep(from, to, currentValue);
+                if (process >= options.animate.duration) {
+                    options.onStop(from, to);
+                } else {
+                    reqAnimationFrame(animation);
+                }
+            }.bind(this);
+
+            reqAnimationFrame(animation);
+        }.bind(this);
+    };
+
+    var EasyPieChart = function(el, opts) {
+        var defaultOptions = {
+            barColor: '#ef1e25',
+            trackColor: '#f9f9f9',
+            scaleColor: '#dfe0e0',
+            scaleLength: 5,
+            lineCap: 'round',
+            lineWidth: 3,
+            trackWidth: undefined,
+            size: 110,
+            rotate: 0,
+            animate: {
+                duration: 1000,
+                enabled: true
+            },
+            easing: function (x, t, b, c, d) { // more can be found here: http://gsgd.co.uk/sandbox/jquery/easing/
+                t = t / (d/2);
+                if (t < 1) {
+                    return c / 2 * t * t + b;
+                }
+                return -c/2 * ((--t)*(t-2) - 1) + b;
+            },
+            onStart: function(from, to) {
+                return;
+            },
+            onStep: function(from, to, currentValue) {
+                return;
+            },
+            onStop: function(from, to) {
+                return;
+            }
+        };
+
+        // detect present renderer
+        if (typeof(CanvasRenderer) !== 'undefined') {
+            defaultOptions.renderer = CanvasRenderer;
+        } else if (typeof(SVGRenderer) !== 'undefined') {
+            defaultOptions.renderer = SVGRenderer;
+        } else {
+            throw new Error('Please load either the SVG- or the CanvasRenderer');
+        }
+
+        var options = {};
+        var currentValue = 0;
+
+        /**
+         * Initialize the plugin by creating the options object and initialize rendering
+         */
+        var init = function() {
+            this.el = el;
+            this.options = options;
+
+            // merge user options into default options
+            for (var i in defaultOptions) {
+                if (defaultOptions.hasOwnProperty(i)) {
+                    options[i] = opts && typeof(opts[i]) !== 'undefined' ? opts[i] : defaultOptions[i];
+                    if (typeof(options[i]) === 'function') {
+                        options[i] = options[i].bind(this);
+                    }
+                }
+            }
+
+            // check for jQuery easing
+            if (typeof(options.easing) === 'string' && typeof(jQuery) !== 'undefined' && jQuery.isFunction(jQuery.easing[options.easing])) {
+                options.easing = jQuery.easing[options.easing];
+            } else {
+                options.easing = defaultOptions.easing;
+            }
+
+            // process earlier animate option to avoid bc breaks
+            if (typeof(options.animate) === 'number') {
+                options.animate = {
+                    duration: options.animate,
+                    enabled: true
+                };
+            }
+
+            if (typeof(options.animate) === 'boolean' && !options.animate) {
+                options.animate = {
+                    duration: 1000,
+                    enabled: options.animate
+                };
+            }
+
+            // create renderer
+            this.renderer = new options.renderer(el, options);
+
+            // initial draw
+            this.renderer.draw(currentValue);
+
+            // initial update
+            if (el.dataset && el.dataset.percent) {
+                this.update(parseFloat(el.dataset.percent));
+            } else if (el.getAttribute && el.getAttribute('data-percent')) {
+                this.update(parseFloat(el.getAttribute('data-percent')));
+            }
+        }.bind(this);
+
+        /**
+         * Update the value of the chart
+         * @param  {number} newValue Number between 0 and 100
+         * @return {object}          Instance of the plugin for method chaining
+         */
+        this.update = function(newValue) {
+            newValue = parseFloat(newValue);
+            if (options.animate.enabled) {
+                this.renderer.animate(currentValue, newValue);
+            } else {
+                this.renderer.draw(newValue);
+            }
+            currentValue = newValue;
+            return this;
+        }.bind(this);
+
+        /**
+         * Disable animation
+         * @return {object} Instance of the plugin for method chaining
+         */
+        this.disableAnimation = function() {
+            options.animate.enabled = false;
+            return this;
+        };
+
+        /**
+         * Enable animation
+         * @return {object} Instance of the plugin for method chaining
+         */
+        this.enableAnimation = function() {
+            options.animate.enabled = true;
+            return this;
+        };
+
+        init();
+    };
+
+    return EasyPieChart;
+
+    }));
+
+    const nectarValues = []
+    const nectars = ["comforting", "invigorating", "motivating", "refreshing", "satisfying"]
+    const nectarColors = ["#A5CFEA", "#EB786C", "#C2A6EC", "#A2EFA3", "#EFCDE0"]
+    const nectarChartSize = buffParent.offsetWidth/6
+    for(let i = 0; i < nectarValues.length; i++){
+        const nectarName = nectars[i]
+        const perc = nectarValues[i]
+        const parentElement = document.getElementById(`${nectarName}-chart`)
+        const element = parentElement.querySelector(".chart")
+        element.style.height = `${nectarChartSize}px`
+        element.style.width = `${nectarChartSize}px`
+        element.dataset.percent = perc
+        element.innerText = `${Math.round(perc)}%`
+        new EasyPieChart(element, {
+            scaleLength: false,
+            animate: false,
+            lineCap: "square",
+            lineWidth: 5,
+            size: nectarChartSize,
+            barColor: nectarColors[i],
+            trackColor: `${nectarColors[i]}80`
+        });
+    }
+
+    const blueBoostBuffData = []
+    const redBoostBuffData = []
+    const whiteBoostBuffData = []
+
+    makeStackableBuffChart(
+        document.getElementById("boostBuffChart"), 
+        [{
+            data: blueBoostBuffData,
+            fill: false,
+            borderColor: 'rgb(86,164,228)',
+            tension: 0.3,
+            fill: {
+                target: 'origin',
+                above: (context) => {
+                    const {ctx, chartArea} = context.chart
+                    let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+                    gradient.addColorStop(0, 'rgba(86,164,228,0)')
+                    gradient.addColorStop(1, 'rgba(86,164,228,0.4)')
+                    return gradient
+                }
+            }
+        },
+        {
+            data: redBoostBuffData,
+            fill: false,
+            borderColor: 'rgb(228,97,86)',
+            tension: 0.3,
+            fill: {
+                target: 'origin',
+                above: (context) => {
+                    const {ctx, chartArea} = context.chart
+                    let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+                    gradient.addColorStop(0, 'rgba(228,97,86,0)')
+                    gradient.addColorStop(1, 'rgba(228,97,86,0.4)')
+                    return gradient
+                }
+            }
+        },
+        {
+            data: whiteBoostBuffData,
+            fill: false,
+            borderColor: 'rgb(250,250,250)',
+            tension: 0.3,
+            fill: {
+                target: 'origin',
+                above: (context) => {
+                    const {ctx, chartArea} = context.chart
+                    let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+                    gradient.addColorStop(0, 'rgba(250,250,250,0)')
+                    gradient.addColorStop(1, 'rgba(250,250,250,0.4)')
+                    return gradient
+                }
+            }
+        }
+        ]
+        
+    )
+
+    </script>
+</html>

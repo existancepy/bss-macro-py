@@ -1,0 +1,254 @@
+<div class="poppins-regular standard-container sub-nav-bar" id = "boost-nav">
+    <div id = "boost-hotbar" class = "boost-tab-item">Hotbar</div>
+    <div id = "boost-buffs" class="boost-tab-item">Buffs</div>
+</div>
+<div style="display: flex; justify-content: center; width: 100%;">
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="boost-hotbar-tab">
+        <script>
+            const hotbarParent = document.getElementById("boost-hotbar-tab")
+            buildStandardContainer(hotbarParent,"Hotbar", "Use your hotbar slots",[])
+            const hotbar = document.getElementById("hotbar").parentElement
+            for (let i = 1; i <= 7; i++){
+                const html =  `
+                    ${i>1 ? '<div class="seperator" style="margin-bottom: 1rem;"></div>' : ""}
+                    <h3 class="poppins-semibold">Slot ${i}</h3>
+                    <table style="width: 70%;">
+                        <tr>
+                            <td>
+                                <h4 class="poppins-regular" style="margin-top:1rem">Use When:</h4>
+                                <div class="poppins-regular" style="font-size:0.9rem; color: #adb4bc">When to use the slot</div>
+                            </td>
+                            <td valign="top" style="padding-top: 0.8rem">
+                                ${buildInput(`hotbar${i}_use_when`, {name: "dropdown", data: ["Never", "Always", "Gathering", "Converting"], triggerFunction: saveProfileTriggerFunction})}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h4 class="poppins-regular" style="margin-top:1rem">Use every X secs/mins:</h4>
+                                <div class="poppins-regular" style="font-size:0.9rem; color: #adb4bc">How often the slot should be used</div>
+                            </td>
+                            <td valign="top" style="display:flex; gap: 0.5rem">
+                                ${buildInput(`hotbar${i}_use_every_value`, {name: "textbox", inputType: "float", triggerFunction: saveProfileTriggerFunction})}
+                                ${buildInput(`hotbar${i}_use_every_format`, {name: "dropdown", data: ["Secs", "Mins"], triggerFunction: saveProfileTriggerFunction, length: 5}).replace("0.6rem", "0.75rem")}
+                            </td>
+                        </tr>
+                    </table>
+                    `
+                hotbar.innerHTML += html
+            }
+
+        </script>
+    </div>
+
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="boost-buffs-tab">
+        <script>
+            const buffsParent = document.getElementById("boost-buffs-tab")
+            buildStandardContainer(buffsParent,"Field Boosters", "",[
+                {
+                    id: "gather_boosted",
+                    title: "Gather in boosted fields",
+                    desc: "Gather in fields boosted by the field boosters",
+                    type: {
+                        name: "checkbox",
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "boost_seperate",
+                    title: "Seperate boosts by X mins",
+                    desc: "Seperate the collection of field boosters by X mins",
+                    type: {
+                        name: "textbox",
+                        inputType: "int",
+                        inputLimit: 4,
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "blue_booster",
+                    title: "Blue Booster",
+                    desc: "Collect the blue field booster in the blue HQ",
+                    type: {
+                        name: "checkbox",
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "red_booster",
+                    title: "Red Booster",
+                    desc: "Collect the red field booster in the red HQ",
+                    type: {
+                        name: "checkbox",
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "mountain_booster",
+                    title: "Mountain Booster",
+                    desc: "Collect the white field booster at mountain top field",
+                    type: {
+                        name: "checkbox",
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+            ])
+            const diceIconsArray = toImgArray(diceIcons)
+            // buildStandardContainer(buffsParent,"Automatic Field Boost ⬆️ 🎲", "",[
+            //     {
+            //         id: "AFB-reset",
+            //         title: "Reset Dice and Glitter timings",
+            //         desc: "Resets the macro's tracking data on AFB ",
+            //         type: {
+            //             name: "button",
+            //             text: "Reset",
+            //             triggerFunction: "clearAFBData(this)"
+            //         }
+            //     },
+            //     {
+            //         id: "Auto_Field_Boost",
+            //         title: "AFB",
+            //         desc: "Enable Auto Field Boost <br> Recommend that other tasks are disabled",
+            //         type: {
+            //                 name: "checkbox",
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+
+            //     },
+            //     {
+            //         id: "AFB_wait",
+            //         title: "Wait",
+            //         desc: "How long the Macro waits to begin AFB after a gather interrupt",
+            //         type: {
+            //             name: "textbox",
+            //                 inputType: "int",
+            //                 inputLimit: 3,
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+
+            //     },
+            //     {
+            //         id: "AFB_attempts",
+            //         title: "Attempts",
+            //         desc: "Gives up after X attempts",
+            //         type: {
+            //             name: "textbox",
+            //                 inputType: "int",
+            //                 inputLimit: 3,
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_rebuff",
+            //         title: "Re-Buff",
+            //         desc: "Re-Buff every X mins <br> DO NOT set to 0",
+            //         type: {
+            //             name: "textbox",
+            //                 inputType: "float",
+            //                 inputLimit: 4,
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_field",
+            //         title: "Field",
+            //         desc: "Activate AFB for the following field",
+            //         type: {
+            //                 name: "dropdown",
+            //                 data: fields,
+            //                 length: 13,
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_dice",
+            //         title: "Field Dice",
+            //         desc: "Type of Field Dice to use",
+            //         type: {
+            //                 name: "dropdown",
+            //                 data: diceIconsArray,
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_slotD",
+            //         title: "Dice Slot",
+            //         desc: "Hotbar of dice <br> Set to 0 to find via inventory",
+            //         type: {
+            //                 name: "dropdown",
+            //                 data: [0,1,2,3,4,5,6,7],
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_glitter",
+            //         title: "Glitter",
+            //         desc: "Allow Glitter to maintain buff",
+            //         type: {
+            //                 name: "checkbox",
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_slotG",
+            //         title: "Glitter Slot",
+            //         desc: "Hotbar of Glitter <br> Set to 0 to find via inventory",
+            //         type: {
+            //                 name: "dropdown",
+            //                 data: [0,1,2,3,4,5,6,7],
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_limit_on",
+            //         title: "Enable Time Limit",
+            //         desc: "Enable to stop using AFB after a set amount of hours",
+            //         type: {
+            //                 name: "checkbox",
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            //     {
+            //         id: "AFB_limit",
+            //         title: "Time Limit Length",
+            //         desc: "Deactivate AFB after X hours",
+            //         type: {
+            //             name: "textbox",
+            //                 inputType: "float",
+            //                 inputLimit: 4,
+            //                 triggerFunction: saveProfileTriggerFunction
+            //             }
+            //     },
+            // ])
+            buildStandardContainer(buffsParent,"Sticker Stack <img src='./assets/icons/sticker_stack.png' style='margin-left:0.4rem; height: 1.3rem;'>", "",[
+                {
+                    id: "sticker_stack",
+                    title: "Enable Task",
+                    desc: "Activate the sticker stack",
+                    type: {
+                        name: "checkbox",
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "sticker_stack_item",
+                    title: "Item",
+                    desc: "Which item (sticker/ticket) the macro should use to activate the sticker stack.<br>Note: If sticker is selected, it is recommended to trade any valuable stickers to an alt account to prevent them from being used by the macro",
+                    type: {
+                        name: "dropdown",
+                        data: ["Sticker","Ticket","Sticker/Ticket"],
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "hive_skin",
+                    title: "Use Hive Skins",
+                    desc: "Use Hive Skins in the sticker stack",
+                    type: {
+                        name: "checkbox",
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+            ])
+        </script>
+    </div>
+</div>

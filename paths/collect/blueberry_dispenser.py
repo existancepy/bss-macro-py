@@ -1,0 +1,11 @@
+self.runPath("cannon_to_field/blue flower")
+for _ in range(2):
+    self.keyboard.press(".")
+self.keyboard.press("space")
+self.keyboard.walk("s",3)
+self.keyboard.walk("a",5)
+self.keyboard.walk("w",1.5)
+self.keyboard.walk('d',0.1)
+self.keyboard.press(",")
+self.keyboard.walk("w",7)
+self.keyboard.press(",")

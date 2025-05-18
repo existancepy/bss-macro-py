@@ -1,0 +1,239 @@
+<div class="poppins-regular standard-container sub-nav-bar" id = "kill-nav">
+    <div id = "kill-settings" class = "kill-tab-item">Settings</div>
+    <div id = "kill-regular" class="kill-tab-item">Regular</div>
+    <div id = "kill-boss" class = "kill-tab-item">Bosses</div>
+    <div id = "kill-misc" class = "kill-tab-item">Misc</div>
+</div>
+<div style="display: flex; justify-content: center; width: 100%;">
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="kill-settings-tab">
+        <script>
+            const settingsMobsParent = document.getElementById("kill-settings-tab")
+            buildStandardContainer(settingsMobsParent,"Respawn Time Modifiers", "",[
+                {
+                    id: "gifted_vicious",
+                    title: "Gifted Vicious Bee",
+                    desc: "Apply the 15% respawn time bonus from gifted vicious bee",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveGeneralTriggerFunction
+                        }
+                },
+                {
+                    id: "stick_bug_amulet",
+                    title: "Stick Bug Amulet",
+                    desc: "Apply the -X% Monster Respawn Time from stick bug amulet",
+                    type: {
+                        name: "textbox",
+                        inputType: "int",
+                        inputLimit: 2,
+                        triggerFunction: saveGeneralTriggerFunction,
+                        length: 8
+                        
+                    }
+                },
+                {
+                    id: "icicles_beequip",
+                    title: "Icicles Beequip",
+                    desc: "Apply the -X% Monster Respawn Time from the icicles beequip",
+                    type: {
+                        name: "textbox",
+                        inputType: "int",
+                        inputLimit: 2,
+                        triggerFunction: saveGeneralTriggerFunction,
+                        length: 8
+                        
+                    }
+                },
+                
+            ])
+        </script>
+    </div>
+
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="kill-regular-tab">
+        <script>
+            const regularMobsParent = document.getElementById("kill-regular-tab")
+            buildStandardContainer(regularMobsParent,"Regular Mobs 🐞", "",[
+                {
+                    id: "ladybug",
+                    title: "Ladybugs",
+                    desc: "Kill and loot ladybugs",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "rhinobeetle",
+                    title: "Rhino Beetles",
+                    desc: "Kill and loot rhino beetles",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "scorpion",
+                    title: "Scorpions",
+                    desc: "Kill and loot scoprions",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "mantis",
+                    title: "Mantises",
+                    desc: "Kill and loot mantises",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "spider",
+                    title: "Spider",
+                    desc: "Kill and loot the spider",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "werewolf",
+                    title: "Werewolf",
+                    desc: "Kill and loot the werewolf",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                
+            ])
+        </script>
+    </div>
+
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="kill-boss-tab">
+        <script>
+            const bossMobsParent = document.getElementById("kill-boss-tab")
+            buildStandardContainer(bossMobsParent,"Stinger Hunt 🌙", "",[
+                {
+                    id: "stinger_hunt",
+                    title: "Enable Task",
+                    desc: "Hunt and kill vicious bee when it is night",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "stinger_clover",
+                    title: "Clover",
+                    desc: "Search for vicious bee in clover field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "stinger_spider",
+                    title: "Spider",
+                    desc: "Search for vicious bee in spider field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "stinger_cactus",
+                    title: "Cactus",
+                    desc: "Search for vicious bee in cactus field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "stinger_rose",
+                    title: "Rose",
+                    desc: "Search for vicious bee in rose field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "stinger_mountain_top",
+                    title: "Mountain Top",
+                    desc: "Search for vicious bee in mountain top field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "stinger_pepper",
+                    title: "Pepper",
+                    desc: "Search for vicious bee in pepper field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+            ])
+
+            buildStandardContainer(bossMobsParent, "Stump Snail 🐌", "",[
+                {
+                    id: "stump_snail",
+                    title: "Enable Task",
+                    desc: "Kill stump snail",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "stump_snail_amulet",
+                    title: "Amulet",
+                    desc: "What to do with the stump snail amulet.<br><br><strong>Keep</strong> - select the 'keep old' option<br><strong>Replace</strong> - select the 'replace' option<br><strong>Stop</strong> - Do not select any option, stop the macro until the amulet is kept/replaced<br><strong>Wait for command</strong> - Do not select any option, stop the macro until it receives a command to keep or replace the amulet. (Requires a discord bot)",
+                    type: {
+                            name: "dropdown",
+                            data: ["Keep", "Replace", "Stop", "Wait for command"],
+                            triggerFunction: saveProfileTriggerFunction,
+                            length: 12
+                        }
+                },
+                
+            ])
+
+            buildStandardContainer(bossMobsParent, "Coconut Crab", "",[
+                {
+                    id: "coconut_crab",
+                    title: "Enable Task",
+                    desc: "Kill coconut crab. The macro's ability to kill it depends on your hive level, attack and lag",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                }
+                
+            ])
+        </script>
+    </div>
+
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="kill-misc-tab">
+        <script>
+            const miscMobsParent = document.getElementById("kill-misc-tab")
+            buildStandardContainer(miscMobsParent,"Ant Challenge 🎯", "",[
+                {
+                    id: "ant_challenge",
+                    title: "Enable Task",
+                    desc: "Complete ant challenges. Recommended only for quests. The macro will keep the ant amulet",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+            ])
+        </script>
+    </div>
+</div>

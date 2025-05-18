@@ -1,3 +1,0 @@
-[('blue clay', 'bamboo'), ('red clay', 'pepper'), ('tacky', 'cactus')]
-[]
-[]

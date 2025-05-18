@@ -1,0 +1,50 @@
+<div style="margin-left: auto; height: 10%; margin-top: 1.5rem; width: 18%; margin-right: 1rem;">
+    <input type="range" min="0" max="1" style="width: 100%;" class="slider" oninput="changePlanterMode()" id = "planters_mode">
+    <div style="display: flex; justify-content: space-between; width: 100%; font-size: 1.02rem;">
+        <div>Off</div>
+        <div>Manual</div>
+        <!--<div>Auto</div>-->
+    </div>
+</div>
+
+<div style="display: flex; justify-content: center; width: 100%; margin-top: 4rem;">
+    <div style="width: 80%; overflow-y: auto; height: 78vh; display: none;" id = "planters-manual" class="planter-tab">
+        <div class="poppins-medium standard-container" style="flex-direction: column; padding-top: 1rem; justify-content: unset;">
+            <h2 id="manual-planters">Manual Planters</h2>
+            <p style="font-weight:500; font-size:1rem;"></p>
+            <div class="seperator"></div>
+            
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%;">
+                <div style="width: 70%;">
+                    <label>Harvest Every X Hours</label>
+                    <p>How often the macro should collect each cycle of planters. 2-3 is recommended</p>
+                </div>
+                <input type="text" id="manual_planters_collect_every" style="width: 8rem; margin-top: 0.6rem;" class="poppins-regular textbox" data-input-type="float" data-input-limit="4" onkeypress="return textboxRestriction(this, event)" onchange="saveSetting(this, 'profile')">
+            </form> 
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top:1rem">
+                <div style="width: 70%;">
+                    <label>Harvest When Full</label>
+                    <p>Collect the planters when they are fully grown. Overrides the 'Harvest Every X Hours' setting</p>
+                </div>
+                <label class="checkbox-container" style="margin-top: 0.6rem;">
+                    <input type="checkbox" id="manual_planters_collect_full" onchange="saveSetting(this, 'profile')">
+                    <span class="checkmark"></span>
+                </label>
+            </form> 
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top:1rem">
+                <div style="width: 70%;">
+                    <label>Clear Planter Timers</label>
+                    <p>Resets the macro's tracking data for the planters</p>
+                </div>
+                <!--Use div instead of button to avoid triggering form reload. event.preventDefault would be better but this is getting loaded by jquery so its a hassle-->
+                <div id = "manual-planters-reset-btn" class="purple-button" onclick="clearManualPlantersData()" style="width: 5rem; display: flex; justify-content: center; padding: 0.3rem; cursor: pointer;">Reset</div>
+            </form> 
+        </div>
+        
+        <div class = "poppins-medium standard-container" style="flex-direction: column; padding-top: 1rem; justify-content: unset;" id = "manual-planters-cycles">
+            <h2>Planter Cycles</h2>
+            <p style = "font-weight:500; font-size:1rem;">The macro can place and collect up to 3 planters at once each cycle. Setting a field or planter as 'none' will make the macro ignore that slot</p>
+        </div>
+    </div>
+</div>
+

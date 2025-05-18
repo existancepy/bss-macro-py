@@ -1,0 +1,493 @@
+/*import font*/
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/*Responsive font sizes*/
+@media (min-width: 1200px) {
+    html {
+        font-size: 13.5px;
+    }
+}
+
+@media (max-width: 1200px) {
+    html {
+        font-size: 13.5px;
+    }
+}
+
+@media (max-width: 900px) {
+    html {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 700px) {
+    html {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 560px) {
+    html {
+        font-size: 8px;
+    }
+}
+
+/*Set variables here*/
+:root{
+    --active-text: #C5C3F7;
+    --active-img: invert(21%) sepia(32%) saturate(711%) hue-rotate(196deg) brightness(100%) contrast(94%);
+}
+
+/*remove pre-built css*/
+button{
+    all: unset;
+    cursor: pointer;
+}
+
+ul,h1,h2,h3,h4,a,p{
+    all: unset
+}
+
+input:focus{
+    outline: none;
+}
+
+select:focus{
+    outline: none;
+}
+
+/*setup classes for font types*/
+.poppins-regular {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+  
+.poppins-medium {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+}
+  
+.poppins-semibold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+}
+  
+.poppins-bold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.jost-regular{
+    font-family: "Jost", sans-serif; 
+    font-weight:400;
+}
+
+.jost-medium{
+    font-family: "Jost", sans-serif; 
+    font-weight: 500;
+}
+
+.exo-semibold{
+    font-family: "Exo", sans-serif; 
+    font-weight: 600
+}
+
+body{
+    background-color: #36393F;
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    color: #E8E8E8;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/*element styling*/
+
+#tabs-placeholder{
+    display: flex;
+}
+main{
+    display: flex;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.sidebar-item{
+    width: 80%;
+    height: 100%;
+    cursor: pointer;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1rem;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    height: min-content;
+}
+
+.sidebar-item img{
+    width: 40%;
+    object-fit: contain;
+    margin-bottom: 0.3rem;
+}
+
+.sidebar-item.active{
+    color: var(--active-text);
+    font-weight: 500;
+}
+
+.sidebar-item:hover{
+    color: var(--active-text);
+    font-weight: 500;
+}
+
+.sidebar-item:hover img{
+    filter: var(--active-img);
+}
+
+.sidebar-item.active img{
+    filter: var(--active-img);
+}
+
+.standard-container{
+    background-color: #2F3136; 
+    margin-top: 1rem; 
+    border: #21262D solid 1px; 
+    height: min-content; 
+    display: flex; 
+    justify-items: center;
+    padding: 0.6rem 1.3rem;
+    color: #d2d3d2;
+}
+
+.standard-container h2{
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;  
+}
+
+.standard-container label{
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;  
+    font-weight: 400;
+    margin-bottom: 0.1rem;
+}
+
+.standard-container h3{
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;  
+    font-weight: 400;
+    margin-bottom: 0.1rem;
+}
+
+.standard-container h4{
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;  
+    /*color: #b4bac2;*/
+}
+
+.standard-container p{
+    font-size: 0.95rem;
+    color: #adb4bc;
+    width: 100%;
+    font-weight: 400;
+}
+
+.standard-container .seperator{
+    height: 1.7px;
+    width: calc(100% + 0.7rem + 0.7rem);
+    background-color: #40444B;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-left: -0.7rem;
+}
+
+.standard-container table {
+    width: 100%;
+    border-collapse:separate;
+    border-spacing:0rem 1rem;
+
+}
+
+.purple-button{
+    border: #202225 solid 1px; 
+    font-size: 1rem; 
+    background-color: #7A77BB;  
+    padding: 0.4rem 1rem;
+    font-weight: 400;
+}
+
+.purple-button.active {
+    background-color: #36393F;
+}
+
+#task-list img{
+    height: 0.9rem;
+    margin-right: 0.3rem;
+}
+
+/*Custom scrollbar*/
+/*https://www.w3schools.com/howto/howto_css_custom_scrollbar.asp*/
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #686868; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}
+
+.log-msg{
+    display: flex; 
+    height: min-content;
+    align-items: center;
+    font-weight: 300;
+}
+
+.log-msg span {
+    height: 1.5rem; 
+    width: 0.2rem; 
+    margin-right: 0.8rem;
+}
+
+.credits a{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.credits a:hover {
+    color: #1898F4;
+}
+
+.sub-nav-bar{
+    width: 7rem; 
+    height: 100%;
+    margin-top: 0; 
+    font-size: 1.1rem; 
+    padding-top: 3rem; 
+    padding-left: 2rem; 
+    flex-direction: column; 
+    gap: 2rem;
+}
+
+.sub-nav-bar div.active{
+    color: var(--active-text);
+    font-weight: 500;
+}
+
+.sub-nav-bar div{
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    cursor: pointer;
+}
+
+/*https://css-tricks.com/snippets/css/css-triangle/*/
+.select-indicator{
+    width: 0; 
+    height: 0; 
+    border-top: 0.5rem solid transparent;
+    border-bottom: 0.5rem solid transparent;
+    border-left: 0.65rem solid white;
+    filter: var(--active-img);
+}
+
+/*Custom checkbox*/
+/*https://www.w3schools.com/howto/howto_css_custom_checkbox.asp*/
+.checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+  
+/* Hide the browser's default checkbox */
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+  
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1.25rem;
+    width: 1.25rem;
+    background-color: #3B3B3B;
+    border-radius: 3px;
+    border: 1.5px solid #858585;
+}
+  
+/* On mouse-over, add a grey background color */
+.checkbox-container:hover input ~ .checkmark {
+    border-color: #ACACAC;
+}
+  
+/* When the checkbox is checked, add a blue background */
+.checkbox-container input:checked ~ .checkmark {
+    background-color: #7A77BB;
+}
+  
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+  
+/* Show the checkmark when checked */
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+  
+/* Style the checkmark/indicator */
+.checkbox-container .checkmark:after {
+    left: 0.45rem;
+    top: 0.15rem;
+    width: 0.3rem;
+    height: 0.6rem;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+/*Dropdown input style*/
+select{
+    background: none;
+    color: #d2d3d2;
+    border: none;
+    border-bottom: 2px solid #7A77BB;
+    font-size: 1rem;
+}
+
+option{
+    background-color: #2F3136;
+    border-bottom: none;
+}
+
+/*Textbox input style*/
+.textbox{
+    background: none;
+    color: #d2d3d2;
+    border: none;
+    border-bottom: 2px solid #7A77BB;
+    font-size: 1rem;
+}
+
+.textbox:focus{
+    border-width: 3px;
+}
+
+/*Slider style*/
+.slider {
+    accent-color: #7A77BB;
+}
+
+/*Manual Planter styles*/
+.manual-planters-field, .manual-planters-planters{
+    width: 10rem;
+}
+
+.cycle-spacing{
+    display: flex; 
+    gap: 5rem; 
+    margin-left: 3rem;
+    margin-top: -0.7rem;
+    align-items: center;
+}
+
+.emoji-text{
+    display: flex;
+    align-items: center;
+}
+
+/*Custom dropdown*/
+.custom-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    --dd-font-size: 1rem
+}
+.custom-select .select-area{
+    background: none;
+    color: #d2d3d2;
+    border: none;
+    border-bottom: 2px solid #7A77BB; /*Customise the dropdown*/
+    font-size: var(--dd-font-size);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+.custom-select .select-menu-relative{
+    position: relative;
+}
+
+.custom-select .select-menu{
+    border: 1px solid light-dark(rgb(118, 118, 118), rgb(133, 133, 133)); /*Customise the dropdown menu border*/
+    background-color: #2F3136; /*Customise the dropdown menu background color*/
+    position: absolute;
+    width: 100%;
+    z-index: 999;
+    overflow-y: auto;
+    max-height: 40vh; /*Customise the max height of the dropdown menu*/
+}
+
+.option, .value{
+    display: flex;
+    align-items: center;
+}
+
+.custom-select .option{
+    padding: 3.5px 4px;
+}
+
+.custom-select .selected{
+    background-color: #3E74DF; /*Customise the highlight color of the options*/
+}
+
+.custom-select .chevron {
+    transform: rotate(90deg);
+}
+
+.custom-select img {
+    height: calc(var(--dd-font-size) * 1); /*Customise the height scaling of icons*/
+    margin: 0 calc(var(--dd-font-size) * 0.3); /*Customise the spacing of icons*/
+}

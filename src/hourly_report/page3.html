@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hourly Report</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
+            #task-times-legend{
+                display: flex;
+                flex-direction: column;
+                gap: 0.4rem;
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+        </style>
+    </head>
+    <body style="background-color: #0E0F13; color: #FFFFFF; display: flex; justify-content: space-between;">
+        <div style="padding: 1.6rem 3rem 0 2.5rem; flex-grow: 1; display: flex; flex-direction: column;">
+            <div style="font-size:1.6rem;">
+                <div class="buff-uptime-container" style="margin-top: 1rem;">
+                    <div class="label inter-semibold">
+                        <img src="assets/haste_buff.png">
+                        <p>-haste-avg</p>
+                    </div>
+                    <div class="canvas2">
+                        <canvas id="hasteBuffChart"></canvas>
+                    </div>
+                </div>
+                <div class="buff-uptime-container">
+                    <div class="label inter-semibold">
+                        <img src="assets/focus_buff.png">
+                        <p style="color: #22ff06;">-focus-avg</p>
+                    </div>
+                    <div class="canvas2">
+                        <canvas id="focusBuffChart"></canvas>
+                    </div>
+                </div>
+                <!-- <div class="buff-uptime-container">
+                    <div class="label inter-semibold">
+                        <img src="assets/bomb_combo_buff.png">
+                        <p>-bomb-combo-avg</p>
+                    </div>
+                    <div class="canvas2">
+                        <canvas id="bombComboBuffChart"></canvas>
+                    </div>
+                </div> -->
+            </div>
+            <!-- <div style="flex-grow: 1; margin-left: 6rem;">
+                <h2 class="inter-bold" style="margin-bottom: 1rem; display: inline-block;">Task Times</h2>
+                <div id="task-times-legend" class="inter-semibold">
+                </div>
+                <div style="height: calc(38vh - 2rem * 4.5);">
+                    <canvas id="taskTimesChart"></canvas>
+                </div>
+            </div> -->
+        </div>
+        <aside style="background-color: #17191D; width: 25%; box-sizing:border-box; padding-left: 2rem; padding-right: 1.5rem; height: 73vh;">
+        </aside>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <script>
+        
+        //haste
+        const hasteBuffData = []
+        makeStackableBuffChart(
+            document.getElementById("hasteBuffChart"), 
+            [{
+                data: hasteBuffData,
+                fill: false,
+                borderColor: 'rgb(230,230,230)',
+                tension: 0.3,
+                fill: {
+                    target: 'origin',
+                    above: (context) => {
+                        const {ctx, chartArea} = context.chart
+                        let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+                        gradient.addColorStop(0, 'rgba(230,230,230,0)')
+                        gradient.addColorStop(1, 'rgba(230,230,230,0.4)')
+                        return gradient
+                    }
+                }
+            }]
+        )
+        
+        //focus
+        const focusBuffData = []
+        makeStackableBuffChart(
+            document.getElementById("focusBuffChart"), 
+            [{
+                data: focusBuffData,
+                fill: false,
+                borderColor: 'rgb(34,255,6)',
+                tension: 0.3,
+                fill: {
+                    target: 'origin',
+                    above: (context) => {
+                        const {ctx, chartArea} = context.chart
+                        let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+                        gradient.addColorStop(0, 'rgba(34,255,6,0)')
+                        gradient.addColorStop(1, 'rgba(34,255,6,0.4)')
+                        return gradient
+                    }
+                }
+            }]
+        )
+
+    </script>
+</html>

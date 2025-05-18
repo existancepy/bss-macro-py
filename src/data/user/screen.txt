@@ -1,0 +1,7 @@
+display_type=retina
+screen_width=2880
+screen_height=1800
+y_multiplier=1
+x_multiplier=1
+y_length_multiplier=1
+x_length_multiplier=1

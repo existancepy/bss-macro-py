@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+.inter-bold {
+    font-family: 'Montserrat', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.inter-semibold {
+    font-family: 'Montserrat', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+}
+
+.inter-medium {
+    font-family: 'Montserrat', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.inter-regular {
+    font-family: 'Montserrat', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+}
+
+/*Responsive font sizes*/
+@media (min-width: 2000px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 2000px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 1200px) {
+    html {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 900px) {
+    html {
+        font-size: 9.5px;
+    }
+}
+
+@media (max-width: 700px) {
+    html {
+        font-size: 8px;
+    }
+}
+
+@media (max-width: 560px) {
+    html {
+        font-size: 7px;
+    }
+}
+
+h1, h2, h3, body, p{
+    all: unset;
+}
+
+#task-times-legend{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+aside .title{
+    font-size: 1.5rem; 
+    margin-top: 2.5rem; 
+    display: inline-block; 
+    margin-bottom: 0.5rem;
+}
+
+.aside-stat{
+    display: flex; 
+    align-items: center;
+    margin-top: 1.2rem;
+}
+
+.buff-uptime-container{
+    margin-top: 2rem;
+}
+
+.buff-uptime-container img{
+    width: 3rem;
+    height: 3rem;
+}
+
+.buff-uptime-container .label{
+    display: flex;
+    gap: 1rem;
+    font-size: 1.1rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.canvas2{
+    height: 25vh;
+    max-height: 25vh;
+}

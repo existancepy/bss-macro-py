@@ -1,0 +1,39 @@
+<div style="margin-right: 1rem; width: 40%; display: flex; flex-direction: column; justify-content: space-between; max-height: 93vh;">
+    <div style="height: 50%; display: flex; flex-direction: column;">
+        <div class="poppins-semibold standard-container">
+            <h2>Macro</h2>
+            <button class="purple-button" style="margin-left: auto;" id = "start-btn">Start [F1]</button>
+        </div>
+        <div class="poppins-semibold standard-container">
+            <h2>Update</h2>
+            <button class="purple-button" style="margin-left: auto;" id = "update-btn">Update</button>
+        </div>
+        <div class = "poppins-medium standard-container" style="display: flex; flex-direction: column; flex-grow: 1; height: 60%;">
+            <h2>Tasks</h2>
+            <div class="seperator"></div>
+            <div id = "task-list" style="width: 100%; flex-grow: 1; overflow-y: auto;">
+            </div>
+        </div>
+    </div>
+    <div class = "poppins-medium standard-container" style="height: 20%; display: flex; flex-direction: column; justify-self: end;">
+        <h2>Credits</h2>
+        <div class="seperator"></div>
+        <ul style="margin-left: 1rem;" class="credits">
+            <li>
+                GUI Inspiration: <a onclick="ahref('https://github.com/LmeSzinc/AzurLaneAutoScript')">AzurLaneAutoScript (ALAS)</a>
+            </li>
+            <li>
+                Macro Inspiration: <a onclick="ahref('https://github.com/NatroTeam/NatroMacro')">Natro Macro</a>, <a onclick="ahref('https://github.com/alaninnovates/bss-macro')">Stumpy Macro</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div style="margin-left: auto; flex-grow: 1; display: flex; flex-direction: column; max-width: 60%;">
+    <div class="poppins-semibold standard-container">
+        <h2>Logs (<span id = "log-type">Simple</span>)</h2>
+        <button class="purple-button active" style="margin-left: auto;" id = "log-btn">Detailed</button>
+    </div>
+    <div class="poppins-regular standard-container" style="flex-grow: 1; overflow-y: auto; flex-direction: column; gap: 0.2rem; display: flex; height:0" id = "logs">
+    </div>
+</div>

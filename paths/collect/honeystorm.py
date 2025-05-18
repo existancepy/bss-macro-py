@@ -1,0 +1,4 @@
+self.runPath("collect/stockings")
+self.keyboard.walk("a",1.25, False)
+self.keyboard.walk("s",1.5)
+self.keyboard.walk("d",0.45)

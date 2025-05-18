@@ -1,0 +1,16 @@
+self.keyboard.slowPress(",")
+self.keyboard.slowPress(",")
+self.keyboard.slowPress("e")
+time.sleep(0.8)
+self.keyboard.keyDown("w")
+self.keyboard.slowPress("space")
+self.keyboard.slowPress("space")
+sleep(2.6)
+self.keyboard.slowPress(".")
+self.keyboard.slowPress(".")
+sleep(3.55)
+self.keyboard.keyUp("w")
+self.keyboard.slowPress("space")
+sleep(0.8)
+
+    

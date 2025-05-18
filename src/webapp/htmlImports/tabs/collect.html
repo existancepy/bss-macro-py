@@ -1,0 +1,355 @@
+<div style="display: flex; justify-content: center; width: 100%;">
+    <div style="width: 65%; overflow-y: auto; height: 94vh;" id="collect">
+        <script>
+            const parentCollect = document.getElementById("collect")
+            buildStandardContainer(parentCollect,"Regular 🕓", "",[
+                {
+                    id: "wealth_clock",
+                    title: "Wealth Clock",
+                    desc: "Collect the wealth clock",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                    
+                },
+                {
+                    id: "blueberry_dispenser",
+                    title: "Blueberry Dispenser",
+                    desc: "Collect the blueberry dispenser in the blue HQ",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "strawberry_dispenser",
+                    title: "Strawberry Dispenser",
+                    desc: "Collect the strawberry dispenser in the red HQ",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "coconut_dispenser",
+                    title: "Coconut Dispenser",
+                    desc: "Collect the Coconut Dispenser in the Coconut Cave <br> Note: Coconut Crab can respawn at any time, be certain it can be collected",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "royal_jelly_dispenser",
+                    title: "(Free) Royal Jelly Dispenser",
+                    desc: "Collect the free royal jelly dispenser in the star hall",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "ant_pass_dispenser",
+                    title: "(Free) Ant Pass Dispenser",
+                    desc: "Collect the free ant pass dispenser",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    
+                    id: "treat_dispenser",
+                    title: "Treat Dispenser",
+                    desc: "Collect the treat dispenser in front the pro shop",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "glue_dispenser",
+                    title: "Glue Dispenser",
+                    desc: "Collect the glue dispenser in gummy bear's lair",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "honeystorm",
+                    title: "Honey Storm",
+                    desc: "Summon a Honey Storm",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+            ])
+
+            buildStandardContainer(parentCollect,"Sticker Printer 🖨️", "",[
+                {
+                    id: "sticker_printer",
+                    title: "Enable Task",
+                    desc: "Print stickers using the sticker printer at mountain top",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "sticker_printer_egg",
+                    title: "Egg",
+                    desc: "The type of egg to donate to the printer",
+                    type: {
+                        name: "dropdown",
+                        data: ["Basic", "Silver", "Gold", "Diamond", "Mythic"],
+                        triggerFunction: saveProfileTriggerFunction
+                        
+                    }
+                },
+            ])
+
+            buildStandardContainer(parentCollect,"Mondo Buff 🐣", "",[
+                {
+                    id: "mondo_buff",
+                    title: "Enable Task",
+                    desc: "Collect the mondo buff by doing some damage to mondo chick. Will not wait for it to die or collect its drops.<br>Note: The macro will only go to mondo in the first 10mins of the hour",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "mondo_buff_wait",
+                    title: "Damage Mondo for X mins",
+                    desc: "The duration to attack mondo chick for. ",
+                    type: {
+                        name: "textbox",
+                            inputType: "int",
+                            inputLimit: 3,
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "mondo_buff_loot",
+                    title: "Collect Loot From Mondo",
+                    desc: "Collect loot when mondo chick is defeated.<br>Ignores the 'Damage Mondo for X mins' setting ",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                id: "mondo_loot_times",
+                    title: "Loops",
+                    desc: "Requires 'Collect Loot From Mondo' active <br>How many loops while collecting loot<br>One loop is going up then down once.<br>1-2 is recommended",
+                    type: {
+                        name: "dropdown",
+                            data: [1,2,3,4,5],
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "mondo_collect_token",
+                    title: "Collect Tokens From Bees",
+                    desc: "Collect tokens during from bees by moving every few seconds. <br> Recommend if you don't have a Cub Buddy.<br>Note: Your avatar may move slightly and drift away from the wall.<br> It is recommend to have a animation that minimizes slight movement.",
+                    type: {
+                        name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "mondo_buff_interrupt_gathering",
+                    title: "Mondo Buff Interrupts gathering",
+                    desc: "If mondo respawns while gathering, stop and collect its buff",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                }
+            ])
+
+
+            buildStandardContainer(parentCollect,"Beesmas 🎅🏻", "",[
+                {
+                    id: "stockings",
+                    title: "Stockings",
+                    desc: "Collect the stockings near clover field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "feast",
+                    title: "Feast",
+                    desc: "Collect the stockings near polar bear",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "samovar",
+                    title: "Samovar",
+                    desc: "Collect the samovar outside dapper bear's shop",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "snow_machine",
+                    title: "Snow Machine",
+                    desc: "Collect the snow machine on top of blue HQ",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "lid_art",
+                    title: "Lid art",
+                    desc: "Collect the lid art near onett",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "candles",
+                    title: "Candles",
+                    desc: "Collect the candles next to the red HQ",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "wreath",
+                    title: "Honey Wreath",
+                    desc: "Collect the honey wreath near black bear",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+            ])
+
+            buildStandardContainer(parentCollect,"Memory Match 💭", "",[
+                {
+                    id: "memory_match",
+                    title: "Memory Match",
+                    desc: "Complete the memory match in front of pro shop",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "mega_memory_match",
+                    title: "Mega Memory Match",
+                    desc: "Complete the memory match inside the badge bearer guild",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "extreme_memory_match",
+                    title: "Extreme Memory Match",
+                    desc: "Complete the memory match near pepper field",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "winter_memory_match",
+                    title: "Winter Memory Match",
+                    desc: "Collect the memory match near honey bee",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                }
+            ])
+            buildStandardContainer(parentCollect,"Blender", "",[
+                {
+                    id: "blender_enable",
+                    title: "Enable Task",
+                    desc: "Craft and collect items from the blender",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "blender-reset",
+                    title: "Reset Blender Timers",
+                    desc: "Resets the macro's tracking data on blender items",
+                    type: {
+                        name: "button",
+                        text: "Reset",
+                        triggerFunction: "clearBlenderData(this)"
+                    }
+                }
+
+            ])
+            function blenderItemDropDownHTML(id){
+                return buildInput(id,{
+                    name: "dropdown",
+                    data: fieldNectarArray,
+                    triggerFunction: "saveSetting(this, 'profile')",   
+                })
+            }
+            const blenderItemsArray = toImgArray(blenderIcons)
+            const blenderParent = document.getElementById("blender").parentElement
+            for (let i = 1; i < 4; i++){
+                const blenderItemHTML = `
+                    <div class="seperator" style="margin-bottom: 1rem;"></div>
+                    <h3 class="poppins-semibold" style = "margin-bottom: 0.9rem;">Item ${i}</h3>
+                    <div style="display:flex; justify-content:space-between; align-items: flex-start; flex-wrap: wrap">
+                        <div style="display:flex; align-items: flex-end">
+                            <h4 class="poppins-regular" style = "margin-right: 0.7rem">Item:</h4>
+                            ${buildInput(`blender_item_${i}`,{
+                                name: "dropdown",
+                                data: blenderItemsArray,
+                                triggerFunction: "saveSetting(this, 'profile')",   
+                            })}
+                        </div>
+                        <div style="display:flex; align-items: flex-start;">
+                            <h4 class="poppins-regular" style = "margin-right: 0.7rem; margin-top: 0.7rem;">Quantity:</h4>
+                            <div>
+                                ${buildInput(`blender_quantity_${i}`, {name: "textbox", triggerFunction: "saveSetting(this, 'profile')", inputType: "int", length:7})}
+                                <div style="display:flex; margin-top: 0.3rem; width:100%; justify-content: space-between">
+                                    <div>
+                                        <h4 class="poppins-regular" style = "margin-top:0.5rem">Max:</h4>
+                                        <div class="poppins-regular" style="font-size:0.9rem; color: #adb4bc">Craft the<br>max quantity</div>
+                                    </div>
+                                    ${buildInput(`blender_quantity_max_${i}`, {name: "checkbox", triggerFunction: "saveSetting(this, 'profile')"})}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items: flex-start;">
+                            <h4 class="poppins-regular" style = "margin-right: 0.7rem; margin-top: 0.7rem;">Repeat:</h4>
+                            <div>
+                                ${buildInput(`blender_repeat_${i}`, {name: "textbox", triggerFunction: "saveSetting(this, 'profile')", inputType: "int", length:6})}
+                                <div style="display:flex; margin-top: 0.3rem; width:calc(100% + 1rem); justify-content: space-between">
+                                    <div>
+                                        <h4 class="poppins-regular" style = "margin-top:0.5rem">Inf:</h4>
+                                        <div class="poppins-regular" style="font-size:0.9rem; color: #adb4bc">Repeat<br>infinitely</div>
+                                    </div>
+                                    ${buildInput(`blender_repeat_inf_${i}`, {name: "checkbox", triggerFunction: "saveSetting(this, 'profile')"})}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ` 
+                blenderParent.innerHTML += blenderItemHTML
+            }
+       </script>
+    </div>
+</div>

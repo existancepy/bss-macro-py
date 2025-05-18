@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hourly Report</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body style="background-color: #0E0F13; color: #FFFFFF; display: flex; justify-content: space-between;">
+        <div style="padding: 1.6rem 3rem 0 2.5rem; flex-grow: 1; height: 96vh; display: flex; flex-direction: column;">
+            <div style="font-size:1.6rem;">
+                <div class="buff-uptime-container">
+                    <div class="label inter-semibold">
+                        <img src="assets/inspire_buff.png">
+                        <p style="color: #f4ef14;">-inspire-avg</p>
+                    </div>
+                    <div class="canvas2">
+                        <canvas id="inspireBuffChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- <div style="flex-grow: 1; margin-left: 6rem;">
+                <h2 class="inter-bold" style="margin-bottom: 1rem; display: inline-block;">Task Times</h2>
+                <div id="task-times-legend" class="inter-semibold">
+                </div>
+                <div style="height: calc(38vh - 2rem * 4.5);">
+                    <canvas id="taskTimesChart"></canvas>
+                </div>
+            </div> -->
+        </div>
+        </div>
+        <aside style="background-color: #17191D; width: 25%; height: 73vh; box-sizing:border-box; padding-left: 2rem; padding-right: 1.5rem;">
+        </aside>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <script>
+
+        //inspire
+        const inspireBuffData = []
+        makeStackableBuffChart(
+            document.getElementById("inspireBuffChart"), 
+            [{
+                data: inspireBuffData,
+                fill: false,
+                borderColor: 'rgb(244,239,20)',
+                tension: 0.3,
+                fill: {
+                    target: 'origin',
+                    above: (context) => {
+                        const {ctx, chartArea} = context.chart
+                        let gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+                        gradient.addColorStop(0, 'rgba(244,239,20,0)')
+                        gradient.addColorStop(1, 'rgba(244,239,20,0.4)')
+                        return gradient
+                    }
+                }
+            }]
+        )
+
+    </script>
+</html>

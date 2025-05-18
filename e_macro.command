@@ -27,7 +27,16 @@ if [ -d bin ]; then
    source ./bin/activate
    printf "activating virtual environment"
 fi
-cd macro
-python3.7 main.py
-python3.8 main.py
-python3.9 main.py
+
+runPython() {
+	if command -v $1 >/dev/null 2>&1; then
+		echo "Trying to run macro with $1"
+		$1 main.py
+	fi
+
+}
+
+cd src
+runPython python3.7
+runPython python3.8
+runPython python3.9

@@ -1,0 +1,101 @@
+<div class="poppins-regular standard-container sub-nav-bar">
+    <div id = "quests-settings" class = "quests-tab-item">Settings</div>
+    <div id = "quests-quests" class="quests-tab-item">Quests</div>
+</div>
+<div style="display: flex; justify-content: center; width: 100%;">
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="quests-settings-tab">
+        <script>
+            const questsSettingsParent = document.getElementById("quests-settings-tab")
+            buildStandardContainer(questsSettingsParent,"Override Gather Settings", "Override the gather settings in the gather tab when gathering for quests",[
+                {
+                    id: "quest_gather_mins",
+                    title: "Gather Until Mins",
+                    desc: "Override the 'Gather Until Mins' option. Set it to 0 to disable overriding",
+                    type: {
+                        name: "textbox",
+                        inputType: "float",
+                        inputLimit: 4,
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "quest_gather_return",
+                    title: "Return To Hive",
+                    desc: "Override the 'Return To Hive' option",
+                    type: {
+                        name: "dropdown",
+                        data: ["No Override", "💀 Reset","👟 Walk","🔄 Rejoin","🌱 Whirligig"],
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+            ])
+
+            buildStandardContainer(questsSettingsParent,"Goo Settings", "Decide how the macro wants to handle gathering goo",[
+                {
+                    id: "quest_use_gumdrops",
+                    title: "Use Gumdrops",
+                    desc: "Use gumdrops when gathering for goo quests",
+                    type: {
+                        name: "checkbox",
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+                {
+                    id: "quest_gumdrop_slot",
+                    title: "Gumdrop Slot",
+                    desc: "The hotbar slot of the gumdrops to use",
+                    type: {
+                        name: "dropdown",
+                        data: [1,2,3,4,5,6,7],
+                        triggerFunction: saveProfileTriggerFunction
+                    }
+                },
+            ])
+
+        </script>
+    </div>
+
+    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="quests-quests-tab">
+        <script>
+            const questsQuestsParent = document.getElementById("quests-quests-tab")
+            buildStandardContainer(questsQuestsParent,"Quests", "", [
+                {
+                    id: "polar_bear_quest",
+                    title: "Polar Bear",
+                    desc: "Complete Polar Bear's Quests",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "honey_bee_quest",
+                    title: "Honey Bee",
+                    desc: "Complete Honey Bee's Quests",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "bucko_bee_quest",
+                    title: "Bucko Bee",
+                    desc: "Complete Bucko Bee's Quests",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "riley_bee_quest",
+                    title: "Riley Bee",
+                    desc: "Complete Riley Bee's Quests",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+            ])
+        </script>
+    </div>
+</div>
