@@ -12,6 +12,7 @@ self.keyboard.keyUp("w")
 self.keyboard.slowPress("space")
 sleep(0.5)
 self.keyboard.walk("d",2.5)
+self.keyboard.walk("w",0.6)
 for _ in range(3):
     self.keyboard.keyDown("w")
     self.keyboard.slowPress('space')

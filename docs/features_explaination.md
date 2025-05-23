@@ -19,7 +19,7 @@ The gather tab allows you to enable up to 3 fields for the macro to gather in. T
 Use shift lock when gathering. The macro will toggle it on before gathering, then toggle it off afterwards.
 
 ### Field Drift Compensation
-The macro searches for the supreme saturator after each pattern and moves towards it. It does that by looking for the brightly-colored blue pixels that indicate the location of the saturator.
+The macro searches for the supreme saturator after each pattern and moves towards it. It does that by looking for the brightly-colored blue pixels that indicate the location of the saturator. However, this also means that it can be confused by bubbles
 
 ### Shape (aka pattern)
 This determines the pattern that the macro walks in when gathering. You can also import new patterns by adding the pattern's .py file in settings -> patterns
@@ -114,4 +114,75 @@ This tab is focused on killing mobs and bosses
 ### Settings
 This is where you can enter any respawn modifiers that you may have. The macro will account for them when calculating respawn times
 
+### Regular
+Choose regular mobs to kill (ladybug, werewolf, rhino beetle, etc)
+
+### Bosses
+Choose to kill vicious bee (stinger hunt), stump snail or coconut crab
+
+#### Stinger Hunt
+When the macro detects night, it will find and kill vicious bee. This action will interrupt gathering and converting. The macro visits the fields in the following order: Pepper -> Mountain Top -> Rose -> Cactus -> Spider -> Clover
+
+**How Night Detection works**
+Every 1 second, the macro will check the bottom half of the screen, where it tries to detect the color of the grass. If its dark green, then its night. If its light green, it is day. If the macro detects night 5 times in a row without detecting day at all, it will then assume it is night. 
+
+#### Stump Snail
+The macro goes to stump field, autoclicks and waits for the amulet popup.
+
+There are a few options on how the macro should handle the amulet
+- **Keep** -> select the 'keep old' option on the popup
+- **Replace** -> select the 'replace' option on the popup
+- **Stop** - Do not select any option, stop the macro until the amulet popup disappears (when the user manually selects to keep or replace)
+- **Wait for command** - Do not select any option, stop the macro until it receives a command to keep or replace the amulet via the discord bot
+
+#### Coconut Crab
+Goes to the coconut field and attempts to kill the coconut crab. Since the macro uses a hardcoded pattern to dodge the crab's attacks, defeating can be lag and rng dependent. Recommended for hives that can kill it relatively quickly.
+
+### Misc
+Enable Ant Challenge
+
+## 4. Boost
+
+### Hotbar
+Allows the user to set how often a hotbar slot should be activated and when
+
+### Buffs
+
+#### Field Boosters
+Collect field boosters
+
+- **Gather in the boosted fields** ->  If the macro should gather in the boosted fields. This action is high priority, so the macro will exclusively gather in the boosted field until the field boost is up.
+- **Seperate boosts by X mins** -> The time between the collection of field boosters. Eg, if this setting is set to 30mins, the macro will collect field boost 1, then collect field boost 2 30 mins later.
+
+#### Sticker Stack
+
+- **Item** -> Choose if the macro should use stickers or tickets to activate the sticker stack. 
+- **Use Hive Skins** -> Choose if the macro should use hive skins in the sticker stack 
+
+## 5. Planters
+
+### Manual
+
+**Tracking of Planters**
+The macro is able to "remember" which planters are placed and when they were placed, as it saves the state of planters. However, the growth time of the planters are calculated purely from the time that they are placed and does not consider the time spent in-game. This means, that if the macro places a planter down, and you stop it and leave the game for 2 hours, it will assume that the planter has 2 hours of growth time
+
+- **Harvest Every X Hours** -> How often the macro should harvest planters
+- **Harvest When Full** -> Collect the planters when they are fully grown. When this setting is enabled, the macro will ignore the 'Harvest Every X Hours' setting
+- **Use Hive Skins** -> Choose if the macro should use hive skins in the sticker stack 
+- **Clear Planter Timers** -> Clear the save state of planters, resetting to the 1st cycle. Use this if you’ve manually interacted with planters outside of the macro or if you want to restart the tracking cycle.
+
+#### Planter Cycles
+Within each cycle, the macro can place up to 3 planters. However, the macro treats each planter in a cycle individually, so it'll not wait for all planters in a cycle to be ready. As soon as a planter is ready, it'll be harvested and the corrresponding one in the next cycle will be placed. This means that at any given time, the active planters can be from different cycles.
+
+As soon as cycle 5 is reached, or there is no planter in the next cycle, the macro will loop back to cycle 1
+
+- **Gather in Planter Field** -> Gather in the same field as the specified planter until that planter is harvested. The gather settings used will be the same ones that are set in the gather tab.
+- **Glitter** -> Use Glitter when the placing the planter.
+
+## 6. Quests
+
+**How macro handles gathering for quests**
+
+
+### Settings
 

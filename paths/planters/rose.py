@@ -1,4 +1,4 @@
 global finalKey
-self.keyboard.multiWalk(["w", "d"], 4)
-self.keyboard.walk("d", 1.5)
-finalKey = ("s", 0.5)
+self.keyboard.multiWalk(["w", "d"], 5, False)
+self.keyboard.walk("d", 1.5, False)
+finalKey = ("s", 0.3)

@@ -29,8 +29,6 @@ if itemCoords is not None:
     self.keyboard.walk("w",0.15)
     self.keyboard.walk("a",0.3)
     time.sleep(0.3)
-    self.keyboard.press("space")
-    time.sleep(0.1)
     self.keyboard.walk("w",0.1)
     self.useItemInInventory(x=itemCoords[0], y=itemCoords[1])
     self.canDetectNight = False #dont let night be detected inside gummy bear's lair

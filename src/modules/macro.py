@@ -754,7 +754,7 @@ class macro:
 
         prevHash = None
         time.sleep(0.3)
-        for i in range(100):
+        for i in range(120):
             #screen = cv2.cvtColor(mssScreenshotNP(90, 90, 300-90, self.mh-180), cv2.COLOR_RGBA2GRAY)
             #max_loc = fastFeatureMatching(screen, itemImg)
             #max_val = 1 if max_loc else 0
@@ -842,9 +842,10 @@ class macro:
 
         mouse.moveTo(x, y)
         mouse.moveBy(10,15)
-        for _ in range(2):
+        for _ in range(3):
             mouse.click()
             time.sleep(0.1)
+            mouse.moveBy(0,15)
         self.clickYes()
         #close inventory
         self.toggleInventory("close")
@@ -1082,6 +1083,7 @@ class macro:
             self.keyboard.keyDown("d")
             time.sleep(0.5)
             self.keyboard.slowPress("space")
+            #os.system('osascript -e \'tell application "System Events" to key code 49\'')
             time.sleep(0.2)
             self.keyboard.keyDown("d")
             self.keyboard.walk("w",0.2)
@@ -1218,6 +1220,11 @@ class macro:
             self.keyboard.timeWait(2.9)
             self.keyboard.keyUp("d", False)
             self.keyboard.keyUp("w", False)
+            for _ in range(3):
+                time.sleep(0.4)
+                if self.isBesideE(["claim", "hive", "send", "trad", "has"]):
+                    break
+                self.keyboard.walk("w", 0.15)
 
             def isHiveAvailable():
                 return self.isBesideE(["claim", "hive"], ["send", "trade"], log=True)
@@ -1329,7 +1336,7 @@ class macro:
     
     def blueTextImageSearch(self, text, threshold=0.7):
         target = self.adjustImage("./images/blue", text)
-        return locateImageOnScreen(target, self.mw*3/4, self.mh*2/3, self.mw//4,self.mh//3, threshold)
+        return locateImageOnScreen(target, self.mw*3/4, self.mh*3/5, self.mw/4, self.mh-self.mh*3/5, threshold)
     #background thread for gather
     #check if mobs have been killed and reset their timings
     #check if player died
@@ -2331,11 +2338,18 @@ class macro:
                 st = time.time()
                 while time.time()-st < (finalKey[1]+1):
                     self.keyboard.walk(finalKey[0],0.25)
-                    if self.isBesideEImage("ebutton"): return True
-                return False
+                    if self.isBesideEImage("ebutton"): 
+                        return True
             else:
                 time.sleep(1)
-                return self.isBesideEImage("ebutton")
+                if self.isBesideEImage("ebutton"): 
+                    return True
+            #can't find it, try detecting and moving to it
+            self.moveToPlanter()
+            if self.isBesideE(["harvest", "planter"]):
+                return True
+            return False
+                
         else: #place, just walk there
             if finalKey is not None: self.keyboard.walk(finalKey[0], finalKey[1])
             return True
@@ -2373,19 +2387,24 @@ class macro:
             #place planter
             self.useItemInInventory(x=self.planterCoords[0], y=self.planterCoords[1])
             
-            #use glitter
-            if glitter: self.useItemInInventory("glitter")
-            
             #check if planter is placed
             time.sleep(0.5)
             placedPlanter = False
             for _ in range(20):
                 if self.blueTextImageSearch("planter"):
-                    self.logger.webhook("",f"Placed Planter: {planter.title()}", "dark brown", "screen")
                     placedPlanter = True
                     break
                 time.sleep(0.1)
-            if placedPlanter: break
+            #didnt detect the image, check for harvest planter popup
+            # time.sleep(1)
+            # if self.isBesideE(["harvest", "planter"], []):
+            #     placedPlanter = True
+                
+            if placedPlanter: 
+                self.logger.webhook("",f"Placed Planter: {planter.title()}", "dark brown", "screen")          
+                #use glitter
+                if glitter: self.useItemInInventory("glitter")
+                break
             self.logger.webhook("",f"Failed to Place Planter: {planter.title()}", "red", "screen")
             self.reset()
         else:
@@ -2403,10 +2422,100 @@ class macro:
         else:
             return self.setdat["manual_planters_collect_every"]*60*60 
 
+    #locate the planter's growth bar and move there
+    def moveToPlanter(self):
+        print("what")
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(2,2))
+        def getPlanterLocation():
+            screen = mssScreenshotNP(0,0,self.mw,self.mh)
+            screen = cv2.cvtColor(screen, cv2.COLOR_BGRA2BGR)
+            # #screen = cv2.cvtColor(screen, cv2.COLOR_BGR2HLS)
+            #screen = cv2.imread("b.png")
+            point = findColorObjectRGB(screen, (134, 213, 112), kernel=kernel, variance=2, draw=False)
+            if not point:
+                point = findColorObjectRGB(screen, (31, 231, 68), kernel=kernel, variance=2)
+            
+            if point and self.display_type == "retina":
+                point = [x//2 for x in point] 
+            return point
+
+        winUp, winDown = self.mh/3.1, self.mh/2.9
+        winLeft, winRight = self.mw/2.14, self.mw/1.88
+
+        hmove, vmove = "", ""
+        for _ in range(10):
+            location = getPlanterLocation()
+            if location:
+                break
+        else:
+            return
+        
+        x,y = location
+        print(y)
+
+        #move towards saturator
+        if x >= winLeft and x <= winRight and y >= winUp and y <= winDown: 
+            return
+        if x < winLeft:
+            keyboard.keyDown("a", False)
+            hmove = "a"
+        elif x > winRight:
+            keyboard.keyDown("d", False)
+            hmove = "d"
+        if y < winUp:
+            keyboard.keyDown("w", False)
+            vmove = "w"
+        elif y > winDown:
+            keyboard.keyDown("s", False)
+            vmove = "s"
+
+        i = 0
+        while hmove or vmove:
+            #check if reached saturator
+            if (hmove == "a" and x >= winLeft) or (hmove == "d" and x <= winRight):
+                keyboard.keyUp(hmove, False)
+                hmove = ""
+                
+            if (vmove == "w" and y >= winUp) or (vmove == "s" and y <= winDown):
+                keyboard.keyUp(vmove, False)
+                vmove = ""
+            
+            time.sleep(0.02)
+            #taking too long, just give up
+            if i >= 100:
+                print("give up")
+                keyboard.releaseMovement()
+                break
+            #update planter location
+            location = getPlanterLocation()
+            if location:
+                x,y = location
+
+            else: #cant find planter, pause
+                keyboard.releaseMovement()
+                #try to find planter
+                for _ in range(10):
+                    time.sleep(0.02)
+                    location = getPlanterLocation()
+                    #planter found
+                    if location:
+                        #move towards planter
+                        if hmove:
+                            keyboard.keyDown(hmove)
+                        if vmove:
+                            keyboard.keyDown(vmove)
+                        x,y = location
+                        break
+                else: #still cant find it, give up
+                    return
+            i += 1
+            
     def collectPlanter(self, planter, field):
         st = time.time()
         def updateHourlyTime():
             self.hourlyReport.addHourlyStat("misc_time", time.time()-st)
+        
+
         for _ in range(2):
             if self.goToPlanter(planter, field, "collect"): 
                 break
@@ -2435,6 +2544,8 @@ class macro:
             if self.setdat[f"cycle{cycle}_{i+1}_planter"] == "none" or self.setdat[f"cycle{cycle}_{i+1}_field"] == "none":
                 continue
             planterData = self.placePlanterInCycle(i, cycle, planterData)
+
+        
     
     def placePlanterInCycle(self, slot, cycle, planterData):
         planter = self.setdat[f"cycle{cycle}_{slot+1}_planter"]
@@ -2460,12 +2571,11 @@ class macro:
         planterReady = time.strftime("%H:%M:%S", time.gmtime(planterGrowthTime))
         self.logger.webhook("", f"Planter will be ready in: {planterReady}", "light blue")
 
-        #save the planter data
+        self.reset()
+
         with open("./data/user/manualplanters.txt", "w") as f:
             f.write(str(planterData))
         f.close()
-
-        self.reset()
         return planterData
     
     def closeBlenderGUI(self):
@@ -2994,7 +3104,7 @@ class macro:
                         if word in text: break
                     else:
                         #match text with the closest known quest title
-                        questTitleYPos = x[0][3][1] #get the bottom Y coordinate
+                        questTitleYPos = x[0][0][1] #get the top Y coordinate
                         questTitle, _ = fuzzywuzzy.process.extractOne(text, quest_data[questGiver].keys())
                         break
                 
@@ -3015,11 +3125,41 @@ class macro:
         #merge the texts into chunks. Using those chunks, compare it with the known objectives
         #assume that the merging is done properly, so 1st chunk = 1st objective
         screen = cv2.cvtColor(screenshotQuest(650, gray=False), cv2.COLOR_BGRA2BGR)
-        #crop it below the quest title
+        #crop it just above the quest title
         screen = screen[questTitleYPos: , : ]
         screenOriginal = np.copy(screen)
+
+        #crop it below the quest title, to the first objective
+        #this is done by detecting the color of the title bar, since relying on ocr's bounding box can cause it to overcrop
+        cropTargetColor = [247, 240, 229]
+        cropColorTolerance = 3
+        lower = np.array([c - cropColorTolerance for c in cropTargetColor], dtype=np.uint8)
+        upper = np.array([c + cropColorTolerance for c in cropTargetColor], dtype=np.uint8)
+
+        #create a mask for the target color
+        cropMask = cv2.inRange(screen, lower, upper)
+        cropRows = np.any(cropMask > 0, axis=1)
+        startIndex = None
+        endIndex = None
+
+        #start searching for the start and end y points of the quest title
+        for i, hasColor in enumerate(cropRows):
+            if hasColor and startIndex is None:
+                #found the starting point of the first quest title area
+                startIndex = i
+            elif not hasColor and startIndex is not None:
+                #found the ending point of the quest title area
+                endIndex = i
+                break
+        
+        #crop
+        if endIndex is not None:
+            screenCropped = screen[endIndex:, :]
+        
+        cv2.imwrite("cropped quest.png", screenCropped)
+
         #convert to grayscale
-        screenGray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+        screenGray = cv2.cvtColor(screenCropped, cv2.COLOR_BGR2GRAY)
         img = cv2.inRange(screenGray, 0, 50)
         img = cv2.GaussianBlur(img, (5, 5), 0)
         #dilute the image so that texts can be merged into chunks
@@ -3061,7 +3201,7 @@ class macro:
             if objectiveData[0] == "feed":
                 amount = ''.join([x for x in textChunk if x.isdigit()])
                 if amount:
-                    objectiveData[1] = amount
+                    objectiveData[1] = str(max(int(amount), 100))
                     objectives[i] = "_".join(objectiveData)
 
             if "complete" in textChunk:
@@ -3304,6 +3444,7 @@ class macro:
         self.hourlyReport = HourlyReport(self.buffDetector)
 
     def start(self):
+        print("macro object started")
         #if roblox is not open, rejoin
         if not appManager.openApp("roblox"):
             self.rejoin()

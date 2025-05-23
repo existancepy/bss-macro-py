@@ -1,4 +1,5 @@
 import sys
+import os
 if sys.platform == "win32":
     import pydirectinput as pag
     pag.PAUSE = 0.1
@@ -104,10 +105,13 @@ class keyboard:
             self.press(k, t*28/self.ws)
 
     #like walk, but with multiple keys
-    def multiWalk(self, keys, t):
+    def multiWalk(self, keys, t, applyHaste=True):
         for k in keys:
             pag.keyDown(k, _pause = False)
-        self.timeWait(t)
+        if applyHaste and self.hasteCompensation:
+            self.timeWait(t)
+        else:
+            time.sleep(t*28/self.ws)
         for k in keys:
             pag.keyUp(k, _pause = False)
 
