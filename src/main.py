@@ -2,7 +2,6 @@
 from pynput import keyboard
 import multiprocessing
 import ctypes
-import typing
 from threading import Thread
 import eel
 import time
@@ -10,7 +9,6 @@ import sys
 import ast
 import subprocess
 from modules.misc import messageBox
-import copy
 import atexit
 from modules.misc.imageManipulation import adjustImage
 from modules.screen.imageSearch import locateImageOnScreen
@@ -538,6 +536,7 @@ if __name__ == "__main__":
             #create and set webhook obj for the logger
             logger.enableWebhook = setdat["enable_webhook"]
             logger.webhookURL = setdat["webhook_link"]
+            print("Setting haste.value")
             haste.value = setdat["movespeed"]
             stopThreads = False
             print("variables initalised")
@@ -590,6 +589,15 @@ if __name__ == "__main__":
             macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, haste, updateGUI), daemon=True)
             macroProc.start()
             run.value = 2
+        
+        #Check for crash
+        if macroProc and not macroProc.is_alive() and hasattr(macroProc, "exitcode") and macroProc.exitcode is not None and macroProc.exitcode < 0:
+            logger.webhook("","Crashed", "red", "screen")
+            appManager.openApp("Roblox")
+            keyboardModule.releaseMovement()
+            mouse.mouseUp()
+            macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, haste, updateGUI), daemon=True)
+            macroProc.start()
 
         #detect a new log message
         if not logQueue.empty():

@@ -1,42 +1,73 @@
-import fuzzywuzzy.process
+print("Importing ocr module")
 import modules.screen.ocr as ocr
-from modules.screen.pixelColor import getPixelColor
+print("Importing app manager")
 import modules.misc.appManager as appManager
+print("Importing settings manager")
 import modules.misc.settingsManager as settingsManager
+print("Importing time")
 import time
+print("Importing pyautogui")
 import pyautogui as pag
+print("Importing screenshot module")
 from modules.screen.screenshot import mssScreenshot, mssScreenshotNP
+print("Importing keyboard module")
 from modules.controls.keyboard import keyboard
+print("Importing sleep module")
 from modules.controls.sleep import sleep
+print("Importing mouse module")
 import modules.controls.mouse as mouse
+print("Importing screen data module")
 from modules.screen.screenData import getScreenData
+print("Importing log module")
 import modules.logging.log as logModule
+print("Importing field drift compendation module")
 from modules.submacros.fieldDriftCompensation import fieldDriftCompensation as fieldDriftCompensationClass
+print("Importing operator")
 from operator import itemgetter
+print("Importing sys")
 import sys
+print("Importing platform")
 import platform
+print("Importing os")
 import os
+print("Importing numpy")
 import numpy as np
+print("Importing threading")
 import threading
+print("Importing backpack module")
 from modules.submacros.backpack import bpc
+print("Importing image search module")
 from modules.screen.imageSearch import *
+print("Importing webbrowser")
 import webbrowser
+print("Importing pynput keyboard")
 from pynput.keyboard import Key, Controller
+print("Importing cv2")
 import cv2
+print("Importing datetime")
 from datetime import timedelta, datetime
+print("Importing image manipulation module")
 from modules.misc.imageManipulation import *
+print("Importing pillow")
 from PIL import Image
+print("Importing message box module")
 from modules.misc import messageBox
+print("Importing memory match module")
 from modules.submacros.memoryMatch import solveMemoryMatch
+print("Importing math")
 import math
+print("Importing re")
 import re
+print("Importing ast")
 import ast
+print("Importing hourly report module")
 from modules.submacros.hourlyReport import HourlyReport, BuffDetector
 from difflib import SequenceMatcher
+print("Importing fuzzywuzzy")
+import fuzzywuzzy.process
 import fuzzywuzzy
-from modules.submacros.walk import Walk
+print("Importing traceback")
 import traceback
-import atexit
 
 pynputKeyboard = Controller()
 #data for collectable objectives
@@ -844,7 +875,7 @@ class macro:
         mouse.moveBy(10,15)
         for _ in range(3):
             mouse.click()
-            time.sleep(0.1)
+            time.sleep(0.03)
             mouse.moveBy(0,15)
         self.clickYes()
         #close inventory
@@ -966,7 +997,9 @@ class macro:
             
             mmImg = self.adjustImage("./images/menu", "mmopen") #memory match
             if locateImageOnScreen(mmImg, self.mw/4, self.mh/4, self.mw/4, self.mh/3.5, 0.8):
+                self.canDetectNight = False
                 solveMemoryMatch(self.latestMM, self.display_type)
+                self.canDetectNight = True
 
             blenderImg = self.adjustImage("./images/menu", "blenderclose") #blender
             if locateImageOnScreen(blenderImg, self.mw/4, self.mh/5, self.mw/7, self.mh/4, 0.8):
@@ -1915,7 +1948,9 @@ class macro:
                 self.latestMM = mmType
                 time.sleep(2)
                 self.logger.webhook("", f"Solving: {displayName}", "dark brown", "screen")
+                self.canDetectNight = False
                 solveMemoryMatch(mmType, self.display_type)
+                self.canDetectNight = True
                 time.sleep(2)
                 self.logger.webhook("", f"Completed: {displayName}", "bright green", "blue")
             elif objective in fieldBoosterData:
@@ -2395,7 +2430,18 @@ class macro:
                     placedPlanter = True
                     break
                 time.sleep(0.1)
-            #didnt detect the image, check for harvest planter popup
+            #didnt detect the image, check for planter growth bar
+            for _ in range(3):
+                screen = mssScreenshotNP(self.mw/2.14, self.mh/2.9, self.mw/1.8-self.mw/2.14, self.mh/2.2-self.mh/2.9)
+                screen = cv2.cvtColor(screen, cv2.COLOR_BGRA2BGR)
+                kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
+                if findColorObjectRGB(screen, (86, 120, 72), kernel=kernel, variance=2):
+                    placedPlanter = True
+                    break
+                for _ in range(2):
+                    self.keyboard.press(",")
+                time.sleep(2)
+                
             # time.sleep(1)
             # if self.isBesideE(["harvest", "planter"], []):
             #     placedPlanter = True
@@ -2424,7 +2470,6 @@ class macro:
 
     #locate the planter's growth bar and move there
     def moveToPlanter(self):
-        print("what")
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(2,2))
         def getPlanterLocation():
             screen = mssScreenshotNP(0,0,self.mw,self.mh)
@@ -2529,6 +2574,7 @@ class macro:
         self.logger.webhook("",f"Looting: {planter.title()} planter","bright green", "screen")
         self.keyboard.multiWalk(["s","d"], 0.87)
         self.nmLoot(9, 5, "a")
+        self.setMobTimer(field)
         updateHourlyTime()
 
     #plant all 3 planters in one cycle
@@ -3143,7 +3189,14 @@ class macro:
         endIndex = None
 
         #start searching for the start and end y points of the quest title
+        #if it can't find the title bar in the first y pixels, stop the search
+        #in some cases, the questTitleYPos already crops below the quest title
+        maxHeight = 20
+        if self.display_type == "retina":
+            maxHeight *= 2
         for i, hasColor in enumerate(cropRows):
+            if i > maxHeight and startIndex is None:
+                break
             if hasColor and startIndex is None:
                 #found the starting point of the first quest title area
                 startIndex = i
@@ -3154,12 +3207,10 @@ class macro:
         
         #crop
         if endIndex is not None:
-            screenCropped = screen[endIndex:, :]
-        
-        cv2.imwrite("cropped quest.png", screenCropped)
+            screen = screen[endIndex:, :]
 
         #convert to grayscale
-        screenGray = cv2.cvtColor(screenCropped, cv2.COLOR_BGR2GRAY)
+        screenGray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
         img = cv2.inRange(screenGray, 0, 50)
         img = cv2.GaussianBlur(img, (5, 5), 0)
         #dilute the image so that texts can be merged into chunks
