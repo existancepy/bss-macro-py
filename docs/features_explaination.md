@@ -141,7 +141,7 @@ Goes to the coconut field and attempts to kill the coconut crab. Since the macro
 ### Misc
 Enable Ant Challenge
 
-## 4. Boost
+## 5. Boost
 
 ### Hotbar
 Allows the user to set how often a hotbar slot should be activated and when
@@ -159,7 +159,7 @@ Collect field boosters
 - **Item** -> Choose if the macro should use stickers or tickets to activate the sticker stack. 
 - **Use Hive Skins** -> Choose if the macro should use hive skins in the sticker stack 
 
-## 5. Planters
+## 6. Planters
 
 ### Manual
 
@@ -179,7 +179,7 @@ As soon as cycle 5 is reached, or there is no planter in the next cycle, the mac
 - **Gather in Planter Field** -> Gather in the same field as the specified planter until that planter is harvested. The gather settings used will be the same ones that are set in the gather tab.
 - **Glitter** -> Use Glitter when the placing the planter.
 
-## 6. Quests
+## 7. Quests
 
 **How macro handles gathering for quests**
 
