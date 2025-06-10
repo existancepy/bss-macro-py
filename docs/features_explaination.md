@@ -163,8 +163,8 @@ Collect field boosters
 
 ### Manual
 
-**Tracking of Planters**
-The macro is able to "remember" which planters are placed and when they were placed, as it saves the state of planters. However, the growth time of the planters are calculated purely from the time that they are placed and does not consider the time spent in-game. This means, that if the macro places a planter down, and you stop it and leave the game for 2 hours, it will assume that the planter has 2 hours of growth time
+**Tracking of Planters**<br>
+The macro is able to "remember" which planters are placed and when they were placed, as it saves the state of planters. However, the growth time of the planters are calculated purely from the time that they are placed and does not consider the time spent outside the game. This means, that if the macro places a planter down, and you stop it and leave the game for 2 hours, it will assume that the planter has 2 hours of growth time
 
 - **Harvest Every X Hours** -> How often the macro should harvest planters
 - **Harvest When Full** -> Collect the planters when they are fully grown. When this setting is enabled, the macro will ignore the 'Harvest Every X Hours' setting
