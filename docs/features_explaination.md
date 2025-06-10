@@ -39,7 +39,7 @@ Invert forward and backward keys of the pattern. Instead of going forwards, the 
 ### Direction
 The direction to turn the camera in before gathering. The initial direction the macro faces varies from field to field. Below is a table of fields and their initial direction. It is the same as Natro Macro
 
-*Note: North is the direction in which the player faces away from the hive*
+*Note: North is the direction where the player faces mountain top*
 | Field | Initial Direction |
 | --- | --- |
 | Sunflower | West |
