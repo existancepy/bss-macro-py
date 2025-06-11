@@ -3,7 +3,7 @@ import modules.screen.ocr as ocr
 from PIL import Image
 import numpy as np
 
-display_type = "built-in"
+display_type = "retina"
 #Load quest data from quest_data.txt
 quest_data = {}
 quest_bear = ""
@@ -32,22 +32,51 @@ for line in qdata:
 quest_data[quest_bear][quest_title] = quest_info 
 
 #quest title found, now find the objectives
-questTitle = "scorpion salad"
+questTitle = "spiced kebab"
 questGiver = "polar bear"
 objectives = quest_data[questGiver][questTitle]
 
 #merge the texts into chunks. Using those chunks, compare it with the known objectives
 #assume that the merging is done properly, so 1st chunk = 1st objective
 screen = cv2.imread("quest.png")
+screenOriginal = screen = np.copy(screen)
 #crop it below the quest title
-questTitleYPos = 80
-# screen = screen[questTitleYPos: , : ]
+cropTargetColor = [247, 240, 229]
+cropColorTolerance = 3
+lower = np.array([c - cropColorTolerance for c in cropTargetColor], dtype=np.uint8)
+upper = np.array([c + cropColorTolerance for c in cropTargetColor], dtype=np.uint8)
 
-screenOriginal = np.copy(screen)
+#create a mask for the target color
+cropMask = cv2.inRange(screen, lower, upper)
+cropRows = np.any(cropMask > 0, axis=1)
+startIndex = None
+endIndex = None
+
+maxHeight = 20
+if display_type == "retina":
+    maxHeight *= 2
+
+#start searching for the start and end y points of the quest title
+for i, hasColor in enumerate(cropRows):
+    if i > maxHeight and startIndex is None:
+                break
+    if hasColor and startIndex is None:
+        #found the starting point of the first quest title area
+        startIndex = i
+    elif not hasColor and startIndex is not None:
+        #found the ending point of the quest title area
+        endIndex = i
+        break
+
+#crop
+if endIndex is not None:
+    screen = screen[endIndex:, :]
+
 #convert to grayscale
 screenGray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
 img = cv2.inRange(screenGray, 0, 50)
 img = cv2.GaussianBlur(img, (5, 5), 0)
+
 #dilute the image so that texts can be merged into chunks
 kernelSize = 10 if display_type == "retina" else 7
 kernel = np.ones((kernelSize, kernelSize), np.uint8) 
@@ -74,8 +103,6 @@ for contour in contours[::-1]:
     area = w*h
     if area < minArea or area > maxArea or h > maxHeight:
         cv2.rectangle(screen, (x, y), (x+w, y+h), (0, 255, 255), 1) #draw a yellow bounding box
-        print(area)
-        print(h)
         continue
     textImg =  Image.fromarray(screen[y:y+h, x:x+w])
     textChunk = []

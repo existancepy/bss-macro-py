@@ -9,6 +9,7 @@ time.sleep(2.2)
 self.keyboard.walk("w", 1.7)
 
 
+foundGummyBee = False
 targetY = self.mh/1.3
 kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
 for _ in range(int(3/0.02)):
@@ -19,21 +20,25 @@ for _ in range(int(3/0.02)):
         res = max(res, key=lambda x: x[1])
         if res[1]/2+100 >= targetY:
             self.logger.webhook("","Aligned with gummy bee","dark brown", "screen")
+            foundGummyBee = True
             break 
 else:
     self.logger.webhook("Notice","Could not detect gummy bee's location","red", "screen")
+    foundGummyBee = False
     #self.keyboard.walk("w",2.48)
-itemCoords = self.findItemInInventory("gumdrops")
-if itemCoords is not None:
-    self.keyboard.walk("a",1.4)
-    self.keyboard.walk("w",0.15)
-    self.keyboard.walk("a",0.3)
-    time.sleep(0.3)
-    self.keyboard.walk("w",0.1)
-    self.useItemInInventory(x=itemCoords[0], y=itemCoords[1])
-    self.canDetectNight = False #dont let night be detected inside gummy bear's lair
-    time.sleep(2)
-    self.keyboard.walk("w",2.5)
-    time.sleep(0.5)
-    self.canDetectNight = True
+
+if foundGummyBee:
+    itemCoords = self.findItemInInventory("gumdrops")
+    if itemCoords is not None:
+        self.keyboard.walk("a",1.4)
+        self.keyboard.walk("w",0.15)
+        self.keyboard.walk("a",0.3)
+        time.sleep(0.3)
+        self.keyboard.walk("w",0.1)
+        self.useItemInInventory(x=itemCoords[0], y=itemCoords[1])
+        self.canDetectNight = False #dont let night be detected inside gummy bear's lair
+        time.sleep(2)
+        self.keyboard.walk("w",2.5)
+        time.sleep(0.5)
+        self.canDetectNight = True
 

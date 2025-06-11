@@ -6,5 +6,5 @@ def getPixelColor(X1,Y1):
     with mss.mss() as sct:
         img = sct.grab(region)
         im = np.array(img)
-        col = tuple(im[0,0])[:-1][::-1]
+        col = tuple(int(c) for c in im[0,0])[:-1][::-1]
         return col

@@ -242,16 +242,24 @@ def macro(status, logQueue, haste, updateGUI):
             else: 
                 planterData = ast.literal_eval(planterDataRaw)
                 planterChanged = False
-                #check all 3 slots
+                #check all 3 slots to see if planters are ready to harvest
                 for i in range(3):
                     cycle = planterData["cycles"][i]
                     if time.time() > planterData["harvestTimes"][i] and planterData["planters"][i]:
-                        #Collect planters
+                        #planter is ready for harvest, but check for the next planter to place
+                        #if that planter is currently placed down by a different slot, do not harvest and place
+                        #this avoids overlapping the same planter
+                        nextCycle = goToNextCycle(cycle, i)
+                        planterToPlace = macro.setdat[f"cycle{nextCycle}_{i+1}_planter"]
+                        otherSlotPlanters = planterData["planters"][:i] + planterData["planters"][i+1:]
+                        if planterToPlace in otherSlotPlanters:
+                            continue
+                            
+                        #Collect planter
                         runTask(macro.collectPlanter, args=(planterData["planters"][i], planterData["fields"][i]))
-                        #go to the next cycle
-                        cycle = goToNextCycle(cycle, i)
+                        
                         #place them
-                        planterData = runTask(macro.placePlanterInCycle, args = (i, cycle, planterData),resetAfter=False)
+                        planterData = runTask(macro.placePlanterInCycle, args = (i, nextCycle, planterData),resetAfter=False)
                         planterChanged = True
                 if planterChanged:
                     #save the planter data
@@ -556,9 +564,12 @@ if __name__ == "__main__":
             streamLink = None
             if setdat["enable_stream"]:
                 print("stream enabled")
-                logger.webhook("", "Starting Stream...", "light blue")
-                streamLink = stream.start(setdat["stream_resolution"])
-                Thread(target=waitForStreamURL, daemon=True).start()
+                if stream.isCloudflaredInstalled():
+                    logger.webhook("", "Starting Stream...", "light blue")
+                    streamLink = stream.start(setdat["stream_resolution"])
+                    Thread(target=waitForStreamURL, daemon=True).start()
+                else:
+                    messageBox.msgBox(text='Cloudflared is required for streaming but is not installed. Check the #guides channel for installation instructions', title='Cloudflared not installed')
 
             print("starting macro proc")
             #macro proc
@@ -593,6 +604,7 @@ if __name__ == "__main__":
         #Check for crash
         if macroProc and not macroProc.is_alive() and hasattr(macroProc, "exitcode") and macroProc.exitcode is not None and macroProc.exitcode < 0:
             logger.webhook("","Crashed", "red", "screen")
+            macroProc.join()
             appManager.openApp("Roblox")
             keyboardModule.releaseMovement()
             mouse.mouseUp()

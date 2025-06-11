@@ -9,7 +9,7 @@ import time
 print("Importing pyautogui")
 import pyautogui as pag
 print("Importing screenshot module")
-from modules.screen.screenshot import mssScreenshot, mssScreenshotNP
+from modules.screen.screenshot import mssScreenshot, mssScreenshotNP, benchmarkMSS
 print("Importing keyboard module")
 from modules.controls.keyboard import keyboard
 print("Importing sleep module")
@@ -68,6 +68,7 @@ import fuzzywuzzy.process
 import fuzzywuzzy
 print("Importing traceback")
 import traceback
+import ctypes
 
 pynputKeyboard = Controller()
 #data for collectable objectives
@@ -987,25 +988,31 @@ class macro:
             #set mouse and execute hotkeys
             #mouse.teleport(self.mw/(self.xsm*4.11)+40,(self.mh/(9*self.ysm))+yOffset)
             self.canDetectNight = False
-
+            st = time.time()
             #close any menus if they exist
             self.clickPermissionPopup()
-
+            print(f"checked permission popup: {time.time()-st}")
+            
             closeImg = self.adjustImage("./images/menu", "close") #sticker printer
+            print(f"adjusted sticker printer image: {time.time()-st}")
             if locateImageOnScreen(closeImg, self.mw/4, 100, self.mw/4, self.mh/3.5, 0.7):
                 self.keyboard.press("e")
+            print(f"check sticker printer popup: {time.time()-st}")
             
             mmImg = self.adjustImage("./images/menu", "mmopen") #memory match
             if locateImageOnScreen(mmImg, self.mw/4, self.mh/4, self.mw/4, self.mh/3.5, 0.8):
                 self.canDetectNight = False
                 solveMemoryMatch(self.latestMM, self.display_type)
                 self.canDetectNight = True
+            print(f"checked memory match popup: {time.time()-st}")
 
             blenderImg = self.adjustImage("./images/menu", "blenderclose") #blender
             if locateImageOnScreen(blenderImg, self.mw/4, self.mh/5, self.mw/7, self.mh/4, 0.8):
                 self.closeBlenderGUI()
+            print(f"checked blender popup: {time.time()-st}")
             
             self.clickdialog(mustFindDialog=True)
+            print(f"checked dialog: {time.time()-st}")
 
             performanceStatsImg = self.adjustImage("./images/menu", "performancestats")
             if locateTransparentImageOnScreen(performanceStatsImg, 0, 20, self.mw/3.5, 70, 0.7):
@@ -1023,11 +1030,13 @@ class macro:
                     pass
                 else:
                     pass
+            print(f"checked performance stats: {time.time()-st}")
 
             noImg = self.adjustImage("./images/menu", "no") #yes/no popup
             x = self.mw/3.2
             y = self.mh/2.3
             res = locateImageOnScreen(noImg,x,y,self.mw/2.5,self.mh/3.4, 0.8)
+            print(f"checked yes/no popup: {time.time()-st}")
             #mssScreenshot(x,y,self.mw/2.5,self.mh/3.4, True)
             if res:
                 x2, y2 = res[1]
@@ -1051,6 +1060,7 @@ class macro:
                 mouse.moveBy(1,3)
                 time.sleep(0.1)
                 mouse.click()
+            print(f"checked sticker book popup: {time.time()-st}")
 
             self.moveMouseToDefault()
             time.sleep(0.1)
@@ -1059,6 +1069,8 @@ class macro:
             self.keyboard.press('r')
             time.sleep(0.25)
             self.keyboard.press('enter')
+            print(f"pressed reset keys: {time.time()-st}")
+            
             if self.newUI:
                 emptyHealth = self.adjustImage("./images/menu", "emptyhealth_new")
             else:
@@ -1080,10 +1092,12 @@ class macro:
             else:
                 time.sleep(8-3)
 
+            print(f"respawn complete: {time.time()-st}")
+
             self.canDetectNight = True
             self.location = "spawn"
             #detect if player is at hive. Spin a max of 4 times
-            for _ in range(4):
+            for i in range(4):
                 screen = pillowToCv2(mssScreenshot(self.mw//2-100, self.mh-10, 200, 10))
                 # Convert the image from BGR to HLS color space
                 hsl = cv2.cvtColor(screen, cv2.COLOR_BGR2HLS)
@@ -1094,6 +1108,7 @@ class macro:
                 mask = cv2.erode(mask, resetKernel)
                 #get contours. If contours exist, direction is correct
                 contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                print(f"spin {i+1}: {time.time()-st}")
                 if contours:
                     for _ in range(8):
                         self.keyboard.press("o")
@@ -3125,9 +3140,9 @@ class macro:
         #scroll to top
         #stop scrolling when the quest page remains unchanged
         prevHash = None
-        for _ in range(180):
+        for _ in range(200):
             mouse.scroll(100)
-            sleep(0.05)
+            sleep(0.08)
             hash = imagehash.average_hash(Image.fromarray(screenshotQuest(100)))
             if not prevHash is None and prevHash == hash:
                 break
@@ -3152,12 +3167,13 @@ class macro:
                         #match text with the closest known quest title
                         questTitleYPos = x[0][0][1] #get the top Y coordinate
                         questTitle, _ = fuzzywuzzy.process.extractOne(text, quest_data[questGiver].keys())
+                        self.logger.webhook("", f"Quest Title: {questTitle}", "dark brown")
                         break
                 
             if questTitle:
                 break
             mouse.scroll(-3, True)
-            time.sleep(0.06)
+            time.sleep(0.08)
 
         if questTitle is None:
             self.logger.webhook("", f"Could not find {questGiver} quest", "dark brown")
@@ -3389,6 +3405,12 @@ class macro:
         #disable game mode
         self.moveMouseToDefault()
         if sys.platform == "darwin":
+            #check for screen recording
+            cg = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+            cg.CGRequestScreenCaptureAccess.restype = ctypes.c_bool
+            if not cg.CGRequestScreenCaptureAccess():
+                messageBox.msgBox(text='It seems like terminal does not have the screen recording permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Screen Recording -> add and enable Terminal. After that, restart the macro')
+
             time.sleep(1)
             #check roblox scaling
             #this is done by checking if all pixels at the top of the screen are black
@@ -3457,12 +3479,6 @@ class macro:
         else:
             self.logger.webhook("","Unable to detect Roblox UI","red", "screen")
             self.newUI = True
-            #2nd check for screen recording perms by checking for sprinkler icon
-            if sys.platform == "darwin":
-                sprinklerImg = self.adjustImage("./images/menu", "sprinkler")
-                if not locateImageOnScreen(sprinklerImg, self.mw//2-300, self.mh*3/4, 300, self.mh*1/4, 0.75):
-                    messageBox.msgBox(text='It seems like terminal does not have the screen recording permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Screen Recording -> add and enable Terminal. After that, restart the macro.\n\nVisit #6system-settings in the discord for more detailed instructions\n\n NOTE: This popup might be incorrect. If the macro is able to detect objects on the screen, you can dismiss this popup', title='Screen Recording Permission')
-
         if self.newUI:
             ocr.newUI = True
             logModule.newUI = True
@@ -3523,6 +3539,7 @@ class macro:
             hourlyReportBackgroundThread = threading.Thread(target=self.hourlyReportBackground, daemon=True)
             hourlyReportBackgroundThread.start()
 
-
+        if not benchmarkMSS():
+            self.logger.webhook("", "MSS is too slow, switching to pillow", "dark brown")
         self.reset(convert=True)
         self.saveTiming("rejoin_every")

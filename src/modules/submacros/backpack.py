@@ -9,6 +9,8 @@ data = sorted(data.items())
 #100% 14889259
 
 def rgb_to_dec(r, g, b):
+      if not (0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255):
+            raise ValueError(f"RGB values out of range: r={r}, g={g}, b={b}")
       return (r * 256 * 256) + (g * 256) + b
     
 def bpc(mw, newUI):

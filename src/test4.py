@@ -1,51 +1,22 @@
-from datetime import timedelta
+import ctypes
+import platform
 
-def cdTextToSecs(rawText, brackets, defaultTime=0):
-    if brackets:
-        closePos = rawText.rfind(")")
-        #get cooldown if close bracket is present or not
-        if closePos >= 0:
-            cooldownRaw = rawText[rawText.rfind("(")+1:closePos]
-        elif "(" in rawText:
-            cooldownRaw = rawText.split("(")[1]
-        else:
-            cooldownRaw = rawText
-    else:
-        cooldownRaw = rawText
-    #clean it up, extract only valid characters
-    cooldownRaw = ''.join([x for x in cooldownRaw if x.isdigit() or x == ":" or x == "s"])
-    cooldownSeconds = None #cooldown in seconds
+def check_screen_recording_permission():
+    if platform.system() != "Darwin":
+        raise RuntimeError("This function is macOS only.")
 
-    def extractNumFromText(text):
-        return ''.join(filter(str.isdigit, text))
-    
-    #convert time to seconds
-    validTime = True
-    if ":" in cooldownRaw:
-        times = cooldownRaw.split(":")
-        cooldownSeconds = 0
-        #convert
-        for i,e in enumerate(times[::-1]):
-            num = extractNumFromText(e)
-            if not num:
-                validTime = False
-                break
-            cooldownSeconds += int(num) * 60**i
+    try:
+        # Load CoreGraphics framework
+        cg = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
 
-    elif cooldownRaw.count("s") == 1: #only seconds
-        num = extractNumFromText(e)
-        if not num:
-            validTime = False
-        cooldownSeconds = num
-    else:
-        validTime = False
-    
-    if not validTime or (defaultTime and cooldownSeconds > defaultTime):
-        cooldownSeconds = defaultTime
+        # Declare return type of the function
+        cg.CGPreflightScreenCaptureAccess.restype = ctypes.c_bool
 
-    return cooldownSeconds
+        has_access = cg.CGPreflightScreenCaptureAccess()
+        return cg.CGPreflightScreenCaptureAccess()
 
+    except Exception as e:
+        print("Error checking screen recording permission:", e)
+        return False
 
-ans = cdTextToSecs("Use the wealth clock (57:01)", True, 0)
-print(ans)
-print(timedelta(seconds=ans))
+print("Screen Recording Permission:", check_screen_recording_permission())

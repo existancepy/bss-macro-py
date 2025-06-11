@@ -172,6 +172,18 @@ class cloudflaredStream:
         gc.enable()
         gc.set_threshold(700, 10, 5)
 
+        #get the cloudflared path
+        paths = [
+            "/opt/homebrew/bin/cloudflared",
+            "/usr/local/Homebrew/bin/cloudflared"
+        ]
+        for path in paths:
+            if os.path.isfile(path) and os.access(path, os.X_OK):
+                self.cloudflaredPath = path
+                break
+        else:
+            self.cloudflaredPath = None
+
     def index(self):
         return render_template_string(self.HTML_PAGE, streaming=self.streaming)
 
@@ -364,20 +376,36 @@ class cloudflaredStream:
     def _run_server(self):
         #use the production WSGI server if available
         try:
-            from waitress import serve
-            print("Starting server with Waitress WSGI server")
-            serve(self.app, host='0.0.0.0', port=8081, threads=4)
+            # from waitress import serve
+            # print("Starting server with Waitress WSGI server")
+            # serve(self.app, host='0.0.0.0', port=8081, threads=4)
+            raise ImportError
         except ImportError:
             # Fall back to Werkzeug server
             from werkzeug.serving import run_simple
             print("Starting server with Werkzeug (install waitress for better performance)")
             run_simple('0.0.0.0', 8081, self.app, threaded=True, use_reloader=False)
     
+    def isCloudflaredInstalled(self):
+        return self.cloudflaredPath
+    
+        try:
+            result = subprocess.run(
+                [self.getCloudflaredPath(), "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            if result.returncode == 0:
+                return True
+        except FileNotFoundError:
+            return False
+
     def _run_cloudflared(self):
         time.sleep(2)
         print("Launching Cloudflare tunnel")
         self.cfProc = subprocess.Popen(
-            ["cloudflared", "tunnel", "--url", "http://localhost:8081"],
+            [self.cloudflaredPath, "tunnel", "--url", "http://localhost:8081"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True

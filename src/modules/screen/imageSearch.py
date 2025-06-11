@@ -2,6 +2,7 @@ import cv2
 from modules.screen.screenshot import mssScreenshot, mssScreenshotNP
 import numpy as np
 import imagehash
+import time
 
 def templateMatch(smallImg, bigImg):
     res = cv2.matchTemplate(bigImg, smallImg, cv2.TM_CCOEFF_NORMED)
