@@ -1268,7 +1268,7 @@ class macro:
             self.keyboard.timeWait(2.9)
             self.keyboard.keyUp("d", False)
             self.keyboard.keyUp("w", False)
-            for _ in range(3):
+            for _ in range(2):
                 time.sleep(0.4)
                 if self.isBesideE(["claim", "hive", "send", "trad", "has"]):
                     break
