@@ -18,6 +18,6 @@ existance_broke=False
 stream_resolution=0.75
 stream_fps=30
 enable_stream=False
-low_performance=True
+low_performance=False
 ngrok_auth=
 stream_quality=1920x1080
