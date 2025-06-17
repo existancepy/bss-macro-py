@@ -251,6 +251,7 @@ def macro(status, logQueue, haste, updateGUI):
                         runTask(macro.collectPlanter, args=(planterData["planters"][i], planterData["fields"][i]))
                         
                         #place them
+                        nextCycle = goToNextCycle(cycle, i)
                         planterData = runTask(macro.placePlanterInCycle, args = (i, nextCycle, planterData),resetAfter=False)
                         planterChanged = True
                 if planterChanged:
