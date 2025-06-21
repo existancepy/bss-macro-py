@@ -3410,7 +3410,7 @@ class macro:
                 cg = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
                 cg.CGRequestScreenCaptureAccess.restype = ctypes.c_bool
                 if not cg.CGRequestScreenCaptureAccess():
-                    messageBox.msgBox(text='It seems like terminal does not have the screen recording permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Screen Recording -> add and enable Terminal. After that, restart the macro')
+                    messageBox.msgBox(title="", text='It seems like terminal does not have the screen recording permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Screen Recording -> add and enable Terminal. After that, restart the macro')
             except AttributeError:
                 pass
             time.sleep(1)
