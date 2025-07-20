@@ -11,14 +11,21 @@ else:
 
 
 self.keyboard.walk(afcfbkey,0.5*size)
-self.keyboard.walk(tclrkey,abs(0.17*width*2))
+for _ in range(width):
+    self.keyboard.walk(tclrkey,0.17)
+    self.keyboard.walk(tclrkey,0.17)
+    
 for _ in range(width):
     self.keyboard.walk(tcfbkey,0.5*size)
     self.keyboard.walk(afclrkey,0.17)
     self.keyboard.walk(afcfbkey,0.5*size)
     self.keyboard.walk(afclrkey,0.17)
+
 self.keyboard.walk(tcfbkey,0.5*size)
-self.keyboard.walk(tclrkey,abs(0.17*width*2))
+for _ in range(width):
+    self.keyboard.walk(tclrkey,0.17)
+    self.keyboard.walk(tclrkey,0.17)
+
 for _ in range(width):
     self.keyboard.walk(afcfbkey,0.5*size)
     self.keyboard.walk(afclrkey,0.17)

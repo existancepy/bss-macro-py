@@ -1,4 +1,3 @@
-AFB_dice_cd=0
-AFB_glitter_cd=0
-AFB_rebuff=0
+AFB_dice_cd=1749697882.844106
+AFB_glitter_cd=1749697882.8454971
 AFB_limit=0

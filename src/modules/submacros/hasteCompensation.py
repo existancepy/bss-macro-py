@@ -7,6 +7,10 @@ import time
 from PIL import Image
 from modules.misc.imageManipulation import pillowToCv2
 from concurrent.futures import ThreadPoolExecutor
+from modules import bitmap_matcher
+from modules.misc.appManager import getWindowSize
+import mss
+from modules.screen.robloxWindow import RobloxWindowBounds
 
 class HasteCompensation():
     def __init__(self, isRetina, baseMoveSpeed):
@@ -22,8 +26,7 @@ class HasteCompensation():
         for i in range(5):
             self.bearMorphs.append(self.adjustBuffImage(f"./images/buffs/bearmorph{i+1}-retina.png", grayscale=True))
 
-        self.hastePlus = self.adjustBuffImage(f"./images/buffs/haste+.png")         
-        self.mw, self.mh = pag.size()                 
+        self.hastePlus = self.adjustBuffImage(f"./images/buffs/haste+.png")                       
         self.prevHaste = 0         
         self.prevHaste368 = 0 #tracking the previous haste to accurately determine if the haste stack is 3,6 or 8
         self.hasteEnds = 0
@@ -49,9 +52,9 @@ class HasteCompensation():
         _, val, _, loc = res
         return (val > threshold, val)
 
-    def getHaste(self):
+    def getHaste(self, mx, my, mw):
         st = time.perf_counter()
-        screen = np.array(mssScreenshot(0,30,self.mw/1.8,70))
+        screen = np.array(mssScreenshot(mx,my+30,mw,70))
         screenGray = cv2.cvtColor(screen.copy(), cv2.COLOR_RGB2GRAY)
         bestHaste = 0
         bestHasteMaxVal = 0
@@ -383,3 +386,104 @@ class HasteCompensationFastest():
 
         # print(f"Calculation time: {time.perf_counter() - st:.4f}s") # Debug timing
         return final_speed
+
+class HasteCompensationRevamped():
+    def __init__(self, robloxWindow: RobloxWindowBounds, baseMoveSpeed):
+        self.robloxWindow = robloxWindow
+        self.baseMoveSpeed = baseMoveSpeed
+
+        self.countBitmaps = []
+        self.bearMorphs = []
+        self.hasteBitmap = Image.new('RGBA', (10, 1), '#f0f0f0ff')
+        self.melodyBitmap = Image.new('RGBA', (3, 2), '#2b2b2bff')
+
+        if self.robloxWindow.isRetina:
+            for i in range(2,11):
+                self.countBitmaps.append(Image.open(f"images/buffs/counts/{i}.png").convert('RGBA'))
+
+            for i in range(6):
+                self.bearMorphs.append(Image.open(f"./images/buffs/bearmorph{i+1}-retina.png").convert('RGBA'))
+            
+            self.hastePlus = Image.open("./images/buffs/haste+-retina.png").convert('RGBA')
+        else:
+            #base64 images taken directly from natro macro
+            #https://github.com/NatroTeam/NatroMacro/blob/main/lib/Walk.ahk
+
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAALCAAAAAB9zHN3AAAAAnRSTlMAAHaTzTgAAABCSURBVHgBATcAyP8BAPMAAADzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPMAAADzAAAA8wAAAPMAAAAB8wAAAAIAAAAAtc8GqohTl5oAAAAASUVORK5CYII=")) #2
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAKCAAAAAC2kKDSAAAAAnRSTlMAAHaTzTgAAAA9SURBVHgBATIAzf8BAPMAAAAAAAAAAAAAAAAAAAAAAAAAAADzAAAAAAAAAAAAAAAAAAAAAPMAAAABAPMAAFILA8/B68+8AAAAAElFTkSuQmCC"))
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAGCAAAAADBUmCpAAAAAnRSTlMAAHaTzTgAAAApSURBVHgBAR4A4f8AAAAA8wAAAAAAAAAA8wAAAPMAAALzAAAAAfMAAABBtgTDARckPAAAAABJRU5ErkJggg=="))
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAALCAAAAAB9zHN3AAAAAnRSTlMAAHaTzTgAAABCSURBVHgBATcAyP8B8wAAAAIAAAAAAPMAAAACAAAAAAHzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHzAAAAgmID1KbRt+YAAAAASUVORK5CYII="))
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAJCAAAAAAwBNJ8AAAAAnRSTlMAAHaTzTgAAAA4SURBVHgBAS0A0v8AAAAA8wAAAPMAAADzAAACAAAAAAEA8wAAAPPzAAAA8wAAAAAA8wAAAQAA8wC5oAiQ09KYngAAAABJRU5ErkJggg=="))
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAMCAAAAABgyUPPAAAAAnRSTlMAAHaTzTgAAABHSURBVHgBATwAw/8B8wAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8wIAAAAAAgAAAABDdgHu70cIeQAAAABJRU5ErkJggg=="))
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAKCAAAAAC2kKDSAAAAAnRSTlMAAHaTzTgAAAA9SURBVHgBATIAzf8BAADzAAAA8wAAAgAAAAABAPMAAAEAAPMAAADzAAAAAAAAAADzAAAAAADzAAABAADzALv5B59oKTe0AAAAAElFTkSuQmCC"))
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAKCAAAAAC2kKDSAAAAAnRSTlMAAHaTzTgAAAA9SURBVHgBATIAzf8BAADzAAAA8wAAAPMAAAAAAPMAAAEAAPMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA87TcBbXcfy3eAAAAAElFTkSuQmCC"))
+            self.countBitmaps.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAgAAAAKCAAAAACsrEBcAAAAAnRSTlMAAHaTzTgAAAArSURBVHgBY2Rg+MzAwMALxCAaQoDBZyYYmwlMYmXAAFApWPVnBkYIi5cBAJNvCLCTFAy9AAAAAElFTkSuQmCC")) #0
+
+            self.bearMorphs.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAAwAAAABBAMAAAAYxVIKAAAAD1BMVEUwLi1STEihfVWzpZbQvKTt7OCuAAAAEklEQVR4AQEHAPj/ACJDEAE0IgLvAM1oKEJeAAAAAElFTkSuQmCC"))
+            self.bearMorphs.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAA4AAAABBAMAAAAcMII3AAAAFVBMVEUwLi1TTD9lbHNmbXN5enW5oXHQuYJDhTsuAAAAE0lEQVR4AQEIAPf/ACNGUQAVZDIFbwFmjB55HwAAAABJRU5ErkJggg=="))
+            self.bearMorphs.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAABAAAAABBAMAAAAlVzNsAAAAGFBMVEUwLi1VU1G9u7m/vLXAvbbPzcXg3dfq6OXkYMPeAAAAFElEQVR4AQEJAPb/AENWchABJ2U0CO4B3TmcTKkAAAAASUVORK5CYII="))
+            self.bearMorphs.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAA4AAAABBAMAAAAcMII3AAAAElBMVEUwLi1JSUqOlZy0vMbY2dnc3NtuftTJAAAAE0lEQVR4AQEIAPf/AFVDIQASNFUFhQFVdZ1AegAAAABJRU5ErkJggg=="))
+            self.bearMorphs.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAAA4AAAABBAMAAAAcMII3AAAAFVBMVEUwLi1TTD+zjUy0jky8l1W5oXHevny+g95vAAAAE0lEQVR4AQEIAPf/ACNGUQAVZDIFbwFmjB55HwAAAABJRU5ErkJggg=="))
+            self.bearMorphs.append(bitmap_matcher.create_bitmap_from_base64("iVBORw0KGgoAAAANSUhEUgAAABAAAAABBAMAAAAlVzNsAAAAJFBMVEVBNRlDNxtTRid8b0avoG69r22+sG7Qw4PRw4Te0Jbk153m2Z5VNHxxAAAAFElEQVR4AQEJAPb/AFVouTECSnZVDPsCv+2QpmwAAAAASUVORK5CYII="))
+
+            self.hastePlus = Image.new('RGBA', (20, 1), '#eddb4cff')
+
+        self.prevHaste = 0
+        self.endTime = 0
+
+    def screenshotBuff(self):   
+        with mss.mss() as sct:
+            monitor = {"left": int(self.robloxWindow.mx), "top": int(self.robloxWindow.my+self.robloxWindow.yOffset+33), "width": int(self.robloxWindow.mw), "height": int(48)}
+            sct_img = sct.grab(monitor)
+            img = Image.frombytes("RGBA", sct_img.size, sct_img.bgra, "raw", "BGRA")
+            #img.save(f"buff_area.png")
+            return img
+
+    #similar to natro's implementation for haste detection
+    def getHaste(self):
+        start_time = time.time()
+        screen = self.screenshotBuff()
+        haste = 0
+        hasteX = None
+
+        x = 0
+        #locate haste. It shares the same color as melody
+        for _ in range(3):
+            res = bitmap_matcher.find_bitmap_cython(screen, self.hasteBitmap, x=x, variance=0)
+            if not res:
+                break
+            x = res[0]
+            #can't find melody, so its haste
+            if not bitmap_matcher.find_bitmap_cython(screen, self.melodyBitmap, x=x+2, w=16*self.robloxWindow.multi, variance=2):
+                hasteX = res[0]
+                break
+            #melody, skip this buff
+            x+= 40*self.robloxWindow.multi
+
+        #haste found, get count
+        if hasteX:
+            for i, img in enumerate(self.countBitmaps):
+                res = bitmap_matcher.find_bitmap_cython(screen, img, x=hasteX, w=38*self.robloxWindow.multi, variance=0)
+                if res:
+                    haste = i+2
+                    break
+            else:
+                haste = 1
+            
+        
+        #search for bear morphs
+        bearmorphSpeed = 0
+        for img in self.bearMorphs:
+            if bitmap_matcher.find_bitmap_cython(screen, img, variance=30):
+                bearmorphSpeed = 4
+                break
+        end_time = time.time()
+
+        #search for haste+
+        if bitmap_matcher.find_bitmap_cython(screen, self.hastePlus, variance=20 if self.robloxWindow.isRetina else 2):
+            haste += 10
+            
+        #print(end_time-start_time)
+        #print(f"{(self.baseMoveSpeed + bearmorphSpeed) * (1 + (0.1 * haste))} --- {self.baseMoveSpeed}, {haste}")
+        
+        return (self.baseMoveSpeed + bearmorphSpeed) * (1 + (0.1 * haste))

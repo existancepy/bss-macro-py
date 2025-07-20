@@ -52,11 +52,6 @@ def setScreenData():
             screenData["screen_width"] = sw
             screenData["screen_height"] = sh
             screenData["display_type"] = "retina"
-            print("display type: retina")
-            
-        else:
-            print("display type: built-in")
-        print("Screen coordinates: {}x{}".format(sw,sh))
         ndisplay = "{}x{}".format(sw,sh)
         #get multipliers
         if ndisplay in multiplierData:

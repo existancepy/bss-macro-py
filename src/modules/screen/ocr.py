@@ -13,7 +13,6 @@ useLangPref = True
 try:
     from ocrmac import ocrmac #see if ocr mac is installed
     useOCRMac = True
-    print("Imported macocr")
 except:
     from paddleocr import PaddleOCR
     ocrP = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)

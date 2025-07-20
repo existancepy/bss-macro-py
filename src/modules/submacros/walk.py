@@ -30,6 +30,8 @@ class Walk():
         self.hasteEnds = 0
         self.prevHasteEnds = 0
 
+        self.hasteCompensationObj = HasteCompensationRevamped(isRetina, baseMoveSpeed)
+
 
     def adjustBuffImage(self, path):
         img = Image.open(path)

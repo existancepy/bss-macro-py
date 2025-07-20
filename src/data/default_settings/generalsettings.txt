@@ -20,3 +20,4 @@ stream_resolution=0.75
 stream_fps=30
 enable_stream=False
 low_performance=False
+only_send_hourly_report=False

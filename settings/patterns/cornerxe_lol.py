@@ -9,27 +9,33 @@ elif sizeword.lower() == "xl":
 else:
     size = 1.5
 
+self.keyboard.walk(tcfbkey,1.2*size)
+self.keyboard.walk(afclrkey,0.7*width)
+self.keyboard.walk(tclrkey,0.4*width)
+self.keyboard.walk(afcfbkey,0.6*size)
 
 for _ in range(2):
     self.keyboard.walk(afcfbkey,0.5*size)
-    self.keyboard.walk(tclrkey,abs(0.17*width*2))
+    for _ in range(width):
+        self.keyboard.walk(tclrkey,0.17)
+        self.keyboard.walk(tclrkey,0.17)
+        
     for _ in range(width):
         self.keyboard.walk(tcfbkey,0.5*size)
         self.keyboard.walk(afclrkey,0.17)
         self.keyboard.walk(afcfbkey,0.5*size)
         self.keyboard.walk(afclrkey,0.17)
     self.keyboard.walk(tcfbkey,0.5*size)
-    self.keyboard.walk(tclrkey,abs(0.17*width*2))
+
+    for _ in range(width):
+        self.keyboard.walk(tclrkey,0.17)
+        self.keyboard.walk(tclrkey,0.17)
+
     for _ in range(width):
         self.keyboard.walk(afcfbkey,0.5*size)
         self.keyboard.walk(afclrkey,0.17)
         self.keyboard.walk(tcfbkey,0.5*size)
         self.keyboard.walk(afclrkey,0.17)
-
-self.keyboard.walk(tcfbkey,1.2*size)
-self.keyboard.walk(afclrkey,0.7*width)
-self.keyboard.walk(tclrkey,0.4*width)
-self.keyboard.walk(afcfbkey,0.6*size)
 
 
 

@@ -15,6 +15,8 @@ import pyautogui as pag
 from modules.screen.ocr import ocrRead, imToString
 import copy
 from datetime import datetime
+from modules.screen.robloxWindow import RobloxWindowBounds
+import pickle
 
 ww, wh = pag.size()
 
@@ -36,13 +38,12 @@ macVer = platform.mac_ver()[0]
 #         hti = None
 
 class BuffDetector():
-    def __init__(self, newUI, displayType):
-        self.y = 52 if newUI else 30
-        self.x = 0
+    def __init__(self, robloxWindow: RobloxWindowBounds):
 
-        self.displayType = displayType
+        self.robloxWindow = robloxWindow
+        self.y = 33
 
-        self.buffSize = 76 if displayType == "retina" else 39
+        self.buffSize = 76 if self.robloxWindow.isRetina else 39
 
         nectars = {
             "comforting": [[np.array([0, 150, 63]), np.array([20, 155, 70])], (-2,0)],
@@ -55,7 +56,7 @@ class BuffDetector():
         self.nectarKernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
 
     def screenshotBuffArea(self):
-        return mssScreenshotNP(self.x, self.y, ww/1.8, 45)
+        return mssScreenshotNP(self.robloxWindow.mx, self.robloxWindow.my+self.robloxWindow.yOffset+33, self.robloxWindow.mw, 45)
 
     def getBuffQuantityFromImg(self, bgrImg,transform, crop=True, buff=None, intOnly=False):
         #buff size is 76x76
@@ -114,10 +115,9 @@ class BuffDetector():
 
         for buff,v in buffs:
             templatePosition, transform, stackable = v
-            multi = 2 if self.displayType == "retina" else 1
 
             #find the buff
-            buffTemplate = adjustImage("./images/buffs", buff, self.displayType)
+            buffTemplate = adjustImage("./images/buffs", buff, self.robloxWindow.display_type)
             res = locateTransparentImage(buffTemplate, screen, threshold)
 
             if not res: 
@@ -198,7 +198,6 @@ class BuffDetector():
     
     def detectBuffColorInImage(self, screen, hex, minSize, x1=0, y1=0, x2=None, y2=None, variation=0, show=False, searchDirection=1, instances=1):
         
-        multi = 2 if self.displayType == "retina" else 1
         #convert hex to bgr and setup the color range
         r = (hex >> 16) & 0xFF
         g = (hex >> 8) & 0xFF
@@ -213,7 +212,7 @@ class BuffDetector():
         if y2 is None:
             y2 = screen.shape[0]
         
-        cropped = screen[int(y1):int(y2), int(x1):int(x2)]
+        cropped = screen[int(y1):int(y2), max(int(x1),0):int(x2)]
 
         if cropped is None or cropped.size == 0:
             print(f"Image is blank")
@@ -229,7 +228,7 @@ class BuffDetector():
             x, y, w, h = rect
 
             #filter area to avoid noise
-            if w > minSize[0]*multi and h > minSize[1]*multi:
+            if w > minSize[0]*self.robloxWindow.multi and h > minSize[1]*self.robloxWindow.multi:
                 coords.append((x + x1, y + y1, w, h))  # Offset by crop origin
 
         def sort_key(rect):
@@ -288,19 +287,18 @@ class BuffDetector():
         for buff, vals in self.nectars:
             col, offsetCoords = vals
             offsetX, offsetY = offsetCoords
-            multi = 2 if self.displayType == "retina" else 1
 
             #find the buff
-            buffTemplate = adjustImage("./images/buffs", buff, self.displayType)
+            buffTemplate = adjustImage("./images/buffs", buff, self.robloxWindow.display_type)
             res = locateTransparentImage(buffTemplate, screen, 0.5) #get the best match first. At high nectar levels, it becomes hard to detect the nectar icon
             if not res: 
                 nectarQuantity.append("0")
                 continue
             #get a screenshot of the buff
             rx, ry = res[1]
-            cropX = int(rx+offsetX*multi)
-            cropY = int(ry+offsetY*multi)
-            fullBuffImg = screen[cropY:cropY+40*multi, cropX:cropX+40*multi]
+            cropX = int(rx+offsetX*self.robloxWindow.multi)
+            cropY = int(ry+offsetY*self.robloxWindow.multi)
+            fullBuffImg = screen[cropY:cropY+40*self.robloxWindow.multi, cropX:cropX+40*self.robloxWindow.multi]
             h,w, *_ = fullBuffImg.shape
             #get the buff level
             fullBuffImg = cv2.cvtColor(fullBuffImg, cv2.COLOR_RGBA2BGR)
@@ -327,7 +325,7 @@ class BuffDetector():
 
 
 class HourlyReport():
-    def __init__(self, buffDetector: BuffDetector):
+    def __init__(self, buffDetector: BuffDetector = None):
         #key: name of buff
         #value: [template for template matching is the buff's top, bottom or middle, if buff image should be transformed, if buff is stackable]
         self.hourBuffs = {
@@ -343,6 +341,7 @@ class HourlyReport():
             "bearmorph3": ["top", True, False],
             "bearmorph4": ["top", True, False],
             "bearmorph5": ["top", True, False],
+            "bearmorph6": ["top", True, False],
         }
 
         self.uptimeBuffsColors = {
@@ -363,11 +362,7 @@ class HourlyReport():
         self.hourlyReportDrawer = HourlyReportDrawer()
 
         #setup stats
-        self.hourlyReportStats = {
-            "start_honey": 0,
-            "start_time": 0
-        }
-        self.resetHourlyStats() #add the hourly stats
+        self.hourlyReportStats = {}
 
     def filterOutliers(self, values, threshold=3):
         nonZeroValues = [x for x in values if x]
@@ -458,20 +453,40 @@ class HourlyReport():
             self.uptimeBuffsValues[k] = [0]*600
         
         self.buffGatherIntervals = [0]*600
+
+        self.saveHourlyReportData()
+    
+    def resetAllStats(self):
+        self.hourlyReportStats["start_time"] = 0
+        self.hourlyReportStats["start_honey"] = 0
+        self.resetHourlyStats()
     
     def addHourlyStat(self, stat, value):
         if isinstance(self.hourlyReportStats[stat], list):
             self.hourlyReportStats[stat].append(value)
         else:
             self.hourlyReportStats[stat] += value
+        self.saveHourlyReportData()
     
     def setSessionStats(self, start_honey, start_time):
         self.hourlyReportStats["start_honey"] = start_honey
         self.hourlyReportStats["start_time"] = start_time
+        self.saveHourlyReportData()
     
-    def getHoney(self):
-        ocrHoney = imToString("honey")
-        return ocrHoney if ocrHoney else 0
+    def saveHourlyReportData(self):
+        with open("data/user/hourly_report_stats.pkl", "wb") as f:
+            pickle.dump({
+                "hourlyReportStats": self.hourlyReportStats,
+                "uptimeBuffsValues": self.uptimeBuffsValues,
+                "buffGatherIntervals": self.buffGatherIntervals,
+            }, f)
+    
+    def loadHourlyReportData(self):
+        with open("data/user/hourly_report_stats.pkl", "rb") as f:
+            data = pickle.load(f)
+            self.hourlyReportStats = data["hourlyReportStats"]
+            self.uptimeBuffsValues = data["uptimeBuffsValues"]
+            self.buffGatherIntervals = data["buffGatherIntervals"]
 
 
 class HourlyReportDrawer:
@@ -930,7 +945,7 @@ class HourlyReportDrawer:
             imageWidth = int(width*(imageHeight/height))
             img = img.resize((imageWidth, imageHeight))
 
-            timeText = self.displayTime(planterTimes[i], ["m", "s"])
+            timeText = self.displayTime(planterTimes[i], ["h", "m"]) if planterTimes[i] > 0 else "Ready!"
             bbox = self.draw.textbbox((0, 0), timeText, font=timeFont)
             timeTextWidth = bbox[2] - bbox[0]
 
@@ -1249,10 +1264,16 @@ class HourlyReportDrawer:
         #planters
         y2 += 1500
         #check if there are planters
+        planterNames = [] #planterData["planters"]
+        planterTimes = [] #[x-time.time() for x in planterData["harvestTimes"]]
+        planterFields = [] #planterData["fields"]
         if planterData:
-            planterNames = planterData["planters"]
-            planterTimes = [x-time.time() for x in planterData["harvestTimes"]]
-            planterFields = planterData["fields"]
+            for i in range(len(planterData["planters"])):
+                if planterData["planters"][i]:
+                    planterNames.append(planterData["planters"][i])
+                    planterTimes.append(planterData["harvestTimes"][i] - time.time())
+                    planterFields.append(planterData["fields"][i])
+        if planterNames:
             self.draw.text((self.sidebarX, y2), "Planters", font=self.getFont("semibold", 85), fill=self.bodyColor)
             y2 += 250
             self.drawPlanters(y2, planterNames, planterTimes, planterFields)

@@ -10,5 +10,6 @@ self.keyboard.walk("d",0.35)
 self.keyboard.walk("w",4)
 self.keyboard.walk("s",0.35)
 self.keyboard.walk("d",4)
-self.keyboard.walk("s",0.6)
+self.keyboard.walk("w",0.8)
+self.keyboard.walk("s",0.55)
     

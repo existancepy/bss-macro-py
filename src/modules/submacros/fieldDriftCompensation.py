@@ -6,17 +6,19 @@ import numpy as np
 import cv2
 import time
 import pyautogui as pag
+from modules.screen.robloxWindow import RobloxWindowBounds
 
 mw, mh = pag.size()
 
 class fieldDriftCompensation():
-    def __init__(self, isRetina):
-        self.isRetina = isRetina
+    def __init__(self, robloxWindow: RobloxWindowBounds):
+        self.robloxWindow = robloxWindow
         #double pixel coordinates, double kernel size
-        if isRetina:
+        if self.robloxWindow.isRetina:
             self.kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(15,15))
         else:
             self.kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(8,8))
+    
     #imgSRC is a cv2 img
     def getSaturatorInImage(self, imgSRC):
         imgHLS = cv2.cvtColor(imgSRC, cv2.COLOR_BGR2HLS)
@@ -55,7 +57,7 @@ class fieldDriftCompensation():
         return (x+w//2, y+h//2)
 
     def getSaturatorLocation(self):
-        saturatorLocation = self.getSaturatorInImage(pillowToCv2(mssScreenshot(0,100, mw, mh-100)))
+        saturatorLocation = self.getSaturatorInImage(pillowToCv2(mssScreenshot(self.robloxWindow.mx,self.robloxWindow.my+100, self.robloxWindow.mw, self.robloxWindow.mh-100)))
         if saturatorLocation is None: return None
         x,y = saturatorLocation
         if self.isRetina:
@@ -70,8 +72,8 @@ class fieldDriftCompensation():
         keyboard.keyUp(k, False)
         
     def slowFieldDriftCompensation(self, initialSaturatorLocation):
-        winUp, winDown = mh/2.14, mh/1.88
-        winLeft, winRight = mw/2.14, mw/1.88
+        winUp, winDown = self.robloxWindow.mh/2.14, self.robloxWindow.mh/1.88
+        winLeft, winRight = self.robloxWindow.mw/2.14, self.robloxWindow.mw/1.88
         saturatorLocation = initialSaturatorLocation
         for _ in range(8):
             if saturatorLocation is None: break #cant find saturator

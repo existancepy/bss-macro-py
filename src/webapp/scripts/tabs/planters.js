@@ -19,8 +19,12 @@ function changePlanterMode(){
     
 }
 
+const planters = Object.keys(planterIcons)
 const planterArray = toImgArray(planterIcons)
+const fields = Object.keys(fieldNectarIcons)
 const fieldNectarArray = toImgArray(fieldNectarIcons, true)
+const nectars = Object.keys(nectarIcons)
+const nectarArray = toImgArray(nectarIcons)
 
 function fieldDropDownHTML(id){
     return buildInput(id,{
@@ -38,6 +42,15 @@ function planterDropDownHTML(id){
         length: 11.5
     })
 }
+function nectarDropDownHTML(id){
+    return buildInput(id,{
+        name: "dropdown",
+        data: nectarArray,
+        triggerFunction: "saveSetting(this, 'profile')",
+        length: 11.5
+    })
+}
+
 
 async function loadPlanters(){
     const cycleElement = document.getElementById("manual-planters-cycles")
@@ -100,6 +113,55 @@ async function loadPlanters(){
         `
         cycleElement.innerHTML += html
     }
+
+    const nectarPriorityElement = document.getElementById("auto-nectar-priority")
+    //auto planter's nectar priority
+    for(let i = 0; i < nectars.length; i++){
+        const html = `
+        <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top:1rem" ;="">
+            ${nectarDropDownHTML(`auto_priority_${i}_nectar`)}
+            <input type="text" id="auto_priority_${i}_min" style="width: 10rem; margin-top: 0.6rem;" class="poppins-regular textbox" data-input-type="int" data-input-limit="3" onkeypress="return textboxRestriction(this, event)" onchange="saveSetting(this, 'profile')">
+        </form>
+        `
+        nectarPriorityElement.innerHTML += html
+    }
+
+    const allowedPlantersElement = document.getElementById("auto-allowed-planters")
+    //auto planter's nectar priority
+    for(let i = 0; i < planters.length; i++){
+        if (planters[i] == "none") continue
+        const html = `
+        <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 10%; margin-top:1rem" ;="">
+            <div style="width: 70%;">
+                <label>${planterArray[i]}</label>
+            </div>
+            <label class="checkbox-container" style="margin-top: 0.6rem;">
+                    <input type="checkbox" id="auto_planter_${planters[i]}" onchange="saveSetting(this, 'profile')">
+                    <span class="checkmark"></span>
+                </label>
+        </form>
+        `
+        allowedPlantersElement.innerHTML += html
+    }
+    
+    const allowedFieldsElement = document.getElementById("auto-allowed-fields")
+    //auto planter's nectar priority
+    for(let i = 0; i < fields.length; i++){
+        if (fields[i] == "none") continue
+        const html = `
+        <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 10%; margin-top:1rem" ;="">
+            <div style="width: 70%;">
+                <label>${fieldNectarArray[i]}</label>
+            </div>
+            <label class="checkbox-container" style="margin-top: 0.6rem;">
+                    <input type="checkbox" id="auto_field_${fields[i]}" onchange="saveSetting(this, 'profile')">
+                    <span class="checkmark"></span>
+                </label>
+        </form>
+        `
+        allowedFieldsElement.innerHTML += html
+    }
+
     //load inputs
     const settings = await loadAllSettings()
     loadInputs(settings)
@@ -116,5 +178,16 @@ function clearManualPlantersData(){
         btn.classList.remove("active")
       }, 700)
 }
+
+function clearAutoPlantersData(){
+    const btn = document.getElementById("auto-planters-reset-btn")
+    if (btn.classList.contains("active")) return
+    eel.clearManualPlanters()
+    btn.classList.add("active")
+    setTimeout(() => {
+        btn.classList.remove("active")
+      }, 700)
+}
+
 $("#planters-placeholder")
 .load("../htmlImports/tabs/planters.html", loadPlanters) 

@@ -1,4 +1,10 @@
 
+from modules.misc import messageBox
+#check if step 3 installing dependencies was ran
+try:
+    import requests
+except ModuleNotFoundError:
+    messageBox.msgBox(title="Dependencies not installed", text="It seems like you have not finished step 3 of the installation process. Refer to the discord for the instructions")
 from pynput import keyboard
 import multiprocessing
 import ctypes
@@ -8,37 +14,27 @@ import time
 import sys
 import ast
 import subprocess
-from modules.misc import messageBox
 import atexit
 from modules.misc.imageManipulation import adjustImage
 from modules.screen.imageSearch import locateImageOnScreen
 import pyautogui as pag
+from modules.misc.appManager import getWindowSize
+import traceback
+import modules.misc.settingsManager as settingsManager
+import modules.macro as macroModule
+import modules.controls.mouse as mouse
+
+try:
+	from modules.misc.ColorProfile import DisplayColorProfile
+except ModuleNotFoundError:
+	messageBox.msgBox(title="Dependencies not installed", text="The new update requires new dependencies. Refer to #3 | installing-dependencies channel in the discord.")
+	quit()
+from modules.submacros.hourlyReport import HourlyReport
 mw, mh = pag.size()
 
-def hasteCompensationThread(baseSpeed, isRetina, haste):
-    from modules.submacros.hasteCompensation import HasteCompensation
-    hasteCompensation = HasteCompensation(isRetina, baseSpeed)
-    global stopThreads
-    while not stopThreads:
-        haste.value = hasteCompensation.getHaste()
-
-def disconnectCheck(run, status, display_type):
-    img = adjustImage("./images/menu", "disconnect", display_type)
-    while not stopThreads:
-        if locateImageOnScreen(img, mw/3, mh/2.8, mw/2.3, mh/5, 0.7):
-            print("disconnected")
-            run.value = 4
-            time.sleep(300) #5 min cd to let the macro run through all 3 rejoins
-        time.sleep(1)
-
 #controller for the macro
-def macro(status, logQueue, haste, updateGUI):
-    print("importing settings manager")
-    import modules.misc.settingsManager as settingsManager
-    print("importing macro module")
-    import modules.macro as macroModule
-    print("macro main process started")
-    macro = macroModule.macro(status, logQueue, haste, updateGUI)
+def macro(status, logQueue, updateGUI):
+    macro = macroModule.macro(status, logQueue, updateGUI)
     #invert the regularMobsInFields dict
     #instead of storing mobs in field, store the fields associated with each mob
     regularMobData = {}
@@ -54,13 +50,22 @@ def macro(status, logQueue, haste, updateGUI):
     if "share" in macro.setdat["private_server_link"] and macro.setdat["rejoin_method"] == "deeplink":
                 messageBox.msgBox(text="You entered a 'share?code' link!\n\nTo fix this:\n1. Paste the link in your browser\n2. Wait for roblox to load in\n3. Copy the link from the top of your browser.  It should now be a 'privateServerLinkCode' link", title='Unsupported private server link')
                 return
+
+    taskCompleted = True
+    questCache = {}
+    
     macro.start()
     #macro.useItemInInventory("blueclayplanter")
     #function to run a task
     #makes it easy to do any checks after a task is complete (like stinger hunt, rejoin every, etc)
     def runTask(func = None, args = (), resetAfter = True, convertAfter = True):
+        nonlocal taskCompleted
         #execute the task
-        returnVal = func(*args) if func else None
+        if func:
+            returnVal = func(*args) 
+            taskCompleted = True
+        else:
+            returnVal = None
         #task done
         if resetAfter: 
             macro.reset(convert=convertAfter)
@@ -68,7 +73,7 @@ def macro(status, logQueue, haste, updateGUI):
         #do priority tasks
         if macro.night and macro.setdat["stinger_hunt"]:
             macro.stingerHunt()
-        if macro.setdat["mondo_buff"]:
+        if macro.setdat["mondo_buff"] and macro.hasMondoRespawned():
             macro.collectMondoBuff()
         if macro.setdat["rejoin_every"]:
             if macro.hasRespawned("rejoin_every", macro.setdat["rejoin_every"]*60*60):
@@ -84,6 +89,8 @@ def macro(status, logQueue, haste, updateGUI):
         return returnVal
     
     def handleQuest(questGiver):
+        nonlocal questCache, taskCompleted
+        
         gatherFieldsList = []
         gumdropGatherFieldsList = []
         requireRedField = False
@@ -94,6 +101,12 @@ def macro(status, logQueue, haste, updateGUI):
         feedBees = []
         setdatEnable = []
 
+        #if the macro has completed a task in the last cycle
+        # if taskCompleted or not questGiver in questCache:
+        #     questObjective = macro.findQuest(questGiver)
+        #     questCache[questGiver] = questObjective
+        # else:
+        #     questObjective = questCache[questGiver]
         questObjective = macro.findQuest(questGiver)
 
         if questObjective is None:  # Quest does not exist
@@ -195,10 +208,14 @@ def macro(status, logQueue, haste, updateGUI):
                 blueGumdropFieldNeeded = blueGumdropFieldNeeded or needsBlueGumdrop
                 fieldNeeded = fieldNeeded or needsField
         
+                    
+        taskCompleted = False 
+
         #feed bees for quest
         for item, quantity in itemsToFeedBees:
             macro.feedBee(item, quantity)
-                    
+            taskCompleted = True
+
         #collect
         for k, _ in macroModule.collectData.items():
             #check if the cooldown is up
@@ -236,30 +253,78 @@ def macro(status, logQueue, haste, updateGUI):
                 planterDataRaw = f.read()
             f.close()
             #no data, place planters
-            if not planterDataRaw:
-                runTask(macro.placeAllPlantersInCycle, args = (1,),resetAfter=False)
+            if not planterDataRaw.strip():
+                planterData = { #planter data to be stored in a file
+                    "cycles": [1,1,1],
+                    "planters": ["","",""],
+                    "fields": ["","",""],
+                    "gatherFields": ["","",""],
+                    "harvestTimes": [0,0,0]
+                }
+                for i in range(3):
+                    if macro.setdat[f"cycle1_{i+1}_planter"] == "none" or macro.setdat[f"cycle1_{i+1}_field"] == "none":
+                        continue
+                    planter = runTask(macro.placePlanterInCycle, args = (i, 1),resetAfter=False)
+                    if planter:
+                        planterData["planters"][i] = planter[0]
+                        planterData["fields"][i] = planter[1]
+                        planterData["harvestTimes"][i] = planter[2]
+                        planterData["gatherFields"][i] = planter[1] if planter[3] else ""
+                        with open("./data/user/manualplanters.txt", "w") as f:
+                            f.write(str(planterData))
+                        f.close()
+
             #planter data does exist, check if its time to collect them
             else: 
                 planterData = ast.literal_eval(planterDataRaw)
-                planterChanged = False
                 #check all 3 slots to see if planters are ready to harvest
                 for i in range(3):
                     cycle = planterData["cycles"][i]
-                    if time.time() > planterData["harvestTimes"][i] and planterData["planters"][i]:
-                            
+                    if planterData["planters"][i] and time.time() > planterData["harvestTimes"][i]:
                         #Collect planter
-                        runTask(macro.collectPlanter, args=(planterData["planters"][i], planterData["fields"][i]))
-                        
-                        #place them
-                        nextCycle = goToNextCycle(cycle, i)
-                        planterData = runTask(macro.placePlanterInCycle, args = (i, nextCycle, planterData),resetAfter=False)
-                        planterChanged = True
-                if planterChanged:
-                    #save the planter data
-                    # with open("./data/user/manualplanters.txt", "w") as f:
-                    #     f.write(str(planterData))
-                    # f.close()
-                    pass
+                        if runTask(macro.collectPlanter, args=(planterData["planters"][i], planterData["fields"][i])):
+                            planterData["harvestTimes"][i] = ""
+                            planterData["planters"][i] = ""
+                            planterData["fields"][i] = ""
+                            with open("./data/user/manualplanters.txt", "w") as f:
+                                f.write(str(planterData))
+                            f.close()
+
+                #check for planters to place
+                for i in range(3):
+                    cycle = planterData["cycles"][i]
+                    #check if planter slot is occupied
+                    if planterData["planters"][i]:
+                        continue
+                    #if that planter is currently placed down by a different slot, do not harvest and place
+                    #this avoids overlapping the same planter
+                    nextCycle = goToNextCycle(cycle, i)
+                    if not nextCycle: #make sure the column (slot) isnt just empty
+                        continue
+
+                    planterToPlace = macro.setdat[f"cycle{nextCycle}_{i+1}_planter"]
+                    otherSlotPlanters = planterData["planters"][:i] + planterData["planters"][i+1:]
+                    if planterToPlace in otherSlotPlanters:
+                        continue
+
+                    #also check for fields
+                    fieldToPlace = macro.setdat[f"cycle{nextCycle}_{i+1}_field"]
+                    otherSlotFields = planterData["fields"][:i] + planterData["fields"][i+1:]
+                    if fieldToPlace in otherSlotFields:
+                        continue
+                    
+                    #place planter
+                    planter = runTask(macro.placePlanterInCycle, args = (i, nextCycle),resetAfter=False)
+                    if planter:
+                        planterData["cycles"][i] = nextCycle
+                        planterData["planters"][i] = planter[0]
+                        planterData["fields"][i] = planter[1]
+                        planterData["harvestTimes"][i] = planter[2]
+                        planterData["gatherFields"][i] = planter[1] if planter[3] else ""
+                        with open("./data/user/manualplanters.txt", "w") as f:
+                            f.write(str(planterData))
+                        f.close()
+                    
                  
         #mob run
         for mob, fields in regularMobData.items():
@@ -386,6 +451,8 @@ def macro(status, logQueue, haste, updateGUI):
         if fieldNeeded and not allGatheredFields:
             runTask(macro.gather, args=("pine tree",), resetAfter=False)
         
+        mouse.click()
+        
         
 
 
@@ -413,7 +480,6 @@ if __name__ == "__main__":
     import modules.screen.screenData as screenData
     from modules.controls.keyboard import keyboard as keyboardModule
     import modules.logging.log as logModule
-    import modules.controls.mouse as mouse
     import modules.misc.appManager as appManager
     import modules.misc.settingsManager as settingsManager
     from modules.discord_bot.discordBot import discordBot
@@ -438,7 +504,6 @@ if __name__ == "__main__":
     updateGUI = multiprocessing.Value('i', 0)
     status = manager.Value(ctypes.c_wchar_p, "none")
     logQueue = manager.Queue()
-    haste = multiprocessing.Value('d', 0)
     watch_for_hotkeys(run)
     logger = logModule.log(logQueue, False, None, blocking=True)
 
@@ -460,21 +525,27 @@ if __name__ == "__main__":
         with open(f"../settings/patterns/{pattern}", "r") as f:
             ahk = f.read()
         f.close()
-        python = ahkPatternToPython(ahk)
-        print(f"Converted: {pattern}")
-        patternName = pattern.rsplit(".", 1)[0].lower()
-        with open(f"../settings/patterns/{patternName}.py", "w") as f:
-            f.write(python)
-        f.close()
+        try:
+            python = ahkPatternToPython(ahk)
+            print(f"Converted: {pattern}")
+            patternName = pattern.rsplit(".", 1)[0].lower()
+            with open(f"../settings/patterns/{patternName}.py", "w") as f:
+                f.write(python)
+            f.close()
+        except:
+            messageBox.msgBox(title="Failed to convert pattern", text=f"There was an error converting {pattern}. The pattern will not be used.")
     
     #setup stream class
     stream = cloudflaredStream()
 
     def onExit():
         stopApp()
-        if discordBotProc and discordBotProc.is_alive():
-            discordBotProc.terminate()
-            discordBotProc.join()
+        try:
+            if discordBotProc and discordBotProc.is_alive():
+                discordBotProc.terminate()
+                discordBotProc.join()
+        except NameError:
+            pass
         
     def stopApp(page= None, sockets = None):
         global stopThreads
@@ -501,18 +572,41 @@ if __name__ == "__main__":
     #check color profile
     if sys.platform == "darwin":
         try:
-            cmd = """
-                osascript -e 'tell application "Image Events" to display profile of display 1' 
-                """
-            colorProfile = subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
-            colorProfile = colorProfile.strip()
-            if colorProfile == "missing value": colorProfile = "Color LCD"
-            if not "sRGB IEC61966" in colorProfile:
-                messageBox.msgBox(text = f"Your current color profile is {colorProfile}.The required one is sRGB IEC61966-2.1.\
-                \nThis is necessary for the macro to work\
-                \nTVisit step 6 of the macro installation guide in the discord for instructions", title="Wrong Color Profile")
-        except:
+            colorProfileManager = DisplayColorProfile()
+            currentProfileColor = colorProfileManager.getCurrentColorProfile()
+            if not "sRGB" in currentProfileColor:
+                try:
+                    if messageBox.msgBoxOkCancel(title="Incorrect Color Profile", text=f"You current display's color profile is {currentProfileColor} but sRGB is required for the macro.\nPress 'Ok' to change color profiles"):
+                        colorProfileManager.resetDisplayProfile()
+                        colorProfileManager.setCustomProfile("/System/Library/ColorSync/Profiles/sRGB Profile.icc")
+                        messageBox.msgBox(title="Color Profile Success", text="Successfully changed the current color profile to sRGB")
+
+                except Exception as e:
+                    messageBox.msgBox(title="Failed to change color profile", text=e)
+        except Exception as e:
             pass
+    
+        #check screen recording permissions
+        try:
+            cg = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+            cg.CGRequestScreenCaptureAccess.restype = ctypes.c_bool
+            if not cg.CGRequestScreenCaptureAccess():
+                messageBox.msgBox(title="Screen Recording Permission", text='Terminal does not have the screen recording permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Screen Recording -> add and enable Terminal. After that, restart the macro')
+        except AttributeError:
+            pass
+        #check full keyboard access
+        try:
+            result = subprocess.run(
+                ["defaults", "read", "com.apple.universalaccess", "KeyboardAccessEnabled"],
+                capture_output=True,
+                text=True
+            )
+            value = result.stdout.strip()
+            if value == "1":
+                messageBox.msgBox(text = f"Full Keyboard Access is enabled. The macro will not work properly\
+                    \nTo disable it, go to System Settings -> Accessibility -> Keyboard -> uncheck 'Full Keyboard Access'")
+        except Exception as e:
+            print("Error reading Full Keyboard Access:", e)
 
     discordBotProc = None
     prevDiscordBotToken = None
@@ -537,11 +631,13 @@ if __name__ == "__main__":
             #create and set webhook obj for the logger
             logger.enableWebhook = setdat["enable_webhook"]
             logger.webhookURL = setdat["webhook_link"]
-            print("Setting haste.value")
-            haste.value = setdat["movespeed"]
+            print("Setting stop threads")
             stopThreads = False
             print("variables initalised")
 
+            #reset hourly report data
+            hourlyReport = HourlyReport()
+            hourlyReport.resetAllStats()
             #stream
             def waitForStreamURL():
                 #wait for up to 15 seconds for the public link
@@ -565,15 +661,28 @@ if __name__ == "__main__":
                     messageBox.msgBox(text='Cloudflared is required for streaming but is not installed. Check the #guides channel for installation instructions', title='Cloudflared not installed')
 
             print("starting macro proc")
+            #check if user enabled field drift compensation but sprinkler is not supreme saturator
+            fieldSettings = settingsManager.loadFields()
+            sprinkler = setdat["sprinkler_type"]
+            for field in setdat["fields"]:
+                if fieldSettings[field]["field_drift_compensation"] and setdat["sprinkler_type"] != "saturator":
+                    messageBox.msgBox(title="Field Drift Compensation", text=f"You have Field Drift Compensation enabled for {field} field, \
+                                    but you do not have Supreme Saturator as your sprinkler type in configs.\n\
+				                    Field Drift Compensation requires you to own the Supreme Saturator.\n\
+                                    Kindly disable field drift compensation if you do not have the Supreme Saturator")
+                    break
+            #check if blender is enabled but there are no items to craft
+            validBlender = not setdat["blender_enable"] #valid blender set to false if blender is enabled, else its true since blender is disabled
+            for i in range(1,4):
+                if setdat[f"blender_item_{i}"] != "none" and (setdat[f"blender_repeat_{i}"] or setdat[f"blender_repeat_inf_{i}"]):
+                    validBlender = True
+            if not validBlender:
+                messageBox.msgBox(title="Blender", text=f"You have blender enabled, \
+                                    but there are no more items left to craft.\n\
+				                    Check the 'repeat' setting on your blender items and reset blender data.")
             #macro proc
-            macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, haste, updateGUI), daemon=True)
+            macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
-
-            #haste compensation
-            if setdat["haste_compensation"]:
-                hasteCompThread = Thread(target=hasteCompensationThread, args=(setdat["movespeed"], screenInfo["display_type"] == "retina", haste,))
-                hasteCompThread.daemon = True
-                hasteCompThread.start()
 
             logger.webhook("Macro Started", f'Existance Macro v2.0\nDisplay: {screenInfo["display_type"]}, {screenInfo["screen_width"]}x{screenInfo["screen_height"]}', "purple")
             run.value = 2
@@ -590,7 +699,7 @@ if __name__ == "__main__":
             appManager.closeApp("Roblox")
             keyboardModule.releaseMovement()
             mouse.mouseUp()
-            macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, haste, updateGUI), daemon=True)
+            macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
             run.value = 2
         
@@ -601,7 +710,7 @@ if __name__ == "__main__":
             appManager.openApp("Roblox")
             keyboardModule.releaseMovement()
             mouse.mouseUp()
-            macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, haste, updateGUI), daemon=True)
+            macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
 
         #detect a new log message
@@ -620,11 +729,12 @@ if __name__ == "__main__":
         
         if run.value == 2 and time.time() > disconnectCooldownUntil:
             img = adjustImage("./images/menu", "disconnect", screenInfo["display_type"])
-            if locateImageOnScreen(img, mw/3, mh/2.8, mw/2.3, mh/5, 0.7):
+            wmx, wmy, wmw, wmh = getWindowSize("roblox roblox")
+            if locateImageOnScreen(img, wmx+wmw/3, wmy+wmh/2.8, wmw/2.3, wmh/5, 0.7):
                 print("disconnected")
                 run.value = 4
                 disconnectCooldownUntil = time.time() + 300  # 5 min cooldown
     
             
             
-            
+        

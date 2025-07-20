@@ -93,132 +93,132 @@
                 },
             ])
             const diceIconsArray = toImgArray(diceIcons)
-            // buildStandardContainer(buffsParent,"Automatic Field Boost ⬆️ 🎲", "",[
-            //     {
-            //         id: "AFB-reset",
-            //         title: "Reset Dice and Glitter timings",
-            //         desc: "Resets the macro's tracking data on AFB ",
-            //         type: {
-            //             name: "button",
-            //             text: "Reset",
-            //             triggerFunction: "clearAFBData(this)"
-            //         }
-            //     },
-            //     {
-            //         id: "Auto_Field_Boost",
-            //         title: "AFB",
-            //         desc: "Enable Auto Field Boost <br> Recommend that other tasks are disabled",
-            //         type: {
-            //                 name: "checkbox",
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
+            buildStandardContainer(buffsParent,"Automatic Field Boost ⬆️ 🎲", "Automatically maintains glitter and dice boosts. Created by Sev",[
+                {
+                    id: "AFB-reset",
+                    title: "Reset Dice and Glitter timings",
+                    desc: "Resets the macro's tracking data on AFB ",
+                    type: {
+                        name: "button",
+                        text: "Reset",
+                        triggerFunction: "clearAFBData(this)"
+                    }
+                },
+                {
+                    id: "Auto_Field_Boost",
+                    title: "AFB",
+                    desc: "Enable Auto Field Boost <br> Recommend that tasks other than gathering are disabled",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
 
-            //     },
-            //     {
-            //         id: "AFB_wait",
-            //         title: "Wait",
-            //         desc: "How long the Macro waits to begin AFB after a gather interrupt",
-            //         type: {
-            //             name: "textbox",
-            //                 inputType: "int",
-            //                 inputLimit: 3,
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
+                },
+                {
+                    id: "AFB_wait",
+                    title: "Wait",
+                    desc: "How long the Macro waits to begin AFB after a gather interrupt",
+                    type: {
+                        name: "textbox",
+                            inputType: "int",
+                            inputLimit: 3,
+                            triggerFunction: saveProfileTriggerFunction
+                        }
 
-            //     },
-            //     {
-            //         id: "AFB_attempts",
-            //         title: "Attempts",
-            //         desc: "Gives up after X attempts",
-            //         type: {
-            //             name: "textbox",
-            //                 inputType: "int",
-            //                 inputLimit: 3,
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_rebuff",
-            //         title: "Re-Buff",
-            //         desc: "Re-Buff every X mins <br> DO NOT set to 0",
-            //         type: {
-            //             name: "textbox",
-            //                 inputType: "float",
-            //                 inputLimit: 4,
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_field",
-            //         title: "Field",
-            //         desc: "Activate AFB for the following field",
-            //         type: {
-            //                 name: "dropdown",
-            //                 data: fields,
-            //                 length: 13,
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_dice",
-            //         title: "Field Dice",
-            //         desc: "Type of Field Dice to use",
-            //         type: {
-            //                 name: "dropdown",
-            //                 data: diceIconsArray,
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_slotD",
-            //         title: "Dice Slot",
-            //         desc: "Hotbar of dice <br> Set to 0 to find via inventory",
-            //         type: {
-            //                 name: "dropdown",
-            //                 data: [0,1,2,3,4,5,6,7],
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_glitter",
-            //         title: "Glitter",
-            //         desc: "Allow Glitter to maintain buff",
-            //         type: {
-            //                 name: "checkbox",
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_slotG",
-            //         title: "Glitter Slot",
-            //         desc: "Hotbar of Glitter <br> Set to 0 to find via inventory",
-            //         type: {
-            //                 name: "dropdown",
-            //                 data: [0,1,2,3,4,5,6,7],
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_limit_on",
-            //         title: "Enable Time Limit",
-            //         desc: "Enable to stop using AFB after a set amount of hours",
-            //         type: {
-            //                 name: "checkbox",
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            //     {
-            //         id: "AFB_limit",
-            //         title: "Time Limit Length",
-            //         desc: "Deactivate AFB after X hours",
-            //         type: {
-            //             name: "textbox",
-            //                 inputType: "float",
-            //                 inputLimit: 4,
-            //                 triggerFunction: saveProfileTriggerFunction
-            //             }
-            //     },
-            // ])
+                },
+                {
+                    id: "AFB_rebuff",
+                    title: "Re-Buff",
+                    desc: "Re-Buff every X mins <br> DO NOT set to 0",
+                    type: {
+                        name: "textbox",
+                            inputType: "float",
+                            inputLimit: 4,
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_field",
+                    title: "Field",
+                    desc: "Activate AFB for the following field",
+                    type: {
+                            name: "dropdown",
+                            data: fields,
+                            length: 13,
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_dice",
+                    title: "Field Dice",
+                    desc: "Type of Field Dice to use",
+                    type: {
+                            name: "dropdown",
+                            data: diceIconsArray,
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_slotD",
+                    title: "Dice Slot",
+                    desc: "Hotbar of dice <br> Set to 0 to find via inventory",
+                    type: {
+                            name: "dropdown",
+                            data: [0,1,2,3,4,5,6,7],
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_attempts",
+                    title: "Dice Attempts",
+                    desc: "Maximum number of times to roll the field dice",
+                    type: {
+                        name: "textbox",
+                            inputType: "int",
+                            inputLimit: 3,
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_glitter",
+                    title: "Glitter",
+                    desc: "Allow Glitter to maintain buff",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_slotG",
+                    title: "Glitter Slot",
+                    desc: "Hotbar of Glitter <br> Set to 0 to find via inventory",
+                    type: {
+                            name: "dropdown",
+                            data: [0,1,2,3,4,5,6,7],
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_limit_on",
+                    title: "Enable Time Limit",
+                    desc: "Enable to stop using AFB after a set amount of hours",
+                    type: {
+                            name: "checkbox",
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+                {
+                    id: "AFB_limit",
+                    title: "Time Limit Length",
+                    desc: "Deactivate AFB after X hours",
+                    type: {
+                        name: "textbox",
+                            inputType: "float",
+                            inputLimit: 4,
+                            triggerFunction: saveProfileTriggerFunction
+                        }
+                },
+            ])
             buildStandardContainer(buffsParent,"Sticker Stack <img src='./assets/icons/sticker_stack.png' style='margin-left:0.4rem; height: 1.3rem;'>", "",[
                 {
                     id: "sticker_stack",

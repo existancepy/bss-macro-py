@@ -1,9 +1,10 @@
-import time
+import time as timeModule
 import threading
 import queue
-import pyautogui as pag
-from modules.screen.screenshot import screenshotScreen
+from modules.screen.screenshot import screenshotRobloxWindow, mssScreenshot
 import modules.logging.webhook as logWebhook
+import mss
+from modules.screen.robloxWindow import RobloxWindowBounds
 
 colors = {
     "red": "D22B2B",
@@ -17,26 +18,8 @@ colors = {
     "white": "FFFFFF",
     "yellow": "FFFF00",
 }
-
-mw, mh = pag.size()
 newUI = False
-
-def sendWebhook(url, title, desc, time, colorHex, ss=None, imagePath=None):
-    screenshotRegions = {
-        "screen": None,
-        "honey-pollen": (mw/3.5, 23 if newUI else 0, mw/2.4, 40),
-        "sticker": (200, 70, mw/2.5-200, mh/4),
-        "blue": (mw*3/4, mh*2/3, mw//4, mh//3),
-    }
     
-    webhookImg = None
-    if imagePath:
-        webhookImg = imagePath
-    elif ss:
-        webhookImg = "webhookScreenshot.png"
-        screenshotScreen(webhookImg, screenshotRegions[ss])
-    logWebhook.webhook(url, title, desc, time, colorHex, webhookImg)
-    print(f"[{time}] {title} {desc}")
 
 class webhookQueue:
     def __init__(self):
@@ -52,18 +35,20 @@ class webhookQueue:
                 print("Webhook queue stopped.")
                 break
             # Send the webhook
-            sendWebhook(**data)
+            logWebhook.webhook(**data)
             self.queue.task_done()
 
     def add_to_queue(self, data):
         self.queue.put(data)
 
 class log:
-    def __init__(self, logQueue, enableWebhook, webhookURL, blocking=False):
+    def __init__(self, logQueue, enableWebhook, webhookURL, hourlyReportOnly=False, blocking=False, robloxWindow: RobloxWindowBounds = None):
         self.logQueue = logQueue
         self.webhookURL = webhookURL
         self.enableWebhook = enableWebhook
         self.blocking = blocking
+        self.hourlyReportOnly = hourlyReportOnly
+        self.robloxWindow = robloxWindow
 
         if not self.blocking:
             self.webhookQueue = webhookQueue()
@@ -74,33 +59,65 @@ class log:
 
     def webhook(self, title, desc, color, ss=None, imagePath=None):
         # Update logs
+        time = timeModule.strftime("%H:%M:%S", timeModule.localtime())
         logData = {
             "type": "webhook",
-            "time": time.strftime("%H:%M:%S", time.localtime()),
+            "time": time,
             "title": title,
             "desc": desc,
             "color": colors[color]
         }
         self.logQueue.put(logData)
 
-        if not self.enableWebhook: return
+        print(f"[{time}] {title} {desc}")
+
+        if not self.enableWebhook or self.hourlyReportOnly: return
+
+        webhookImgPath = None
+        if imagePath:
+            webhookImgPath = imagePath
+        elif ss:
+            webhookImgPath = "webhookScreenshot.png"
+            #if roblox window is not provided, make one
+            if self.robloxWindow:
+                robloxWindow = self.robloxWindow
+            else:
+                print("new window bounds")
+                robloxWindow = RobloxWindowBounds()
+                robloxWindow.setRobloxWindowBounds()
+
+            screenshotRegions = {
+                "screen": (robloxWindow.mx, robloxWindow.my, robloxWindow.mw, robloxWindow.mh),
+                "honey-pollen": (robloxWindow.mx+robloxWindow.mw//2-320, robloxWindow.my+robloxWindow.yOffset, 650, 40),
+                "sticker": (robloxWindow.mx+200, robloxWindow.my+70, 376, 225),
+                "blue": (robloxWindow.mx+robloxWindow.mw*3/4, robloxWindow.my+robloxWindow.mh*2/3, robloxWindow.mw//4, robloxWindow.mh//3),
+            }
+            print(screenshotRegions["screen"])
+
+            for _ in range(2):
+                try:
+                    mssScreenshot(*screenshotRegions[ss], save=True, filename=webhookImgPath)
+                    break
+                except mss.exception.ScreenShotError:
+                    timeModule.sleep(0.5)
+            else:
+                webhookImgPath = None
 
         webhookData = {
             "url": self.webhookURL,
             "title": title,
             "desc": desc,
-            "time": time.strftime("%H:%M:%S", time.localtime()),
-            "colorHex": colors[color],
-            "ss": ss,
-            "imagePath": imagePath
+            "time": time,
+            "color": colors[color],
+            "imagePath": webhookImgPath
         }
 
         # Add the webhook message to the queue
         if self.blocking:
-            sendWebhook(**webhookData)
+            logWebhook.webhook(**webhookData)
         else:
             self.webhookQueue.add_to_queue(webhookData)
 
     def hourlyReport(self, title, desc, color):
         if not self.enableWebhook: return
-        logWebhook.webhook(self.webhookURL, title, desc, time.strftime("%H:%M:%S", time.localtime()), colors[color], "hourlyReport.png") 
+        logWebhook.webhook(self.webhookURL, title, desc, timeModule.strftime("%H:%M:%S", timeModule.localtime()), colors[color], "hourlyReport.png") 

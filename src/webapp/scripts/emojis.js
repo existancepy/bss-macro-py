@@ -89,6 +89,13 @@ const killEmojis = {
     stump_snail: "🐌",
 }
 
+const nectarIcons = {
+    comforting: "comforting",
+    motivating: "motivating",
+    satisfying: "satisfying",
+    refreshing: "refreshing",
+    invigorating: "invigorating"
+}
 const fieldNectarIcons = {
     none: null,
     sunflower: "satisfying",

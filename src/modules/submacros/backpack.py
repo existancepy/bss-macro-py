@@ -13,14 +13,8 @@ def rgb_to_dec(r, g, b):
             raise ValueError(f"RGB values out of range: r={r}, g={g}, b={b}")
       return (r * 256 * 256) + (g * 256) + b
     
-def bpc(mw, newUI):
-    Y1=6
-    add = 59+3
-    
-    if newUI: Y1 = 31  
-    X1=mw//2+add
-    
-    pix = pixelColor.getPixelColor(X1, Y1)
+def bpc(x,y):
+    pix = pixelColor.getPixelColor(x,y)
     col = rgb_to_dec(*pix)
     perc = 0
     #natro's backpack calc
@@ -119,5 +113,5 @@ def bpc(mw, newUI):
                         perc=95
                     else:
                         perc=0
-    #print("Pixel Colour: {}, Backpack Percentage: {}.".format(col, perc))
+    #print("X: {}, Y:{}, Pixel Colour: {}, Backpack Percentage: {}.".format(x,y,col, perc))
     return perc

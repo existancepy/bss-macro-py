@@ -46,5 +46,74 @@
             <p style = "font-weight:500; font-size:1rem;">The macro can place and collect up to 3 planters at once each cycle. Setting a field or planter as 'none' will make the macro ignore that slot</p>
         </div>
     </div>
+    
+    <div style="width: 80%; overflow-y: auto; height: 78vh; display: none;" id = "planters-auto" class="planter-tab">
+        <div class="poppins-medium standard-container" style="flex-direction: column; padding-top: 1rem; justify-content: unset;">
+            <h2 id="auto-planters">Auto Planters/Planter+</h2>
+            <p style="font-weight:500; font-size:1rem;"></p>
+            <div class="seperator"></div>
+            
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%;">
+                <div style="width: 70%;">
+                    <label>Harvest Every X Hours</label>
+                    <p>How often the macro should collect each cycle of planters. 2-3 is recommended</p>
+                </div>
+                <input type="text" id="auto_planters_collect_every" style="width: 8rem; margin-top: 0.6rem;" class="poppins-regular textbox" data-input-type="float" data-input-limit="4" onkeypress="return textboxRestriction(this, event)" onchange="saveSetting(this, 'profile')">
+            </form> 
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top:1rem">
+                <div style="width: 70%;">
+                    <label>Harvest When Full</label>
+                    <p>Collect the planters when they are fully grown. Overrides the 'Harvest Every X Hours' setting</p>
+                </div>
+                <label class="checkbox-container" style="margin-top: 0.6rem;">
+                    <input type="checkbox" id="auto_planters_collect_full" onchange="saveSetting(this, 'profile')">
+                    <span class="checkmark"></span>
+                </label>
+            </form> 
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top: 1rem;">
+                <div style="width: 70%;">
+                    <label>Max Planters</label>
+                    <p>Maximum number of planters that can be placed at any time</p>
+                </div>
+                <input type="text" id="auto_max_planters" style="width: 8rem; margin-top: 0.6rem;" class="poppins-regular textbox" data-input-type="int" data-input-limit="1" onkeypress="return textboxRestriction(this, event)" onchange="saveSetting(this, 'profile')">
+            </form> 
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top:1rem">
+                <div style="width: 70%;">
+                    <label>Clear Planter Timers</label>
+                    <p>Resets the macro's tracking data for the planters</p>
+                </div>
+                
+                <div id = "auto-planters-reset-btn" class="purple-button" onclick="clearManualPlantersData()" style="width: 5rem; display: flex; justify-content: center; padding: 0.3rem; cursor: pointer;">Reset</div>
+            </form> 
+        </div>
+
+        <div class="poppins-medium standard-container" style="flex-direction: column; padding-top: 1rem; justify-content: unset;">
+            <h2>Nectar Priority</h2>
+            <p style="font-weight:500; font-size:1rem;">The macro will aim to maintain nectars above the min%. The higher up a nectar is, the greater its priority</p>
+            <div class="seperator"></div>
+            <div id="auto-nectar-priority">
+                
+            </div>   
+        </div>
+
+        <div class="poppins-medium standard-container" style="flex-direction: column; padding-top: 1rem; justify-content: unset;">
+            <h2>Allowed Planters</h2>
+            <p style="font-weight:500; font-size:1rem;">Planters the macro can use</p>
+            <div class="seperator"></div>
+            <div style="height: 30vh; overflow-y: auto;" id="auto-allowed-planters">
+
+            </div>
+        </div>
+
+        <div class="poppins-medium standard-container" style="flex-direction: column; padding-top: 1rem; justify-content: unset;">
+            <h2>Allowed Fields</h2>
+            <p style="font-weight:500; font-size:1rem;">Fields the macro can plant in</p>
+            <div class="seperator"></div>
+            <div style="height: 30vh; overflow-y: auto;" id="auto-allowed-fields">
+
+            </div>
+        </div>
+    
+    </div>
 </div>
 

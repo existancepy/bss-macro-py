@@ -6,15 +6,88 @@ if sys.platform == "win32":
 else:
     import pyautogui as pag
 import time
-from modules.submacros.hasteCompensation import HasteCompensationOptimized
+from modules.submacros.hasteCompensation import HasteCompensationRevamped
+import threading
+from collections import deque
 
 
 class keyboard:
-    def __init__(self, walkspeed, haste, enableHasteCompensation):
+    def __init__(self, walkspeed, enableHasteCompensation, hasteCompensation: HasteCompensationRevamped):
         self.ws = walkspeed
-        self.haste = haste
         self.enableHasteCompensation = enableHasteCompensation
-        self.hasteCompensation = HasteCompensationOptimized(True, walkspeed)
+        self.hasteCompensation = hasteCompensation
+
+        self.detection_interval = 0.01
+        
+        #drift compensation
+        self.accumulated_error = 0
+        self.error_correction_factor = 0.1
+    
+    
+    def predictiveTimeWait(self, duration):
+        base_speed = 28
+        target_distance = base_speed * duration
+        corrected_target = target_distance - self.accumulated_error
+        
+        traveled_distance = 0
+        start_time = time.perf_counter()
+        last_time = start_time
+        
+        #safety distance, just in case of infinite drifting
+        max_time = duration * 1.2
+
+        #sleep_interval = 0.01  # Or even 0.02 would probably work fine
+        
+        while traveled_distance < corrected_target:
+            current_time = time.perf_counter()
+            elapsed = current_time - start_time
+            
+            # Safety timeout
+            if elapsed >= max_time:
+                break
+
+            speed = self.getMoveSpeed()
+            
+            delta_t = current_time - last_time
+            distance_increment = speed * delta_t
+            traveled_distance += distance_increment
+            
+            last_time = current_time
+            #time.sleep(sleep_interval)
+        
+        #calculate drift and update accumulated error
+        distance_error = traveled_distance - target_distance
+        
+        #self.accumulated_error = (self.accumulated_error * 0.9 + distance_error * self.error_correction_factor)
+    
+    
+    def walk(self, k, t, applyHaste=True, method='predictive'):
+        if applyHaste and self.enableHasteCompensation:
+            keyboard.keyDown(k, False)
+            
+            if method == 'predictive':
+                self.predictiveTimeWait(t)
+            else:
+                self.timeWait(t)  # Original method
+                
+            keyboard.keyUp(k, False)
+        else:
+            self.press(k, t * 28 / self.ws)
+    
+    def multiWalk(self, keys, t, applyHaste=True, method='predictive'):
+        for k in keys:
+            pag.keyDown(k, _pause=False)
+        
+        if applyHaste and self.enableHasteCompensation:
+            if method == 'predictive':
+                self.predictiveTimeWait(t)
+            else:
+                self.timeWait(t)
+        else:
+            time.sleep(t * 28 / self.ws)
+        
+        for k in keys:
+            pag.keyUp(k, _pause=False)
 
     @staticmethod
     #call the press function of the pag library
@@ -46,28 +119,13 @@ class keyboard:
         pag.keyUp(k)
 
     def getMoveSpeed(self):
-        movespeed = self.haste.value
+        movespeed = self.hasteCompensation.getHaste()
         return movespeed
     
+    def timeWaitNoHasteCompensation(self, duration):
+        time.sleep(duration* 28 / self.ws)
+
     def timeWait(self, duration):
-        # baseSpeed = 28
-        # targetDistance = baseSpeed * duration  # Total distance the player should travel
-        # maxTime = 28/24*duration #fail safe, in case it loops longer than it needs to.
-        # traveledDistance = 0  # Tracks total integrated distance
-        # startTime = time.perf_counter()
-        # prevTime = startTime
-
-        # while traveledDistance < targetDistance and prevTime-startTime < maxTime:
-        #     currentTime = time.perf_counter()
-        #     deltaT = currentTime - prevTime
-        #     speed = max(self.haste.value, self.ws)
-        #     traveledDistance += speed * deltaT
-
-        #     prevTime = currentTime
-        #     time.sleep(0.01)
-
-        # elapsed_time = time.perf_counter() - startTime
-        # print(f"current speed: {speed}, original time: {duration}, actual travel time: {elapsed_time}")
 
         baseSpeed = 28
         target_distance = baseSpeed * duration  # Total distance the player should travel
@@ -94,27 +152,6 @@ class keyboard:
         elapsed_time = time.perf_counter() - st
         #print(f"current speed: {speed}, original time: {duration}, actual travel time: {elapsed_time}")
 
-    #like press, but with walkspeed and haste compensation
-    def walk(self,k,t,applyHaste = True):
-        #print(self.haste.value)
-        if applyHaste and self.hasteCompensation:
-            keyboard.keyDown(k, False)
-            self.timeWait(t)
-            keyboard.keyUp(k, False)
-        else:
-            self.press(k, t*28/self.ws)
-
-    #like walk, but with multiple keys
-    def multiWalk(self, keys, t, applyHaste=True):
-        for k in keys:
-            pag.keyDown(k, _pause = False)
-        if applyHaste and self.hasteCompensation:
-            self.timeWait(t)
-        else:
-            time.sleep(t*28/self.ws)
-        for k in keys:
-            pag.keyUp(k, _pause = False)
-
     #recreate natro's walk function
     def tileWait(self, n, hasteCap=0):
         #self.getMoveSpeed takes too fast to run
@@ -136,7 +173,6 @@ class keyboard:
             s, f, v = a()
             d += ((prev_v + v) / 2) * (f - s) 
         
-        print(time.time()-st)
     
     def tileWalk(self, key, tiles, applyHaste = True):
         if applyHaste:

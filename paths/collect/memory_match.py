@@ -8,7 +8,7 @@ for _ in range(2):
 sleep(3)
 for _ in range(2):
     self.keyboard.press(",")
-sleep(1.9)
+sleep(1.8)
 self.keyboard.press("space")
 self.keyboard.keyUp("w")
 sleep(0.2)

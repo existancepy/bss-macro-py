@@ -491,3 +491,12 @@ option{
     height: calc(var(--dd-font-size) * 1); /*Customise the height scaling of icons*/
     margin: 0 calc(var(--dd-font-size) * 0.3); /*Customise the spacing of icons*/
 }
+
+label img{
+    height: 1.1rem;
+    margin-right: 0.5rem
+}
+
+#auto-allowed-fields img{
+    margin-left: 0.5rem;
+}

@@ -17,4 +17,4 @@ def webhook(url, title, desc, time, color, imagePath = None):
     try:
         webhook.execute()
     except Exception as e:
-        print(f"Webhook Error: {e}")    
+        print(f"Webhook Error: {e}")

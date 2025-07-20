@@ -174,6 +174,7 @@ class cloudflaredStream:
 
         #get the cloudflared path
         paths = [
+            "cloudflared",
             "/opt/homebrew/bin/cloudflared",
             "/usr/local/Homebrew/bin/cloudflared"
         ]

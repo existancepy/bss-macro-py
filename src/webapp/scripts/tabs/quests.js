@@ -9,7 +9,6 @@ function switchQuestsTab(target){
     //remove active class and hide all tabs
     Array.from(document.getElementsByClassName("quests-tab-item")).forEach(x => {
         x.classList.remove("active")
-        console.log(x.id)
         document.getElementById(`${x.id}-tab`).style.display = "none"
     })
     //add indicator + active class
