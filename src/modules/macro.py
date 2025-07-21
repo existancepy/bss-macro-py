@@ -3759,7 +3759,7 @@ class macro:
             time.sleep(0.15)
             newX = mouse.getPos()[0]
             if originalX == newX:
-                messageBox.msgBox(text='It seems like terminal does not have the accessibility permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Accessibility -> add and enable Terminal.\n\nVisit #6system-settings in the discord for more detailed instructions\n\n NOTE: This popup might be incorrect. If the macro is able to input keypresses and interact with the game, you can dismiss this popup', title='Accessibility Permission')
+                messageBox.msgBox(text='It seems like terminal does not have the accessibility permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Accessibility -> add and enable Terminal.\n\nVisit https://existance-macro.gitbook.io/existance-macro-docs/macro-installation/images-and-media/1.-terminal-permissions for detailed instructions\n\n NOTE: This popup might be incorrect. If the macro is able to input keypresses and interact with the game, you can dismiss this popup', title='Accessibility Permission')
             time.sleep(1)
             # img1 = pillowToHash(mssScreenshot())
             # self.keyboard.press("esc")

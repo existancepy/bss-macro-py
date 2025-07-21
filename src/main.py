@@ -4,7 +4,7 @@ from modules.misc import messageBox
 try:
     import requests
 except ModuleNotFoundError:
-    messageBox.msgBox(title="Dependencies not installed", text="It seems like you have not finished step 3 of the installation process. Refer to the discord for the instructions")
+    messageBox.msgBox(title="Dependencies not installed", text="It seems like you have not finished step 3 of the installation process. Refer to https://existance-macro.gitbook.io/existance-macro-docs/macro-installation/markdown/2.-installing-dependencies")
 from pynput import keyboard
 import multiprocessing
 import ctypes
@@ -27,7 +27,7 @@ import modules.controls.mouse as mouse
 try:
 	from modules.misc.ColorProfile import DisplayColorProfile
 except ModuleNotFoundError:
-	messageBox.msgBox(title="Dependencies not installed", text="The new update requires new dependencies. Refer to #3 | installing-dependencies channel in the discord.")
+	messageBox.msgBox(title="Dependencies not installed", text="The new update requires new dependencies. Refer to https://existance-macro.gitbook.io/existance-macro-docs/macro-installation/markdown/2.-installing-dependencies.")
 	quit()
 from modules.submacros.hourlyReport import HourlyReport
 mw, mh = pag.size()
@@ -658,7 +658,7 @@ if __name__ == "__main__":
                     streamLink = stream.start(setdat["stream_resolution"])
                     Thread(target=waitForStreamURL, daemon=True).start()
                 else:
-                    messageBox.msgBox(text='Cloudflared is required for streaming but is not installed. Check the #guides channel for installation instructions', title='Cloudflared not installed')
+                    messageBox.msgBox(text='Cloudflared is required for streaming but is not installed. Visit https://existance-macro.gitbook.io/existance-macro-docs/guides/optional-installations/stream-setup-installing-cloudflared for installation instructions', title='Cloudflared not installed')
 
             print("starting macro proc")
             #check if user enabled field drift compensation but sprinkler is not supreme saturator
