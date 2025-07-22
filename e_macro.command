@@ -44,6 +44,7 @@ cd src
 if [ -d "$VENV_PATH" ]; then
 	source "$VENV_PATH/bin/activate"
 	printf "activating virtual environment\n"
+	python --version
 	runPython python
 else
 	runPython python3.7
