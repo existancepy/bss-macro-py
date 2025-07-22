@@ -7,6 +7,7 @@ import platform
 import os
 from pathlib import Path
 import importlib.util
+import subprocess
 
 def get_python_version():
     """Get Python version as string (e.g., '3.9')."""
@@ -88,7 +89,9 @@ def load_bitmap_matcher():
             f"\n\nTry building with: python{get_python_version()} build_universal.py"
         )
     
-    # Load the module from the .so file
+    subprocess.run(["xattr", "-cr", so_path])
+
+    #load the module from the .so file
     spec = importlib.util.spec_from_file_location("bitmap_matcher", so_path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load module spec from {so_path}")
@@ -98,7 +101,7 @@ def load_bitmap_matcher():
     
     return module
 
-# Auto-load the module and expose its contents
+#auto-load the module and expose its contents
 try:
     _bitmap_matcher = load_bitmap_matcher()
     
