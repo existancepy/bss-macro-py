@@ -7,6 +7,9 @@ pkill -9 Python3.9
 pkill -9 Python3.8
 pkill -9 Python3.7
 
+VENV_NAME="bss-macro-env"
+VENV_PATH="$HOME/$VENV_NAME"
+
 #get system information
 chip=$(arch)
 os_ver=$(sw_vers -productVersion)
@@ -23,10 +26,8 @@ if [ $chip = 'i386' ]; then
 fi
 
 cd "$(dirname "$0")"
-if [ -d bin ]; then
-   source ./bin/activate
-   printf "activating virtual environment"
-fi
+
+
 
 runPython() {
 	if command -v $1 >/dev/null 2>&1; then
@@ -40,6 +41,12 @@ runPython() {
 }
 
 cd src
-runPython python3.7
-runPython python3.8
-runPython python3.9
+if [ -d "$VENV_PATH" ]; then
+	source "$VENV_PATH/bin/activate"
+	printf "activating virtual environment\n"
+	runPython python
+else
+	runPython python3.7
+	runPython python3.8
+	runPython python3.9
+fi
