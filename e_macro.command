@@ -31,7 +31,7 @@ cd "$(dirname "$0")"
 
 runPython() {
 	if command -v $1 >/dev/null 2>&1; then
-		echo "Trying to run macro with $1"
+		echo "Loading macro with $1..."
 		python_output=$($1 main.py 2>&1)
 		if echo "$python_output" | grep -i "operation not permitted" > /dev/null; then
 			osascript -e "display dialog \"Terminal does not have the 'full disk access' permission.\" & return & \"Instructions on enabling it can be found at https://existance-macro.gitbook.io/existance-macro-docs/tutorial/images-and-media/3.-terminal-permissions\" with title \"Permission Error\" buttons {\"OK\"} default button \"OK\" with icon caution"
@@ -44,6 +44,7 @@ cd src
 if [ -d "$VENV_PATH" ]; then
 	source "$VENV_PATH/bin/activate"
 	printf "activating virtual environment\n"
+	python --version
 	runPython python
 else
 	runPython python3.7
