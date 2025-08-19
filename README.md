@@ -3,7 +3,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/existancepy/bss-macro-py?style=flat&label=Stars&color=fff240&logo=github&logocolor=white&link=https://github.com/existancepy/bss-macro-py/stargazers)
 ![Repo Size](https://img.shields.io/github/repo-size/existancepy/bss-macro-py?label=Repo%20Size&logo=github&logoColor=white)
 
-A Python macro for [Bee Swarm Simulator](https://www.roblox.com/games/1537690962/Bee-Swarm-Simulator) designed for MacOS and Windows.
+A Python macro for [Bee Swarm Simulator](https://www.roblox.com/games/1537690962/Bee-Swarm-Simulator) designed for MacOS.
 
 Existance Macro is a free and open source software, link: https://github.com/existancepy/bss-macro-py
 
@@ -33,3 +33,4 @@ This is where you can receive update news, guides, support/troubleshooting help 
 - Boost
     - Customise when and how often hotbar slots are used
     - Collect buffs from the sticker stack and field boosts
+
