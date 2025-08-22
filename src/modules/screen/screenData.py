@@ -4,6 +4,8 @@ import numpy as np
 import subprocess
 import sys
 import os
+import mss
+from PIL import Image
 from ..misc import settingsManager
 screenPath = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/user/screen.txt'))
 def setScreenData():
@@ -47,10 +49,13 @@ def setScreenData():
     #for macs: check if its reina, set the screen width and height, set multipliers
     if sys.platform == "darwin":
         #get a screenshot. The size of the screenshot is the true screen size
-        sh, sw, _ = np.array(pag.screenshot()).shape
-        if whd*2 == sh: #check if retina (screenshot size is twice pyautogui's size)
-            screenData["screen_width"] = sw
-            screenData["screen_height"] = sh
+        sct=mss.mss()
+        region={'top':0,'left':0,'width':150,'height':150}
+        shot=sct.grab(region)
+        sw, sh = shot.width, shot.height
+        if sw == 300: #check if retina (screenshot size is twice)
+            screenData["screen_width"] *= 2
+            screenData["screen_height"] *= 2
             screenData["display_type"] = "retina"
         ndisplay = "{}x{}".format(sw,sh)
         #get multipliers

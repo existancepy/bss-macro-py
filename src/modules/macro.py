@@ -1094,6 +1094,8 @@ class macro:
             self.keyboard.press('esc')
             time.sleep(0.2)
             self.keyboard.press('r')
+            time.sleep(0.2)
+            self.keyboard.press('w')
             time.sleep(0.25)
             self.keyboard.press('enter')
             print(f"pressed reset keys: {time.time()-st}")
