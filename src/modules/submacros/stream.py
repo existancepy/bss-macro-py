@@ -2,6 +2,8 @@ from flask import Flask, Response, render_template_string
 import cv2
 import numpy as np
 import mss
+import mss.darwin
+mss.darwin.IMAGE_OPTIONS = 0
 import threading
 import subprocess
 import time

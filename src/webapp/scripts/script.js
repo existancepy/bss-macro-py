@@ -48,6 +48,15 @@ async function loadAllSettings(){
 //element
 //type: setting type, eg: profile, general
 function saveSetting(ele, type){
+    //apply element binding (only for checkboxes)
+    const bindTargetId = ele.dataset.inputBind
+    if (bindTargetId){
+        const bindTarget = document.getElementById(bindTargetId)
+        if (ele.checked){
+            bindTarget.checked = false
+            eel.saveProfileSetting(bindTargetId, false)
+        }
+    }
     const id = ele.id
     const value = getInputValue(id)
     if (type == "profile"){
@@ -70,7 +79,7 @@ function generateSettingObject(properties){
 
 //load fields based on the obj data
 eel.expose(loadInputs)
-function loadInputs(obj){
+function loadInputs(obj, save=""){
     for (const [k,v] of Object.entries(obj)) {
         const ele = document.getElementById(k)
         //check if element exists
@@ -82,6 +91,9 @@ function loadInputs(obj){
         }else{
             ele.value = v
         }
+    }
+    if (save == "profile"){
+        eel.saveDictProfileSettings(obj)
     }
 }
 

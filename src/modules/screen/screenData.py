@@ -5,6 +5,8 @@ import subprocess
 import sys
 import os
 import mss
+import mss.darwin
+mss.darwin.IMAGE_OPTIONS = 0
 from PIL import Image
 from ..misc import settingsManager
 screenPath = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/user/screen.txt'))

@@ -9,6 +9,8 @@ import platform
 import zipfile
 import requests
 from io import BytesIO
+import ast
+import json
 
 eel.init('webapp')
 run = None
@@ -33,6 +35,57 @@ def getPatterns():
 @eel.expose
 def clearManualPlanters():
     settingsManager.clearFile("./data/user/manualplanters.txt")
+
+@eel.expose
+def getManualPlanterData():
+    with open("./data/user/manualplanters.txt", "r") as f:
+        planterDataRaw = f.read()
+    if planterDataRaw.strip():
+        return ast.literal_eval(planterDataRaw)
+    else: 
+        return ""
+    
+@eel.expose
+def getAutoPlanterData():
+    with open("./data/user/auto_planters.json", "r") as f:
+        return json.load(f)
+
+@eel.expose
+def clearAutoPlanters():
+    data = {
+        "planters": [
+            {
+                "planter": "",
+                "nectar": "",
+                "field": "",
+                "harvest_time": 0,
+                "nectar_est_percent": 0
+            },
+            {
+                "planter": "",
+                "nectar": "",
+                "field": "",
+                "harvest_time": 0,
+                "nectar_est_percent": 0
+            },
+            {
+                "planter": "",
+                "nectar": "",
+                "field": "",
+                "harvest_time": 0,
+                "nectar_est_percent": 0
+            }
+        ],
+        "nectar_last_field": {
+            "comforting": "",
+            "refreshing": "",
+            "satisfying": "",
+            "motivating": "",
+            "invigorating": ""
+        }
+    }
+    with open("./data/user/auto_planters.json", "w") as f:
+        json.dump(data, f, indent=3)
     
 @eel.expose
 def clearBlender():
@@ -73,6 +126,7 @@ eel.expose(settingsManager.loadSettings)
 eel.expose(settingsManager.loadAllSettings)
 eel.expose(settingsManager.saveProfileSetting)
 eel.expose(settingsManager.saveGeneralSetting)
+eel.expose(settingsManager.saveDictProfileSettings)
 
 def updateGUI():
     settings = settingsManager.loadAllSettings()

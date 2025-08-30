@@ -3,7 +3,7 @@ import modules.misc.appManager as appManager
 import modules.misc.settingsManager as settingsManager
 import time
 import pyautogui as pag
-from modules.screen.screenshot import mssScreenshot, mssScreenshotNP, benchmarkMSS
+from modules.screen.screenshot import mssScreenshot, mssScreenshotNP, benchmarkMSS, mssScreenshotPillowRGBA
 from modules.controls.keyboard import keyboard
 from modules.controls.sleep import sleep
 import modules.controls.mouse as mouse
@@ -37,6 +37,8 @@ import fuzzywuzzy
 import traceback
 import pygetwindow as gw
 from modules.submacros.hasteCompensation import HasteCompensationRevamped
+from modules import bitmap_matcher
+import json
 
 pynputKeyboard = Controller()
 #data for collectable objectives
@@ -315,6 +317,19 @@ for line in qdata:
         quest_info.append(line)
 quest_data[quest_bear][quest_title] = quest_info 
 
+#planter-related info
+nectarNames=["comforting", "refreshing", "satisfying", "motivating", "invigorating"]
+nectarFields = {
+  "comforting": ["dandelion", "bamboo", "pine tree"],
+  "refreshing": ["coconut", "strawberry", "blue flower"],
+  "satisfying": ["pineapple", "sunflower", "pumpkin"],
+  "motivating": ["stump", "spider", "mushroom", "rose"],
+  "invigorating": ["pepper", "mountain top", "clover", "cactus"]
+}
+allPlanters = ["paper", "ticket", "festive", "sticker", "plastic", "candy", "red_clay", "blue_clay", "tacky", "pesticide", "heat-treated", "hydroponic", "petal", "planter_of_plenty"]
+with open("./data/bss/auto_planter_ranking.json", "r") as f:
+    autoPlanterRankings = json.load(f) 
+
 class macro:
     def __init__(self, status, logQueue, updateGUI):
         self.status = status
@@ -327,7 +342,7 @@ class macro:
         self.hasteCompensation = HasteCompensationRevamped(self.robloxWindow, self.setdat["movespeed"])
         self.fieldDriftCompensation = fieldDriftCompensationClass(self.robloxWindow)
         self.keyboard = keyboard(self.setdat["movespeed"], self.setdat["haste_compensation"], self.hasteCompensation)
-        self.logger = logModule.log(logQueue, self.setdat["enable_webhook"], self.setdat["webhook_link"], blocking=self.setdat["low_performance"], hourlyReportOnly=self.setdat["only_send_hourly_report"], robloxWindow=self.robloxWindow)
+        self.logger = logModule.log(logQueue, self.setdat["enable_webhook"], self.setdat["webhook_link"], self.setdat["send_screenshot"], blocking=self.setdat["low_performance"], hourlyReportOnly=self.setdat["only_send_hourly_report"], robloxWindow=self.robloxWindow)
         self.buffDetector = BuffDetector(self.robloxWindow)
         self.hourlyReport = HourlyReport(self.buffDetector)
         self.memoryMatch = MemoryMatch(self.robloxWindow)
@@ -356,6 +371,7 @@ class macro:
         self.isGathering = False
         self.converting = False
         self.alreadyConverted = False
+        self.cannonFromHive = False
 
         #auto field boost
         self.failed = False
@@ -365,6 +381,8 @@ class macro:
         self.cAFBDice = False
         self.afb = False
         self.stop = False
+
+        self.hiveDistance = 1.32 #distance between hives (in seconds)
 
 
         self.setRobloxWindowInfo(setYOffset=False)
@@ -680,6 +698,18 @@ class macro:
             self.keyboard.keyUp("space")
         return True
     
+    def waitForBees(self):
+        if self.alreadyConverted:
+            return
+        bees = self.setdat["bees"]
+        if bees > 45:
+            time.sleep(4)
+        elif bees > 40:
+            time.sleep(8)
+        elif bees > 35:
+            time.sleep(13)
+        else:
+            time.sleep(20)
     #click the yes popup
     #if detect is set to true, the macro will check if the yes button is there
     #if detectOnly is set to true, the macro will not click 
@@ -703,10 +733,9 @@ class macro:
         return True
     
     def toggleInventory(self, mode):
-        invOpenImg = self.adjustImage("./images/menu", "inventoryopen")
-        open = False
-        if locateImageOnScreen(invOpenImg, self.robloxWindow.mx, self.robloxWindow.my+10, 100, 180, 0.8):
-            open = True
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+        screen = mssScreenshotNP(self.robloxWindow.mx+4, self.robloxWindow.my+100, 50, 60)
+        open = findColorObjectRGB(screen, (254, 254, 254), kernel=kernel, variance=3)
         
         def clickInv():
             mouse.moveTo(self.robloxWindow.mx+30, self.robloxWindow.my+113)
@@ -716,11 +745,15 @@ class macro:
             mouse.click()
             time.sleep(0.1)
 
-        if mode == "open" and open: #already open
-            #close and reopen
-            for _ in range(2):
-                clickInv()
-                time.sleep(0.1)
+        if mode == "open": #already open
+            #click the system settings
+            mouse.moveTo(self.robloxWindow.mx+245, self.robloxWindow.my+113)
+            time.sleep(0.1)
+            mouse.moveBy(0,3)
+            time.sleep(0.1)
+            mouse.click()
+            clickInv()
+            time.sleep(0.1)
         else:
             clickInv()
         self.moveMouseToDefault()
@@ -787,17 +820,17 @@ class macro:
 
         prevHash = None
         time.sleep(0.3)
-        for i in range(120):
+        for i in range(180):
             #screen = cv2.cvtColor(mssScreenshotNP(90, 90, 300-90, self.robloxWindow.mh-180), cv2.COLOR_RGBA2GRAY)
             #max_loc = fastFeatureMatching(screen, itemImg)
             #max_val = 1 if max_loc else 0
             max_val, max_loc = locateImageOnScreen(itemImg, self.robloxWindow.mx, self.robloxWindow.my+90, 100, self.robloxWindow.mh-180)
             data = (max_val, max_loc, i)
             #most likely the correct item, stop searching
-            if max_val > 0.6:
+            if max_val > 0.7:
                 itemScreenshot = mssScreenshot(self.robloxWindow.mx+90, self.robloxWindow.my+(max_loc[1]//self.robloxWindow.multi)+60, 220, 60)
                 itemOCRText = ''.join([x[1][0] for x in ocr.ocrRead(itemScreenshot)]).replace(" ","").replace("-","").lower()
-                if itemOCRName in itemOCRText or self.getStringSimilarity(itemOCRName, itemOCRText) > 0.8:
+                if itemOCRName in itemOCRText or self.getStringSimilarity(itemOCRName, itemOCRText) > 0.7:
                     print(itemOCRText)
                     bestY = max_loc[1]
                     foundEarly = True
@@ -810,7 +843,7 @@ class macro:
                 if len(bestResults) > 5: 
                     bestResults.pop()
                     
-            mouse.scroll(-3, True)
+            mouse.scroll(-2, True)
             time.sleep(0.06)
 
             screen = cv2.cvtColor(mssScreenshotNP(self.robloxWindow.mx, self.robloxWindow.my+100, 100, 200), cv2.COLOR_BGRA2RGB)
@@ -853,7 +886,7 @@ class macro:
         if not (itemOCRName in itemOCRText or self.getStringSimilarity(itemOCRName, itemOCRText) > 0.6):
             self.logger.webhook("", f"Could not find {itemName} in inventory", "dark brown")
             return None
-        '''          
+        ''' 
         if not bestY:   
             self.logger.webhook("", f"Could not find {itemName} in inventory", "dark brown")
             return
@@ -915,16 +948,15 @@ class macro:
             self.keyboard.press(",")
         
         while True: 
-            if self.isBesideE(["pollen", "flower", "field"]):
-                break
             #check if the macro is done converting/not converting
             text = self.getTextBesideE()
             #done converting
             doneConverting = False
-            for i in ["pollen", "flower", "field"]:
-                if i in text:
-                    doneConverting = True
-                    break
+            if not "stop" in text and not "making" in text:
+                for i in ["pollen", "flower", "field"]:
+                    if i in text:
+                        doneConverting = True
+                        break
             if doneConverting: 
                 break
             #not converting
@@ -1089,15 +1121,23 @@ class macro:
                 mouse.click()
             print(f"checked sticker book popup: {time.time()-st}")
 
+            # robloxMenu = self.adjustImage("./images/menu", "robloxmenu")
+            # if not locateImageOnScreen(robloxMenu, self.robloxWindow.mx, self.robloxWindow.my, 75, 60, 0.8):
+            #     self.keyboard.press('esc')
+            #     time.sleep(0.5)
+            # mouse.moveTo(self.robloxWindow.mx+37, self.robloxWindow.my+34)
+            # time.sleep(0.1)
+            # mouse.click()
+            for _ in range(2):
+                self.keyboard.press('esc')
+                time.sleep(0.3)
+                self.keyboard.press('r')
+                time.sleep(0.25)
+                self.keyboard.press('w')
+                time.sleep(0.25)
+                self.keyboard.press('enter')
+                time.sleep(0.4)
             self.moveMouseToDefault()
-            time.sleep(0.1)
-            self.keyboard.press('esc')
-            time.sleep(0.2)
-            self.keyboard.press('r')
-            time.sleep(0.2)
-            self.keyboard.press('w')
-            time.sleep(0.25)
-            self.keyboard.press('enter')
             print(f"pressed reset keys: {time.time()-st}")
             
             if self.newUI:
@@ -1134,6 +1174,7 @@ class macro:
             self.canDetectNight = True
             self.location = "spawn"
             #detect if player is at hive. Spin a max of 4 times
+            atHive = False
             for i in range(4):
                 screen = pillowToCv2(mssScreenshot(self.robloxWindow.mx+(self.robloxWindow.mw//2-100), self.robloxWindow.my+(self.robloxWindow.mh-10), 200, 10))
                 # Convert the image from BGR to HLS color space
@@ -1147,24 +1188,51 @@ class macro:
                 contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 print(f"spin {i+1}: {time.time()-st}")
                 if contours:
-                    for _ in range(8):
-                        self.keyboard.press("o")
-                    if convert: self.convert()
-                    return True
+                    atHive = True
+                    break
                 #failed to detect, spin
                 for _ in range(4):
                     self.keyboard.press(".")
                 time.sleep(0.1)
+
+            for _ in range(8):
+                self.keyboard.press("o")
+            if atHive:
+                self.cannonFromHive = True
+                if convert: 
+                    self.convert()
+                return True
+            else:
+                self.keyboard.walk("w", 5)
+                if convert:
+                    self.cannonFromHive = True
+                    self.keyboard.walk("s", 0.55)
+                    if self.setdat["hive_number"] < 3:
+                        dir = "d"
+                    else:
+                        dir = "a"
+                    self.keyboard.walk(dir, self.hiveDistance*abs(self.setdat["hive_number"]-3))
+                    self.convert()
+                else:
+                    self.keyboard.walk("s", 0.15)
+                    self.cannonFromHive = False
+            return True
+        
         else:
             self.logger.webhook("", "Unable to detect that player respawned at hive", "dark brown", "screen")
-            return False
 
     def cannon(self, fast = False):
         for i in range(3):
             #Move to canon:
-            self.keyboard.walk("w",0.8)
             fieldDist = 0.9
-            self.keyboard.walk("d",1.2*(self.setdat["hive_number"])+i)
+            if self.cannonFromHive:
+                self.keyboard.walk("w",0.8)
+                hiveNumber = self.setdat["hive_number"]
+            else:
+                hiveNumber = 3
+            self.keyboard.walk("d",1.2*hiveNumber+i)
+            if not self.cannonFromHive:
+                self.keyboard.walk("w", 0.2)
             self.keyboard.keyDown("d")
             time.sleep(0.5)
             self.keyboard.slowPress("space")
@@ -1246,18 +1314,26 @@ class macro:
             signUpImage = self.adjustImage("./images/menu", "signup")
             robloxHomeImage = self.adjustImage("./images/menu", "robloxhome")
             rejoinSuccess = True
-            while not locateImageOnScreen(sprinklerImg, self.robloxWindow.mx, self.robloxWindow.my+(self.robloxWindow.mh*3/4), self.robloxWindow.mw, self.robloxWindow.mh*1/4, 0.75) and time.time() - loadStartTime < 120:
+            robloxOpenTime = 0
+            while not locateImageOnScreen(sprinklerImg, self.robloxWindow.mx, self.robloxWindow.my+(self.robloxWindow.mh*3/4), self.robloxWindow.mw, self.robloxWindow.mh*1/4, 0.75) and time.time() - loadStartTime < 240:
+                if appManager.isAppOpen("roblox"):
+                    robloxOpenTime = time.time()
                 if self.setdat["rejoin_method"] == "deeplink":
                     #check if the user is stuck on the sign up screen
-                    if locateImageOnScreen(signUpImage, self.robloxWindow.mx+(self.robloxWindow.mw/4), self.robloxWindow.my+(self.robloxWindow.mh/3), self.robloxWindow.mw/2, self.robloxWindow.mh*2/3, 0.7):
+                    if robloxOpenTime and locateImageOnScreen(signUpImage, self.robloxWindow.mx+(self.robloxWindow.mw/4), self.robloxWindow.my+(self.robloxWindow.mh/3), self.robloxWindow.mw/2, self.robloxWindow.mh*2/3, 0.7):
                         self.logger.webhook("","Not logged into the roblox app. Rejoining via the browser. For a smoother experience, please ensure you are logged into the Roblox app beforehand.","red","screen")
                         self.setdat["rejoin_method"] = "new tab"
                         continue
                     #check if home page is opened instead of the app
-                    if locateImageOnScreen(robloxHomeImage, self.robloxWindow.mx, self.robloxWindow.my, self.robloxWindow.mw/10, self.robloxWindow.mh/6, 0.7) and time.time() - loadStartTime > 10:
-                        self.logger.webhook("","Roblox Home Page is open","brown","screen")
-                        rejoinSuccess = False
-                        break
+                    # if locateImageOnScreen(robloxHomeImage, self.robloxWindow.mx, self.robloxWindow.my, self.robloxWindow.mw/10, self.robloxWindow.mh/6, 0.7) and time.time() - loadStartTime > 10:
+                    if robloxOpenTime and time.time() - robloxOpenTime > 5:
+                        robloxScreen = mssScreenshot(self.robloxWindow.mx, self.robloxWindow.my, self.robloxWindow.mw/2, self.robloxWindow.mh/2.5)
+                        robloxScreenText = '\n'.join([x[1][0].lower() for x in ocr.ocrRead(robloxScreen)])
+                        if "connect" in robloxScreenText:
+                            print(robloxScreenText)
+                            self.logger.webhook("","Roblox Home Page is open","brown","screen")
+                            rejoinSuccess = False
+                            break
 
                     self.setRobloxWindowInfo(setYOffset=False)
 
@@ -1303,7 +1379,6 @@ class macro:
             rejoinSuccess = False
             availableSlots = [] #store hive slots that are claimable
             newHiveNumber = 0
-            hiveDistance = 1.32 #distance between hives (in seconds)
         
             # self.keyboard.keyDown("d", False)
             # self.keyboard.tileWait(4)
@@ -1332,7 +1407,7 @@ class macro:
             for j in range(1, hiveNumber+1):
                 if j > 1:
                     #self.keyboard.tileWalk("a", 9.2)
-                    self.keyboard.walk("a", hiveDistance)
+                    self.keyboard.walk("a", self.hiveDistance)
                 time.sleep(0.4)
                 if isHiveAvailable():
                     availableSlots.append(j)
@@ -1348,7 +1423,7 @@ class macro:
                 if availableSlots:
                     targetSlot = min(availableSlots)
                     #self.keyboard.tileWalk("d", 9.2*(hiveNumber - targetSlot))
-                    self.keyboard.walk("d", hiveDistance*(hiveNumber - targetSlot))
+                    self.keyboard.walk("d", self.hiveDistance*(hiveNumber - targetSlot))
                     time.sleep(0.4)
                     if isHiveAvailable():
                         newHiveNumber = targetSlot
@@ -1357,7 +1432,7 @@ class macro:
                 #no available hive slots found previously, continue finding new ones ahead
                 else:
                     for j in range(hiveNumber+1, 7):
-                        self.keyboard.walk("a", hiveDistance)
+                        self.keyboard.walk("a", self.hiveDistance)
                         time.sleep(0.4)
                         if isHiveAvailable():
                             newHiveNumber = j
@@ -1467,8 +1542,7 @@ class macro:
     def gather(self, field, settingsOverride = {}, questGumdrops=False):
         fieldSetting = {**self.fieldSettings[field], **settingsOverride}
         for i in range(3):
-            #wait for bees to wake up
-            if not self.alreadyConverted: time.sleep(6)
+            self.waitForBees()
             #go to field
             self.cannon()
             self.logger.webhook("",f"Travelling: {field.title()}, Attempt {i+1}", "dark brown")
@@ -2102,6 +2176,13 @@ class macro:
     #time limit of 20s
     def mobRunAttackingBackground(self):
         st = time.time()
+        if self.setdat["bees"] > 40:
+            timeout = 20
+        elif self.setdat["bees"] > 30:
+            timeout = 30
+        else:
+            timeout = 40
+
         while True:
             if self.blueTextImageSearch("died"):
                 self.mobRunStatus = "dead"
@@ -2109,7 +2190,7 @@ class macro:
             elif self.blueTextImageSearch("defeated"):
                 self.mobRunStatus = "looting"
                 break
-            elif time.time() - st > 20:
+            elif time.time() - st > timeout:
                 self.mobRunStatus = "timeout"
                 break
     #background thread to check if token link is collected or the macro runs out of time (max 15s)
@@ -2131,8 +2212,7 @@ class macro:
         attackThread = threading.Thread(target=self.mobRunAttackingBackground)
         attackThread.daemon = True
         if walkPath is None:
-            #wait for bees to respawn
-            time.sleep(10)
+            self.waitForBees()
             self.cannon()
             self.goToField(field, "north")
             #attack the mob
@@ -2231,7 +2311,7 @@ class macro:
             #detect which field the vic is in
             if self.vicField is None:
                 for field in self.vicFields:
-                    if self.blueTextImageSearch(f"vic{field}"):
+                    if self.blueTextImageSearch(f"vic{field}", 0.75):
                         self.vicField = field
                         break
             else:
@@ -2241,6 +2321,15 @@ class macro:
                 self.vicStatus = "defeated"
                 
     def stingerHunt(self):
+
+        class VicStopPathException(Exception):
+            pass
+
+        def vicSearchWalk(key, t):
+            if self.vicField and currField != self.vicField:
+                raise VicStopPathException()
+            self.keyboard.walk(key, t)
+
         self.vicStatus = None
         self.vicField = None
         self.stopVic = False
@@ -2257,10 +2346,13 @@ class macro:
         for currField in self.vicFields:
             #go to field
             self.cannon()
-            self.logger.webhook("",f"Travelling to {currField} (vicious bee)","dark brown")
+            self.logger.webhook("",f"Travelling to {currField} (stinger hunt)","dark brown")
             self.goToField(currField, "south")
             time.sleep(0.8)
-            self.runPath(f"vic/find_vic/{currField}")
+            try:
+                exec(open(f"../paths/vic/find_vic/{currField}.py").read())
+            except VicStopPathException:
+                pass
             if self.vicField:
                 self.logger.webhook("",f"Vicious Bee detected ({self.vicField})", "light blue", "screen") 
                 break
@@ -2281,7 +2373,7 @@ class macro:
                 time.sleep(10)
             self.logger.webhook("",f"Travelling to {self.vicField} (vicious bee)","dark brown")
             self.cannon()
-            self.goToField(currField, "south")
+            self.goToField(self.vicField, "south")
 
         #first, check if vic is found in the same field as the player
         if currField != self.vicField: 
@@ -2340,9 +2432,11 @@ class macro:
 
         def replace():
             replaceImg = self.adjustImage("./images/menu", "replace")
-            res = locateImageOnScreen(replaceImg, self.robloxWindow.mx+(self.robloxWindow.mw/3.15), self.robloxWindow.my+(self.robloxWindow.mh/2.15), self.robloxWindow.mw/2.4, self.robloxWindow.mh/4.2)
+            x = self.robloxWindow.mx + self.robloxWindow.mw/2-300
+            y = self.robloxWindow.my
+            res = locateImageOnScreen(replaceImg, x, y, 650, self.robloxWindow.mh, 0.8)
             if res is not None:
-                mouse.moveTo(*res[1])
+                mouse.moveTo(*[j//self.robloxWindow.multi for j in res[1]])
                 mouse.click()
         amulet = self.setdat["stump_snail_amulet"]
         if amulet == "keep":
@@ -2473,6 +2567,7 @@ class macro:
             if res:
                 self.planterCoords = res
                 return
+            time.sleep(1)
             
     #place the planter and return the time it would take for the planter to grow (in secs)
     def placePlanter(self, planter, field, harvestFull, glitter):
@@ -2502,27 +2597,12 @@ class macro:
             
             #check if planter is placed
             time.sleep(0.5)
-            placedPlanter = False
-            for _ in range(20):
-                if self.blueTextImageSearch("planter"):
-                    placedPlanter = True
+            placedPlanter = True
+            for _ in range(15):
+                if self.blueTextImageSearch("notinfield") or self.blueTextImageSearch("maxplanters"):
+                    placedPlanter = False
                     break
-                time.sleep(0.1)
-            #didnt detect the image, check for planter growth bar
-            for _ in range(3):
-                screen = mssScreenshotNP(self.robloxWindow.mx+(self.robloxWindow.mw/2.14), self.robloxWindow.my+(self.robloxWindow.mh/2.9), self.robloxWindow.mw/1.8-self.robloxWindow.mw/2.14, self.robloxWindow.mh/2.2-self.robloxWindow.mh/2.9)
-                screen = cv2.cvtColor(screen, cv2.COLOR_BGRA2BGR)
-                kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
-                if findColorObjectRGB(screen, (86, 120, 72), kernel=kernel, variance=2):
-                    placedPlanter = True
-                    break
-                for _ in range(2):
-                    self.keyboard.press(",")
-                time.sleep(2)
-                
-            # time.sleep(1)
-            # if self.isBesideE(["harvest", "planter"], []):
-            #     placedPlanter = True
+                time.sleep(0.3)
                 
             if placedPlanter: 
                 self.logger.webhook("",f"Placed Planter: {planter.title()}", "dark brown", "screen")          
@@ -3037,7 +3117,7 @@ class macro:
 
             #check if its time to send hourly report
             if currMin == 0 and time.time() - self.lastHourlyReport > 120:
-                hourlyReportData = self.hourlyReport.generateHourlyReport()
+                hourlyReportData = self.hourlyReport.generateHourlyReport(self.setdat)
                 self.logger.hourlyReport("Hourly Report", "", "purple")
 
                 #add to history
@@ -3186,15 +3266,20 @@ class macro:
         if not questGiver in questGiverShort:
             raise Exception(f"Unknown Quest Giver: {questGiver}")
         
-        def screenshotQuest(screenshotHeight, gray = True):
-            #Take a screenshot of the quest page and 
-            screen = mssScreenshotNP(self.robloxWindow.mx, self.robloxWindow.my+170, 300, min(screenshotHeight, self.robloxWindow.mh-(self.robloxWindow.my+170)))
-            if gray:
+        def screenshotQuest(screenshotHeight, mode = "gray"):
+            #Take a screenshot of the quest page
+            mode = mode.lower()
+            if mode == "rgba":
+                screenshotFunction = mssScreenshotPillowRGBA
+            else:
+                screenshotFunction = mssScreenshotNP
+            screen = screenshotFunction(self.robloxWindow.mx, self.robloxWindow.my+150, 300, min(screenshotHeight, self.robloxWindow.mh-(self.robloxWindow.my+150)))
+            if mode == "gray":
                 screen = cv2.cvtColor(screen, cv2.COLOR_BGRA2GRAY)
             return screen
         
         #open inventory to ensure quest page is closed
-        self.toggleInventory("open")
+        self.toggleInventory("close")
         self.toggleQuest()
         #scroll to top
         #stop scrolling when the quest page remains unchanged
@@ -3207,32 +3292,43 @@ class macro:
                 break
             prevHash = hash
         #scroll down, note the best match
-        sleep(0.3)
+        sleep(0.4)
         questTitle = None
         questTitleYPos = None
 
+        questGiverImg = Image.open(f"./images/quest/{questGiver}-{self.robloxWindow.display_type}.png").convert('RGBA')
+        prevHash = None
+        for i in range(150):
+            screen = screenshotQuest(800, mode="RGBA")
 
-        for i in range(80):
-            screen = screenshotQuest(200)
-            img = cv2.threshold(screen, 150, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-            img = cv2.GaussianBlur(img, (5, 5), 0)
-            img = Image.fromarray(img)
-            for x in ocr.ocrRead(img):
-                text = self.convertCyrillic(x[1][0].strip().lower())
-                if questGiverShort[questGiver] in text:
-                    for word in questTitleBlacklistedPhrases.get(questGiver, []):
-                        if word in text: break
-                    else:
-                        #match text with the closest known quest title
-                        questTitleYPos = x[0][0][1] #get the top Y coordinate
-                        questTitle, _ = fuzzywuzzy.process.extractOne(text, quest_data[questGiver].keys())
-                        self.logger.webhook("", f"Quest Title: {questTitle}", "dark brown")
-                        break
+            res = bitmap_matcher.find_bitmap_cython(screen, questGiverImg, variance=5, h=250)
+            if res:
+                rx, ry = res
+                rw, rh = questGiverImg.size
+                img = cv2.cvtColor(np.array(screen), cv2.COLOR_RGBA2GRAY)
+                img = img[ry-10:ry+rh+20, rx-5:]
+                img = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                img = cv2.GaussianBlur(img, (5, 5), 0)
+                img = Image.fromarray(img)
                 
-            if questTitle:
+                ocrRes = ocr.ocrRead(img)
+                text = self.convertCyrillic(''.join([x[1][0].strip().lower() for x in ocrRes]))
+                for word in questTitleBlacklistedPhrases.get(questGiver, []):
+                    if word in text: 
+                        break
+                else:
+                    #match text with the closest known quest title
+                    questTitleYPos = ry
+                    print(questTitleYPos)
+                    questTitle, _ = fuzzywuzzy.process.extractOne(text, quest_data[questGiver].keys())
+                    self.logger.webhook("", f"Quest Title: {questTitle}", "dark brown")
+                    break
+                
+            mouse.scroll(-1, True)
+            time.sleep(0.06)
+            hash = imagehash.average_hash(Image.fromarray(screenshotQuest(100)))
+            if not prevHash is None and prevHash == hash:
                 break
-            mouse.scroll(-3, True)
-            time.sleep(0.08)
 
         if questTitle is None:
             self.logger.webhook("", f"Could not find {questGiver} quest", "dark brown")
@@ -3241,12 +3337,11 @@ class macro:
             return None
         
         #quest title found, now find the objectives
-        print(questTitle)
         objectives = quest_data[questGiver][questTitle]
 
         #merge the texts into chunks. Using those chunks, compare it with the known objectives
         #assume that the merging is done properly, so 1st chunk = 1st objective
-        screen = cv2.cvtColor(screenshotQuest(650, gray=False), cv2.COLOR_BGRA2BGR)
+        screen = cv2.cvtColor(np.array(screen), cv2.COLOR_RGBA2BGR)
         #crop it just above the quest title
         screen = screen[questTitleYPos: , : ]
         screenOriginal = np.copy(screen)
@@ -3262,7 +3357,7 @@ class macro:
         cropMask = cv2.inRange(screen, lower, upper)
         cropRows = np.any(cropMask > 0, axis=1)
         startIndex = None
-        endIndex = None
+        endIndex = 0
 
         #start searching for the start and end y points of the quest title
         #if it can't find the title bar in the first y pixels, stop the search
@@ -3280,7 +3375,7 @@ class macro:
                 break
         
         #crop
-        if endIndex is not None:
+        if endIndex:
             screen = screen[endIndex:, :]
 
         #convert to grayscale
@@ -3319,9 +3414,20 @@ class macro:
             #detect amount of items to feed
             objectiveData = objectives[i].split("_")
             if objectiveData[0] == "feed":
-                amount = ''.join([x for x in textChunk if x.isdigit()])
+                amount = 0
+                #start by trying to get the text from the progression, ie 0/x
+                if "/" in textChunk: 
+                    split = textChunk.split("/")[1].replace(",","").replace(".", "")
+                    amount = int(split) if split.isdigit() else 0
+                #find it via words, ie feed x bluberries
+                if not amount:
+                    words = textChunk.split(" ")
+                    for word in words:
+                        if word.isdigit():
+                            amount = int(word)
+                            break
                 if amount:
-                    objectiveData[1] = str(min(int(amount), 100))
+                    objectiveData[1] = str(min(int(amount), 50))
                     objectives[i] = "_".join(objectiveData)
 
             if "complete" in textChunk:
@@ -3332,8 +3438,9 @@ class macro:
                 color = (0, 0, 255)  #red
             
             #draw bounding boxes and add the quest text
-            cv2.rectangle(screen, (x, y), (x+w, y+h), color, 2)
-            cv2.putText(screen, objectives[i], (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+            drawY = y+endIndex
+            cv2.rectangle(screenOriginal, (x, drawY), (x+w, drawY+h), color, 2)
+            cv2.putText(screenOriginal, objectives[i], (x, drawY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
             i += 1
 
@@ -3733,7 +3840,7 @@ class macro:
                         mouse.moveTo(self.robloxWindow.mx+(x+gx), self.robloxWindow.my+(gy))
                         mouse.click()
                 #fullscreen back roblox
-                appManager.openApp("roblox")
+                appManager.openApp("Roblox")
                 self.toggleFullScreen()
             time.sleep(1)
             self.moveMouseToDefault()
@@ -3798,7 +3905,7 @@ class macro:
             hourlyReportBackgroundThread.start()
         
         #if roblox is not open, rejoin
-        if not appManager.openApp("roblox"):
+        if not appManager.openApp("Roblox"):
             self.rejoin()
         else:
             #toggle fullscreen

@@ -4,19 +4,19 @@ back = 1.2
 
 for _ in range(2):
     self.keyboard.press(".")
-self.keyboard.walk("a",1)
-self.keyboard.walk("w",0.4)
+vicSearchWalk("a",1)
+vicSearchWalk("w",0.4)
 time.sleep(1)
-self.keyboard.walk("d",side)
-self.keyboard.walk("w",back)
-self.keyboard.walk("a",side)
-self.keyboard.walk("s",back)
-self.keyboard.walk("d",side)
-self.keyboard.walk("s",back)
-self.keyboard.walk("a",side)
-self.keyboard.walk("s",back)
-self.keyboard.walk("d",side)
-self.keyboard.walk("w",back*0.8)
+vicSearchWalk("d",side)
+vicSearchWalk("w",back)
+vicSearchWalk("a",side)
+vicSearchWalk("s",back)
+vicSearchWalk("d",side)
+vicSearchWalk("s",back)
+vicSearchWalk("a",side)
+vicSearchWalk("s",back)
+vicSearchWalk("d",side)
+vicSearchWalk("w",back*0.8)
 
 
     

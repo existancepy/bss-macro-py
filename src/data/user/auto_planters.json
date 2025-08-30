@@ -1,0 +1,32 @@
+{
+   "planters": [
+      {
+         "planter": "",
+         "nectar": "",
+         "field": "",
+         "harvest_time": 0,
+         "nectar_est_percent": 0
+      },
+      {
+         "planter": "",
+         "nectar": "",
+         "field": "",
+         "harvest_time": 0,
+         "nectar_est_percent": 0
+      },
+      {
+         "planter": "",
+         "nectar": "",
+         "field": "",
+         "harvest_time": 0,
+         "nectar_est_percent": 0
+      }
+   ],
+   "nectar_last_field": {
+      "comforting": "",
+      "refreshing": "",
+      "satisfying": "",
+      "motivating": "",
+      "invigorating": ""
+   }
+}

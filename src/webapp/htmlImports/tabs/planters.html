@@ -1,9 +1,9 @@
 <div style="margin-left: auto; height: 10%; margin-top: 1.5rem; width: 18%; margin-right: 1rem;">
-    <input type="range" min="0" max="1" style="width: 100%;" class="slider" oninput="changePlanterMode()" id = "planters_mode">
+    <input type="range" min="0" max="2" style="width: 100%;" class="slider" oninput="changePlanterMode()" id = "planters_mode">
     <div style="display: flex; justify-content: space-between; width: 100%; font-size: 1.02rem;">
         <div>Off</div>
         <div>Manual</div>
-        <!--<div>Auto</div>-->
+        <div>Auto</div>
     </div>
 </div>
 
@@ -56,7 +56,7 @@
             <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%;">
                 <div style="width: 70%;">
                     <label>Harvest Every X Hours</label>
-                    <p>How often the macro should collect each cycle of planters. 2-3 is recommended</p>
+                    <p>The maximum amount of time for planters to grow before being harvested. 2-3 is recommended</p>
                 </div>
                 <input type="text" id="auto_planters_collect_every" style="width: 8rem; margin-top: 0.6rem;" class="poppins-regular textbox" data-input-type="float" data-input-limit="4" onkeypress="return textboxRestriction(this, event)" onchange="saveSetting(this, 'profile')">
             </form> 
@@ -66,7 +66,17 @@
                     <p>Collect the planters when they are fully grown. Overrides the 'Harvest Every X Hours' setting</p>
                 </div>
                 <label class="checkbox-container" style="margin-top: 0.6rem;">
-                    <input type="checkbox" id="auto_planters_collect_full" onchange="saveSetting(this, 'profile')">
+                    <input type="checkbox" id="auto_planters_collect_full" onchange="saveSetting(this, 'profile')" data-input-bind="auto_planters_collect_auto">
+                    <span class="checkmark"></span>
+                </label>
+            </form> 
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top:1rem">
+                <div style="width: 70%;">
+                    <label>Auto Harvest</label>
+                    <p>Let the macro decide when to harvest planters for optimal nectar maintenance. Overrides the 'Harvest Every X Hours' setting</p>
+                </div>
+                <label class="checkbox-container" style="margin-top: 0.6rem;">
+                    <input type="checkbox" id="auto_planters_collect_auto" onchange="saveSetting(this, 'profile')" data-input-bind="auto_planters_collect_full">
                     <span class="checkmark"></span>
                 </label>
             </form> 
@@ -83,8 +93,29 @@
                     <p>Resets the macro's tracking data for the planters</p>
                 </div>
                 
-                <div id = "auto-planters-reset-btn" class="purple-button" onclick="clearManualPlantersData()" style="width: 5rem; display: flex; justify-content: center; padding: 0.3rem; cursor: pointer;">Reset</div>
+                <div id = "auto-planters-reset-btn" class="purple-button" onclick="clearAutoPlantersData()" style="width: 5rem; display: flex; justify-content: center; padding: 0.3rem; cursor: pointer;">Reset</div>
             </form> 
+            <form style="display: flex; align-items:flex-start; justify-content: space-between; padding-right: 5%; margin-top:1rem" ;="">
+                <div style="width: 70%;">
+                    <label>Presets</label>
+                    <p>Recommended nectar priority and field settings based on hive color</p>
+                </div>
+                
+                <div data-onchange="changePreset(this)" id="auto_preset" class="custom-select poppins-regular" style="width: 10rem; margin-top: 0.6rem;">
+                    <div class="select-area">
+                        <div class="value" data-value="m">M</div>
+                        <div class="chevron">&gt;</div>
+                    </div>
+                    <div class="select-menu-relative">
+                        <div class="select-menu" style="display: none;">
+                            <div class="option" data-value="blue">Blue</div>
+                            <div class="option" data-value="red">Red</div>
+                            <div class="option" data-value="white">White</div>
+                            <div class="option" data-value="custom">Custom</div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
 
         <div class="poppins-medium standard-container" style="flex-direction: column; padding-top: 1rem; justify-content: unset;">
@@ -100,7 +131,7 @@
             <h2>Allowed Planters</h2>
             <p style="font-weight:500; font-size:1rem;">Planters the macro can use</p>
             <div class="seperator"></div>
-            <div style="height: 30vh; overflow-y: auto;" id="auto-allowed-planters">
+            <div id="auto-allowed-planters">
 
             </div>
         </div>
@@ -109,7 +140,7 @@
             <h2>Allowed Fields</h2>
             <p style="font-weight:500; font-size:1rem;">Fields the macro can plant in</p>
             <div class="seperator"></div>
-            <div style="height: 30vh; overflow-y: auto;" id="auto-allowed-fields">
+            <div id="auto-allowed-fields">
 
             </div>
         </div>

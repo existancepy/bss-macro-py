@@ -197,7 +197,7 @@ gather_mushroom
 gather_mushroom
 fieldtoken_strawberry
 feed_*_strawberry
-kill_15*_fireant
+kill_fireant
 
 -pollen
 pollen_red
@@ -205,7 +205,7 @@ pollen_red
 -rampage
 token_rage
 kill_10_ladybug
-kill_30*_fireant
+kill_fireant
 
 -roses
 gather_rose

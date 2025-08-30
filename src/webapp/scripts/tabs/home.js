@@ -39,9 +39,14 @@ function taskHTML(title, desc=""){
     `
     return html
 }
-/*
 
-*/
+function secondsToMinsAndHours(time){
+    if (time < 0) return "Ready!"
+    const hours = Math.floor(time / 3600)
+    const minutes = Math.floor((time - hours*3600)/60)
+    return `${hours}h ${minutes}m`
+}
+
 //load the tasks
 //also set max-height for logs
 eel.expose(loadTasks)
@@ -98,6 +103,51 @@ async function loadTasks(){
     }
     //display the tasks
     document.getElementById("task-list").innerHTML = out
+
+    //planter timers
+
+    function getPlanterHTML(planter, field, harvestTime){
+        const currTime = Date.now() / 1000
+        const timeRemaining = secondsToMinsAndHours(harvestTime - currTime)
+        return `
+            <div class="planter">
+                <img class="planter-img" src="./assets/icons/${planter.replaceAll(" ", "_")}_planter.png">
+                <div class="field-row">
+                    <span>${toTitleCase(field)}</span>
+                    <img src="./assets/icons/${fieldNectarIcons[field.toLowerCase().replaceAll(" ","_")]}.png">
+                </div>
+                <span class="time ${timeRemaining == "Ready!" ? 'ready' : ''}">${timeRemaining}</span> 
+            </div> 
+        `
+    }
+
+    const planterTimerContainer = document.getElementById("planter-timers-container")
+    if (setdat["planters_mode"]){
+        planterTimerContainer.classList.add("show")
+        let planterData
+        const planterContainer = planterTimerContainer.querySelector(".planter-timers")
+        let planterTimersOut = ""
+
+        if (setdat["planters_mode"] == 1){
+            planterData = await eel.getManualPlanterData()()
+            for(let i = 0; i< planterData.planters.length; i++){
+                if (planterData.planters[i]){
+                    planterTimersOut += getPlanterHTML(planterData.planters[i], planterData.fields[i], planterData.harvestTimes[i])
+                }
+            }
+        }else if(setdat["planters_mode"] == 2){
+            planterData = (await eel.getAutoPlanterData()()).planters
+            for (const planter of planterData) {
+                if (planter.planter){
+                    planterTimersOut += getPlanterHTML(planter.planter, planter.field, planter.harvest_time)
+                }
+            }
+        }
+        planterContainer.innerHTML = planterTimersOut
+    }
+    else{
+        planterTimerContainer.classList.remove("show")
+    }
 }
 
 eel.expose(closeWindow)
@@ -126,4 +176,19 @@ $("#home-placeholder")
         purpleButtonToggle(event.currentTarget, ["Update","Updating"])
         await eel.update()
     }
+})
+.on("click", "#clear-timers-btn", async(event) => {
+    const btn = event.currentTarget
+    if (btn.classList.contains("active")) return
+    btn.classList.add("active")
+    const setdat = await loadAllSettings()
+    if (setdat["planters_mode"] == 1){
+        eel.clearManualPlanters()
+    }else if(setdat["planters_mode"] == 2){
+        eel.clearAutoPlanters()
+    }
+    document.getElementById("planter-timers-container").querySelector(".planter-timers").innerHTML = ""
+    setTimeout(() => {
+        btn.classList.remove("active")
+      }, 700)
 })

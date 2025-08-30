@@ -1,0 +1,1260 @@
+{
+   "bamboo": [
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.375,
+         "grow_time": 8.73
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.125,
+         "grow_time": 12.45
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.6,
+         "grow_time": 6.25
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.1875,
+         "grow_time": 5.06
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.25,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "blue flower": [
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.345,
+         "grow_time": 8.93
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.5,
+         "grow_time": 5.34
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.1725,
+         "grow_time": 5.12
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.155,
+         "grow_time": 12.13
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "cactus": [
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.215,
+         "grow_time": 9.88
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.1075,
+         "grow_time": 5.42
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.25,
+         "grow_time": 9.6
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.125,
+         "grow_time": 5.34
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.035,
+         "grow_time": 13.53
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "clover": [
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.17,
+         "grow_time": 10.26
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.5,
+         "grow_time": 5.34
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.085,
+         "grow_time": 5.53
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.17,
+         "grow_time": 10.57
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.16,
+         "grow_time": 12.07
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.085,
+         "grow_time": 5.53
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "coconut": [
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.5,
+         "grow_time": 10.67
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.5,
+         "grow_time": 2.67
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.447,
+         "grow_time": 9.68
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.023,
+         "grow_time": 11.74
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.0115,
+         "grow_time": 5.94
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.03,
+         "grow_time": 11.66
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.015,
+         "grow_time": 5.92
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "dandelion": [
+      {
+         "name": "petal",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.4235,
+         "grow_time": 9.84
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.25,
+         "grow_bonus": 1.5,
+         "grow_time": 5.33
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.0485,
+         "grow_time": 11.45
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.02425,
+         "grow_time": 5.86
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.028,
+         "grow_time": 11.68
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.014,
+         "grow_time": 5.92
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "mountain top": [
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.5,
+         "grow_time": 10.67
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.25,
+         "grow_time": 9.6
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.125,
+         "grow_time": 5.34
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.25,
+         "grow_time": 9.6
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.125,
+         "grow_time": 5.34
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 14.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "mushroom": [
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.3425,
+         "grow_time": 8.94
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.5,
+         "grow_time": 5.34
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.3,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.17125,
+         "grow_time": 5.12
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.1575,
+         "grow_time": 12.1
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "pepper": [
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.5,
+         "grow_time": 10.67
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.46,
+         "grow_time": 8.22
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.23,
+         "grow_time": 4.88
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.04,
+         "grow_time": 13.47
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "pine tree": [
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.42,
+         "grow_time": 8.46
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.08,
+         "grow_time": 12.97
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.21,
+         "grow_time": 4.96
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.25,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "pineapple": [
+      {
+         "name": "petal",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.445,
+         "grow_time": 9.69
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.5,
+         "grow_time": 2.67
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.3,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.25,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.015,
+         "grow_time": 5.92
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.03,
+         "grow_time": 11.66
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.025,
+         "grow_time": 11.71
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0125,
+         "grow_time": 5.93
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "pumpkin": [
+      {
+         "name": "petal",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.285,
+         "grow_time": 10.9
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.3,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.055,
+         "grow_time": 5.69
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.25,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.11,
+         "grow_time": 10.82
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.105,
+         "grow_time": 10.86
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0525,
+         "grow_time": 5.71
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "rose": [
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.41,
+         "grow_time": 8.52
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.3,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.205,
+         "grow_time": 4.98
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.09,
+         "grow_time": 12.85
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "spider": [
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.3,
+         "grow_bonus": 1.6,
+         "grow_time": 6.25
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.5,
+         "grow_time": 9.33
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "strawberry": [
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.6,
+         "grow_time": 6.25
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.5,
+         "grow_time": 2.67
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.0,
+         "grow_time": 12.0
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.345,
+         "grow_time": 8.93
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.0,
+         "grow_time": 6.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.1725,
+         "grow_time": 5.12
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.155,
+         "grow_time": 12.13
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "stump": [
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.5,
+         "grow_time": 10.67
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.4,
+         "grow_bonus": 1.03,
+         "grow_time": 11.65
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.375,
+         "grow_time": 8.73
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.3,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.1875,
+         "grow_time": 5.06
+      },
+      {
+         "name": "petal",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.095,
+         "grow_time": 12.79
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.015,
+         "grow_time": 5.92
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 8.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ],
+   "sunflower": [
+      {
+         "name": "petal",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.3415,
+         "grow_time": 10.44
+      },
+      {
+         "name": "tacky",
+         "nectar_bonus": 1.25,
+         "grow_bonus": 1.5,
+         "grow_time": 5.34
+      },
+      {
+         "name": "planter of plenty",
+         "nectar_bonus": 1.5,
+         "grow_bonus": 1.0,
+         "grow_time": 16.0
+      },
+      {
+         "name": "pesticide",
+         "nectar_bonus": 1.3,
+         "grow_bonus": 1.0,
+         "grow_time": 10.0
+      },
+      {
+         "name": "red clay",
+         "nectar_bonus": 1.2,
+         "grow_bonus": 1.04175,
+         "grow_time": 5.76
+      },
+      {
+         "name": "heat-treated",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0835,
+         "grow_time": 11.08
+      },
+      {
+         "name": "hydroponic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.075,
+         "grow_time": 11.17
+      },
+      {
+         "name": "blue clay",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0375,
+         "grow_time": 5.79
+      },
+      {
+         "name": "plastic",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      },
+      {
+         "name": "candy",
+         "nectar_bonus": 1.0,
+         "grow_bonus": 1.0,
+         "grow_time": 4.0
+      },
+      {
+         "name": "paper",
+         "nectar_bonus": 0.75,
+         "grow_bonus": 1.0,
+         "grow_time": 1.0
+      },
+      {
+         "name": "ticket",
+         "nectar_bonus": 2.0,
+         "grow_bonus": 1.0,
+         "grow_time": 2.0
+      }
+   ]
+}

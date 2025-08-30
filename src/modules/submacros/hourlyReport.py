@@ -17,6 +17,7 @@ import copy
 from datetime import datetime
 from modules.screen.robloxWindow import RobloxWindowBounds
 import pickle
+import json
 
 ww, wh = pag.size()
 
@@ -45,14 +46,13 @@ class BuffDetector():
 
         self.buffSize = 76 if self.robloxWindow.isRetina else 39
 
-        nectars = {
+        self.nectars = {
             "comforting": [[np.array([0, 150, 63]), np.array([20, 155, 70])], (-2,0)],
             "invigorating": [[np.array([0, 128, 95]), np.array([180, 132, 101])], (-2,4)],
             "motivating": [[np.array([160, 150, 63]), np.array([170, 155, 70])], (-2,-2)],
             "refreshing": [[np.array([50, 144, 70]), np.array([70, 151, 75])], (-2,2)],
             "satisfying": [[np.array([130, 163, 36]), np.array([140, 168, 40])], (-2,0)]
         }
-        self.nectars = nectars.items()
         self.nectarKernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
 
     def screenshotBuffArea(self):
@@ -278,49 +278,52 @@ class BuffDetector():
         return []
 
         
+    def getNectar(self, nectar):
+        vals = self.nectars[nectar]
+        col, offsetCoords = vals
+        offsetX, offsetY = offsetCoords
+
+        #find the buff
+        screen = self.screenshotBuffArea()
+        buffTemplate = adjustImage("./images/buffs", nectar, self.robloxWindow.display_type)
+        res = locateTransparentImage(buffTemplate, screen, 0.5) #get the best match first. At high nectar levels, it becomes hard to detect the nectar icon
+        if not res: 
+            return 0
+        #get a screenshot of the buff
+        rx, ry = res[1]
+        screenH, screenW, *_ = screen.shape
+        cropX = max(0, int(rx+offsetX*self.robloxWindow.multi))
+        cropY = max(0, int(ry+offsetY*self.robloxWindow.multi))
+        cropX2 = min(screenW, cropX+40*self.robloxWindow.multi)
+        cropY2 = min(screenH, cropY+40*self.robloxWindow.multi)
+        fullBuffImg = screen[cropY:cropY2, cropX:cropX2]
+        h,w, *_ = fullBuffImg.shape
+        #get the buff level
+        fullBuffImg = cv2.cvtColor(fullBuffImg, cv2.COLOR_RGBA2BGR)
+        mask = cv2.cvtColor(fullBuffImg, cv2.COLOR_BGR2HLS)
+        mask = cv2.inRange(mask, col[0], col[1])
+        #cv2.imshow("mask", mask)
+        #cv2.waitKey(0)
+        mask = cv2.erode(mask, self.nectarKernel)
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+        if not contours:
+            #in this case, the nectar quantity might be so low it cant be detected or the player doesnt have the nectar at all
+            #so, we get the confidence value of the match
+            #if the value is high, its probably low nectar quantity
+            #if its low, the player prob doesnt have the nectar
+            max_val, _  = res
+            return 2 if max_val > 0.8 else 0
+        # return the bounding with the largest area
+        _, _, _, buffH = cv2.boundingRect(max(contours, key=cv2.contourArea))
+        quantity = max(min(100, (buffH/h*100)), 1)
+        return quantity
 
 
     def getNectars(self):
         nectarQuantity = []
-
-        screen = self.screenshotBuffArea()
-        for buff, vals in self.nectars:
-            col, offsetCoords = vals
-            offsetX, offsetY = offsetCoords
-
-            #find the buff
-            buffTemplate = adjustImage("./images/buffs", buff, self.robloxWindow.display_type)
-            res = locateTransparentImage(buffTemplate, screen, 0.5) #get the best match first. At high nectar levels, it becomes hard to detect the nectar icon
-            if not res: 
-                nectarQuantity.append("0")
-                continue
-            #get a screenshot of the buff
-            rx, ry = res[1]
-            cropX = int(rx+offsetX*self.robloxWindow.multi)
-            cropY = int(ry+offsetY*self.robloxWindow.multi)
-            fullBuffImg = screen[cropY:cropY+40*self.robloxWindow.multi, cropX:cropX+40*self.robloxWindow.multi]
-            h,w, *_ = fullBuffImg.shape
-            #get the buff level
-            fullBuffImg = cv2.cvtColor(fullBuffImg, cv2.COLOR_RGBA2BGR)
-            mask = cv2.cvtColor(fullBuffImg, cv2.COLOR_BGR2HLS)
-            mask = cv2.inRange(mask, col[0], col[1])
-            #cv2.imshow("mask", mask)
-            #cv2.waitKey(0)
-            mask = cv2.erode(mask, self.nectarKernel)
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-            if not contours:
-                #in this case, the nectar quantity might be so low it cant be detected or the player doesnt have the nectar at all
-                #so, we get the confidence value of the match
-                #if the value is high, its probably low nectar quantity
-                #if its low, the player prob doesnt have the nectar
-                max_val, _  = res
-                nectarQuantity.append(2 if max_val > 0.8 else 0)
-                continue
-            # return the bounding with the largest area
-            _, _, _, buffH = cv2.boundingRect(max(contours, key=cv2.contourArea))
-            quantity = max(min(100, (buffH/h*100)), 1)
-            nectarQuantity.append(quantity)
+        for nectar in self.nectars:
+            nectarQuantity.append(self.getNectar(nectar))
         return nectarQuantity
 
 
@@ -382,20 +385,34 @@ class HourlyReport():
         
         return filtered_values
 
-    def generateHourlyReport(self):
+    def generateHourlyReport(self, setdat):
         buffQuantity = self.buffDetector.getBuffsWithImage(self.hourBuffs)
         nectarQuantity = self.buffDetector.getNectars()
         #mssScreenshot(save=True)
 
         #get the hourly report data
 
+        planterData = ""
         #get planter data
-        with open("./data/user/manualplanters.txt", "r") as f:
-            planterData = f.read()
-        f.close()
+        if setdat["planters_mode"] == 1:
+            with open("./data/user/manualplanters.txt", "r") as f:
+                planterData = f.read()
+            f.close()
 
-        if planterData:
-            planterData = ast.literal_eval(planterData)
+            if planterData:
+                planterData = ast.literal_eval(planterData)
+        elif setdat["planters_mode"] == 2:
+            with open("./data/user/auto_planters.json", "r") as f:
+                planterData = json.load(f)["planters"]
+            f.close()
+            planterData = {
+                "planters": [p["planter"] for p in planterData],
+                "harvestTimes": [p["harvest_time"] for p in planterData],
+                "fields": [p["field"] for p in planterData],
+            }
+            if all(not p for p in planterData["planters"]):
+                planterData = ""
+
 
         #get history
         with open("data/user/hourly_report_history.txt", "r") as f:
@@ -492,7 +509,7 @@ class HourlyReport():
 class HourlyReportDrawer:
     def __init__(self):
         self.backgroundColor = "#0E0F13"
-        self.canvasSize = (6400, 9000)
+        self.canvasSize = (6400, 8000)
         self.sidebarWidth = 1900
         self.leftPadding = 150
         self.availableSpace = self.canvasSize[0] - self.sidebarWidth - self.leftPadding*2
@@ -1253,7 +1270,7 @@ class HourlyReportDrawer:
                 "color": "#C3A6FF"
             },
             {
-                "label": "Misc",
+                "label": "Other",
                 "data": hourlyReportStats["misc_time"],
                 "color": "#E6D6FF"
             },

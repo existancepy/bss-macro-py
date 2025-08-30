@@ -1,3 +1,6 @@
+for _ in range(10):
+    self.keyboard.press("a", 0.25)
+    self.keyboard.press("s", 0.75)
 self.keyboard.slowPress(".")
 self.keyboard.walk("w",30)
 self.keyboard.slowPress(",")

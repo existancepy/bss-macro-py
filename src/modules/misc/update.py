@@ -24,6 +24,7 @@ def merge(scr_path, dir_path):
     merge(scr_folder, dir_folder)
 
 def update(t = "e"):
+    msgBox("Update in progress", "Updating... Do not close terminal")
     protectedFolders = ["settings"] #folders that should not be replaced
     protectedFiles = [".git"] #files that should not be replaces
     destination = os.getcwd().replace("/src","") #the target folder to replace the files. Should be the parent directory of the /src folder

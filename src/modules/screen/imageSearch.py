@@ -4,7 +4,18 @@ import numpy as np
 import imagehash
 import time
 
+class TemplateTooLargeError(Exception):
+    def __init__(self, template_size, image_size):
+        self.template_size = template_size
+        self.image_size = image_size
+        super().__init__(f"Template size {template_size} is larger than image size {image_size}")
+
 def templateMatch(smallImg, bigImg):
+    if smallImg.shape[0] > bigImg.shape[0] or smallImg.shape[1] > bigImg.shape[1]:
+        raise TemplateTooLargeError(
+            template_size=(smallImg.shape[1], smallImg.shape[0]),  # (width, height)
+            image_size=(bigImg.shape[1], bigImg.shape[0])          # (width, height)
+        )
     res = cv2.matchTemplate(bigImg, smallImg, cv2.TM_CCOEFF_NORMED)
     return cv2.minMaxLoc(res)
 
@@ -53,7 +64,7 @@ def locateImageWithMaskOnScreen(image, mask, x,y,w,h, threshold=0):
 
 def findColorObjectHSL(img, hslRange, kernel=None, mode="point", best=1, draw=False):
     """
-    Quickly find objects of a specific color in the HSL range.
+    Find objects of a specific color in the HSL range.
 
     Args:
         img (numpy.ndarray): Input image in BGR format.
@@ -66,11 +77,9 @@ def findColorObjectHSL(img, hslRange, kernel=None, mode="point", best=1, draw=Fa
     Returns:
         tuple or list: Coordinates of the center or bounding boxes.
     """
-    # Convert HSL range to OpenCV's HLS format
     hLow, sLow, lLow = hslRange[0][0] / 2, hslRange[0][1] / 100 * 255, hslRange[0][2] / 100 * 255
     hHigh, sHigh, lHigh = hslRange[1][0] / 2, hslRange[1][1] / 100 * 255, hslRange[1][2] / 100 * 255
 
-    # Fast conversion to HLS and thresholding
     binary_mask = cv2.inRange(
         cv2.cvtColor(img, cv2.COLOR_BGR2HLS),
         np.array([hLow, lLow, sLow], dtype=np.uint8),
@@ -96,6 +105,7 @@ def findColorObjectHSL(img, hslRange, kernel=None, mode="point", best=1, draw=Fa
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     if draw:
+        cv2.imwrite(f"{time.time()}.png", img)
         cv2.imshow("Result", img)
         cv2.waitKey(0)
 

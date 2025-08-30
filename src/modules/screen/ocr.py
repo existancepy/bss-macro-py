@@ -5,6 +5,8 @@ from PIL import Image
 import os
 import time
 import mss
+import mss.darwin
+mss.darwin.IMAGE_OPTIONS = 0
 from modules.screen.screenData import getScreenData
 import io
 

@@ -182,11 +182,109 @@ function clearManualPlantersData(){
 function clearAutoPlantersData(){
     const btn = document.getElementById("auto-planters-reset-btn")
     if (btn.classList.contains("active")) return
-    eel.clearManualPlanters()
+    eel.clearAutoPlanters()
     btn.classList.add("active")
     setTimeout(() => {
         btn.classList.remove("active")
       }, 700)
+}
+
+function changePreset(ele){
+    const presetData = {
+        "blue": {
+            "auto_priority_0_nectar": "comforting",
+            "auto_priority_1_nectar": "motivating",
+            "auto_priority_2_nectar": "satisfying",
+            "auto_priority_3_nectar": "refreshing",
+            "auto_priority_4_nectar": "invigorating",
+            "auto_priority_0_min": 70,
+            "auto_priority_1_min": 80,
+            "auto_priority_2_min": 80,
+            "auto_priority_3_min": 80,
+            "auto_priority_4_min": 40,
+            "auto_field_sunflower": true,
+            "auto_field_dandelion": true,
+            "auto_field_mushroom": false,
+            "auto_field_blue_flower": true,
+            "auto_field_clover": true,
+            "auto_field_strawberry": true,
+            "auto_field_spider": true,
+            "auto_field_bamboo": false,
+            "auto_field_pineapple": true,
+            "auto_field_stump": false,
+            "auto_field_cactus": true,
+            "auto_field_pumpkin": false,
+            "auto_field_pine_tree": true,
+            "auto_field_rose": true,
+            "auto_field_mountain_top": false,
+            "auto_field_pepper": true,
+            "auto_field_coconut": false,
+        },
+        "red": {
+            "auto_priority_0_nectar": "invigorating",
+            "auto_priority_1_nectar": "refreshing",
+            "auto_priority_2_nectar": "motivating",
+            "auto_priority_3_nectar": "satisfying",
+            "auto_priority_4_nectar": "comforting",
+            "auto_priority_0_min": 70,
+            "auto_priority_1_min": 80,
+            "auto_priority_2_min": 80,
+            "auto_priority_3_min": 80,
+            "auto_priority_4_min": 40,
+            "auto_field_sunflower": true,
+            "auto_field_dandelion": true,
+            "auto_field_mushroom": false,
+            "auto_field_blue_flower": true,
+            "auto_field_clover": true,
+            "auto_field_strawberry": true,
+            "auto_field_spider": true,
+            "auto_field_bamboo": true,
+            "auto_field_pineapple": true,
+            "auto_field_stump": false,
+            "auto_field_cactus": true,
+            "auto_field_pumpkin": true,
+            "auto_field_pine_tree": true,
+            "auto_field_rose": true,
+            "auto_field_mountain_top": false,
+            "auto_field_pepper": true,
+            "auto_field_coconut": false,
+        },
+        "white": {
+            "auto_priority_0_nectar": "satisfying",
+            "auto_priority_1_nectar": "motivating",
+            "auto_priority_2_nectar": "refreshing",
+            "auto_priority_3_nectar": "comforting",
+            "auto_priority_4_nectar": "invigorating",
+            "auto_priority_0_min": 70,
+            "auto_priority_1_min": 80,
+            "auto_priority_2_min": 80,
+            "auto_priority_3_min": 80,
+            "auto_priority_4_min": 40,
+            "auto_field_sunflower": true,
+            "auto_field_dandelion": true,
+            "auto_field_mushroom": false,
+            "auto_field_blue_flower": true,
+            "auto_field_clover": true,
+            "auto_field_strawberry": true,
+            "auto_field_spider": true,
+            "auto_field_bamboo": true,
+            "auto_field_pineapple": true,
+            "auto_field_stump": false,
+            "auto_field_cactus": true,
+            "auto_field_pumpkin": false,
+            "auto_field_pine_tree": true,
+            "auto_field_rose": true,
+            "auto_field_mountain_top": false,
+            "auto_field_pepper": true,
+            "auto_field_coconut": false,
+        }
+    }
+    saveSetting(ele, "profile")
+    const preset = getInputValue(ele.id)
+    if (preset in presetData){
+        const data = presetData[preset]
+        loadInputs(data, save="profile")
+    }
 }
 
 $("#planters-placeholder")

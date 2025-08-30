@@ -68,6 +68,17 @@
                         triggerFunction: saveGeneralTriggerFunction
                     }
                 },
+                {
+                    id: "bees",
+                    title: "Bees",
+                    desc: "The number of bees in your hive",
+                    type: {
+                        name: "textbox",
+                        inputType: "int",
+                        inputLimit: 2,
+                        triggerFunction: saveGeneralTriggerFunction
+                    }
+                },
             ])
             
             buildStandardContainer(parentBSS,"Sprinkler", "",[
@@ -149,7 +160,7 @@
                 {
                     id: "rejoin_method",
                     title: "Rejoin Method",
-                    desc: "How the macro should rejoin. All methods other than deeplink use the browser",
+                    desc: "How the macro should rejoin. Deeplink is highly recommended, and all other methods use the browser",
                     type: {
                         name: "dropdown",
                         data: ["Deeplink", "New Tab", "Reload"],
@@ -284,7 +295,7 @@
     <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="stream">
         <script>
             const parentStream = document.getElementById("stream")
-                buildStandardContainer(parentStream,"Stream", "Stream your screen in real-time through a web link. Visit #guides in the discord for instructions on how to set it up",[
+                buildStandardContainer(parentStream,"Stream", "Stream your screen in real-time through a web link. Visit the gitbook for instructions on how to set it up",[
                     {
                         id: "enable_stream",
                         title: "Enable Stream",

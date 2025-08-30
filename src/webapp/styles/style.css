@@ -500,3 +500,67 @@ label img{
 #auto-allowed-fields img{
     margin-left: 0.5rem;
 }
+
+#planter-timers-container{
+    display: none;
+}
+
+#planter-timers-container{
+    display: none;
+}
+
+#planter-timers-container.show{
+    display: flex;
+}
+
+#credits-container{
+    margin-top: auto;
+}
+
+div:has(#planter-timers-container.show) #credits-container{
+    margin-top: 1rem;
+}
+
+.planter-timers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+    gap: 1rem; /* optional spacing between columns */
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.planter-timers .planter{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.planter-timers .planter-img{
+    width: 40%;
+    margin-bottom: 0.5rem;
+}
+
+.planter-timers .planter span{
+    text-align: center;
+    font-size: 0.9rem; 
+}
+
+.planter-timers .planter .time{
+    color: #ADB5BD;
+}
+
+.planter-timers .planter span.ready{
+    color: #4CAF50;
+}
+
+.planter-timers .field-row{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.planter-timers .field-row img{
+    height: 0.9rem;
+    object-fit: contain;
+}

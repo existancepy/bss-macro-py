@@ -10,6 +10,8 @@ from concurrent.futures import ThreadPoolExecutor
 from modules import bitmap_matcher
 from modules.misc.appManager import getWindowSize
 import mss
+import mss.darwin
+mss.darwin.IMAGE_OPTIONS = 0
 from modules.screen.robloxWindow import RobloxWindowBounds
 
 class HasteCompensation():
