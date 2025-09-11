@@ -10,16 +10,24 @@ mss.darwin.IMAGE_OPTIONS = 0
 from modules.screen.screenData import getScreenData
 import io
 
-useOCRMac = False
+ocrLib = None
 useLangPref = True
 try:
     from ocrmac import ocrmac #see if ocr mac is installed
-    useOCRMac = True
+    ocrLib = "ocrmac"
 except:
-    from paddleocr import PaddleOCR
-    ocrP = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
-    print("Imported paddleocr")
-
+    try:
+        from paddleocr import PaddleOCR
+        ocrP = PaddleOCR(lang='en', show_log = False, use_angle_cls=False)
+        print("Imported paddleocr")
+        ocrLib = "paddleocr"
+    except:
+        import easyocr
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
+        print("Imported easyocr")
+        easyocrReader = easyocr.Reader(['en'])
+        ocrLib = "easyocr"
 
 mw, mh = pag.size()
 screenInfo = getScreenData()
@@ -49,6 +57,7 @@ def ocrMac_(img):
     else:
         result = ocrmac.OCR(img).recognize(px=True)
     #convert it to the same format as paddleocr
+    #[ ([x1,y1],[x2,y1],[x2,y2],[x1,y2]), (text, confidence) ]
     return [ [paddleBounding(x[2]),(x[0],x[1]) ] for x in result]
 
 def ocrPaddle(img):
@@ -58,6 +67,11 @@ def ocrPaddle(img):
     img_byte_arr = img_byte_arr.getvalue()
     result = ocrP.ocr(img_byte_arr, cls=False)[0]
     return result
+
+def ocrEasy(img):
+    img = np.asarray(img)
+    result = easyocrReader.readtext(img)
+    return [[(x[0]), (x[1], x[2])] for x in result]
 
 def screenshot(**kwargs):
     out = None
@@ -147,7 +161,7 @@ def ocrRead(img):
         return [[[""],["",0]]]
     return out
     
-if useOCRMac:
+if ocrLib == "ocrmac":
     ocrFunc = ocrMac_
     try:
         ocrFunc(mssScreenshot(1,1,10,10))
@@ -155,6 +169,8 @@ if useOCRMac:
         print(e)
         print("Language Preferences for ocrmac is disabled")
         useLangPref = False
-else:
+elif ocrLib == "paddleocr":
     ocrFunc = ocrPaddle
+elif ocrLib == "easyocr":
+    ocrFunc = ocrEasy
 
