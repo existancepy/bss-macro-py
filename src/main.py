@@ -973,7 +973,7 @@ if __name__ == "__main__":
         
         #Check for crash
         if macroProc and not macroProc.is_alive() and hasattr(macroProc, "exitcode") and macroProc.exitcode is not None and macroProc.exitcode < 0:
-            logger.webhook("","Crashed", "red", "screen")
+            logger.webhook("","Macro Crashed", "red")
             macroProc.join()
             appManager.openApp("Roblox")
             keyboardModule.releaseMovement()
