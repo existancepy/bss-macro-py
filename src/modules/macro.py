@@ -342,7 +342,21 @@ class macro:
         self.hasteCompensation = HasteCompensationRevamped(self.robloxWindow, self.setdat["movespeed"])
         self.fieldDriftCompensation = fieldDriftCompensationClass(self.robloxWindow)
         self.keyboard = keyboard(self.setdat["movespeed"], self.setdat["haste_compensation"], self.hasteCompensation)
-        self.logger = logModule.log(logQueue, self.setdat["enable_webhook"], self.setdat["webhook_link"], self.setdat["send_screenshot"], blocking=self.setdat["low_performance"], hourlyReportOnly=self.setdat["only_send_hourly_report"], robloxWindow=self.robloxWindow)
+        # Prepare ping settings
+        pingSettings = {
+            "ping_critical_errors": self.setdat.get("ping_critical_errors", False),
+            "ping_disconnects": self.setdat.get("ping_disconnects", False),
+            "ping_character_deaths": self.setdat.get("ping_character_deaths", False),
+            "ping_vicious_bee": self.setdat.get("ping_vicious_bee", False),
+            "ping_mondo_buff": self.setdat.get("ping_mondo_buff", False),
+            "ping_ant_challenge": self.setdat.get("ping_ant_challenge", False),
+            "ping_sticker_events": self.setdat.get("ping_sticker_events", False),
+            "ping_mob_events": self.setdat.get("ping_mob_events", False),
+            "ping_conversion_events": self.setdat.get("ping_conversion_events", False),
+            "ping_hourly_reports": self.setdat.get("ping_hourly_reports", False)
+        }
+        
+        self.logger = logModule.log(logQueue, self.setdat["enable_webhook"], self.setdat["webhook_link"], self.setdat["send_screenshot"], blocking=self.setdat["low_performance"], hourlyReportOnly=self.setdat["only_send_hourly_report"], robloxWindow=self.robloxWindow, enableDiscordPing=self.setdat["enable_discord_ping"], discordUserID=self.setdat["discord_user_id"], pingSettings=pingSettings)
         self.buffDetector = BuffDetector(self.robloxWindow)
         self.hourlyReport = HourlyReport(self.buffDetector)
         self.memoryMatch = MemoryMatch(self.robloxWindow)
@@ -1018,7 +1032,7 @@ class macro:
         if convertBalloon: self.saveTiming("convert_balloon")
         self.status.value = ""
         #deal with the extra delay
-        self.logger.webhook("", f"Finished converting (Time: {self.convertSecsToMinsAndSecs(time.time()-st)})", "brown")
+        self.logger.webhook("", f"Finished converting (Time: {self.convertSecsToMinsAndSecs(time.time()-st)})", "brown", ping_category="ping_conversion_events")
         wait = self.setdat["convert_wait"]
         if (wait):
             self.logger.webhook("", f'Waiting for an additional {wait} seconds', "light green")
@@ -1265,7 +1279,7 @@ class macro:
             self.logger.webhook("Notice", f"Could not find cannon", "dark brown", "screen")
             self.reset(convert=False)
         else:
-            self.logger.webhook("Notice", f"Failed to reach cannon too many times", "red")
+            self.logger.webhook("Notice", f"Failed to reach cannon too many times", "red", ping_category="ping_critical_errors")
             self.rejoin()
     
     def rejoin(self, rejoinMsg = "Rejoining"):
@@ -1280,7 +1294,7 @@ class macro:
             rejoinMethod = self.setdat["rejoin_method"]
             browserLink = "https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129"
             if i == 2 and joinPS: 
-                self.logger.webhook("", "Failed rejoining too many times, falling back to a public server", "red", "screen")
+                self.logger.webhook("", "Failed rejoining too many times, falling back to a public server", "red", "screen", ping_category="ping_disconnects")
                 joinPS = False
             appManager.closeApp("Roblox") # close roblox
             time.sleep(8)
@@ -1321,7 +1335,7 @@ class macro:
                 if self.setdat["rejoin_method"] == "deeplink":
                     #check if the user is stuck on the sign up screen
                     if robloxOpenTime and locateImageOnScreen(signUpImage, self.robloxWindow.mx+(self.robloxWindow.mw/4), self.robloxWindow.my+(self.robloxWindow.mh/3), self.robloxWindow.mw/2, self.robloxWindow.mh*2/3, 0.7):
-                        self.logger.webhook("","Not logged into the roblox app. Rejoining via the browser. For a smoother experience, please ensure you are logged into the Roblox app beforehand.","red","screen")
+                        self.logger.webhook("","Not logged into the roblox app. Rejoining via the browser. For a smoother experience, please ensure you are logged into the Roblox app beforehand.","red","screen", ping_category="ping_disconnects")
                         self.setdat["rejoin_method"] = "new tab"
                         continue
                     #check if home page is opened instead of the app
@@ -1487,7 +1501,7 @@ class macro:
                 self.clickPermissionPopup()
                 self.keyboard.press("e")
                 time.sleep(1)
-                self.logger.webhook("",f'Claimed hive {newHiveNumber}', "bright green", "screen")
+                self.logger.webhook("",f'Claimed hive {newHiveNumber}', "bright green", "screen", ping_category="ping_critical_errors")
                 self.setdat["hive_number"] = newHiveNumber
                 settingsManager.saveGeneralSetting("hive_number", newHiveNumber)
                 for _ in range(8):
@@ -1563,7 +1577,7 @@ class macro:
             #place sprinkler + check if in field
             if self.placeSprinkler(): 
                 break
-            self.logger.webhook("", f"Failed to land in field", "red", "screen")
+            self.logger.webhook("", f"Failed to land in field", "red", "screen", ping_category="ping_critical_errors")
             self.reset()
         else: #failed too many times
             return
@@ -1693,7 +1707,7 @@ class macro:
             elif self.died:
                 self.status.value = ""
                 stopGather()
-                self.logger.webhook("","Player died", "dark brown","screen")
+                self.logger.webhook("","Player died", "dark brown","screen", ping_category="ping_character_deaths")
                 time.sleep(0.4)
                 self.reset()
                 break
@@ -1818,14 +1832,14 @@ class macro:
                 keepOld = self.keepOldCheck()
                 if keepOld is not None:
                     mouse.mouseUp()
-                    self.logger.webhook("","Ant Challenge Complete","bright green", "screen")
+                    self.logger.webhook("","Ant Challenge Complete","bright green", "screen", ping_category="ping_ant_challenge")
                     time.sleep(0.1)
                     mouse.moveTo(*keepOld)
                     time.sleep(0.2)
                     mouse.click()
                     break
             return
-        self.logger.webhook("", "Cant start ant challenge", "red", "screen")
+        self.logger.webhook("", "Cant start ant challenge", "red", "screen", ping_category="ping_critical_errors")
 
     def getCurrentMinute(self):
         current_time = datetime.now().strftime("%H:%M:%S")
@@ -1862,7 +1876,7 @@ class macro:
                 if self.blueTextImageSearch("died"):
                     self.died = True
                     self.keyboard.press("shift")
-                    self.logger.webhook("", "Player Died", "red", "screen")
+                    self.logger.webhook("", "Player Died", "red", "screen", ping_category="ping_character_deaths")
                     self.reset(convert=False)
                     #sev recursion here is pretty weird
                     #TODO: not make it recursive
@@ -1927,7 +1941,7 @@ class macro:
             else:
                 time.sleep(self.setdat['mondo_buff_wait'] * 60)
             self.saveTiming("mondo") 
-            self.logger.webhook("","Collected: Mondo Buff","light green")
+            self.logger.webhook("","Collected: Mondo Buff","light green", ping_category="ping_mondo_buff")
         #done
         self.reset(convert=True)
         return True
@@ -1981,7 +1995,7 @@ class macro:
         #click yes
         if not self.clickYes(detect=True):
             egg = self.setdat["sticker_printer_egg"]
-            self.logger.webhook("", f"No {egg} eggs left, Sticker Printer has been disabled", "red", "screen")
+            self.logger.webhook("", f"No {egg} eggs left, Sticker Printer has been disabled", "red", "screen", ping_category="ping_critical_errors")
             self.updateGUI.value = 1
             self.setdat["sticker_printer"] = False
             settingsManager.saveProfileSetting(f"sticker_printer", False)
@@ -1989,7 +2003,7 @@ class macro:
             return
         #wait for sticker to generate
         time.sleep(7)
-        self.logger.webhook(f"", "Claimed sticker", "bright green", "sticker")
+        self.logger.webhook(f"", "Claimed sticker", "bright green", "sticker", ping_category="ping_sticker_events")
         self.saveTiming("sticker_printer")
         #close the inventory
         time.sleep(1)
@@ -2247,7 +2261,7 @@ class macro:
 
         attackThread.join()
         if self.mobRunStatus == "dead":
-            self.logger.webhook("","Player died", "dark brown","screen")
+            self.logger.webhook("","Player died", "dark brown","screen", ping_category="ping_character_deaths")
             updateHourlyTime()
             return
         elif self.mobRunStatus == "timeout":
@@ -2387,15 +2401,15 @@ class macro:
                 #run checks
                 if self.died or self.vicStatus is not None: break
             if self.vicStatus == "defeated":
-                self.logger.webhook("","Vicious Bee Defeated","light green", "screen")
+                self.logger.webhook("","Vicious Bee Defeated","light green", "screen", ping_category="ping_vicious_bee")
                 self.hourlyReport.addHourlyStat("vicious_bees", 1)
                 break
             elif self.died:
-                self.logger.webhook("","Player Died","dark brown", "screen")
+                self.logger.webhook("","Player Died","dark brown", "screen", ping_category="ping_character_deaths")
                 goToVicField(wait=True)
                 self.died = False
             elif time.time()-st > 180: #max 3 mins to kill vic
-                self.logger.webhook("","Took too long to kill Vicious Bee","red", "screen")
+                self.logger.webhook("","Took too long to kill Vicious Bee","red", "screen", ping_category="ping_critical_errors")
                 break
         self.night = False
         updateHourlyTime()
@@ -2410,7 +2424,7 @@ class macro:
             self.goToField("stump")
             if self.placeSprinkler():
                 break
-            self.logger.webhook("", "Failed to land in stump field", "red", "screen")
+            self.logger.webhook("", "Failed to land in stump field", "red", "screen", ping_category="ping_critical_errors")
             self.reset()
         while True:
             mouse.click()
@@ -2419,7 +2433,7 @@ class macro:
                 mouse.mouseUp()
                 break
         #handle the other stump snail
-        self.logger.webhook("","Stump Snail Killed","bright green", "screen")
+        self.logger.webhook("","Stump Snail Killed","bright green", "screen", ping_category="ping_mob_events")
         self.saveTiming("stump_snail")
         def keepOld():
             time.sleep(0.5)
@@ -2501,17 +2515,17 @@ class macro:
                 if self.died or self.bossStatus is not None: break
             
             if self.died:
-                self.logger.webhook("", "Died to Coconut Crab", "dark brown")
+                self.logger.webhook("", "Died to Coconut Crab", "dark brown", ping_category="ping_character_deaths")
                 self.reset(convert=False)
                 self.died = False
             elif self.bossStatus is not None:
                 break
             
         if self.bossStatus == "timelimit":
-            self.logger.webhook("", "Time Limit: Coconut Crab", "dark brown")
+            self.logger.webhook("", "Time Limit: Coconut Crab", "dark brown", ping_category="ping_critical_errors")
         elif self.bossStatus == "defeated":
             self.keyboard.walk("a", 2)
-            self.logger.webhook("", "Defeated: Coconut Crab", "bright green", "screen")
+            self.logger.webhook("", "Defeated: Coconut Crab", "bright green", "screen", ping_category="ping_mob_events")
             self.nmLoot(9, 4, "d")
             self.nmLoot(9, 4, "a")
             self.nmLoot(9, 4, "d")
@@ -2605,7 +2619,7 @@ class macro:
                 #use glitter
                 if glitter: self.useItemInInventory("glitter")
                 break
-            self.logger.webhook("",f"Failed to Place Planter: {planter.title()}", "red", "screen")
+            self.logger.webhook("",f"Failed to Place Planter: {planter.title()}", "red", "screen", ping_category="ping_critical_errors")
             self.reset()
         else:
             updateHourlyTime()
@@ -2725,7 +2739,7 @@ class macro:
         
         self.keyboard.press("e")
         self.clickYes()
-        self.logger.webhook("",f"Looting: {planter.title()} planter","bright green", "screen")
+        self.logger.webhook("",f"Looting: {planter.title()} planter","bright green", "screen", ping_category="ping_conversion_events")
         self.keyboard.multiWalk(["s","d"], 0.87)
         self.nmLoot(9, 5, "a")
         self.setMobTimer(field)
@@ -2938,7 +2952,7 @@ class macro:
         craftTime = quantity*5*60 #5mins per item
         blenderData["collectTime"] = time.time() + craftTime
         time.sleep(1) #add a delay here before taking a screenshot, since bss displays the crafting screen with default values for a bit
-        self.logger.webhook("", f"Crafted: {itemDisplay} x{quantity}, Ready in: {timedelta(seconds=craftTime)}", "bright green", "screen")
+        self.logger.webhook("", f"Crafted: {itemDisplay} x{quantity}, Ready in: {timedelta(seconds=craftTime)}", "bright green", "screen", ping_category="ping_conversion_events")
         #store the data
         saveBlenderData()
         self.closeBlenderGUI()
@@ -2954,7 +2968,7 @@ class macro:
         ocrRes = re.findall(r"\(.*?\)", ocrRes) #get text between brackets
         finalTime = None
         def cantDetectTime():
-            self.logger.webhook("", "Failed to detect sticker stack buff duration", "red", "screen")
+            self.logger.webhook("", "Failed to detect sticker stack buff duration", "red", "screen", ping_category="ping_critical_errors")
         if ocrRes:
             times = []
             if "x" in ocrRes[0]: #number of stickers
@@ -2987,7 +3001,7 @@ class macro:
                 mouse.click()
                 stickerUsed = True
             elif not "/" in self.setdat["sticker_stack_item"]:
-                self.logger.webhook("", "No Stickers left to stack, Sticker Stack has been disabled", "red", "screen")
+                self.logger.webhook("", "No Stickers left to stack, Sticker Stack has been disabled", "red", "screen", ping_category="ping_critical_errors")
                 self.setdat["sticker_stack"] = False
                 self.keyboard.press("e")
                 return
@@ -3010,12 +3024,12 @@ class macro:
                 time.sleep(0.4)
         else: #4 yes/no popups, either cub/hive skin
             if not self.setdat["hive_skin"] and not self.setdat["cub_skin"]: #do not use cub and hive stickers
-                self.logger.webhook("", "A hive/cub sticker has been wrongly selected, aborting", "red", "screen")
+                self.logger.webhook("", "A hive/cub sticker has been wrongly selected, aborting", "red", "screen", ping_category="ping_critical_errors")
                 self.keyboard.press("e")
                 return
         
         if "ticket" in self.setdat["sticker_stack_item"] and not yesPopup: #if no popup appears, ran out of tickets
-            self.logger.webhook("", "No Tickets left, Sticker Stack has been disabled", "red", "screen")
+            self.logger.webhook("", "No Tickets left, Sticker Stack has been disabled", "red", "screen", ping_category="ping_critical_errors")
             self.setdat["sticker_stack"] = False
             self.keyboard.press("e")
             return
@@ -3218,7 +3232,7 @@ class macro:
                     self.hourlyReport.buffGatherIntervals[i] = 1
                 self.hourlyReport.saveHourlyReportData()
         except Exception:
-            self.logger.webhook("Hourly Report Error", traceback.format_exc(), "red")
+            self.logger.webhook("Hourly Report Error", traceback.format_exc(), "red", ping_category="ping_critical_errors")
         
     def hourlyReportBackground(self):
         while True:

@@ -915,7 +915,7 @@ if __name__ == "__main__":
                         logger.webhook("Stream Started", f'Stream URL: {stream.publicURL}', "purple")
                         return
             
-                logger.webhook("", f'Stream could not start. Check terminal for more info', "red")
+                logger.webhook("", f'Stream could not start. Check terminal for more info', "red", ping_category="ping_critical_errors")
 
             print("checking stream")
             streamLink = None
@@ -963,7 +963,7 @@ if __name__ == "__main__":
                 stopApp()
         elif run.value == 4: #disconnected
             macroProc.kill()
-            logger.webhook("","Disconnected", "red", "screen")
+            logger.webhook("","Disconnected", "red", "screen", ping_category="ping_disconnects")
             appManager.closeApp("Roblox")
             keyboardModule.releaseMovement()
             mouse.mouseUp()
@@ -973,7 +973,7 @@ if __name__ == "__main__":
         
         #Check for crash
         if macroProc and not macroProc.is_alive() and hasattr(macroProc, "exitcode") and macroProc.exitcode is not None and macroProc.exitcode < 0:
-            logger.webhook("","Macro Crashed", "red")
+            logger.webhook("","Macro Crashed", "red", "screen", ping_category="ping_critical_errors")
             macroProc.join()
             appManager.openApp("Roblox")
             keyboardModule.releaseMovement()
