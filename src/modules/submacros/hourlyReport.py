@@ -118,47 +118,58 @@ class BuffDetector():
 
             #find the buff
             buffTemplate = adjustImage("./images/buffs", buff, self.robloxWindow.display_type)
-            res = locateTransparentImage(buffTemplate, screen, threshold)
+            finalBuffValues = [0]
 
-            if not res: 
-                buffQuantity.append("0")
-                continue
+            for _ in range(3):
+                res = locateTransparentImage(buffTemplate, screen, threshold)
 
-            #get a screenshot of the buff
-            rx, ry = res[1]
-            h,w = buffTemplate.shape[:-1]
-            if templatePosition == "bottom": 
-                ry-=self.buffSize-h
-            elif templatePosition == "middle":
-                rx = max(0, rx-(self.buffSize-w)/2+8)
-                ry -= 30
+                if not res: 
+                    finalBuffValues.append(0)
+                    break
 
-            cropX = int(rx)
-            cropY = int(ry)
+                #get a screenshot of the buff
+                rx, ry = res[1]
+                h,w = buffTemplate.shape[:-1]
+                if templatePosition == "bottom": 
+                    ry-=self.buffSize-h
+                elif templatePosition == "middle":
+                    rx = max(0, rx-(self.buffSize-w)/2+8)
+                    ry -= 30
 
-            imgHeight, imgWidth, *_ = screen.shape
-            cropX = np.clip(cropX, 0, imgWidth - self.buffSize - 5)
-            cropY = np.clip(cropY, 0, imgHeight - self.buffSize - 2)
-            
-            #buff is either present or not, non stackable (0 or 1)
-            if not stackable:
-                buffQuantity.append("1")
-                if save:
-                    fullBuffImgBGR = cv2.cvtColor(screen, cv2.COLOR_RGBA2BGR)[cropY:cropY+self.buffSize+2, cropX:cropX+self.buffSize+5]
-                    cv2.imwrite(f"{buff}-{time.time()}.png", fullBuffImgBGR)
-                continue
+                cropX = int(rx)
+                cropY = int(ry)
+
+                imgHeight, imgWidth, *_ = screen.shape
+                cropX = np.clip(cropX, 0, imgWidth - self.buffSize - 5)
+                cropY = np.clip(cropY, 0, imgHeight - self.buffSize - 2)
                 
-            fullBuffImgBGR = cv2.cvtColor(screen, cv2.COLOR_RGBA2BGR)[cropY:cropY+self.buffSize+2, cropX:cropX+self.buffSize+5]
+                #buff is not stackable, no need to extract text
+                if not stackable:
+                    finalBuffValues.append(1)
+                    if save:
+                        fullBuffImgBGR = cv2.cvtColor(screen, cv2.COLOR_RGBA2BGR)[cropY:cropY+self.buffSize+2, cropX:cropX+self.buffSize+5]
+                        cv2.imwrite(f"{buff}-{time.time()}.png", fullBuffImgBGR)
+                    break
+                    
+                fullBuffImgBGR = cv2.cvtColor(screen, cv2.COLOR_RGBA2BGR)[cropY:cropY+self.buffSize+2, cropX:cropX+self.buffSize+5]
 
-            if fullBuffImgBGR.size == 0:
-                print(f"Warning: Empty image for buff '{buff}' at ({cropX}, {cropY})")
-                buffQuantity.append("1")  # default fallback or "0" if appropriate
-                continue
-            
-            if save:
-                cv2.imwrite(f"{buff}-{time.time()}.png", fullBuffImgBGR)
-            #filter out everything but the text
-            buffQuantity.append(self.getBuffQuantityFromImg(fullBuffImgBGR, transform, buff=buff))
+                if fullBuffImgBGR.size == 0:
+                    print(f"Warning: Empty image for buff '{buff}' at ({cropX}, {cropY})")
+                    finalBuffValues.append(1)
+                    time.sleep(1)
+                    continue
+                
+                if save:
+                    cv2.imwrite(f"{buff}-{time.time()}.png", fullBuffImgBGR)
+
+                #filter out everything but the text
+                buffVal = self.getBuffQuantityFromImg(fullBuffImgBGR, transform, buff=buff)
+                if buffVal == "1":
+                    time.sleep(1)
+                finalBuffValues.append(buffVal)
+                
+            buffQuantity.append(max(finalBuffValues))
+
         return buffQuantity
 
     def getBuffWithColor(self, buffs):
@@ -304,7 +315,7 @@ class BuffDetector():
         mask = cv2.inRange(mask, col[0], col[1])
         #cv2.imshow("mask", mask)
         #cv2.waitKey(0)
-        mask = cv2.erode(mask, self.nectarKernel)
+        #mask = cv2.erode(mask, self.nectarKernel)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
         if not contours:

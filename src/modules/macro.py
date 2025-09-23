@@ -974,9 +974,9 @@ class macro:
             if doneConverting: 
                 break
             #not converting
-            if "make" in text:
+            if "make" in text and not "stop" in text:
                 self.keyboard.press("e")
-                time.sleep(0.5)
+                time.sleep(2)
 
             mouse.click()
 
@@ -1533,9 +1533,7 @@ class macro:
         st = time.time()
         if self.blueTextImageSearch("died", 0.8):
             self.died = True
-        #mob respawn check
-        self.setMobTimer(field)
-        time.sleep(1)
+
     def gatherBackground(self):
         field = self.status.value.split("_")[1]
         while self.isGathering:
@@ -1632,15 +1630,12 @@ class macro:
         keepGathering = True
         self.died = False
         #time to gather
+        gatherNameSpace = {**locals(), **globals()}
         self.status.value = f"gather_{field}"
         self.isGathering = True
         firstPattern = True
         self.logger.webhook(f"Gathering: {field.title()}", f"Limit: {gatherTimeLimit} - {fieldSetting['shape']} - Backpack: {fieldSetting['backpack']}%", "light green")
         mouse.moveBy(10,5)
-        if not self.setdat["low_performance"]:
-            gatherBackgroundThread = threading.Thread(target=self.gatherBackground)
-            gatherBackgroundThread.daemon = True
-            gatherBackgroundThread.start()
         self.keyboard.releaseMovement()
 
         def getGatherTime():
@@ -1652,11 +1647,12 @@ class macro:
             self.moveMouseToDefault()
             self.status.value = ""
             self.isGathering = False
-            if not self.setdat["low_performance"]:
-                gatherBackgroundThread.join()
+            if "onGatherEnd" in gatherNameSpace and callable(gatherNameSpace["onGatherEnd"]):
+                gatherNameSpace["onGatherEnd"]()
 
         if fieldSetting["shift_lock"]: 
             self.keyboard.press('shift')
+        
         while keepGathering:
             patternStartTime = time.time()
             mouse.mouseDown()
@@ -1669,7 +1665,7 @@ class macro:
 
             #ensure that the pattern works  
             try:
-                exec(open(f"../settings/patterns/{pattern}.py").read())
+                exec(open(f"../settings/patterns/{pattern}.py").read(), gatherNameSpace)
             except Exception as e:
                 print(traceback.format_exc())
                 if firstPattern:
@@ -1677,6 +1673,9 @@ class macro:
                                         Avoid using this pattern in the future. If you are the creator of this pattern, the error can be found in terminal", "red")
                     pattern = "e_lol"
             firstPattern = False
+
+            #mob respawn check
+            self.setMobTimer(field)
 
             #field drift compensation
             if fieldSetting["field_drift_compensation"]:
@@ -1688,9 +1687,6 @@ class macro:
             #add gather time stat
             self.hourlyReport.addHourlyStat("gathering_time", time.time()-patternStartTime)
             gatherTime = self.convertSecsToMinsAndSecs(getGatherTime())
-
-            if self.setdat["low_performance"]:
-                self.gatherBackgroundOnce(field)
 
             #check for AFB
             if self.setdat["Auto_Field_Boost"] and not self.AFBLIMIT and self.AFB(gatherInterrupt=True, turnOffShiftLock = fieldSetting["shift_lock"]):
@@ -3453,6 +3449,7 @@ class macro:
             
             #draw bounding boxes and add the quest text
             drawY = y+endIndex
+            print(drawY)
             cv2.rectangle(screenOriginal, (x, drawY), (x+w, drawY+h), color, 2)
             cv2.putText(screenOriginal, objectives[i], (x, drawY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
