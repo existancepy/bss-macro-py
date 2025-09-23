@@ -25,6 +25,7 @@ ping_ant_challenge=True
 ping_sticker_events=True
 ping_mob_events=True
 ping_conversion_events=True
+ping_hourly_reports=True
 existance_broke=False
 stream_resolution=0.75
 stream_fps=30
