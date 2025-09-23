@@ -44,7 +44,7 @@ class webhookQueue:
         self.queue.put(data)
 
 class log:
-    def __init__(self, logQueue, enableWebhook, webhookURL, sendScreenshots, hourlyReportOnly=False, blocking=False, robloxWindow: RobloxWindowBounds = None):
+    def __init__(self, logQueue, enableWebhook, webhookURL, sendScreenshots, hourlyReportOnly=False, blocking=False, robloxWindow: RobloxWindowBounds = None, enableDiscordPing=False, discordUserID=None, pingSettings=None):
         self.logQueue = logQueue
         self.webhookURL = webhookURL
         self.enableWebhook = enableWebhook
@@ -52,6 +52,9 @@ class log:
         self.hourlyReportOnly = hourlyReportOnly
         self.robloxWindow = robloxWindow
         self.sendScreenshots = sendScreenshots
+        self.enableDiscordPing = enableDiscordPing
+        self.discordUserID = discordUserID
+        self.pingSettings = pingSettings or {}
 
         if not self.blocking:
             self.webhookQueue = webhookQueue()
@@ -60,7 +63,7 @@ class log:
         # Display in GUI or macro logs (to be implemented)
         pass
 
-    def webhook(self, title, desc, color, ss=None, imagePath=None):
+    def webhook(self, title, desc, color, ss=None, imagePath=None, ping_category=None):
         # Update logs
         time = timeModule.strftime("%H:%M:%S", timeModule.localtime())
         logData = {
@@ -107,13 +110,19 @@ class log:
                 else:
                     webhookImgPath = None
 
+        # Determine if we should ping for this event based on category
+        ping_user_id = None
+        if ping_category and self.enableDiscordPing and self.discordUserID and self.pingSettings.get(ping_category, False):
+            ping_user_id = self.discordUserID
+
         webhookData = {
             "url": self.webhookURL,
             "title": title,
             "desc": desc,
             "time": time,
             "color": colors[color],
-            "imagePath": webhookImgPath
+            "imagePath": webhookImgPath,
+            "ping_user_id": ping_user_id
         }
 
         # Add the webhook message to the queue

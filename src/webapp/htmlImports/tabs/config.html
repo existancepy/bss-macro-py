@@ -1,356 +1,488 @@
-<div class="poppins-regular standard-container sub-nav-bar" id = "config-nav">
-    <style>
-        /*Logos for the side bar*/
-        .logos--discord-icon {
-            display: inline-block;
-            width: 1.4rem;
-            height: calc(1.4rem / 1.29);
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 199'%3E%3Cpath fill='%235865f2' d='M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18'/%3E%3C/svg%3E");
-        }
+<div class="poppins-regular standard-container sub-nav-bar" id="config-nav">
+  <style>
+    /*Logos for the side bar*/
+    .logos--discord-icon {
+      display: inline-block;
+      width: 1.4rem;
+      height: calc(1.4rem / 1.29);
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 199'%3E%3Cpath fill='%235865f2' d='M216.856 16.597A208.5 208.5 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046q-29.538-4.442-58.533 0c-1.832-4.4-4.55-9.933-6.846-14.046a207.8 207.8 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161 161 0 0 0 79.735 175.3a136.4 136.4 0 0 1-21.846-10.632a109 109 0 0 0 5.356-4.237c42.122 19.702 87.89 19.702 129.51 0a132 132 0 0 0 5.355 4.237a136 136 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848c21.142-6.58 42.646-16.637 64.815-33.213c5.316-56.288-9.08-105.09-38.056-148.36M85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2s23.236 11.804 23.015 26.2c.02 14.375-10.148 26.18-23.015 26.18m85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2c0 14.375-10.148 26.18-23.015 26.18'/%3E%3C/svg%3E");
+    }
 
-        .fxemoji--honeybee {
-            display: inline-block;
-            width: 1.4rem;
-            height: 1.4rem;
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%232c3c47' d='m265.311 407.417l-4.232 61.184c-.29 4.174-3.912 7.33-8.087 7.039a7.58 7.58 0 0 1-7.045-7.039l-4.232-61.184c-.453-6.515 4.465-12.162 10.98-12.614c6.517-.446 12.162 4.472 12.616 10.98c.035.531.035 1.117 0 1.634'/%3E%3Cpath fill='%23d4dde3' d='M458.116 114.218s-.964-.382-2.767-.827c-1.803-.446-4.456-.977-7.845-1.323a73 73 0 0 0-5.603-.375a91 91 0 0 0-6.659.162c-2.37.142-4.895.375-7.548.722c-2.667.361-5.491.898-8.405 1.549c-5.816 1.245-12.177 3.304-18.841 5.242c-3.325.991-6.799 2.151-10.294 3.255c-1.762.579-3.508 1.146-5.306 1.776q-2.695.954-5.432 1.931c-1.819.651-3.645 1.309-5.491 1.966q-2.78 1.063-5.596 2.137l-5.631 2.215c-1.883.757-3.793 1.592-5.695 2.391l-5.71 2.448l-5.752 2.625c-1.917.906-3.814 1.762-5.731 2.724l-5.738 2.894l-2.843 1.45l-2.859 1.542c-1.903 1.018-3.784 2.073-5.653 3.119c-1.874 1.068-3.741 2.207-5.596 3.304c-1.846 1.111-3.679 2.194-5.51 3.396a343 343 0 0 0-5.406 3.51a403 403 0 0 0-5.284 3.707c-.877.623-1.734 1.217-2.598 1.853q-1.282.966-2.553 1.932c-1.698 1.302-3.361 2.511-4.988 3.891a179 179 0 0 0-17.879 16.506c-5.341 5.618-9.954 11.341-13.775 16.796a177 177 0 0 0-3.135 4.681a171 171 0 0 0-3.132-4.675c-3.821-5.448-8.441-11.172-13.775-16.796a180 180 0 0 0-17.879-16.499c-1.627-1.379-3.296-2.589-4.987-3.892l-2.555-1.931c-.864-.637-1.726-1.231-2.596-1.853c-1.734-1.225-3.503-2.484-5.285-3.701a355 355 0 0 0-5.405-3.516c-1.833-1.196-3.665-2.285-5.512-3.389c-1.853-1.097-3.729-2.243-5.596-3.311a331 331 0 0 0-5.653-3.113l-2.857-1.549l-2.845-1.443l-5.738-2.893c-1.917-.962-3.814-1.819-5.731-2.731c-1.917-.877-3.841-1.748-5.752-2.625q-2.864-1.22-5.709-2.441c-1.897-.8-3.814-1.634-5.695-2.391l-5.633-2.214a2715 2715 0 0 1-5.589-2.137c-1.846-.658-3.679-1.316-5.496-1.966l-5.427-1.932c-1.796-.63-3.551-1.202-5.306-1.776c-3.494-1.104-6.975-2.264-10.301-3.254c-6.664-1.939-13.017-3.99-18.832-5.25c-2.922-.65-5.745-1.181-8.412-1.556c-2.653-.346-5.171-.58-7.55-.721a87 87 0 0 0-6.657-.163a78 78 0 0 0-5.603.368c-3.382.354-6.035.884-7.838 1.33c-1.812.439-2.774.821-2.774.821c-16.577 6.601-31.03 19.102-39.711 36.279c-18.882 37.369-3.892 82.967 33.471 101.843l6.241 3.156s.793.396 2.264.87c1.479.481 3.636 1.061 6.38 1.472c1.373.206 2.893.368 4.543.481a59 59 0 0 0 5.292.206a71 71 0 0 0 6.035-.305c2.121-.183 4.315-.402 6.643-.792c2.313-.354 4.783-.934 7.258-1.415c2.498-.503 5.087-1.019 7.74-1.549c2.674-.545 5.342-.97 8.137-1.479c1.385-.24 2.815-.544 4.216-.771c1.408-.233 2.822-.466 4.253-.707c1.442-.24 2.893-.474 4.358-.721q2.162-.308 4.358-.616c1.472-.219 2.957-.439 4.443-.665c1.492-.219 2.943-.375 4.436-.573c1.494-.191 2.993-.375 4.5-.566c1.479-.149 2.966-.304 4.451-.453c1.485-.155 3.028-.354 4.506-.474l4.456-.375l2.251-.184l2.194-.121q2.218-.129 4.436-.269c1.472-.078 2.893-.106 4.358-.162c1.458-.057 2.929-.113 4.323-.099c5.779-.127 11.262.071 16.632.403q1.997.158 3.962.304c1.289.149 2.568.29 3.835.432c1.302.127 2.505.332 3.757.503c.624.085 1.245.176 1.86.262c.601.113 1.204.219 1.798.326c4.79.877 9.36 1.903 13.549 3.254c2.1.658 4.152 1.344 6.09 2.108c.976.361 1.947.743 2.886 1.132c.941.375 1.862.757 2.76 1.175c3.608 1.577 6.785 3.303 9.678 4.839c1.387.722 2.774 1.521 3.905 2.143c1.273.743 2.406 1.451 3.277 1.924c1.584.744 2.427 1.146 2.427 1.146a18.65 18.65 0 0 0 9.91 1.643a18.3 18.3 0 0 0 9.848-1.642s.841-.403 2.427-1.153c.864-.467 2.002-1.175 3.275-1.924c1.133-.616 2.511-1.415 3.905-2.137c2.888-1.536 6.071-3.262 9.68-4.839s7.527-3.106 11.744-4.415c4.189-1.345 8.759-2.371 13.549-3.247c.594-.106 1.188-.212 1.789-.326c.617-.086 1.238-.17 1.869-.262c1.252-.163 2.454-.368 3.748-.503q1.903-.213 3.834-.424c1.316-.099 2.632-.206 3.969-.305c5.37-.339 10.854-.53 16.627-.403c1.394-.014 2.872.042 4.323.099c1.463.057 2.886.085 4.358.162q2.218.14 4.436.269l2.194.12l2.256.191l4.451.368c1.479.12 3.021.326 4.506.474c1.485.155 2.971.304 4.449.453c1.508.191 3.007.383 4.5.567c1.494.198 2.943.36 4.436.58c1.487.219 2.973.439 4.444.658c1.465.206 2.914.418 4.358.623c1.465.241 2.914.481 4.358.722q2.142.35 4.253.7c1.401.226 2.829.53 4.216.771c2.795.51 5.462.94 8.128 1.479q3.99.796 7.747 1.549c2.47.488 4.945 1.061 7.26 1.415c2.32.383 4.52.609 6.643.786c2.13.198 4.145.289 6.035.297c1.89.014 3.658-.064 5.285-.206a57 57 0 0 0 4.548-.481c2.746-.417 4.904-.991 6.375-1.472c1.479-.474 2.264-.871 2.264-.871l6.36-3.212c15.918-8.072 29.07-21.769 36.167-39.661c15.428-38.92-3.61-82.975-42.529-98.405'/%3E%3Cpath fill='%23ffd733' d='M277.095 139.062a42.68 42.68 0 0 0-44.679 0c-49.17 30.125-81.976 84.347-81.976 146.237c0 62.202 33.131 116.657 82.718 146.69c13.252 8.023 29.949 8.023 43.192 0c49.588-30.033 82.72-84.488 82.72-146.69c0-61.89-32.806-116.112-81.975-146.237'/%3E%3Cpath fill='%232c3c47' d='M342.169 359.562a171.8 171.8 0 0 1-34.849 48.434H202.191a171.8 171.8 0 0 1-34.85-48.434zm-191.731-74.26c0 6.818.421 13.535 1.195 20.145h206.24a173 173 0 0 0 1.195-20.145a172.6 172.6 0 0 0-2.325-28.289h-203.98a172.6 172.6 0 0 0-2.325 28.289m20.768-81.804h167.1a172 172 0 0 0-36.218-45.805c4.082-7.807 6.402-17.01 6.402-27.291c0-15.702-12.073-29.991-24.771-40.684c.112-.185.22-.37.336-.556c.969-1.529 1.988-3.092 3.119-4.641c1.104-1.564 2.308-3.113 3.531-4.648c4.924-6.127 10.541-11.815 14.899-15.855a149 149 0 0 1 5.329-4.733a59 59 0 0 1 2.002-1.642a12.6 12.6 0 0 0 1.81-1.733c4.239-5.016 3.615-12.515-1.401-16.753c-5.009-4.246-12.514-3.616-16.753 1.401l-.34.403s-.791.927-2.009 2.49a167 167 0 0 0-4.854 6.523c-3.869 5.448-8.709 12.904-12.79 20.906c-1.012 2.01-1.995 4.033-2.895 6.077a88 88 0 0 0-1.711 4.13c-11.37-6.362-25.462-5.958-36.484 1.215a98 98 0 0 0-2.188-5.347c-.891-2.044-1.874-4.061-2.886-6.07c-4.088-8.002-8.921-15.465-12.792-20.913a180 180 0 0 0-4.852-6.523c-1.225-1.557-2.011-2.491-2.011-2.491l-.382-.453a12 12 0 0 0-1.769-1.684c-5.199-4.012-12.664-3.049-16.682 2.143c-4.012 5.2-3.05 12.664 2.144 16.676c0 0 .706.545 2.009 1.641c1.289 1.09 3.149 2.71 5.327 4.734c4.36 4.039 9.97 9.728 14.901 15.861a113 113 0 0 1 3.529 4.641a87 87 0 0 1 3.114 4.648c.415.66.798 1.313 1.182 1.957c-12.077 10.525-23.128 24.255-23.128 39.279c0 10.282 2.32 19.486 6.402 27.293a172.1 172.1 0 0 0-36.22 45.804'/%3E%3C/svg%3E");
-        }
+    .fxemoji--honeybee {
+      display: inline-block;
+      width: 1.4rem;
+      height: 1.4rem;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%232c3c47' d='m265.311 407.417l-4.232 61.184c-.29 4.174-3.912 7.33-8.087 7.039a7.58 7.58 0 0 1-7.045-7.039l-4.232-61.184c-.453-6.515 4.465-12.162 10.98-12.614c6.517-.446 12.162 4.472 12.616 10.98c.035.531.035 1.117 0 1.634'/%3E%3Cpath fill='%23d4dde3' d='M458.116 114.218s-.964-.382-2.767-.827c-1.803-.446-4.456-.977-7.845-1.323a73 73 0 0 0-5.603-.375a91 91 0 0 0-6.659.162c-2.37.142-4.895.375-7.548.722c-2.667.361-5.491.898-8.405 1.549c-5.816 1.245-12.177 3.304-18.841 5.242c-3.325.991-6.799 2.151-10.294 3.255c-1.762.579-3.508 1.146-5.306 1.776q-2.695.954-5.432 1.931c-1.819.651-3.645 1.309-5.491 1.966q-2.78 1.063-5.596 2.137l-5.631 2.215c-1.883.757-3.793 1.592-5.695 2.391l-5.71 2.448l-5.752 2.625c-1.917.906-3.814 1.762-5.731 2.724l-5.738 2.894l-2.843 1.45l-2.859 1.542c-1.903 1.018-3.784 2.073-5.653 3.119c-1.874 1.068-3.741 2.207-5.596 3.304c-1.846 1.111-3.679 2.194-5.51 3.396a343 343 0 0 0-5.406 3.51a403 403 0 0 0-5.284 3.707c-.877.623-1.734 1.217-2.598 1.853q-1.282.966-2.553 1.932c-1.698 1.302-3.361 2.511-4.988 3.891a179 179 0 0 0-17.879 16.506c-5.341 5.618-9.954 11.341-13.775 16.796a177 177 0 0 0-3.135 4.681a171 171 0 0 0-3.132-4.675c-3.821-5.448-8.441-11.172-13.775-16.796a180 180 0 0 0-17.879-16.499c-1.627-1.379-3.296-2.589-4.987-3.892l-2.555-1.931c-.864-.637-1.726-1.231-2.596-1.853c-1.734-1.225-3.503-2.484-5.285-3.701a355 355 0 0 0-5.405-3.516c-1.833-1.196-3.665-2.285-5.512-3.389c-1.853-1.097-3.729-2.243-5.596-3.311a331 331 0 0 0-5.653-3.113l-2.857-1.549l-2.845-1.443l-5.738-2.893c-1.917-.962-3.814-1.819-5.731-2.731c-1.917-.877-3.841-1.748-5.752-2.625q-2.864-1.22-5.709-2.441c-1.897-.8-3.814-1.634-5.695-2.391l-5.633-2.214a2715 2715 0 0 1-5.589-2.137c-1.846-.658-3.679-1.316-5.496-1.966l-5.427-1.932c-1.796-.63-3.551-1.202-5.306-1.776c-3.494-1.104-6.975-2.264-10.301-3.254c-6.664-1.939-13.017-3.99-18.832-5.25c-2.922-.65-5.745-1.181-8.412-1.556c-2.653-.346-5.171-.58-7.55-.721a87 87 0 0 0-6.657-.163a78 78 0 0 0-5.603.368c-3.382.354-6.035.884-7.838 1.33c-1.812.439-2.774.821-2.774.821c-16.577 6.601-31.03 19.102-39.711 36.279c-18.882 37.369-3.892 82.967 33.471 101.843l6.241 3.156s.793.396 2.264.87c1.479.481 3.636 1.061 6.38 1.472c1.373.206 2.893.368 4.543.481a59 59 0 0 0 5.292.206a71 71 0 0 0 6.035-.305c2.121-.183 4.315-.402 6.643-.792c2.313-.354 4.783-.934 7.258-1.415c2.498-.503 5.087-1.019 7.74-1.549c2.674-.545 5.342-.97 8.137-1.479c1.385-.24 2.815-.544 4.216-.771c1.408-.233 2.822-.466 4.253-.707c1.442-.24 2.893-.474 4.358-.721q2.162-.308 4.358-.616c1.472-.219 2.957-.439 4.443-.665c1.492-.219 2.943-.375 4.436-.573c1.494-.191 2.993-.375 4.5-.566c1.479-.149 2.966-.304 4.451-.453c1.485-.155 3.028-.354 4.506-.474l4.456-.375l2.251-.184l2.194-.121q2.218-.129 4.436-.269c1.472-.078 2.893-.106 4.358-.162c1.458-.057 2.929-.113 4.323-.099c5.779-.127 11.262.071 16.632.403q1.997.158 3.962.304c1.289.149 2.568.29 3.835.432c1.302.127 2.505.332 3.757.503c.624.085 1.245.176 1.86.262c.601.113 1.204.219 1.798.326c4.79.877 9.36 1.903 13.549 3.254c2.1.658 4.152 1.344 6.09 2.108c.976.361 1.947.743 2.886 1.132c.941.375 1.862.757 2.76 1.175c3.608 1.577 6.785 3.303 9.678 4.839c1.387.722 2.774 1.521 3.905 2.143c1.273.743 2.406 1.451 3.277 1.924c1.584.744 2.427 1.146 2.427 1.146a18.65 18.65 0 0 0 9.91 1.643a18.3 18.3 0 0 0 9.848-1.642s.841-.403 2.427-1.153c.864-.467 2.002-1.175 3.275-1.924c1.133-.616 2.511-1.415 3.905-2.137c2.888-1.536 6.071-3.262 9.68-4.839s7.527-3.106 11.744-4.415c4.189-1.345 8.759-2.371 13.549-3.247c.594-.106 1.188-.212 1.789-.326c.617-.086 1.238-.17 1.869-.262c1.252-.163 2.454-.368 3.748-.503q1.903-.213 3.834-.424c1.316-.099 2.632-.206 3.969-.305c5.37-.339 10.854-.53 16.627-.403c1.394-.014 2.872.042 4.323.099c1.463.057 2.886.085 4.358.162q2.218.14 4.436.269l2.194.12l2.256.191l4.451.368c1.479.12 3.021.326 4.506.474c1.485.155 2.971.304 4.449.453c1.508.191 3.007.383 4.5.567c1.494.198 2.943.36 4.436.58c1.487.219 2.973.439 4.444.658c1.465.206 2.914.418 4.358.623c1.465.241 2.914.481 4.358.722q2.142.35 4.253.7c1.401.226 2.829.53 4.216.771c2.795.51 5.462.94 8.128 1.479q3.99.796 7.747 1.549c2.47.488 4.945 1.061 7.26 1.415c2.32.383 4.52.609 6.643.786c2.13.198 4.145.289 6.035.297c1.89.014 3.658-.064 5.285-.206a57 57 0 0 0 4.548-.481c2.746-.417 4.904-.991 6.375-1.472c1.479-.474 2.264-.871 2.264-.871l6.36-3.212c15.918-8.072 29.07-21.769 36.167-39.661c15.428-38.92-3.61-82.975-42.529-98.405'/%3E%3Cpath fill='%23ffd733' d='M277.095 139.062a42.68 42.68 0 0 0-44.679 0c-49.17 30.125-81.976 84.347-81.976 146.237c0 62.202 33.131 116.657 82.718 146.69c13.252 8.023 29.949 8.023 43.192 0c49.588-30.033 82.72-84.488 82.72-146.69c0-61.89-32.806-116.112-81.975-146.237'/%3E%3Cpath fill='%232c3c47' d='M342.169 359.562a171.8 171.8 0 0 1-34.849 48.434H202.191a171.8 171.8 0 0 1-34.85-48.434zm-191.731-74.26c0 6.818.421 13.535 1.195 20.145h206.24a173 173 0 0 0 1.195-20.145a172.6 172.6 0 0 0-2.325-28.289h-203.98a172.6 172.6 0 0 0-2.325 28.289m20.768-81.804h167.1a172 172 0 0 0-36.218-45.805c4.082-7.807 6.402-17.01 6.402-27.291c0-15.702-12.073-29.991-24.771-40.684c.112-.185.22-.37.336-.556c.969-1.529 1.988-3.092 3.119-4.641c1.104-1.564 2.308-3.113 3.531-4.648c4.924-6.127 10.541-11.815 14.899-15.855a149 149 0 0 1 5.329-4.733a59 59 0 0 1 2.002-1.642a12.6 12.6 0 0 0 1.81-1.733c4.239-5.016 3.615-12.515-1.401-16.753c-5.009-4.246-12.514-3.616-16.753 1.401l-.34.403s-.791.927-2.009 2.49a167 167 0 0 0-4.854 6.523c-3.869 5.448-8.709 12.904-12.79 20.906c-1.012 2.01-1.995 4.033-2.895 6.077a88 88 0 0 0-1.711 4.13c-11.37-6.362-25.462-5.958-36.484 1.215a98 98 0 0 0-2.188-5.347c-.891-2.044-1.874-4.061-2.886-6.07c-4.088-8.002-8.921-15.465-12.792-20.913a180 180 0 0 0-4.852-6.523c-1.225-1.557-2.011-2.491-2.011-2.491l-.382-.453a12 12 0 0 0-1.769-1.684c-5.199-4.012-12.664-3.049-16.682 2.143c-4.012 5.2-3.05 12.664 2.144 16.676c0 0 .706.545 2.009 1.641c1.289 1.09 3.149 2.71 5.327 4.734c4.36 4.039 9.97 9.728 14.901 15.861a113 113 0 0 1 3.529 4.641a87 87 0 0 1 3.114 4.648c.415.66.798 1.313 1.182 1.957c-12.077 10.525-23.128 24.255-23.128 39.279c0 10.282 2.32 19.486 6.402 27.293a172.1 172.1 0 0 0-36.22 45.804'/%3E%3C/svg%3E");
+    }
 
-        .carbon--settings {
-            display: inline-block;
-            width: 1.4rem;
-            height: 1.4rem;
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='white' d='M27 16.76v-1.53l1.92-1.68A2 2 0 0 0 29.3 11l-2.36-4a2 2 0 0 0-1.73-1a2 2 0 0 0-.64.1l-2.43.82a11 11 0 0 0-1.31-.75l-.51-2.52a2 2 0 0 0-2-1.61h-4.68a2 2 0 0 0-2 1.61l-.51 2.52a11.5 11.5 0 0 0-1.32.75l-2.38-.86A2 2 0 0 0 6.79 6a2 2 0 0 0-1.73 1L2.7 11a2 2 0 0 0 .41 2.51L5 15.24v1.53l-1.89 1.68A2 2 0 0 0 2.7 21l2.36 4a2 2 0 0 0 1.73 1a2 2 0 0 0 .64-.1l2.43-.82a11 11 0 0 0 1.31.75l.51 2.52a2 2 0 0 0 2 1.61h4.72a2 2 0 0 0 2-1.61l.51-2.52a11.5 11.5 0 0 0 1.32-.75l2.42.82a2 2 0 0 0 .64.1a2 2 0 0 0 1.73-1l2.28-4a2 2 0 0 0-.41-2.51ZM25.21 24l-3.43-1.16a8.9 8.9 0 0 1-2.71 1.57L18.36 28h-4.72l-.71-3.55a9.4 9.4 0 0 1-2.7-1.57L6.79 24l-2.36-4l2.72-2.4a8.9 8.9 0 0 1 0-3.13L4.43 12l2.36-4l3.43 1.16a8.9 8.9 0 0 1 2.71-1.57L13.64 4h4.72l.71 3.55a9.4 9.4 0 0 1 2.7 1.57L25.21 8l2.36 4l-2.72 2.4a8.9 8.9 0 0 1 0 3.13L27.57 20Z'/%3E%3Cpath fill='white' d='M16 22a6 6 0 1 1 6-6a5.94 5.94 0 0 1-6 6m0-10a3.91 3.91 0 0 0-4 4a3.91 3.91 0 0 0 4 4a3.91 3.91 0 0 0 4-4a3.91 3.91 0 0 0-4-4'/%3E%3C/svg%3E");
-        }
-        .solar--play-stream-bold {
-            display: inline-block;
-            width: 1.4rem;
-            height: 1.4rem;
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fd7777' fill-rule='evenodd' d='M5.467 4.392a.75.75 0 0 1-.001 1.06A9.22 9.22 0 0 0 2.75 12a9.22 9.22 0 0 0 2.775 6.606a.75.75 0 1 1-1.05 1.071A10.72 10.72 0 0 1 1.25 12c0-2.972 1.207-5.664 3.156-7.609a.75.75 0 0 1 1.06.001m13.15.072a.75.75 0 0 1 1.06.011A10.72 10.72 0 0 1 22.75 12c0 2.964-1.2 5.65-3.141 7.594a.75.75 0 1 1-1.062-1.06A9.22 9.22 0 0 0 21.25 12a9.22 9.22 0 0 0-2.644-6.475a.75.75 0 0 1 .01-1.06M8.308 7.488a.75.75 0 0 1-.035 1.06c-.949.888-1.524 2.102-1.524 3.434c0 1.348.589 2.575 1.558 3.466a.75.75 0 1 1-1.016 1.104c-1.252-1.151-2.042-2.77-2.042-4.57c0-1.779.771-3.38 2-4.53a.75.75 0 0 1 1.06.036m7.434.038a.75.75 0 0 1 1.06-.024c1.197 1.145 1.947 2.727 1.947 4.48c0 1.775-.767 3.373-1.99 4.521a.75.75 0 1 1-1.027-1.093c.945-.887 1.517-2.1 1.517-3.428c0-1.313-.559-2.512-1.484-3.396a.75.75 0 0 1-.023-1.06' clip-rule='evenodd'/%3E%3Cpath fill='%23fd7777' d='M13.656 10.451c.896.658 1.344.987 1.344 1.55c0 .562-.448.89-1.344 1.548a13 13 0 0 1-.718.495c-.197.125-.421.254-.653.381c-.894.49-1.34.734-1.741.463s-.437-.838-.51-1.971c-.02-.32-.034-.635-.034-.917s.013-.596.034-.917c.072-1.133.109-1.7.51-1.97c.4-.271.847-.027 1.74.462c.233.127.457.256.654.381c.226.143.471.314.718.495'/%3E%3C/svg%3E");
-        }
-    </style>
-    <div id = "setting-bss" class="settings-tab-item active"><span class="fxemoji--honeybee"></span>Bss</div>
-    <div id = "setting-other" class = "settings-tab-item"><span class="carbon--settings"></span>Other</div>
-    <div id = "setting-discord" class = "settings-tab-item" style="display: flex; align-items: center;"><span class="logos--discord-icon"></span>Discord</div>
-    <div id = "setting-stream" class = "settings-tab-item" style="display: flex; align-items: center;"><span class="solar--play-stream-bold"></span>Stream</div>
+    .carbon--settings {
+      display: inline-block;
+      width: 1.4rem;
+      height: 1.4rem;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='white' d='M27 16.76v-1.53l1.92-1.68A2 2 0 0 0 29.3 11l-2.36-4a2 2 0 0 0-1.73-1a2 2 0 0 0-.64.1l-2.43.82a11 11 0 0 0-1.31-.75l-.51-2.52a2 2 0 0 0-2-1.61h-4.68a2 2 0 0 0-2 1.61l-.51 2.52a11.5 11.5 0 0 0-1.32.75l-2.38-.86A2 2 0 0 0 6.79 6a2 2 0 0 0-1.73 1L2.7 11a2 2 0 0 0 .41 2.51L5 15.24v1.53l-1.89 1.68A2 2 0 0 0 2.7 21l2.36 4a2 2 0 0 0 1.73 1a2 2 0 0 0 .64-.1l2.43-.82a11 11 0 0 0 1.31.75l.51 2.52a2 2 0 0 0 2 1.61h4.72a2 2 0 0 0 2-1.61l.51-2.52a11.5 11.5 0 0 0 1.32-.75l2.42.82a2 2 0 0 0 .64.1a2 2 0 0 0 1.73-1l2.28-4a2 2 0 0 0-.41-2.51ZM25.21 24l-3.43-1.16a8.9 8.9 0 0 1-2.71 1.57L18.36 28h-4.72l-.71-3.55a9.4 9.4 0 0 1-2.7-1.57L6.79 24l-2.36-4l2.72-2.4a8.9 8.9 0 0 1 0-3.13L4.43 12l2.36-4l3.43 1.16a8.9 8.9 0 0 1 2.71-1.57L13.64 4h4.72l.71 3.55a9.4 9.4 0 0 1 2.7 1.57L25.21 8l2.36 4l-2.72 2.4a8.9 8.9 0 0 1 0 3.13L27.57 20Z'/%3E%3Cpath fill='white' d='M16 22a6 6 0 1 1 6-6a5.94 5.94 0 0 1-6 6m0-10a3.91 3.91 0 0 0-4 4a3.91 3.91 0 0 0 4 4a3.91 3.91 0 0 0 4-4a3.91 3.91 0 0 0-4-4'/%3E%3C/svg%3E");
+    }
+    .solar--play-stream-bold {
+      display: inline-block;
+      width: 1.4rem;
+      height: 1.4rem;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fd7777' fill-rule='evenodd' d='M5.467 4.392a.75.75 0 0 1-.001 1.06A9.22 9.22 0 0 0 2.75 12a9.22 9.22 0 0 0 2.775 6.606a.75.75 0 1 1-1.05 1.071A10.72 10.72 0 0 1 1.25 12c0-2.972 1.207-5.664 3.156-7.609a.75.75 0 0 1 1.06.001m13.15.072a.75.75 0 0 1 1.06.011A10.72 10.72 0 0 1 22.75 12c0 2.964-1.2 5.65-3.141 7.594a.75.75 0 1 1-1.062-1.06A9.22 9.22 0 0 0 21.25 12a9.22 9.22 0 0 0-2.644-6.475a.75.75 0 0 1 .01-1.06M8.308 7.488a.75.75 0 0 1-.035 1.06c-.949.888-1.524 2.102-1.524 3.434c0 1.348.589 2.575 1.558 3.466a.75.75 0 1 1-1.016 1.104c-1.252-1.151-2.042-2.77-2.042-4.57c0-1.779.771-3.38 2-4.53a.75.75 0 0 1 1.06.036m7.434.038a.75.75 0 0 1 1.06-.024c1.197 1.145 1.947 2.727 1.947 4.48c0 1.775-.767 3.373-1.99 4.521a.75.75 0 1 1-1.027-1.093c.945-.887 1.517-2.1 1.517-3.428c0-1.313-.559-2.512-1.484-3.396a.75.75 0 0 1-.023-1.06' clip-rule='evenodd'/%3E%3Cpath fill='%23fd7777' d='M13.656 10.451c.896.658 1.344.987 1.344 1.55c0 .562-.448.89-1.344 1.548a13 13 0 0 1-.718.495c-.197.125-.421.254-.653.381c-.894.49-1.34.734-1.741.463s-.437-.838-.51-1.971c-.02-.32-.034-.635-.034-.917s.013-.596.034-.917c.072-1.133.109-1.7.51-1.97c.4-.271.847-.027 1.74.462c.233.127.457.256.654.381c.226.143.471.314.718.495'/%3E%3C/svg%3E");
+    }
+  </style>
+  <div id="setting-bss" class="settings-tab-item active">
+    <span class="fxemoji--honeybee"></span>Bss
+  </div>
+  <div id="setting-other" class="settings-tab-item">
+    <span class="carbon--settings"></span>Other
+  </div>
+  <div
+    id="setting-discord"
+    class="settings-tab-item"
+    style="display: flex; align-items: center"
+  >
+    <span class="logos--discord-icon"></span>Discord
+  </div>
+  <div
+    id="setting-stream"
+    class="settings-tab-item"
+    style="display: flex; align-items: center"
+  >
+    <span class="solar--play-stream-bold"></span>Stream
+  </div>
 </div>
-<div style="display: flex; justify-content: center; width: 100%;">
-    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="bss">
-        <script>
-            const parentBSS = document.getElementById("bss")
-            buildStandardContainer(parentBSS,"Basic", "",[
-                {
-                    id: "hive_number",
-                    title: "Hive slot",
-                    desc: "The hive slot claimed.<br>1 is the closest to cannon, 6 is the furthest.",
-                    type: {
-                            name: "dropdown",
-                            data: [1,2,3,4,5,6],
-                            triggerFunction: saveGeneralTriggerFunction
-                        }
-                    
-                },
-                {
-                    id: "movespeed",
-                    title: "Movespeed",
-                    desc: "Your movespeed without any haste",
-                    type: {
-                        name: "textbox",
-                        inputType: "float",
-                        inputLimit: 5,
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                },
-                {
-                    id: "bees",
-                    title: "Bees",
-                    desc: "The number of bees in your hive",
-                    type: {
-                        name: "textbox",
-                        inputType: "int",
-                        inputLimit: 2,
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                },
-            ])
-            
-            buildStandardContainer(parentBSS,"Sprinkler", "",[
-                {
-                    id: "sprinkler_type",
-                    title: "Sprinkler Type",
-                    desc: "The type of sprinkler that you use. Note that the macro will stack the sprinklers on top of each other when placing them",
-                    type: {
-                            name: "dropdown",
-                            data: ["Basic", "Silver", "Golden", "Diamond", "Saturator"],
-                            triggerFunction: saveGeneralTriggerFunction
-                        }
-                    
-                },
-                {
-                    id: "sprinkler_slot",
-                    title: "Slot",
-                    desc: "The hotbar slot of the sprinkler",
-                    type: {
-                        name: "dropdown",
-                        data: [1,2,3,4,5,6],
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                }
-            ])
+<div style="display: flex; justify-content: center; width: 100%">
+  <div
+    style="width: 74%; overflow-y: auto; height: 94vh; display: none"
+    id="bss"
+  >
+    <script>
+      const parentBSS = document.getElementById("bss");
+      buildStandardContainer(parentBSS, "Basic", "", [
+        {
+          id: "hive_number",
+          title: "Hive slot",
+          desc: "The hive slot claimed.<br>1 is the closest to cannon, 6 is the furthest.",
+          type: {
+            name: "dropdown",
+            data: [1, 2, 3, 4, 5, 6],
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "movespeed",
+          title: "Movespeed",
+          desc: "Your movespeed without any haste",
+          type: {
+            name: "textbox",
+            inputType: "float",
+            inputLimit: 5,
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "bees",
+          title: "Bees",
+          desc: "The number of bees in your hive",
+          type: {
+            name: "textbox",
+            inputType: "int",
+            inputLimit: 2,
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
 
-            buildStandardContainer(parentBSS, "Balloon", "", [
-                {
-                    id: "convert_balloon",
-                    title: "Convert Balloon",
-                    desc: "How often the macro should convert the balloon",
-                    type: {
-                        name: "dropdown",
-                        data: ["Always", "Every", "Never"],
-                        triggerFunction: saveProfileTriggerFunction
-                    }
-                },
-                {
-                    id: "convert_balloon_every",
-                    title: "Convert Balloon Every X Mins",
-                    desc: "Convert the balloon every X mins. Only applies if convert balloon is set to 'every'",
-                    type: {
-                        name: "textbox",
-                        inputType: "int",
-                        triggerFunction: saveProfileTriggerFunction
-                    }
-                },
-            ])
+      buildStandardContainer(parentBSS, "Sprinkler", "", [
+        {
+          id: "sprinkler_type",
+          title: "Sprinkler Type",
+          desc: "The type of sprinkler that you use. Note that the macro will stack the sprinklers on top of each other when placing them",
+          type: {
+            name: "dropdown",
+            data: ["Basic", "Silver", "Golden", "Diamond", "Saturator"],
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "sprinkler_slot",
+          title: "Slot",
+          desc: "The hotbar slot of the sprinkler",
+          type: {
+            name: "dropdown",
+            data: [1, 2, 3, 4, 5, 6],
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
 
-            buildStandardContainer(parentBSS,"Preferences", "",[
-                {
-                    id: "convert_wait",
-                    title: "Wait X secs after converting",
-                    desc: "Wait for X seconds after converting before moving. Useful for converting the last amount of pollen",
-                    type: {
-                        name: "textbox",
-                        inputType: "int",
-                        inputLimit: 3,
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                }
-            ])
-        </script>
-    </div>
-    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="other">
-        <script>
-        const parentOther = document.getElementById("other")
-            buildStandardContainer(parentOther,"Rejoining", "",[
-                {
-                    id: "private_server_link",
-                    title: "Private Server Link (Optional)",
-                    desc: "The link of a private server for the macro to join.<br>If left blank, the macro will join a public server instead",
-                    type: {
-                        name: "textbox",
-                        inputType: "string",
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                },
-                {
-                    id: "rejoin_method",
-                    title: "Rejoin Method",
-                    desc: "How the macro should rejoin. Deeplink is highly recommended, and all other methods use the browser",
-                    type: {
-                        name: "dropdown",
-                        data: ["Deeplink", "New Tab", "Reload"],
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                    
-                },
-                {
-                    
-                    id: "rejoin_every",
-                    title: "Rejoin Every X hours",
-                    desc: "How often the macro should rejoin. Set it as 0 to disable this feature.",
-                    type: {
-                        name: "textbox",
-                        inputType: "float",
-                        inputLimit: 4,
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                    
-                },
-                {
-                    
-                    id: "existance_broke",
-                    title: "Existance so Broke",
-                    desc: "Say 'Existance so broke' in chat after rejoining. A reference to natro's 'natro so broke', which is a reference to e_lol's 'e_lol so broke'",
-                    type: {
-                        name: "checkbox",
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                    
-                },
+      buildStandardContainer(parentBSS, "Balloon", "", [
+        {
+          id: "convert_balloon",
+          title: "Convert Balloon",
+          desc: "How often the macro should convert the balloon",
+          type: {
+            name: "dropdown",
+            data: ["Always", "Every", "Never"],
+            triggerFunction: saveProfileTriggerFunction,
+          },
+        },
+        {
+          id: "convert_balloon_every",
+          title: "Convert Balloon Every X Mins",
+          desc: "Convert the balloon every X mins. Only applies if convert balloon is set to 'every'",
+          type: {
+            name: "textbox",
+            inputType: "int",
+            triggerFunction: saveProfileTriggerFunction,
+          },
+        },
+      ]);
 
-            ])
+      buildStandardContainer(parentBSS, "Preferences", "", [
+        {
+          id: "convert_wait",
+          title: "Wait X secs after converting",
+          desc: "Wait for X seconds after converting before moving. Useful for converting the last amount of pollen",
+          type: {
+            name: "textbox",
+            inputType: "int",
+            inputLimit: 3,
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
+    </script>
+  </div>
+  <div
+    style="width: 74%; overflow-y: auto; height: 94vh; display: none"
+    id="other"
+  >
+    <script>
+      const parentOther = document.getElementById("other");
+      buildStandardContainer(parentOther, "Rejoining", "", [
+        {
+          id: "private_server_link",
+          title: "Private Server Link (Optional)",
+          desc: "The link of a private server for the macro to join.<br>If left blank, the macro will join a public server instead",
+          type: {
+            name: "textbox",
+            inputType: "string",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "rejoin_method",
+          title: "Rejoin Method",
+          desc: "How the macro should rejoin. Deeplink is highly recommended, and all other methods use the browser",
+          type: {
+            name: "dropdown",
+            data: ["Deeplink", "New Tab", "Reload"],
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "rejoin_every",
+          title: "Rejoin Every X hours",
+          desc: "How often the macro should rejoin. Set it as 0 to disable this feature.",
+          type: {
+            name: "textbox",
+            inputType: "float",
+            inputLimit: 4,
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "existance_broke",
+          title: "Existance so Broke",
+          desc: "Say 'Existance so broke' in chat after rejoining. A reference to natro's 'natro so broke', which is a reference to e_lol's 'e_lol so broke'",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
 
-            buildStandardContainer(parentOther, "Haste Compensation", "", [
-                {
-                    id: "haste_compensation",
-                    title: "Enable Haste Compensation",
-                    desc: "Adjust the macro's movements based on the amount of haste the player has. This is done by searching for haste and bear morph buffs on the screen",
-                    type: {
-                        name: "checkbox",
-                        triggerFunction: saveProfileTriggerFunction
-                    }
-                },
-            ])
+      buildStandardContainer(parentOther, "Haste Compensation", "", [
+        {
+          id: "haste_compensation",
+          title: "Enable Haste Compensation",
+          desc: "Adjust the macro's movements based on the amount of haste the player has. This is done by searching for haste and bear morph buffs on the screen",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveProfileTriggerFunction,
+          },
+        },
+      ]);
 
-            buildStandardContainer(parentOther, "Low Performance", "", [
-                {
-                    id: "low_performance",
-                    title: "Enable Low Performance mode",
-                    desc: "Reduce the number of the macro's background processes",
-                    type: {
-                        name: "checkbox",
-                        triggerFunction: saveGeneralTriggerFunction
-                    }
-                },
-            ])
+      buildStandardContainer(parentOther, "Low Performance", "", [
+        {
+          id: "low_performance",
+          title: "Enable Low Performance mode",
+          desc: "Reduce the number of the macro's background processes",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
+    </script>
+  </div>
+  <div
+    style="width: 74%; overflow-y: auto; height: 94vh; display: none"
+    id="discord"
+  >
+    <script>
+      const parentDiscord = document.getElementById("discord");
+      buildStandardContainer(parentDiscord, "Webhook", "", [
+        {
+          id: "enable_webhook",
+          title: "Enable Webhook",
+          desc: "A webhook to send the macro's status. Does not receive commands",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "webhook_link",
+          title: "Webhook Link",
+          desc: "The link of the webhook for the macro to use",
+          type: {
+            name: "textbox",
+            inputType: "string",
+            length: 13,
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "send_screenshot",
+          title: "Send Screenshots",
+          desc: "Send screenshots of the game via the webhook",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "only_send_hourly_report",
+          title: "Only Send Hourly Reports",
+          desc: "Disable sending the regular status messages in the webhook and only send hourly reports",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
 
-        </script>
-    </div>
-    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="discord">
-        <script>
-            const parentDiscord = document.getElementById("discord")
-                buildStandardContainer(parentDiscord,"Webhook", "",[
-                    {
-                        id: "enable_webhook",
-                        title: "Enable Webhook",
-                        desc: "A webhook to send the macro's status. Does not receive commands",
-                        type: {
-                            name: "checkbox",
-                            triggerFunction: saveGeneralTriggerFunction
-                        }
-                    },
-                    {
-                        id: "webhook_link",
-                        title: "Webhook Link",
-                        desc: "The link of the webhook for the macro to use",
-                        type: {
-                            name: "textbox",
-                            inputType: "string",
-                            length: 13,
-                            triggerFunction: saveGeneralTriggerFunction
-                        }
-                    },
-                    {
-                        id: "send_screenshot",
-                        title: "Send Screenshots",
-                        desc: "Send screenshots of the game via the webhook",
-                        type: {
-                                name: "checkbox",
-                                triggerFunction: saveGeneralTriggerFunction
-                            }
-                        
-                    },
-                    {
-                        id: "only_send_hourly_report",
-                        title: "Only Send Hourly Reports",
-                        desc: "Disable sending the regular status messages in the webhook and only send hourly reports",
-                        type: {
-                                name: "checkbox",
-                                triggerFunction: saveGeneralTriggerFunction
-                            }
-                        
-                    }
-    
-                ])
+      buildStandardContainer(parentDiscord, "Discord Bot", "", [
+        {
+          id: "discord_bot",
+          title: "Enable Discord Bot",
+          desc: "A discord bot to receive commands",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "discord_bot_token",
+          title: "Discord Bot Token",
+          desc: "The token of your discord bot",
+          type: {
+            name: "textbox",
+            inputType: "string",
+            length: 13,
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
 
-                buildStandardContainer(parentDiscord,"Discord Bot", "",[
-                    {
-                        id: "discord_bot",
-                        title: "Enable Discord Bot",
-                        desc: "A discord bot to receive commands",
-                        type: {
-                            name: "checkbox",
-                            triggerFunction: saveGeneralTriggerFunction
-                        }
-                    },
-                    {
-                        id: "discord_bot_token",
-                        title: "Discord Bot Token",
-                        desc: "The token of your discord bot",
-                        type: {
-                            name: "textbox",
-                            inputType: "string",
-                            length: 13,
-                            triggerFunction: saveGeneralTriggerFunction
-                        }
-                    }
-                ])
-        </script>
-    </div>
-    <div style="width: 74%; overflow-y: auto; height: 94vh; display: none;" id="stream">
-        <script>
-            const parentStream = document.getElementById("stream")
-                buildStandardContainer(parentStream,"Stream", "Stream your screen in real-time through a web link. Visit the gitbook for instructions on how to set it up",[
-                    {
-                        id: "enable_stream",
-                        title: "Enable Stream",
-                        desc: "Automatically start streaming",
-                        type: {
-                            name: "checkbox",
-                            triggerFunction: saveGeneralTriggerFunction
-                        }
-                    },
-                    // {
-                    //     id: "ngrok_auth",
-                    //     title: "Ngrok Authentication Token",
-                    //     desc: "Instructions for finding your ngrok auth token can be found in #guides",
-                    //     type: {
-                    //         name: "textbox",
-                    //         inputType: "string",
-                    //         length: 13,
-                    //         triggerFunction: saveGeneralTriggerFunction
-                    //     }
-                    // },
+      buildStandardContainer(parentDiscord, "Discord Pings", "", [
+        {
+          id: "enable_discord_ping",
+          title: "Enable Discord Pings",
+          desc: "Enable pinging your Discord user for important events",
+          type: {
+            name: "checkbox",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "discord_user_id",
+          title: "Discord User ID",
+          desc: "Your Discord User ID to ping for important events",
+          type: {
+            name: "textbox",
+            inputType: "string",
+            length: 13,
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
 
-                    // {
-                    //     id: "stream_resolution",
-                    //     title: "Stream Quality",
-                    //     desc: "The resolution of the stream. ",
-                    //     type: {
-                    //         name: "dropdown",
-                    //         data: [1.0, 0.75, 0.5, 0.25],
-                    //         triggerFunction: saveGeneralTriggerFunction
-                    //     }
-                    // },
-                    // {
-                    //     id: "stream_fps",
-                    //     title: "Stream Frame Rate",
-                    //     desc: "The frames per second (fps) of the stream. 30 is recommended, 60 max.",
-                    //     type: {
-                    //         name: "textbox",
-                    //         inputType: "integer",
-                    //         inputLimit: 2,
-                    //         triggerFunction: saveGeneralTriggerFunction
-                    //     }
-                    // },
-                    // {
-                    //     id: "stream_preset",
-                    //     title: "FFMPEG Preset",
-                    //     desc: "Encoding quality. Choose ultrafast if your device is unable to keep up with the stream",
-                    //     type: {
-                    //         name: "dropdown",
-                    //         data: ["veryfast", "ultrafast"],
-                    //         triggerFunction: saveGeneralTriggerFunction
-                    //     }
-                        
-                    // }
-    
-                ])
-        </script>
-    </div>
+      buildStandardContainer(
+        parentDiscord,
+        "Ping Categories",
+        "Choose which types of events should trigger Discord pings",
+        [
+          {
+            id: "ping_critical_errors",
+            title: "Critical Errors",
+            desc: "Ping for critical errors like failed operations, system failures, and major issues",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_disconnects",
+            title: "Disconnects",
+            desc: "Ping when the macro fails to reconnect or has connection issues",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_character_deaths",
+            title: "Character Deaths",
+            desc: "Ping for all character deaths during gameplay",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_vicious_bee",
+            title: "Vicious Bee Events",
+            desc: "Ping for Vicious Bee defeats and related events",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_mondo_buff",
+            title: "Mondo Buff Events",
+            desc: "Ping for Mondo Buff collection and related events",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_ant_challenge",
+            title: "Ant Challenge Events",
+            desc: "Ping for Ant Challenge completions and related events",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_sticker_events",
+            title: "Sticker Events",
+            desc: "Ping for sticker printer claims and sticker-related events",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_mob_events",
+            title: "Mob Events",
+            desc: "Ping for mob defeats like Stump Snail, Coconut Crab, and other mobs",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          {
+            id: "ping_conversion_events",
+            title: "Conversion Events",
+            desc: "Ping for pollen conversion completions and related events",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+        ]
+      );
+    </script>
+  </div>
+  <div
+    style="width: 74%; overflow-y: auto; height: 94vh; display: none"
+    id="stream"
+  >
+    <script>
+      const parentStream = document.getElementById("stream");
+      buildStandardContainer(
+        parentStream,
+        "Stream",
+        "Stream your screen in real-time through a web link. Visit the gitbook for instructions on how to set it up",
+        [
+          {
+            id: "enable_stream",
+            title: "Enable Stream",
+            desc: "Automatically start streaming",
+            type: {
+              name: "checkbox",
+              triggerFunction: saveGeneralTriggerFunction,
+            },
+          },
+          // {
+          //     id: "ngrok_auth",
+          //     title: "Ngrok Authentication Token",
+          //     desc: "Instructions for finding your ngrok auth token can be found in #guides",
+          //     type: {
+          //         name: "textbox",
+          //         inputType: "string",
+          //         length: 13,
+          //         triggerFunction: saveGeneralTriggerFunction
+          //     }
+          // },
+
+          // {
+          //     id: "stream_resolution",
+          //     title: "Stream Quality",
+          //     desc: "The resolution of the stream. ",
+          //     type: {
+          //         name: "dropdown",
+          //         data: [1.0, 0.75, 0.5, 0.25],
+          //         triggerFunction: saveGeneralTriggerFunction
+          //     }
+          // },
+          // {
+          //     id: "stream_fps",
+          //     title: "Stream Frame Rate",
+          //     desc: "The frames per second (fps) of the stream. 30 is recommended, 60 max.",
+          //     type: {
+          //         name: "textbox",
+          //         inputType: "integer",
+          //         inputLimit: 2,
+          //         triggerFunction: saveGeneralTriggerFunction
+          //     }
+          // },
+          // {
+          //     id: "stream_preset",
+          //     title: "FFMPEG Preset",
+          //     desc: "Encoding quality. Choose ultrafast if your device is unable to keep up with the stream",
+          //     type: {
+          //         name: "dropdown",
+          //         data: ["veryfast", "ultrafast"],
+          //         triggerFunction: saveGeneralTriggerFunction
+          //     }
+
+          // }
+        ]
+      );
+    </script>
+  </div>
 </div>
