@@ -352,7 +352,8 @@ class macro:
             "ping_ant_challenge": self.setdat.get("ping_ant_challenge", False),
             "ping_sticker_events": self.setdat.get("ping_sticker_events", False),
             "ping_mob_events": self.setdat.get("ping_mob_events", False),
-            "ping_conversion_events": self.setdat.get("ping_conversion_events", False)
+            "ping_conversion_events": self.setdat.get("ping_conversion_events", False),
+            "ping_hourly_reports": self.setdat.get("ping_hourly_reports", False)
         }
         
         self.logger = logModule.log(logQueue, self.setdat["enable_webhook"], self.setdat["webhook_link"], self.setdat["send_screenshot"], blocking=self.setdat["low_performance"], hourlyReportOnly=self.setdat["only_send_hourly_report"], robloxWindow=self.robloxWindow, enableDiscordPing=self.setdat["enable_discord_ping"], discordUserID=self.setdat["discord_user_id"], pingSettings=pingSettings)
