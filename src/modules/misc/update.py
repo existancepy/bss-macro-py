@@ -34,7 +34,7 @@ def update(t = "e"):
     e_macroPath = f"{destination}/e_macro.command"
     
     if t == "e":
-        link = "https://github.com/existancepy/bss-macro-py-experimental/archive/master.zip"
+        link = "https://github.com/existancepy/bss-macro-py/archive/refs/heads/experimental.zip"
         source = f"{destination}/bss-macro-py-experimental-main"
 
     print(os.listdir(destination))

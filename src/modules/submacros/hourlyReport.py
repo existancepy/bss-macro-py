@@ -118,7 +118,7 @@ class BuffDetector():
 
             #find the buff
             buffTemplate = adjustImage("./images/buffs", buff, self.robloxWindow.display_type)
-            finalBuffValues = [0]
+            finalBuffValues = []
 
             for _ in range(3):
                 res = locateTransparentImage(buffTemplate, screen, threshold)
@@ -167,8 +167,12 @@ class BuffDetector():
                 if buffVal == "1":
                     time.sleep(1)
                 finalBuffValues.append(buffVal)
-                
-            buffQuantity.append(max(finalBuffValues))
+            
+            maxFinalBuffValue = "0"
+            for val in finalBuffValues:
+                if float(val) > float(maxFinalBuffValue):
+                    maxFinalBuffValue = val
+            buffQuantity.append(maxFinalBuffValue)
 
         return buffQuantity
 

@@ -2579,8 +2579,8 @@ class macro:
                 return
             time.sleep(1)
             
-    #place the planter and return the time it would take for the planter to grow (in secs)
-    def placePlanter(self, planter, field, harvestFull, glitter):
+    #place the planter and return true if successfully placed
+    def placePlanter(self, planter, field, glitter):
         st = time.time()
         name = planter.lower().replace(" ","").replace("-","")
 
@@ -2608,7 +2608,7 @@ class macro:
             #check if planter is placed
             time.sleep(0.5)
             placedPlanter = True
-            for _ in range(15):
+            for _ in range(7):
                 if self.blueTextImageSearch("notinfield") or self.blueTextImageSearch("maxplanters"):
                     placedPlanter = False
                     break
@@ -2617,24 +2617,15 @@ class macro:
             if placedPlanter: 
                 self.logger.webhook("",f"Placed Planter: {planter.title()}", "dark brown", "screen")          
                 #use glitter
-                if glitter: self.useItemInInventory("glitter")
-                break
+                if glitter: 
+                    self.useItemInInventory("glitter")
+                updateHourlyTime()
+                return True
             self.logger.webhook("",f"Failed to Place Planter: {planter.title()}", "red", "screen", ping_category="ping_critical_errors")
             self.reset()
-        else:
-            updateHourlyTime()
-            return None
-        #calculate growth time. If the user didnt select harvest when full, return the harvest every X hours instead
+            
         updateHourlyTime()
-        if harvestFull:
-            baseGrowthTime, bonusFields, fieldGrowthBonus = planterGrowthData[planter]
-            bonusTime = 0
-            if glitter: bonusTime += 0.25
-            if field in bonusFields: bonusTime += fieldGrowthBonus
-            return (baseGrowthTime/(1+bonusTime))
-
-        else:
-            return self.setdat["manual_planters_collect_every"]*60*60 
+        return False
 
     #locate the planter's growth bar and move there
     def moveToPlanter(self):
@@ -2757,10 +2748,18 @@ class macro:
         glitter = self.setdat[f"cycle{cycle}_{slot+1}_glitter"]
         gather = self.setdat[f"cycle{cycle}_{slot+1}_gather"]
         #set the cooldown for planters and place them
-        planterGrowthTime = self.placePlanter(planter,field, self.setdat["manual_planters_collect_full"], glitter)
-        if planterGrowthTime is None: #make sure the planter was placed
-            self.reset()
+        if not self.placePlanter(planter,field, glitter): #make sure the planter was placed
             return
+        
+        if self.setdat["manual_planters_collect_full"]:
+            baseGrowthTime, bonusFields, fieldGrowthBonus = planterGrowthData[planter]
+            bonusTime = 0
+            if glitter: bonusTime += 0.25
+            if field in bonusFields: bonusTime += fieldGrowthBonus
+            planterGrowthTime = (baseGrowthTime/(1+bonusTime))
+
+        else:
+            planterGrowthTime = self.setdat["manual_planters_collect_every"]*60*60 
         
         planterReady = time.strftime("%H:%M:%S", time.gmtime(planterGrowthTime))
         self.logger.webhook("", f"Planter will be ready in: {planterReady}", "light blue")
@@ -3126,7 +3125,7 @@ class macro:
             currSec = datetime.now().second
 
             #check if its time to send hourly report
-            if currMin == 0 and time.time() - self.lastHourlyReport > 120:
+            if currMin == 30 and time.time() - self.lastHourlyReport > 120:
                 hourlyReportData = self.hourlyReport.generateHourlyReport(self.setdat)
                 self.logger.hourlyReport("Hourly Report", "", "purple")
 
