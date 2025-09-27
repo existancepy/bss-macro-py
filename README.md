@@ -3,34 +3,64 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/existancepy/bss-macro-py?style=flat&label=Stars&color=fff240&logo=github&logocolor=white&link=https://github.com/existancepy/bss-macro-py/stargazers)
 ![Repo Size](https://img.shields.io/github/repo-size/existancepy/bss-macro-py?label=Repo%20Size&logo=github&logoColor=white)
 
-A Python macro for [Bee Swarm Simulator](https://www.roblox.com/games/1537690962/Bee-Swarm-Simulator) designed for MacOS.
+Roblox Bee Swarm Simulator macro for macOS. Free, open source, and actively maintained.
 
-Existance Macro is a free and open source software, link: https://github.com/existancepy/bss-macro-py
+- Docs: https://existance-macro.gitbook.io/existance-macro-docs/
+- Discord: https://discord.gg/3qf8bgqCVu
+- Repo: https://github.com/existancepy/bss-macro-py
 
-![gui](https://raw.githubusercontent.com/existancepy/bss-macro-py-experimental/3b6d5fa0c9110f4ae1baad9bac3c1f393eeed74f/docs/assets/gui.png)
-## Community
-[Join the Discord!](https://discord.gg/3qf8bgqCVu)
-
-This is where you can receive update news, guides, support/troubleshooting help and download custom content made by other users (patterns, paths, settings, etc)
+![GUI](https://raw.githubusercontent.com/existancepy/bss-macro-py-experimental/3b6d5fa0c9110f4ae1baad9bac3c1f393eeed74f/docs/assets/gui.png)
 
 ## Features
-- Gathering
-    - Gather up to 3 fields
-    - Choose from preset patterns or import your own
-    - Settings align with [natro's](https://github.com/NatroTeam/NatroMacro)
-- Collect
-    - Claim dispensers like wealth clock, glue dispenser and more
-    - Collect the Mondo Chick's Buff
-    - Complete memory matches
-    - Craft and collect items from the blender
-- Kill
-    - Automate bug runs
-    - Kill bosses like coconut crab and stump snail
-    - Farm for stingers with stinger hunt 
-- Planters
-    - Customise your planter cycles
-    - Boost your planter's growth by automating glitter usage and gathering in planter field
-- Boost
-    - Customise when and how often hotbar slots are used
-    - Collect buffs from the sticker stack and field boosts
+
+- **Home / Control**
+    - Start/stop via UI or hotkeys (F1 start, F3 stop; may require Fn)
+    - One-click updater preserves `settings/` (profiles, patterns, paths)
+    - Task list shows enabled tasks and execution order
+
+- **Gather**
+    - Farm up to 3 fields with Natro-compatible settings
+    - Patterns (shapes), size/width, invert axes, direction and turns
+    - Shift-lock handling and field drift compensation (Saturator tracking)
+    - Time- or backpack%-based stop conditions
+    - Return-to-hive methods: Reset, Walk, Rejoin, Whirligig
+    - Select start location and distance per field
+
+- **Collect**
+    - Regular dispensers (e.g., Wealth Clock, Glue, boosters, etc.)
+    - Sticker Printer with egg availability detection
+    - Beesmas dispensers (seasonal)
+    - Memory Match (regular/mega/extreme/winter) completion
+    - Blender craft/collect up to 3 items with quantity and repeat/inf modes
+
+- **Kill**
+    - Regular mob runs (ladybug, rhino, werewolf, etc.) with respawn modifiers
+    - Bosses: Vicious Bee (Stinger Hunt), Stump Snail, Coconut Crab
+    - Night detection logic for Stinger Hunt field route
+    - Optional Ant Challenge
+
+- **Boost**
+    - Hotbar scheduling: when and how often to trigger slots
+    - Buffs: Field Boosters with spacing and gather-in-boosted-field priority
+    - Sticker Stack activation (stickers or tickets) and optional Hive Skins
+
+- **Planters**
+    - Tracks placed planters and growth timing across cycles
+    - Harvest by interval or when full; clear timers when needed
+    - Up to 3 planters per cycle, loops cycles automatically
+    - Gather in planter field and optional Glitter usage
+
+- **Quests**
+    - Quest-oriented gathering logic and settings (WIP; see docs)
+
+## Getting Started
+
+For requirements, installation, recommended system/Roblox settings, and usage guides, see the docs:
+
+https://existance-macro.gitbook.io/existance-macro-docs/
+
+## Notes
+
+- Designed for macOS.
+- This project and documentation are a work in progress but actively supported.
 
