@@ -136,6 +136,20 @@ def updateGUI():
 def toggleStartStop():
     eel.toggleStartStop()
 
+# Global variable to store run state
+_run_state = 3  # 0=stop, 1=start, 2=running, 3=stopped
+
+def setRunState(state):
+    global _run_state
+    _run_state = state
+
+def getRunState():
+    return _run_state
+
+# Expose functions to eel
+eel.expose(getRunState)
+eel.expose(setRunState)
+
 def launch():
 
     #download chromium

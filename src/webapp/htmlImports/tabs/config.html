@@ -232,6 +232,27 @@
           },
         },
       ]);
+
+      buildStandardContainer(parentOther, "Keybinds", "", [
+        {
+          id: "start_keybind",
+          title: "Start Macro Keybind",
+          desc: "Click to record a new keybind for starting the macro",
+          type: {
+            name: "keybind",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+        {
+          id: "stop_keybind",
+          title: "Stop Macro Keybind",
+          desc: "Click to record a new keybind for stopping the macro",
+          type: {
+            name: "keybind",
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
     </script>
   </div>
   <div

@@ -717,21 +717,107 @@ def macro(status, logQueue, updateGUI):
 
 
 def watch_for_hotkeys(run):
+    # Track currently pressed keys for combination detection
+    pressed_keys = set()
+    
     def on_press(key):
         nonlocal run
-        if key == keyboard.Key.f1:
-            
+        # Reload keybind settings dynamically
+        settings = settingsManager.loadAllSettings()
+        start_keybind = settings.get("start_keybind", "F1")
+        stop_keybind = settings.get("stop_keybind", "F3")
+        
+        # Convert key to string for comparison
+        key_str = str(key).replace("Key.", "")
+        
+        # Convert pynput key format to JavaScript format
+        if key_str == "ctrl_l" or key_str == "ctrl_r":
+            key_str = "Ctrl"
+        elif key_str == "alt_l" or key_str == "alt_r":
+            key_str = "Alt"
+        elif key_str == "shift_l" or key_str == "shift_r":
+            key_str = "Shift"
+        elif key_str == "cmd_l" or key_str == "cmd_r" or key_str == "cmd":
+            key_str = "Cmd"
+        elif key_str == "space":
+            key_str = "Space"
+        elif key_str.startswith("f") and len(key_str) <= 3:
+            key_str = key_str.upper()  # F1, F2, etc.
+        elif key_str.startswith("'") and key_str.endswith("'"):
+            # Handle character keys like 'e' -> E
+            key_str = key_str[1:-1].upper()  # Remove quotes and uppercase
+        elif len(key_str) == 1:
+            key_str = key_str.upper()  # A, B, C, etc.
+        
+        
+        pressed_keys.add(key_str)
+        
+        # Check for key combinations
+        # Sort keys in a consistent order: modifiers first, then main key
+        modifier_keys = ['Ctrl', 'Alt', 'Shift', 'Cmd']
+        sorted_keys = []
+        
+        # Add modifiers first
+        for mod in modifier_keys:
+            if mod in pressed_keys:
+                sorted_keys.append(mod)
+        
+        # Add non-modifier keys (sorted alphabetically)
+        non_modifier_keys = []
+        for key in pressed_keys:
+            if key not in modifier_keys:
+                non_modifier_keys.append(key)
+        non_modifier_keys.sort()
+        sorted_keys.extend(non_modifier_keys)
+        
+        current_combo = "+".join(sorted_keys)
+        
+        # Don't start/stop macro if we're recording a keybind
+        # Check if any keybind input is in recording mode
+        try:
+            import eel
+            recording_start = eel.getElementProperty("start_keybind", "dataset.recording")()
+            recording_stop = eel.getElementProperty("stop_keybind", "dataset.recording")()
+            if recording_start == "true" or recording_stop == "true":
+                return  # Ignore keybind during recording
+        except:
+            pass  # If eel is not available, continue normally
+
+        if current_combo == start_keybind:
             if run.value == 2: #already running
-                print("Already running")
-                return 
+                return
             run.value = 1
-        elif key == keyboard.Key.f3:
+        elif current_combo == stop_keybind:
             if run.value == 3: #already stopped
-                print("Already stopped")
                 return
             run.value = 0
+    
+    def on_release(key):
+        # Remove released key from pressed keys
+        key_str = str(key).replace("Key.", "")
+        
+        # Convert pynput key format to JavaScript format (same as on_press)
+        if key_str == "ctrl_l" or key_str == "ctrl_r":
+            key_str = "Ctrl"
+        elif key_str == "alt_l" or key_str == "alt_r":
+            key_str = "Alt"
+        elif key_str == "shift_l" or key_str == "shift_r":
+            key_str = "Shift"
+        elif key_str == "cmd_l" or key_str == "cmd_r" or key_str == "cmd":
+            key_str = "Cmd"
+        elif key_str == "space":
+            key_str = "Space"
+        elif key_str.startswith("f") and len(key_str) <= 3:
+            key_str = key_str.upper()  # F1, F2, etc.
+        elif key_str.startswith("'") and key_str.endswith("'"):
+            # Handle character keys like 'e' -> E
+            key_str = key_str[1:-1].upper()  # Remove quotes and uppercase
+        elif len(key_str) == 1:
+            key_str = key_str.upper()  # A, B, C, etc.
+            
+        pressed_keys.discard(key_str)
 
-    keyboard.Listener(on_press=on_press).start()
+    keyboard.Listener(on_press=on_press, on_release=on_release).start()
 
 if __name__ == "__main__":
     print("Loading gui...")
@@ -761,6 +847,7 @@ if __name__ == "__main__":
     #3: already stopped (do nothing)
     manager = multiprocessing.Manager()
     run = multiprocessing.Value('i', 3)
+    gui.setRunState(3)  # Initialize the global run state
     updateGUI = multiprocessing.Value('i', 0)
     status = manager.Value(ctypes.c_wchar_p, "none")
     logQueue = manager.Queue()
@@ -811,7 +898,6 @@ if __name__ == "__main__":
         global stopThreads
         global macroProc
         stopThreads = True
-        print("stop")
         #print(sockets)
         if macroProc and macroProc.is_alive():
             macroProc.kill()
@@ -887,14 +973,11 @@ if __name__ == "__main__":
             discordBotProc.start()
 
         if run.value == 1:
-            print("start")
             #create and set webhook obj for the logger
             logger.enableWebhook = setdat["enable_webhook"]
             logger.webhookURL = setdat["webhook_link"]
             logger.sendScreenshots = setdat["send_screenshot"]
-            print("Setting stop threads")
             stopThreads = False
-            print("variables initalised")
 
             #reset hourly report data
             hourlyReport = HourlyReport()
@@ -910,10 +993,8 @@ if __name__ == "__main__":
             
                 logger.webhook("", f'Stream could not start. Check terminal for more info', "red", ping_category="ping_critical_errors")
 
-            print("checking stream")
             streamLink = None
             if setdat["enable_stream"]:
-                print("stream enabled")
                 if stream.isCloudflaredInstalled():
                     logger.webhook("", "Starting Stream...", "light blue")
                     streamLink = stream.start(setdat["stream_resolution"])
@@ -947,12 +1028,24 @@ if __name__ == "__main__":
 
             logger.webhook("Macro Started", f'Existance Macro v2.13.12\nDisplay: {screenInfo["display_type"]}, {screenInfo["screen_width"]}x{screenInfo["screen_height"]}', "purple")
             run.value = 2
-            gui.toggleStartStop()
+            gui.setRunState(2)  # Update the global run state
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
         elif run.value == 0:
             if macroProc:
                 logger.webhook("Macro Stopped", "Existance Macro", "red")
                 run.value = 3
-                gui.toggleStartStop()
+                gui.setRunState(3)  # Update the global run state
+                try:
+                    gui.toggleStartStop()  # Update UI
+                except:
+                    pass  # If eel is not ready, continue
                 stopApp()
         elif run.value == 4: #disconnected
             macroProc.kill()
@@ -963,6 +1056,11 @@ if __name__ == "__main__":
             macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
             run.value = 2
+            gui.setRunState(2)  # Update the global run state
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
         
         #Check for crash
         if macroProc and not macroProc.is_alive() and hasattr(macroProc, "exitcode") and macroProc.exitcode is not None and macroProc.exitcode < 0:
@@ -973,6 +1071,12 @@ if __name__ == "__main__":
             mouse.mouseUp()
             macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
+            run.value = 2
+            gui.setRunState(2)  # Update the global run state
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
 
         #detect a new log message
         if not logQueue.empty():
