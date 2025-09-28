@@ -35,7 +35,7 @@ def update(t = "e"):
     
     if t == "e":
         link = "https://github.com/existancepy/bss-macro-py/archive/refs/heads/experimental.zip"
-        source = f"{destination}/bss-macro-py-experimental-main"
+        source = f"{destination}/bss-macro-py-experimental"
 
     print(os.listdir(destination))
     #delete all files
