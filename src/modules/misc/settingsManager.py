@@ -43,14 +43,15 @@ def loadFields():
     f.close()
     
     # Auto-add missing goo settings for backward compatibility
+    # This ensures users upgrading from older versions get the new goo functionality
     fieldsUpdated = False
     for field, settings in out.items():
         # Add missing goo settings if they don't exist
         if "goo" not in settings:
-            settings["goo"] = False
+            settings["goo"] = False  # Default to disabled
             fieldsUpdated = True
         if "goo_interval" not in settings:
-            settings["goo_interval"] = 3
+            settings["goo_interval"] = 3  # Default to 3 seconds (minimum allowed)
             fieldsUpdated = True
     
     # Save the updated fields if any were modified
