@@ -990,7 +990,7 @@ if __name__ == "__main__":
                     if stream.publicURL:
                         logger.webhook("Stream Started", f'Stream URL: {stream.publicURL}', "purple")
                         return
-            
+
                 logger.webhook("", f'Stream could not start. Check terminal for more info', "red", ping_category="ping_critical_errors")
 
             streamLink = None

@@ -179,30 +179,50 @@ def discordBot(token, run, status):
         try:
             # Import the settings functions
             from modules.misc.settingsManager import loadFields
-            
+
             # Load current field settings
             fieldSettings = loadFields()
-            
+
             # Create status message
             statusMessage = "**Goo Status for All Fields:**\n"
             enabledFields = []
             disabledFields = []
-            
+
             for fieldName, settings in fieldSettings.items():
                 if settings.get("goo", False):
                     enabledFields.append(fieldName.title())
                 else:
                     disabledFields.append(fieldName.title())
-            
+
             if enabledFields:
                 statusMessage += f"✅ **Enabled:** {', '.join(enabledFields)}\n"
             if disabledFields:
                 statusMessage += f"❌ **Disabled:** {', '.join(disabledFields)}\n"
-            
+
             await interaction.response.send_message(statusMessage)
-            
+
         except Exception as e:
             await interaction.response.send_message(f"❌ Error checking goo status: {str(e)}")
+
+    @bot.tree.command(name = "streamurl", description = "Get the current stream URL")
+    async def stream_url(interaction: discord.Interaction):
+        try:
+            # Read stream URL from file (use absolute path for reliability)
+            import sys
+            src_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            stream_url_file = os.path.join(src_dir, 'stream_url.txt')
+            if os.path.exists(stream_url_file):
+                with open(stream_url_file, 'r') as f:
+                    stream_url = f.read().strip()
+                if stream_url:
+                    await interaction.response.send_message(f"🔗 **Current Stream URL:**\n{stream_url}")
+                else:
+                    await interaction.response.send_message("❌ No active stream URL found. Make sure streaming is enabled and running.")
+            else:
+                await interaction.response.send_message("❌ No active stream URL found. Make sure streaming is enabled and running.")
+
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error getting stream URL: {str(e)}")
         
     '''
     @bot.tree.command(name = "hourly report", description = "Send the hourly report")
