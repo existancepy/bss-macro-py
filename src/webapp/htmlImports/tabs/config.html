@@ -122,6 +122,19 @@
         },
       ]);
 
+      buildStandardContainer(parentBSS, "Goo", "", [
+        {
+          id: "goo_slot",
+          title: "Slot",
+          desc: "The hotbar slot of the goo",
+          type: {
+            name: "dropdown",
+            data: [1, 2, 3, 4, 5, 6, 7],
+            triggerFunction: saveGeneralTriggerFunction,
+          },
+        },
+      ]);
+
       buildStandardContainer(parentBSS, "Balloon", "", [
         {
           id: "convert_balloon",

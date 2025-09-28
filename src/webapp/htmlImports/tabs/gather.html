@@ -1,168 +1,165 @@
-<div class="poppins-regular standard-container sub-nav-bar" id = "field-nav">
-    <div id = "field-1" class="gather-tab-item">Field 1</div>
-    <div id = "field-2" class = "gather-tab-item">Field 2</div>
-    <div id = "field-3" class = "gather-tab-item">Field 3</div>
+<div class="poppins-regular standard-container sub-nav-bar" id="field-nav">
+  <div id="field-1" class="gather-tab-item">Field 1</div>
+  <div id="field-2" class="gather-tab-item">Field 2</div>
+  <div id="field-3" class="gather-tab-item">Field 3</div>
 </div>
-<div style="display: flex; justify-content: center; width: 100%;">
-    <div style="width: 74%; overflow-y: auto; height: 94vh;" id="gather">
-        <script>
-            const parentElement = document.getElementById("gather")
-            const triggerFunction = "saveField()"
-            const fieldData = toEmojiArray(fieldEmojis)
-            buildStandardContainer(parentElement,"Gather Field", "",[
-                {
-                    id: "field_enable",
-                    title: "Enable Task",
-                    desc: "Enable gathering in this field",
-                    type: {
-                            name: "checkbox",
-                            triggerFunction: "updateFieldEnable(this)"
-                        }
-                },
-                {
-                    id: "field",
-                    title: "Field",
-                    desc: "Which field to gather in",
-                    type: {
-                            name: "dropdown",
-                            data: fieldData,
-                            length: 13,
-                            triggerFunction: "loadAndSaveField(this)"
-                        }
-                },
-                {
-                    id: "shift_lock",
-                    title: "Use Shift Lock",
-                    desc: "Enable shift lock switch when gathering",
-                    type: {
-                            name: "checkbox",
-                            triggerFunction: triggerFunction
-                        }
-                },
-                {
-                    id: "field_drift_compensation",
-                    title: "Field Drift Compensation",
-                    desc: "Move the player to the supreme saturator between gather patterns",
-                    type: {
-                            name: "checkbox",
-                            triggerFunction: triggerFunction
-                        }
-                },
-                
-            ])
-            buildStandardContainer(parentElement, "Pattern", "",[
-                {
-                    id: "shape",
-                    title: "Shape",
-                    desc: "The movement pattern",
-                    type: {
-                        name: "dropdown",
-                        data: [],
-                        triggerFunction: triggerFunction
-                    }
-                },
-                {
-                    id: "size",
-                    title: "Size",
-                    desc: "Affects each pattern differently. Generally affects the overall area covered by the pattern",
-                    type: {
-                        name: "dropdown",
-                        data: ["XS","S","M","L","XL"],
-                        triggerFunction: triggerFunction
-                        
-                    }
-                },
-                {
-                    id: "width",
-                    title: "Width",
-                    desc: "Affects each pattern differently. Generally affects the number of repetitions of each loop. For cornerx patterns, also affects the distance the macro travels to the corner",
-                    type: {
-                        name: "dropdown",
-                        data: [1,2,3,4,5,6,7,8],
-                        triggerFunction: triggerFunction
-                        
-                    }
-                },
-                {
-                    id: "invert_lr",
-                    title: "Invert Left/Right",
-                    desc: "Invert left and right of the pattern. Instead of going left, it will go right and vice versa",
-                    type: {
-                        name: "checkbox",
-                        triggerFunction: triggerFunction
-                        
-                    }
-                },
-                {
-                    id: "invert_fb",
-                    title: "Invert Forward/Back",
-                    desc: "Invert forwards and backwards of the pattern. Instead of going forwards, it will go backwards and vice versa",
-                    type: {
-                        name: "checkbox",
-                        triggerFunction: triggerFunction
-                        
-                    }
-                },
-            ])
-            buildStandardContainer(parentElement, "Rotate Camera", "Rotate camera before gathering", [
-                {
-                    id: "turn",
-                    title: "Direction",
-                    desc: "Direction to turn the camera in. The starting direction varies from field to field",
-                    type: {
-                        name: "dropdown",
-                        data: ["None","Left","Right"],
-                        triggerFunction: triggerFunction
-                    }
-                },
-                {
-                    id: "turn_times",
-                    title: "Turn X times",
-                    desc: "Number of times to turn in a direction. Does nothing if direction is set to 'none'",
-                    type: {
-                        name: "dropdown",
-                        data: [1,2,3,4],
-                        triggerFunction: triggerFunction
-                        
-                    }
-                }
-            ])
-            buildStandardContainer(parentElement, "Gather Until", "", [
-                {
-                    id: "mins",
-                    title: "Mins",
-                    desc: "Maximum number of minutes to gather for",
-                    type: {
-                        name: "textbox",
-                        inputType: "float",
-                        inputLimit: 4,
-                        triggerFunction: triggerFunction
-                    }
-                },
-                {
-                    id: "backpack",
-                    title: "Backpack%",
-                    desc: "Maximum backpack capacity to gather until. It is recommended not to set it to 100, use 95 instead",
-                    type: {
-                        name: "textbox",
-                        inputType: "int",
-                        inputLimit: 3,
-                        triggerFunction: triggerFunction
-                        
-                    }
-                },
-                {
-                    id: "return",
-                    title: "Return To Hive",
-                    desc: "The method used to return to hive", //<br> - Reset is best for blue hives with balloons<br> - Walk is generally good but inconsistent<br> - Rejoin is best for those without balloons",
-                    type: {
-                        name: "dropdown",
-                        data: ["💀 Reset","👟 Walk","🔄 Rejoin","🌱 Whirligig"],
-                        triggerFunction: triggerFunction
-                        
-                    }
-                },
-                /*
+<div style="display: flex; justify-content: center; width: 100%">
+  <div style="width: 74%; overflow-y: auto; height: 94vh" id="gather">
+    <script>
+      const parentElement = document.getElementById("gather");
+      const triggerFunction = "saveField()";
+      const fieldData = toEmojiArray(fieldEmojis);
+      buildStandardContainer(parentElement, "Gather Field", "", [
+        {
+          id: "field_enable",
+          title: "Enable Task",
+          desc: "Enable gathering in this field",
+          type: {
+            name: "checkbox",
+            triggerFunction: "updateFieldEnable(this)",
+          },
+        },
+        {
+          id: "field",
+          title: "Field",
+          desc: "Which field to gather in",
+          type: {
+            name: "dropdown",
+            data: fieldData,
+            length: 13,
+            triggerFunction: "loadAndSaveField(this)",
+          },
+        },
+        {
+          id: "shift_lock",
+          title: "Use Shift Lock",
+          desc: "Enable shift lock switch when gathering",
+          type: {
+            name: "checkbox",
+            triggerFunction: triggerFunction,
+          },
+        },
+        {
+          id: "field_drift_compensation",
+          title: "Field Drift Compensation",
+          desc: "Move the player to the supreme saturator between gather patterns",
+          type: {
+            name: "checkbox",
+            triggerFunction: triggerFunction,
+          },
+        },
+      ]);
+      buildStandardContainer(parentElement, "Pattern", "", [
+        {
+          id: "shape",
+          title: "Shape",
+          desc: "The movement pattern",
+          type: {
+            name: "dropdown",
+            data: [],
+            triggerFunction: triggerFunction,
+          },
+        },
+        {
+          id: "size",
+          title: "Size",
+          desc: "Affects each pattern differently. Generally affects the overall area covered by the pattern",
+          type: {
+            name: "dropdown",
+            data: ["XS", "S", "M", "L", "XL"],
+            triggerFunction: triggerFunction,
+          },
+        },
+        {
+          id: "width",
+          title: "Width",
+          desc: "Affects each pattern differently. Generally affects the number of repetitions of each loop. For cornerx patterns, also affects the distance the macro travels to the corner",
+          type: {
+            name: "dropdown",
+            data: [1, 2, 3, 4, 5, 6, 7, 8],
+            triggerFunction: triggerFunction,
+          },
+        },
+        {
+          id: "invert_lr",
+          title: "Invert Left/Right",
+          desc: "Invert left and right of the pattern. Instead of going left, it will go right and vice versa",
+          type: {
+            name: "checkbox",
+            triggerFunction: triggerFunction,
+          },
+        },
+        {
+          id: "invert_fb",
+          title: "Invert Forward/Back",
+          desc: "Invert forwards and backwards of the pattern. Instead of going forwards, it will go backwards and vice versa",
+          type: {
+            name: "checkbox",
+            triggerFunction: triggerFunction,
+          },
+        },
+      ]);
+      buildStandardContainer(
+        parentElement,
+        "Rotate Camera",
+        "Rotate camera before gathering",
+        [
+          {
+            id: "turn",
+            title: "Direction",
+            desc: "Direction to turn the camera in. The starting direction varies from field to field",
+            type: {
+              name: "dropdown",
+              data: ["None", "Left", "Right"],
+              triggerFunction: triggerFunction,
+            },
+          },
+          {
+            id: "turn_times",
+            title: "Turn X times",
+            desc: "Number of times to turn in a direction. Does nothing if direction is set to 'none'",
+            type: {
+              name: "dropdown",
+              data: [1, 2, 3, 4],
+              triggerFunction: triggerFunction,
+            },
+          },
+        ]
+      );
+      buildStandardContainer(parentElement, "Gather Until", "", [
+        {
+          id: "mins",
+          title: "Mins",
+          desc: "Maximum number of minutes to gather for",
+          type: {
+            name: "textbox",
+            inputType: "float",
+            inputLimit: 4,
+            triggerFunction: triggerFunction,
+          },
+        },
+        {
+          id: "backpack",
+          title: "Backpack%",
+          desc: "Maximum backpack capacity to gather until. It is recommended not to set it to 100, use 95 instead",
+          type: {
+            name: "textbox",
+            inputType: "int",
+            inputLimit: 3,
+            triggerFunction: triggerFunction,
+          },
+        },
+        {
+          id: "return",
+          title: "Return To Hive",
+          desc: "The method used to return to hive", //<br> - Reset is best for blue hives with balloons<br> - Walk is generally good but inconsistent<br> - Rejoin is best for those without balloons",
+          type: {
+            name: "dropdown",
+            data: ["💀 Reset", "👟 Walk", "🔄 Rejoin", "🌱 Whirligig"],
+            triggerFunction: triggerFunction,
+          },
+        },
+        /*
                 {
                     id: "whirligig_slot",
                     title: "Whirligig slot",
@@ -171,36 +168,75 @@
                         name: "dropdown",
                         data: slotArray,
                         triggerFunction: triggerFunction
-                        
+
                     }
                 }
                 */
-            ])
-            buildStandardContainer(parentElement, "Start location", "Which part of the field the macro should start gathering in", [
-                {
-                    id: "start_location",
-                    title: "Start Location",
-                    desc: "Area of the field to farm in",
-                    type: {
-                        name: "dropdown",
-                        data: ["Center", "Upper Right", "Right", "Lower Right", "Bottom", "Lower Left", "Left", "Upper Left", "Top"],
-                        triggerFunction: triggerFunction
-                        
-                    }
-                },
-                {
-                    id: "distance",
-                    title: "Distance",
-                    desc: "Distance to travel in the direction of the start location. Does nothing if start location is set to center",
-                    type: {
-                        name: "dropdown",
-                        data: [1,2,3,4,5,6,7,8,9,10],
-                        triggerFunction: triggerFunction
-                        
-                    }
-                }
-            ])
-            
-        </script>
-    </div>
+      ]);
+      buildStandardContainer(
+        parentElement,
+        "Goo Settings",
+        "Use goo when gathering in this field",
+        [
+          {
+            id: "goo",
+            title: "Use Goo",
+            desc: "Use goo to increase pollen collection rate when gathering in this field",
+            type: {
+              name: "checkbox",
+              triggerFunction: triggerFunction,
+            },
+          },
+          {
+            id: "goo_interval",
+            title: "Goo Interval (seconds)",
+            desc: "How often to use goo while gathering (minimum: 3 seconds, default: 3 seconds)",
+            type: {
+              name: "textbox",
+              inputType: "int",
+              inputLimit: 3,
+              triggerFunction: triggerFunction,
+            },
+          },
+        ]
+      );
+      buildStandardContainer(
+        parentElement,
+        "Start location",
+        "Which part of the field the macro should start gathering in",
+        [
+          {
+            id: "start_location",
+            title: "Start Location",
+            desc: "Area of the field to farm in",
+            type: {
+              name: "dropdown",
+              data: [
+                "Center",
+                "Upper Right",
+                "Right",
+                "Lower Right",
+                "Bottom",
+                "Lower Left",
+                "Left",
+                "Upper Left",
+                "Top",
+              ],
+              triggerFunction: triggerFunction,
+            },
+          },
+          {
+            id: "distance",
+            title: "Distance",
+            desc: "Distance to travel in the direction of the start location. Does nothing if start location is set to center",
+            type: {
+              name: "dropdown",
+              data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+              triggerFunction: triggerFunction,
+            },
+          },
+        ]
+      );
+    </script>
+  </div>
 </div>

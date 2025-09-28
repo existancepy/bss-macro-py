@@ -21,8 +21,12 @@ def discordBot(token, run, status):
         try:
             synced = await bot.tree.sync()
             print(f"Synced {len(synced)} commands")
+            for command in synced:
+                print(f"  - {command.name}: {command.description}")
         except Exception as e:
-            print(e)
+            print(f"Error syncing commands: {e}")
+            import traceback
+            traceback.print_exc()
     
     @bot.tree.command(name = "ping", description = "Check if the bot is online")
     async def ping(interaction: discord.Interaction):
@@ -110,6 +114,95 @@ def discordBot(token, run, status):
     async def battery(interaction: discord.Interaction):
         closeApp("Roblox")
         os._exit(1)
+    
+    @bot.tree.command(name = "disablegoo", description = "Disable goo for a specific field")
+    async def disable_goo(interaction: discord.Interaction, field: str):
+        print("disablegoo command called")
+        try:
+            # Import the settings functions
+            from modules.misc.settingsManager import loadFields, saveField
+            
+            # Load current field settings
+            fieldSettings = loadFields()
+            
+            # Normalize field name (lowercase, handle spaces)
+            fieldKey = field.lower().strip()
+            
+            # Check if field exists
+            if fieldKey not in fieldSettings:
+                await interaction.response.send_message(f"Field '{field}' not found. Available fields: {', '.join(fieldSettings.keys())}")
+                return
+            
+            # Disable goo for the field
+            fieldSettings[fieldKey]["goo"] = False
+            
+            # Save the updated settings
+            saveField(fieldKey, fieldSettings[fieldKey])
+            
+            await interaction.response.send_message(f"✅ Goo disabled for field: {fieldKey.title()}")
+            
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error disabling goo: {str(e)}")
+    
+    @bot.tree.command(name = "enablegoo", description = "Enable goo for a specific field")
+    async def enable_goo(interaction: discord.Interaction, field: str):
+        print("enablegoo command called")
+        try:
+            # Import the settings functions
+            from modules.misc.settingsManager import loadFields, saveField
+            
+            # Load current field settings
+            fieldSettings = loadFields()
+            
+            # Normalize field name (lowercase, handle spaces)
+            fieldKey = field.lower().strip()
+            
+            # Check if field exists
+            if fieldKey not in fieldSettings:
+                await interaction.response.send_message(f"Field '{field}' not found. Available fields: {', '.join(fieldSettings.keys())}")
+                return
+            
+            # Enable goo for the field
+            fieldSettings[fieldKey]["goo"] = True
+            
+            # Save the updated settings
+            saveField(fieldKey, fieldSettings[fieldKey])
+            
+            await interaction.response.send_message(f"✅ Goo enabled for field: {fieldKey.title()}")
+            
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error enabling goo: {str(e)}")
+    
+    @bot.tree.command(name = "goostatus", description = "Check goo status for all fields")
+    async def goo_status(interaction: discord.Interaction):
+        print("goostatus command called")
+        try:
+            # Import the settings functions
+            from modules.misc.settingsManager import loadFields
+            
+            # Load current field settings
+            fieldSettings = loadFields()
+            
+            # Create status message
+            statusMessage = "**Goo Status for All Fields:**\n"
+            enabledFields = []
+            disabledFields = []
+            
+            for fieldName, settings in fieldSettings.items():
+                if settings.get("goo", False):
+                    enabledFields.append(fieldName.title())
+                else:
+                    disabledFields.append(fieldName.title())
+            
+            if enabledFields:
+                statusMessage += f"✅ **Enabled:** {', '.join(enabledFields)}\n"
+            if disabledFields:
+                statusMessage += f"❌ **Disabled:** {', '.join(disabledFields)}\n"
+            
+            await interaction.response.send_message(statusMessage)
+            
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error checking goo status: {str(e)}")
         
     '''
     @bot.tree.command(name = "hourly report", description = "Send the hourly report")
