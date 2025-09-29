@@ -173,8 +173,21 @@ def macro(status, logQueue, updateGUI):
         return setdatEnable, gatherFieldsList, gumdropGatherFieldsList, requireRedField, requireBlueField, feedBees, requireRedGumdropField, requireBlueGumdropField, requireField
 
     #macro.rejoin()
+    # Cache settings to avoid reloading on every iteration
+    settings_cache = {}
+    last_settings_load = 0
+    settings_cache_duration = 0.5  # Reload settings every 0.5 seconds max
+    
+    def get_cached_settings():
+        nonlocal settings_cache, last_settings_load
+        current_time = time.time()
+        if current_time - last_settings_load > settings_cache_duration:
+            settings_cache = settingsManager.loadAllSettings()
+            last_settings_load = current_time
+        return settings_cache
+    
     while True:
-        macro.setdat = settingsManager.loadAllSettings()
+        macro.setdat = get_cached_settings()
         #run empty task
         #this is in case no other settings are selected 
         runTask(resetAfter=False)
@@ -720,36 +733,73 @@ def watch_for_hotkeys(run):
     # Track currently pressed keys for combination detection
     pressed_keys = set()
     
+    # Cache settings to avoid reloading on every keypress
+    settings_cache = {}
+    last_settings_load = 0
+    settings_cache_duration = 1.0  # Reload settings every 1 second max
+    
+    # Cache Eel recording state to avoid repeated calls
+    recording_cache = {"start": False, "stop": False}
+    last_recording_check = 0
+    recording_cache_duration = 0.5  # Check recording state every 0.5 seconds max
+    
+    def get_cached_settings():
+        nonlocal settings_cache, last_settings_load
+        current_time = time.time()
+        if current_time - last_settings_load > settings_cache_duration:
+            settings_cache = settingsManager.loadAllSettings()
+            last_settings_load = current_time
+        return settings_cache
+    
+    def is_recording_keybind():
+        nonlocal recording_cache, last_recording_check
+        current_time = time.time()
+        if current_time - last_recording_check > recording_cache_duration:
+            try:
+                import eel
+                recording_cache["start"] = eel.getElementProperty("start_keybind", "dataset.recording")() == "true"
+                recording_cache["stop"] = eel.getElementProperty("stop_keybind", "dataset.recording")() == "true"
+                last_recording_check = current_time
+            except:
+                recording_cache = {"start": False, "stop": False}
+        return recording_cache["start"] or recording_cache["stop"]
+    
+    def convert_key_to_string(key):
+        """Optimized key conversion with minimal string operations"""
+        key_str = str(key)
+        if key_str.startswith("Key."):
+            key_str = key_str[4:]  # Remove "Key." prefix
+        
+        # Use dictionary lookup for better performance
+        key_mapping = {
+            "ctrl_l": "Ctrl", "ctrl_r": "Ctrl",
+            "alt_l": "Alt", "alt_r": "Alt", 
+            "shift_l": "Shift", "shift_r": "Shift",
+            "cmd_l": "Cmd", "cmd_r": "Cmd", "cmd": "Cmd",
+            "space": "Space"
+        }
+        
+        if key_str in key_mapping:
+            return key_mapping[key_str]
+        elif key_str.startswith("f") and len(key_str) <= 3:
+            return key_str.upper()  # F1, F2, etc.
+        elif key_str.startswith("'") and key_str.endswith("'"):
+            return key_str[1:-1].upper()  # Remove quotes and uppercase
+        elif len(key_str) == 1:
+            return key_str.upper()  # A, B, C, etc.
+        else:
+            return key_str
+    
     def on_press(key):
         nonlocal run
-        # Reload keybind settings dynamically
-        settings = settingsManager.loadAllSettings()
+        
+        # Get cached settings
+        settings = get_cached_settings()
         start_keybind = settings.get("start_keybind", "F1")
         stop_keybind = settings.get("stop_keybind", "F3")
         
         # Convert key to string for comparison
-        key_str = str(key).replace("Key.", "")
-        
-        # Convert pynput key format to JavaScript format
-        if key_str == "ctrl_l" or key_str == "ctrl_r":
-            key_str = "Ctrl"
-        elif key_str == "alt_l" or key_str == "alt_r":
-            key_str = "Alt"
-        elif key_str == "shift_l" or key_str == "shift_r":
-            key_str = "Shift"
-        elif key_str == "cmd_l" or key_str == "cmd_r" or key_str == "cmd":
-            key_str = "Cmd"
-        elif key_str == "space":
-            key_str = "Space"
-        elif key_str.startswith("f") and len(key_str) <= 3:
-            key_str = key_str.upper()  # F1, F2, etc.
-        elif key_str.startswith("'") and key_str.endswith("'"):
-            # Handle character keys like 'e' -> E
-            key_str = key_str[1:-1].upper()  # Remove quotes and uppercase
-        elif len(key_str) == 1:
-            key_str = key_str.upper()  # A, B, C, etc.
-        
-        
+        key_str = convert_key_to_string(key)
         pressed_keys.add(key_str)
         
         # Check for key combinations
@@ -773,15 +823,8 @@ def watch_for_hotkeys(run):
         current_combo = "+".join(sorted_keys)
         
         # Don't start/stop macro if we're recording a keybind
-        # Check if any keybind input is in recording mode
-        try:
-            import eel
-            recording_start = eel.getElementProperty("start_keybind", "dataset.recording")()
-            recording_stop = eel.getElementProperty("stop_keybind", "dataset.recording")()
-            if recording_start == "true" or recording_stop == "true":
-                return  # Ignore keybind during recording
-        except:
-            pass  # If eel is not available, continue normally
+        if is_recording_keybind():
+            return  # Ignore keybind during recording
 
         if current_combo == start_keybind:
             if run.value == 2: #already running
@@ -793,28 +836,8 @@ def watch_for_hotkeys(run):
             run.value = 0
     
     def on_release(key):
-        # Remove released key from pressed keys
-        key_str = str(key).replace("Key.", "")
-        
-        # Convert pynput key format to JavaScript format (same as on_press)
-        if key_str == "ctrl_l" or key_str == "ctrl_r":
-            key_str = "Ctrl"
-        elif key_str == "alt_l" or key_str == "alt_r":
-            key_str = "Alt"
-        elif key_str == "shift_l" or key_str == "shift_r":
-            key_str = "Shift"
-        elif key_str == "cmd_l" or key_str == "cmd_r" or key_str == "cmd":
-            key_str = "Cmd"
-        elif key_str == "space":
-            key_str = "Space"
-        elif key_str.startswith("f") and len(key_str) <= 3:
-            key_str = key_str.upper()  # F1, F2, etc.
-        elif key_str.startswith("'") and key_str.endswith("'"):
-            # Handle character keys like 'e' -> E
-            key_str = key_str[1:-1].upper()  # Remove quotes and uppercase
-        elif len(key_str) == 1:
-            key_str = key_str.upper()  # A, B, C, etc.
-            
+        # Remove released key from pressed keys using optimized conversion
+        key_str = convert_key_to_string(key)
         pressed_keys.discard(key_str)
 
     keyboard.Listener(on_press=on_press, on_release=on_release).start()
@@ -956,10 +979,21 @@ if __name__ == "__main__":
 
     discordBotProc = None
     prevDiscordBotToken = None
+    
+    # Cache settings for main GUI loop to avoid reloading every 0.5 seconds
+    gui_settings_cache = {}
+    last_gui_settings_load = 0
+    gui_settings_cache_duration = 1.0  # Reload settings every 1 second max
 
     while True:
         eel.sleep(0.5)
-        setdat = settingsManager.loadAllSettings()
+        
+        # Get cached settings
+        current_time = time.time()
+        if current_time - last_gui_settings_load > gui_settings_cache_duration:
+            gui_settings_cache = settingsManager.loadAllSettings()
+            last_gui_settings_load = current_time
+        setdat = gui_settings_cache
 
         #discord bot. Look for changes in the bot token
         currentDiscordBotToken = setdat["discord_bot_token"]
