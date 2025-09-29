@@ -3125,7 +3125,7 @@ class macro:
             currSec = datetime.now().second
 
             #check if its time to send hourly report
-            if currMin == 30 and time.time() - self.lastHourlyReport > 120:
+            if currMin == 0 and time.time() - self.lastHourlyReport > 120:
                 hourlyReportData = self.hourlyReport.generateHourlyReport(self.setdat)
                 self.logger.hourlyReport("Hourly Report", "", "purple")
 
