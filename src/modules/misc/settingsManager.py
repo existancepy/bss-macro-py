@@ -41,6 +41,25 @@ def loadFields():
     with open(f"../settings/profiles/{profileName}/fields.txt") as f:
         out = ast.literal_eval(f.read())
     f.close()
+    
+    # Auto-add missing goo settings for backward compatibility
+    # This ensures users upgrading from older versions get the new goo functionality
+    fieldsUpdated = False
+    for field, settings in out.items():
+        # Add missing goo settings if they don't exist
+        if "goo" not in settings:
+            settings["goo"] = False  # Default to disabled
+            fieldsUpdated = True
+        if "goo_interval" not in settings:
+            settings["goo_interval"] = 3  # Default to 3 seconds (minimum allowed)
+            fieldsUpdated = True
+    
+    # Save the updated fields if any were modified
+    if fieldsUpdated:
+        with open(f"../settings/profiles/{profileName}/fields.txt", "w") as f:
+            f.write(str(out))
+        f.close()
+    
     for field,settings in out.items():
         for k,v in settings.items():
             #check if integer

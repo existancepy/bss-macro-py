@@ -84,9 +84,23 @@ class BuffDetector():
         #read the text
         ocrText = ''.join([x[1][0] for x in ocrRead(mask)]).replace(":", ".")
         buffCount = ''.join([x for x in ocrText if x.isdigit() or (not intOnly and x == ".")])
+
+        # Clean up the buffCount to ensure it's a valid number format
+        # Remove leading/trailing dots and handle multiple dots
+        if not intOnly:
+            # Remove leading dots
+            buffCount = buffCount.lstrip('.')
+            # Remove trailing dots
+            buffCount = buffCount.rstrip('.')
+            # Replace multiple consecutive dots with single dot
+            import re
+            buffCount = re.sub(r'\.\.+', '.', buffCount)
+
         if buff:
             print(buff)
             print(ocrText)
+            print(f"Filtered buffCount: '{buffCount}'")
+
         return buffCount if buffCount else '1'
     
     def getBuffQuantityFromImgTight(self, bgrImg, show=False):
@@ -170,8 +184,15 @@ class BuffDetector():
             
             maxFinalBuffValue = "0"
             for val in finalBuffValues:
-                if float(val) > float(maxFinalBuffValue):
-                    maxFinalBuffValue = val
+                try:
+                    val_float = float(val)
+                    max_float = float(maxFinalBuffValue)
+                    if val_float > max_float:
+                        maxFinalBuffValue = val
+                except (ValueError, TypeError) as e:
+                    # If we can't convert to float, skip this value or use a default
+                    print(f"Warning: Could not convert buff value '{val}' to float: {e}")
+                    continue
             buffQuantity.append(maxFinalBuffValue)
 
         return buffQuantity

@@ -422,6 +422,14 @@ class cloudflaredStream:
                     url = match.group()
                     print("Cloudflare URL:", url)
                     self.publicURL = url
+                    # Write stream URL to file for Discord bot
+                    try:
+                        import os
+                        stream_url_file = os.path.join(os.path.dirname(__file__), '..', '..', 'stream_url.txt')
+                        with open(stream_url_file, 'w') as f:
+                            f.write(url)
+                    except Exception as e:
+                        print(f"Failed to write stream URL to file: {e}")
                     break
 
     def start(self, resolution=1.0):
@@ -444,6 +452,14 @@ class cloudflaredStream:
             print("Stream stopped.")
         self.streaming = False
         self.publicURL = None
+
+        # Clear stream URL file
+        try:
+            stream_url_file = os.path.join(os.path.dirname(__file__), '..', '..', 'stream_url.txt')
+            if os.path.exists(stream_url_file):
+                os.remove(stream_url_file)
+        except Exception as e:
+            print(f"Failed to remove stream URL file: {e}")
         
         #stop the capture thread
         if self.capture_thread and self.capture_thread.is_alive():

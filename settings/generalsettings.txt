@@ -33,3 +33,5 @@ enable_stream=False
 low_performance=False
 ngrok_auth=
 stream_quality=1920x1080
+start_keybind=F1
+stop_keybind=F3

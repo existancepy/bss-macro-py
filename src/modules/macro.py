@@ -1634,7 +1634,28 @@ class macro:
         self.status.value = f"gather_{field}"
         self.isGathering = True
         firstPattern = True
-        self.logger.webhook(f"Gathering: {field.title()}", f"Limit: {gatherTimeLimit} - {fieldSetting['shape']} - Backpack: {fieldSetting['backpack']}%", "light green")
+        lastGooTime = 0  # Track when goo was last used
+        gooTimerActive = True  # Flag to control goo timer thread
+        
+        # Add goo status to webhook message
+        gooStatus = " - Goo Enabled" if fieldSetting["goo"] else ""
+        self.logger.webhook(f"Gathering: {field.title()}", f"Limit: {gatherTimeLimit} - {fieldSetting['shape']} - Backpack: {fieldSetting['backpack']}%{gooStatus}", "light green")
+        
+        # Start goo timer thread
+        import threading
+        def gooTimerThread():
+            nonlocal lastGooTime, gooTimerActive
+            while gooTimerActive:
+                currentTime = time.time()
+                gooInterval = int(fieldSetting["goo_interval"])
+                if fieldSetting["goo"] and (currentTime - lastGooTime) >= gooInterval:
+                    self.keyboard.press(str(self.setdat["goo_slot"]))
+                    time.sleep(0.05)
+                    lastGooTime = currentTime
+                time.sleep(0.5)  # Check every 0.5 seconds
+        
+        gooTimerThread = threading.Thread(target=gooTimerThread, daemon=True)
+        gooTimerThread.start()
         mouse.moveBy(10,5)
         self.keyboard.releaseMovement()
 
@@ -1642,6 +1663,8 @@ class macro:
             return time.time() - st
         
         def stopGather():
+            nonlocal gooTimerActive
+            gooTimerActive = False  # Stop the goo timer thread
             if fieldSetting["shift_lock"]: 
                 self.keyboard.press('shift')
             self.moveMouseToDefault()
@@ -1654,6 +1677,8 @@ class macro:
             self.keyboard.press('shift')
         
         while keepGathering:
+            #goo timer is now handled by background thread
+
             patternStartTime = time.time()
             mouse.mouseDown()
 
@@ -1663,7 +1688,7 @@ class macro:
                     self.keyboard.press(str(self.setdat["quest_gumdrop_slot"]))
                     time.sleep(0.05)
 
-            #ensure that the pattern works  
+            #ensure that the pattern works
             try:
                 exec(open(f"../settings/patterns/{pattern}.py").read(), gatherNameSpace)
             except Exception as e:
@@ -1692,7 +1717,7 @@ class macro:
             if self.setdat["Auto_Field_Boost"] and not self.AFBLIMIT and self.AFB(gatherInterrupt=True, turnOffShiftLock = fieldSetting["shift_lock"]):
                 return
             #check for gather interrupts
-            elif self.night and self.setdat["stinger_hunt"]: 
+            elif self.night and self.setdat["stinger_hunt"]:
                 #rely on task function in main to execute the stinger hunt
                 stopGather()
                 self.logger.webhook("Gathering: interrupted","Stinger Hunt","dark brown")
@@ -1720,10 +1745,12 @@ class macro:
                 keepGathering = False
 
         #gathering was interrupted
-        if keepGathering: 
+        if keepGathering:
             return
-        else: 
+        else:
             stopGather()
+
+        #goo timer continues via background thread during return process
 
         #go back to hive
         def walkToHive():
@@ -1747,12 +1774,14 @@ class macro:
             st = time.time()
             self.canDetectNight = True
             while time.time()-st < 10:
+                #goo timer continues via background thread during hive search
                 if self.isBesideEImage("makehoney"):
                     break
             self.keyboard.keyUp("a")
             #in case we overrun
             time.sleep(0.4)
             for _ in range(7):
+                #goo timer continues via background thread during conversion attempts
                 if self.convert():
                     break
                 self.keyboard.walk("d",0.1)
@@ -1762,10 +1791,13 @@ class macro:
                 self.reset()
 
         if returnType == "reset":
+            #goo timer continues via background thread during reset
             self.reset()
         elif returnType == "rejoin":
+            #goo timer continues via background thread during rejoin
             self.rejoin()
         elif returnType == "whirligig":
+            #goo timer continues via background thread during whirligig usage
             self.useItemInInventory("whirligig")
             time.sleep(1)
             if not self.convert():
@@ -1773,9 +1805,14 @@ class macro:
                 walkToHive()
                 return
             #whirligig sucessful
+            #goo timer continues via background thread after whirligig success
             self.reset(convert=False)
         elif returnType == "walk":
+            #goo timer continues via background thread during walk to hive
             walkToHive()
+        
+        # Stop the goo timer thread when gathering is completely finished
+        gooTimerActive = False
 
     #returns the coordinates of the keep old text
     def keepOldCheck(self):

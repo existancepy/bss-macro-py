@@ -173,8 +173,21 @@ def macro(status, logQueue, updateGUI):
         return setdatEnable, gatherFieldsList, gumdropGatherFieldsList, requireRedField, requireBlueField, feedBees, requireRedGumdropField, requireBlueGumdropField, requireField
 
     #macro.rejoin()
+    # Cache settings to avoid reloading on every iteration
+    settings_cache = {}
+    last_settings_load = 0
+    settings_cache_duration = 0.5  # Reload settings every 0.5 seconds max
+    
+    def get_cached_settings():
+        nonlocal settings_cache, last_settings_load
+        current_time = time.time()
+        if current_time - last_settings_load > settings_cache_duration:
+            settings_cache = settingsManager.loadAllSettings()
+            last_settings_load = current_time
+        return settings_cache
+    
     while True:
-        macro.setdat = settingsManager.loadAllSettings()
+        macro.setdat = get_cached_settings()
         #run empty task
         #this is in case no other settings are selected 
         runTask(resetAfter=False)
@@ -717,21 +730,117 @@ def macro(status, logQueue, updateGUI):
 
 
 def watch_for_hotkeys(run):
+    # Track currently pressed keys for combination detection
+    pressed_keys = set()
+    
+    # Cache settings to avoid reloading on every keypress
+    settings_cache = {}
+    last_settings_load = 0
+    settings_cache_duration = 1.0  # Reload settings every 1 second max
+    
+    # Cache Eel recording state to avoid repeated calls
+    recording_cache = {"start": False, "stop": False}
+    last_recording_check = 0
+    recording_cache_duration = 0.5  # Check recording state every 0.5 seconds max
+    
+    def get_cached_settings():
+        nonlocal settings_cache, last_settings_load
+        current_time = time.time()
+        if current_time - last_settings_load > settings_cache_duration:
+            settings_cache = settingsManager.loadAllSettings()
+            last_settings_load = current_time
+        return settings_cache
+    
+    def is_recording_keybind():
+        nonlocal recording_cache, last_recording_check
+        current_time = time.time()
+        if current_time - last_recording_check > recording_cache_duration:
+            try:
+                import eel
+                recording_cache["start"] = eel.getElementProperty("start_keybind", "dataset.recording")() == "true"
+                recording_cache["stop"] = eel.getElementProperty("stop_keybind", "dataset.recording")() == "true"
+                last_recording_check = current_time
+            except:
+                recording_cache = {"start": False, "stop": False}
+        return recording_cache["start"] or recording_cache["stop"]
+    
+    def convert_key_to_string(key):
+        """Optimized key conversion with minimal string operations"""
+        key_str = str(key)
+        if key_str.startswith("Key."):
+            key_str = key_str[4:]  # Remove "Key." prefix
+        
+        # Use dictionary lookup for better performance
+        key_mapping = {
+            "ctrl_l": "Ctrl", "ctrl_r": "Ctrl",
+            "alt_l": "Alt", "alt_r": "Alt", 
+            "shift_l": "Shift", "shift_r": "Shift",
+            "cmd_l": "Cmd", "cmd_r": "Cmd", "cmd": "Cmd",
+            "space": "Space"
+        }
+        
+        if key_str in key_mapping:
+            return key_mapping[key_str]
+        elif key_str.startswith("f") and len(key_str) <= 3:
+            return key_str.upper()  # F1, F2, etc.
+        elif key_str.startswith("'") and key_str.endswith("'"):
+            return key_str[1:-1].upper()  # Remove quotes and uppercase
+        elif len(key_str) == 1:
+            return key_str.upper()  # A, B, C, etc.
+        else:
+            return key_str
+    
     def on_press(key):
         nonlocal run
-        if key == keyboard.Key.f1:
-            
+        
+        # Get cached settings
+        settings = get_cached_settings()
+        start_keybind = settings.get("start_keybind", "F1")
+        stop_keybind = settings.get("stop_keybind", "F3")
+        
+        # Convert key to string for comparison
+        key_str = convert_key_to_string(key)
+        pressed_keys.add(key_str)
+        
+        # Check for key combinations
+        # Sort keys in a consistent order: modifiers first, then main key
+        modifier_keys = ['Ctrl', 'Alt', 'Shift', 'Cmd']
+        sorted_keys = []
+        
+        # Add modifiers first
+        for mod in modifier_keys:
+            if mod in pressed_keys:
+                sorted_keys.append(mod)
+        
+        # Add non-modifier keys (sorted alphabetically)
+        non_modifier_keys = []
+        for key in pressed_keys:
+            if key not in modifier_keys:
+                non_modifier_keys.append(key)
+        non_modifier_keys.sort()
+        sorted_keys.extend(non_modifier_keys)
+        
+        current_combo = "+".join(sorted_keys)
+        
+        # Don't start/stop macro if we're recording a keybind
+        if is_recording_keybind():
+            return  # Ignore keybind during recording
+
+        if current_combo == start_keybind:
             if run.value == 2: #already running
-                print("Already running")
-                return 
+                return
             run.value = 1
-        elif key == keyboard.Key.f3:
+        elif current_combo == stop_keybind:
             if run.value == 3: #already stopped
-                print("Already stopped")
                 return
             run.value = 0
+    
+    def on_release(key):
+        # Remove released key from pressed keys using optimized conversion
+        key_str = convert_key_to_string(key)
+        pressed_keys.discard(key_str)
 
-    keyboard.Listener(on_press=on_press).start()
+    keyboard.Listener(on_press=on_press, on_release=on_release).start()
 
 if __name__ == "__main__":
     print("Loading gui...")
@@ -761,6 +870,7 @@ if __name__ == "__main__":
     #3: already stopped (do nothing)
     manager = multiprocessing.Manager()
     run = multiprocessing.Value('i', 3)
+    gui.setRunState(3)  # Initialize the global run state
     updateGUI = multiprocessing.Value('i', 0)
     status = manager.Value(ctypes.c_wchar_p, "none")
     logQueue = manager.Queue()
@@ -811,7 +921,6 @@ if __name__ == "__main__":
         global stopThreads
         global macroProc
         stopThreads = True
-        print("stop")
         #print(sockets)
         if macroProc and macroProc.is_alive():
             macroProc.kill()
@@ -870,10 +979,21 @@ if __name__ == "__main__":
 
     discordBotProc = None
     prevDiscordBotToken = None
+    
+    # Cache settings for main GUI loop to avoid reloading every 0.5 seconds
+    gui_settings_cache = {}
+    last_gui_settings_load = 0
+    gui_settings_cache_duration = 1.0  # Reload settings every 1 second max
 
     while True:
         eel.sleep(0.5)
-        setdat = settingsManager.loadAllSettings()
+        
+        # Get cached settings
+        current_time = time.time()
+        if current_time - last_gui_settings_load > gui_settings_cache_duration:
+            gui_settings_cache = settingsManager.loadAllSettings()
+            last_gui_settings_load = current_time
+        setdat = gui_settings_cache
 
         #discord bot. Look for changes in the bot token
         currentDiscordBotToken = setdat["discord_bot_token"]
@@ -887,14 +1007,11 @@ if __name__ == "__main__":
             discordBotProc.start()
 
         if run.value == 1:
-            print("start")
             #create and set webhook obj for the logger
             logger.enableWebhook = setdat["enable_webhook"]
             logger.webhookURL = setdat["webhook_link"]
             logger.sendScreenshots = setdat["send_screenshot"]
-            print("Setting stop threads")
             stopThreads = False
-            print("variables initalised")
 
             #reset hourly report data
             hourlyReport = HourlyReport()
@@ -907,13 +1024,11 @@ if __name__ == "__main__":
                     if stream.publicURL:
                         logger.webhook("Stream Started", f'Stream URL: {stream.publicURL}', "purple")
                         return
-            
+
                 logger.webhook("", f'Stream could not start. Check terminal for more info', "red", ping_category="ping_critical_errors")
 
-            print("checking stream")
             streamLink = None
             if setdat["enable_stream"]:
-                print("stream enabled")
                 if stream.isCloudflaredInstalled():
                     logger.webhook("", "Starting Stream...", "light blue")
                     streamLink = stream.start(setdat["stream_resolution"])
@@ -945,14 +1060,26 @@ if __name__ == "__main__":
             macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
 
-            logger.webhook("Macro Started", f'Existance Macro v2.13.12\nDisplay: {screenInfo["display_type"]}, {screenInfo["screen_width"]}x{screenInfo["screen_height"]}', "purple")
+            logger.webhook("Macro Started", f'Existance Macro v2.13.13\nDisplay: {screenInfo["display_type"]}, {screenInfo["screen_width"]}x{screenInfo["screen_height"]}', "purple")
             run.value = 2
-            gui.toggleStartStop()
+            gui.setRunState(2)  # Update the global run state
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
         elif run.value == 0:
             if macroProc:
                 logger.webhook("Macro Stopped", "Existance Macro", "red")
                 run.value = 3
-                gui.toggleStartStop()
+                gui.setRunState(3)  # Update the global run state
+                try:
+                    gui.toggleStartStop()  # Update UI
+                except:
+                    pass  # If eel is not ready, continue
                 stopApp()
         elif run.value == 4: #disconnected
             macroProc.kill()
@@ -963,6 +1090,11 @@ if __name__ == "__main__":
             macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
             run.value = 2
+            gui.setRunState(2)  # Update the global run state
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
         
         #Check for crash
         if macroProc and not macroProc.is_alive() and hasattr(macroProc, "exitcode") and macroProc.exitcode is not None and macroProc.exitcode < 0:
@@ -973,6 +1105,12 @@ if __name__ == "__main__":
             mouse.mouseUp()
             macroProc = multiprocessing.Process(target=macro, args=(status, logQueue, updateGUI), daemon=True)
             macroProc.start()
+            run.value = 2
+            gui.setRunState(2)  # Update the global run state
+            try:
+                gui.toggleStartStop()  # Update UI
+            except:
+                pass  # If eel is not ready, continue
 
         #detect a new log message
         if not logQueue.empty():
