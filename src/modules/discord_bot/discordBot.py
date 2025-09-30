@@ -290,6 +290,218 @@ def discordBot(token, run, status):
         except Exception as e:
             await interaction.response.send_message(f"❌ Error getting stream URL: {str(e)}")
 
+    @bot.tree.command(name="taskqueue", description = "Show the current task queue with current task highlighted")
+    async def task_queue(interaction: discord.Interaction):
+        """Show the current task queue similar to the GUI"""
+        await interaction.response.defer()
+
+        try:
+            settings = get_cached_settings()
+            current_status = status.value if hasattr(status, 'value') else ""
+
+            # Define emojis and icons for different tasks (same as GUI)
+            fieldEmojis = {
+                "sunflower": "🌻", "dandelion": "🌼", "mushroom": "🍄", "blue_flower": "🔷",
+                "clover": "🍀", "strawberry": "🍓", "spider": "🕸️", "bamboo": "🐼",
+                "pineapple": "🍍", "stump": "🐌", "cactus": "🌵", "pumpkin": "🎃",
+                "pine_tree": "🌲", "rose": "🌹", "mountain_top": "⛰️", "pepper": "🌶️", "coconut": "🥥"
+            }
+
+            collectEmojis = {
+                "wealth_clock": "🕒", "blueberry_dispenser": "🔵", "strawberry_dispenser": "🍓",
+                "coconut_dispenser": "🥥", "royal_jelly_dispenser": "💎", "treat_dispenser": "🦴",
+                "ant_pass_dispenser": "🎫", "glue_dispenser": "🧴", "stockings": "🧦",
+                "feast": "🍽️", "samovar": "🏺", "snow_machine": "❄️", "lid_art": "🖼️",
+                "candles": "🕯️", "wreath": "🎄", "sticker_printer": "🖨️", "mondo_buff": "🐣",
+                "memory_match": "🍍", "mega_memory_match": "🌟", "extreme_memory_match": "🌶️",
+                "winter_memory_match": "❄️", "honeystorm": "🟧", "Auto_Field_Boost": "🎲"
+            }
+
+            killEmojis = {
+                "scorpion": "", "werewolf": "", "ladybug": "", "rhinobeetle": "",
+                "spider": "", "mantis": "", "ant_challenge": "🎯", "coconut_crab": "",
+                "stump_snail": "🐌"
+            }
+
+            fieldBoosterEmojis = {
+                "blue_booster": "🔵", "red_booster": "🔴", "mountain_booster": "⚪"
+            }
+
+            questGiverEmojis = {
+                "polar_bear_quest": "🐻‍❄️", "honey_bee_quest": "🐝",
+                "bucko_bee_quest": "💙", "riley_bee_quest": "❤️"
+            }
+
+            def get_detailed_status_text(status, settings_data):
+                """Get more detailed text for current task status"""
+                if status.startswith("gather_"):
+                    field_name = status.split("_")[1]
+                    field_display = field_name.replace("_", " ").title()
+                    return f"🔄 Gathering from **{field_display}**"
+
+                elif status == "converting":
+                    # Check if blender is enabled and what items are being crafted
+                    if settings_data.get("blender_enable", False):
+                        blender_items = []
+                        for i in range(1, 4):
+                            item = settings_data.get(f"blender_item_{i}", "none")
+                            if item != "none":
+                                blender_items.append(item.replace("_", " ").title())
+
+                        if blender_items:
+                            return f"🔄 Converting: **{', '.join(blender_items)}**"
+                        else:
+                            return "🔄 Converting honey"
+                    else:
+                        return "🔄 Converting honey"
+
+                elif status == "bugrun":
+                    # Try to be more specific about mob runs
+                    enabled_mobs = []
+                    mob_emojis = {
+                        "ladybug": "🐞", "rhinobeetle": "🪲", "scorpion": "🦂",
+                        "mantis": "🦗", "spider": "🕷️", "werewolf": "🐺",
+                        "coconut_crab": "🦀", "stump_snail": "🐌"
+                    }
+
+                    for mob_key in ["ladybug", "rhinobeetle", "scorpion", "mantis", "spider", "werewolf", "coconut_crab", "stump_snail"]:
+                        if settings_data.get(mob_key, False):
+                            emoji = mob_emojis.get(mob_key, "")
+                            mob_name = mob_key.replace("_", " ").title()
+                            enabled_mobs.append(f"{emoji} {mob_name}" if emoji else mob_name)
+
+                    if enabled_mobs:
+                        return f"⚔️ Fighting: **{', '.join(enabled_mobs)}**"
+                    else:
+                        return "⚔️ Mob run in progress"
+
+                elif status == "rejoining":
+                    return "🔄 Rejoining game server"
+
+                elif status == "amulet_wait":
+                    return "⏳ Waiting for amulet decision"
+
+                else:
+                    return f"🔄 {status.replace('_', ' ').title()}"
+
+                return f"🔄 {status.replace('_', ' ').title()}"
+
+            # Helper function to format task items
+            def format_task_items(emoji_dict, enabled_items, task_type, current_status=""):
+                items = []
+                for item_key, emoji in emoji_dict.items():
+                    if settings.get(item_key, False):
+                        # Check if this is the current task
+                        is_current = False
+                        if task_type == "gather" and current_status.startswith("gather_"):
+                            current_field = current_status.split("_")[1]
+                            if item_key == current_field:
+                                is_current = True
+                        elif task_type == "convert" and current_status == "converting":
+                            is_current = True
+                        elif task_type == "bugrun" and current_status == "bugrun":
+                            is_current = True
+
+                        # Format the item
+                        if emoji:
+                            if is_current:
+                                items.append(f"▶️ **{emoji} {item_key.replace('_', ' ').title()}** 🔄")
+                            else:
+                                items.append(f"{emoji} {item_key.replace('_', ' ').title()}")
+                        else:
+                            if is_current:
+                                items.append(f"▶️ **{item_key.replace('_', ' ').title()}** 🔄")
+                            else:
+                                items.append(f"{item_key.replace('_', ' ').title()}")
+
+                return items
+
+            # Build task list similar to GUI
+            embed = discord.Embed(title="📋 Current Task Queue", color=0x00ff00)
+
+            # Quests
+            quest_items = format_task_items(questGiverEmojis, {}, "quest")
+            if quest_items:
+                embed.add_field(name="📜 Quests", value="\n".join(quest_items), inline=False)
+
+            # Collectibles
+            collect_items = format_task_items(collectEmojis, {}, "collect")
+            if collect_items:
+                embed.add_field(name="🎁 Collectibles", value="\n".join(collect_items), inline=False)
+
+            # Blender
+            if settings.get("blender_enable", False):
+                blender_items = []
+                for i in range(1, 4):
+                    item = settings.get(f"blender_item_{i}", "none")
+                    if item != "none":
+                        is_current = current_status == "converting"
+                        if is_current:
+                            blender_items.append(f"▶️ **{item.replace('_', ' ').title()}** 🔄")
+                        else:
+                            blender_items.append(f"{item.replace('_', ' ').title()}")
+
+                if blender_items:
+                    embed.add_field(name="🥤 Blender", value="\n".join(blender_items), inline=False)
+
+            # Planters
+            planters_mode = settings.get("planters_mode", 0)
+            if planters_mode > 0:
+                mode_text = "Manual" if planters_mode == 1 else "Auto"
+                embed.add_field(name="🌱 Planters", value=mode_text, inline=False)
+
+            # Kill tasks
+            kill_items = format_task_items(killEmojis, {}, "kill")
+            if kill_items:
+                embed.add_field(name="⚔️ Combat", value="\n".join(kill_items), inline=False)
+
+            # Field boosters and sticker stack
+            booster_items = format_task_items(fieldBoosterEmojis, {}, "boosters")
+            sticker_items = []
+            if settings.get("sticker_stack", False):
+                sticker_items.append("Sticker Stack")
+
+            if booster_items or sticker_items:
+                all_buff_items = booster_items + sticker_items
+                embed.add_field(name="🎯 Buffs", value="\n".join(all_buff_items), inline=False)
+
+            # Gather fields
+            gather_items = []
+            field_list = settings.get("fields", [])
+            fields_enabled = settings.get("fields_enabled", [])
+
+            for i, field_name in enumerate(field_list):
+                if i < len(fields_enabled) and fields_enabled[i]:
+                    emoji = fieldEmojis.get(field_name, "")
+                    is_current = current_status == f"gather_{field_name}"
+
+                    if emoji:
+                        if is_current:
+                            gather_items.append(f"▶️ **{emoji} {field_name.replace('_', ' ').title()}** 🔄")
+                        else:
+                            gather_items.append(f"{emoji} {field_name.replace('_', ' ').title()}")
+                    else:
+                        if is_current:
+                            gather_items.append(f"▶️ **{field_name.replace('_', ' ').title()}** 🔄")
+                        else:
+                            gather_items.append(f"{field_name.replace('_', ' ').title()}")
+
+            if gather_items:
+                embed.add_field(name="🌾 Gathering", value="\n".join(gather_items), inline=False)
+
+            # Show current status if no specific task is highlighted
+            if current_status and not any("🔄" in field.value for field in embed.fields):
+                status_text = get_detailed_status_text(current_status, settings)
+                embed.add_field(name="🔄 Current Task", value=status_text, inline=False)
+
+            if not embed.fields:
+                embed.add_field(name="📭 No Tasks", value="No tasks are currently enabled.", inline=False)
+
+            await interaction.followup.send(embed=embed)
+
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error retrieving task queue: {str(e)}")
+
     # === COMPREHENSIVE SETTINGS MANAGEMENT COMMANDS ===
 
     @bot.tree.command(name="settings", description="View current macro settings")
@@ -956,7 +1168,7 @@ def discordBot(token, run, status):
 
         # embed.add_field(name="📁 **Profile Management**", value="`/profiles` - List available profiles\n`/currentprofile` - Show current profile\n`/switchprofile <name>` - Switch profile", inline=False)
 
-        embed.add_field(name="📊 **Status & Monitoring**", value="`/status` - Get macro status\n`/battery` - Check battery status\n`/streamurl` - Get stream URL", inline=False)
+        embed.add_field(name="📊 **Status & Monitoring**", value="`/status` - Get macro status\n`/taskqueue` - Show current task queue\n`/battery` - Check battery status\n`/streamurl` - Get stream URL", inline=False)
 
         await interaction.response.send_message(embed=embed)
 
