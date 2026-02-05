@@ -14,8 +14,28 @@
   <div
     class="poppins-medium"
     style="font-size: 1.1rem; margin-left: auto"
-    id="update"
+    id="version-display"
   >
-    v2.13.14
+    Loading...
   </div>
 </div>
+
+<script>
+  // Load and display macro version
+  async function loadMacroVersion() {
+    try {
+      const version = await eel.getMacroVersion()();
+      document.getElementById('version-display').textContent = 'v' + version;
+    } catch (error) {
+      console.error('Error loading macro version:', error);
+      document.getElementById('version-display').textContent = 'v?.?.?';
+    }
+  }
+  
+  // Load version when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadMacroVersion);
+  } else {
+    loadMacroVersion();
+  }
+</script>

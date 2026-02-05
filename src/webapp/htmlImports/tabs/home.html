@@ -10,6 +10,20 @@
 >
   <div class="poppins-semibold standard-container">
     <h2>Macro</h2>
+    <button
+      class="purple-button"
+      style="margin-left: auto; display: none"
+      id="stop-btn"
+    >
+      Stop [F3]
+    </button>
+    <!-- <button
+      class="purple-button active"
+      style="margin-left: 0.5rem; display: none"
+      id="pause-btn"
+    >
+      Pause [F2]
+    </button> -->
     <button class="purple-button" style="margin-left: auto" id="start-btn">
       Start [F1]
     </button>
@@ -31,12 +45,16 @@
       style="width: 100%; flex-grow: 1; overflow-y: auto"
     ></div>
   </div>
-  <div class="poppins-medium standard-container" style="justify-content: space-between">
+  <div
+    class="poppins-medium standard-container"
+    style="justify-content: space-between"
+  >
     <h2 style="margin: 0">Macro Mode</h2>
-    <label style="display: flex; margin-top: 0.5rem;">
-      <select id="field_only_mode">
-        <option value="false">Normal Mode</option>
-        <option value="true">Field Only Mode</option>
+    <label style="display: flex; margin-top: 0.5rem">
+      <select id="macro_mode">
+        <option value="normal">Normal Mode</option>
+        <option value="field">Field Mode</option>
+        <option value="quest">Quest Mode</option>
       </select>
     </label>
   </div>
@@ -80,6 +98,11 @@
         <a onclick="ahref('https://github.com/alaninnovates/bss-macro')"
           >Stumpy Macro</a
         >
+      </li>
+      <li>Developers: Existance, Sev, Logan</li>
+      <li>
+        Pattern Makers: Existance, NatroTeam, tvojamamkajenic, sev, dully176,
+        chillketchup
       </li>
     </ul>
   </div>

@@ -1,5 +1,5 @@
-fields_enabled=[True, False, False]
-fields=['pine tree', 'sunflower', 'dandelion']
+fields_enabled=[True, False, False, False, False]
+fields=['pine tree', 'sunflower', 'dandelion', 'pine tree', 'sunflower']
 wealth_clock=False
 blueberry_dispenser=False
 strawberry_dispenser=False
@@ -226,3 +226,4 @@ auto_field_rose=False
 auto_field_mountain_top=False
 auto_field_pepper=False
 auto_field_coconut=False
+task_priority_order=["quest_polar_bear", "quest_honey_bee", "quest_bucko_bee", "quest_riley_bee", "stinger_hunt", "mondo_buff", "auto_field_boost", "collect_wealth_clock", "collect_blueberry_dispenser", "collect_strawberry_dispenser", "collect_coconut_dispenser", "collect_royal_jelly_dispenser", "collect_treat_dispenser", "collect_ant_pass_dispenser", "collect_glue_dispenser", "collect_stockings", "collect_wreath", "collect_feast", "collect_samovar", "collect_snow_machine", "collect_lid_art", "collect_candles", "collect_memory_match", "collect_mega_memory_match", "collect_extreme_memory_match", "collect_winter_memory_match", "collect_honeystorm", "collect_sticker_printer", "blender", "planters", "kill_ladybug", "kill_mantis", "kill_rhinobeetle", "kill_scorpion", "kill_spider", "kill_werewolf", "ant_challenge", "kill_coconut_crab", "kill_stump_snail", "collect_sticker_stack", "collect_blue_booster", "collect_red_booster", "collect_mountain_booster", "gather_bamboo", "gather_blue_flower", "gather_cactus", "gather_clover", "gather_coconut", "gather_dandelion", "gather_mountain_top", "gather_mushroom", "gather_pepper", "gather_pine_tree", "gather_pineapple", "gather_pumpkin", "gather_rose", "gather_spider", "gather_strawberry", "gather_stump", "gather_sunflower"]

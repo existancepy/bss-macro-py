@@ -350,6 +350,23 @@
                 ` 
                 blenderParent.innerHTML += blenderItemHTML
             }
+            
+            // Add Petals & Blooms cheat sheet at the bottom
+            buildStandardContainer(parentCollect, "Petals & Blooms", "Reference guide for petals and blooms", []);
+            // Find the container that was just created
+            const petalsContainers = parentCollect.querySelectorAll(".standard-container");
+            const petalsContainer = petalsContainers[petalsContainers.length - 1];
+            const petalsImageContainer = document.createElement("div");
+            petalsImageContainer.style.cssText = "display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1rem; width: 100%;";
+            petalsImageContainer.innerHTML = `
+                <img 
+                    src="./assets/cheatsheet/petals.png" 
+                    alt="Petals and Blooms Cheat Sheet"
+                    class="zoomable-image"
+                    style="width: 100%; max-width: 600px; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); cursor: pointer;"
+                />
+            `;
+            petalsContainer.appendChild(petalsImageContainer);
        </script>
     </div>
 </div>

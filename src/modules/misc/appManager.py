@@ -106,9 +106,9 @@ def getWindowSize(windowName):
 
 def setAppFullscreenMac(app="Roblox", fullscreen=True):
     workspace = NSWorkspace.sharedWorkspace()
-    for app in workspace.runningApplications():
-        if app.localizedName() == "Roblox":
-            pid = app.processIdentifier()
+    for runningApp in workspace.runningApplications():
+        if runningApp.localizedName() == app:
+            pid = runningApp.processIdentifier()
             break
     else:
         return
@@ -119,9 +119,9 @@ def setAppFullscreenMac(app="Roblox", fullscreen=True):
 
 def maximiseAppWindowMac(app="Roblox"):
     workspace = NSWorkspace.sharedWorkspace()
-    for app in workspace.runningApplications():
-        if app.localizedName() == "Roblox":
-            pid = app.processIdentifier()
+    for runningApp in workspace.runningApplications():
+        if runningApp.localizedName() == app:
+            pid = runningApp.processIdentifier()
             break
     else:
         return
@@ -144,3 +144,29 @@ else:
     import win32gui, win32con,  win32com.client
     openApp = openAppWindows
     isAppOpen = isAppOpenWindows
+    
+    def maximiseAppWindowWindows(app="Roblox"):
+        """Windows implementation for maximizing app window"""
+        w = WindowMgr()
+        w.find_window(None, app)
+        try:
+            w.set_foreground()
+        except:
+            pass
+    
+    def setAppFullscreenWindows(app="Roblox", fullscreen=True):
+        """Windows implementation for setting app fullscreen"""
+        # Windows fullscreen handling is typically done through window state
+        # This is a placeholder implementation
+        w = WindowMgr()
+        w.find_window(None, app)
+        try:
+            if fullscreen:
+                win32gui.ShowWindow(w._handle, win32con.SW_MAXIMIZE)
+            else:
+                win32gui.ShowWindow(w._handle, win32con.SW_RESTORE)
+        except:
+            pass
+    
+    maximiseAppWindow = maximiseAppWindowWindows
+    setAppFullscreen = setAppFullscreenWindows

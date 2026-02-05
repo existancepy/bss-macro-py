@@ -1,16 +1,16 @@
 # Existance Macro
 
 ![Discord](https://img.shields.io/discord/1065032948119769118?label=Discord&color=7289da&logo=discord&logoColor=white&link=https://discord.gg/WdbWgFewqx)
-![GitHub Repo stars](https://img.shields.io/github/stars/existancepy/bss-macro-py?style=flat&label=Stars&color=fff240&logo=github&logocolor=white&link=https://github.com/existancepy/bss-macro-py/stargazers)
-![Repo Size](https://img.shields.io/github/repo-size/existancepy/bss-macro-py?label=Repo%20Size&logo=github&logoColor=white)
+![GitHub Repo stars](https://img.shields.io/github/stars/LaganYT/Existance-Macro?style=flat&label=Stars&color=fff240&logo=github&logocolor=white&link=https://github.com/LaganYT/Existance-Macro/stargazers)
+![Repo Size](https://img.shields.io/github/repo-size/LaganYT/Existance-Macro?label=Repo%20Size&logo=github&logoColor=white)
 
 Roblox Bee Swarm Simulator macro for macOS. Free, open source, and actively maintained.
 
 - Docs: https://existance-macro.gitbook.io/existance-macro-docs/
-- Discord: https://discord.gg/3qf8bgqCVu
-- Repo: https://github.com/existancepy/bss-macro-py
+- Discord: https://discord.gg/3qf8bgqCVu (Original Macro)
+- Original Macro: https://github.com/existancepy/bss-macro-py
 
-![GUI](https://raw.githubusercontent.com/LaganYT/Existance-Macro/refs/heads/main/src/gui.png)
+![GUI](https://github.com/LaganYT/Existance-Macro/blob/06dd4987b68053c9bdfa842a17e51db3b7c83d30/src/gui.png)
 
 ## Features
 
@@ -25,7 +25,7 @@ Roblox Bee Swarm Simulator macro for macOS. Free, open source, and actively main
 
 - **Gather**
 
-  - Farm up to 3 fields with Natro-compatible settings
+  - Farm up to 5 fields with Natro-compatible settings
   - Patterns (shapes), size/width, invert axes, direction and turns
   - Shift-lock handling and field drift compensation (Saturator tracking)
   - Time- or backpack%-based stop conditions

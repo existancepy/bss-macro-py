@@ -2,6 +2,8 @@
   <div id="field-1" class="gather-tab-item">Field 1</div>
   <div id="field-2" class="gather-tab-item">Field 2</div>
   <div id="field-3" class="gather-tab-item">Field 3</div>
+  <div id="field-4" class="gather-tab-item">Field 4</div>
+  <div id="field-5" class="gather-tab-item">Field 5</div>
 </div>
 <div style="display: flex; justify-content: center; width: 100%">
   <div style="width: 74%; overflow-y: auto; height: 94vh" id="gather">
@@ -237,6 +239,39 @@
           },
         ]
       );
+
+      // Add control buttons at the bottom
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.cssText = 'display: flex; justify-content: center; gap: 10px; margin-top: 20px; margin-bottom: 20px;';
+      buttonContainer.innerHTML = `
+        <button id="export-field-button" class="standard-button" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+          📤 Export Settings
+        </button>
+        <button id="import-field-button" class="standard-button" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+          📥 Import Settings
+        </button>
+        <button id="reset-field-button" class="standard-button" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+          🔄 Reset Field to Default
+        </button>
+      `;
+      parentElement.appendChild(buttonContainer);
+
+      // Add import modal (hidden by default)
+      const importModal = document.createElement('div');
+      importModal.id = 'import-modal';
+      importModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); z-index: 1000; justify-content: center; align-items: center; font-family: "Poppins", sans-serif;';
+      importModal.innerHTML = `
+        <div style="background: #2f3136; padding: 1.5rem; border-radius: 8px; border: 1px solid #21262d; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; color: #e8e8e8; font-weight: 500;">Import Field Settings</h3>
+          <p style="color: #adb4bc; font-size: 0.95rem; margin: 0 0 1rem 0; font-weight: 400;">Paste your JSON settings below:</p>
+          <textarea id="import-json-textarea" style="width: 100%; height: 300px; font-family: 'Courier New', monospace; padding: 0.75rem; border: 1px solid #40444b; background-color: #36393f; color: #d2d3d2; border-radius: 4px; resize: vertical; box-sizing: border-box; font-size: 0.9rem;" placeholder="Paste JSON here..."></textarea>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem;">
+            <button id="cancel-import-button" style="background-color: #40444b; color: #e8e8e8; border: 1px solid #40444b; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 500; transition: background-color 0.2s;">Cancel</button>
+            <button id="confirm-import-button" style="background-color: #7a77bb; color: #e8e8e8; border: 1px solid #7a77bb; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 500; transition: background-color 0.2s;">Import</button>
+          </div>
+        </div>
+      `;
+      parentElement.appendChild(importModal);
     </script>
   </div>
 </div>

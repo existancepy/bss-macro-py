@@ -87,6 +87,129 @@ function generateSettingObject(properties) {
   return out;
 }
 
+function loadDragListOrder(dragListElement, orderArray) {
+  if (!orderArray || !Array.isArray(orderArray)) return;
+
+  const container = dragListElement.querySelector(".drag-list-container");
+  if (!container) return;
+
+  // Clear existing items
+  container.innerHTML = "";
+
+  // Helper function to get category
+  function getCategory(taskId) {
+    if (taskId.startsWith("gather_")) return "gather";
+    if (taskId.startsWith("collect_")) return "collect";
+    if (taskId.startsWith("kill_")) return "kill";
+    if (taskId.startsWith("quest_")) return "quest";
+    return "special";
+  }
+
+  // Helper function to get category badge
+  function getCategoryBadge(category) {
+    const badges = {
+      gather: "GATHER",
+      collect: "COLLECT",
+      kill: "KILL",
+      quest: "QUEST",
+      special: "SPECIAL",
+    };
+    return badges[category] || "";
+  }
+
+  // Create items in the specified order
+  orderArray.forEach((taskId) => {
+    let taskName = taskId; // Default to taskId if not found in map
+
+    // Convert task ID to display name
+    const displayNames = {
+      gather_pine_tree: "Gather: Pine Tree",
+      gather_sunflower: "Gather: Sunflower",
+      gather_dandelion: "Gather: Dandelion",
+      gather_mushroom: "Gather: Mushroom",
+      gather_blue_flower: "Gather: Blue Flower",
+      gather_clover: "Gather: Clover",
+      gather_strawberry: "Gather: Strawberry",
+      gather_spider: "Gather: Spider",
+      gather_bamboo: "Gather: Bamboo",
+      gather_cactus: "Gather: Cactus",
+      gather_rose: "Gather: Rose",
+      gather_pineapple: "Gather: Pineapple",
+      gather_pumpkin: "Gather: Pumpkin",
+      gather_coconut: "Gather: Coconut",
+      gather_pepper: "Gather: Pepper",
+      gather_mountain_top: "Gather: Mountain Top",
+      gather_stump: "Gather: Stump",
+      collect_wealth_clock: "Collect: Wealth Clock",
+      collect_blueberry_dispenser: "Collect: Blueberry Dispenser",
+      collect_strawberry_dispenser: "Collect: Strawberry Dispenser",
+      collect_coconut_dispenser: "Collect: Coconut Dispenser",
+      collect_royal_jelly_dispenser: "Collect: Royal Jelly Dispenser",
+      collect_treat_dispenser: "Collect: Treat Dispenser",
+      collect_ant_pass_dispenser: "Collect: Ant Pass Dispenser",
+      collect_glue_dispenser: "Collect: Glue Dispenser",
+      collect_stockings: "Collect: Stockings",
+      collect_wreath: "Collect: Wreath",
+      collect_feast: "Collect: Feast",
+      collect_samovar: "Collect: Samovar",
+      collect_snow_machine: "Collect: Snow Machine",
+      collect_lid_art: "Collect: Lid Art",
+      collect_candles: "Collect: Candles",
+      collect_memory_match: "Collect: Memory Match",
+      collect_mega_memory_match: "Collect: Mega Memory Match",
+      collect_extreme_memory_match: "Collect: Extreme Memory Match",
+      collect_winter_memory_match: "Collect: Winter Memory Match",
+      collect_honeystorm: "Collect: Honeystorm",
+      collect_blue_booster: "Collect: Blue Booster",
+      collect_red_booster: "Collect: Red Booster",
+      collect_mountain_booster: "Collect: Mountain Booster",
+      collect_sticker_stack: "Collect: Sticker Stack",
+      collect_sticker_printer: "Collect: Sticker Printer",
+      kill_stump_snail: "Kill: Stump Snail",
+      kill_ladybug: "Kill: Ladybug",
+      kill_rhinobeetle: "Kill: Rhinobeetle",
+      kill_scorpion: "Kill: Scorpion",
+      kill_mantis: "Kill: Mantis",
+      kill_spider: "Kill: Spider",
+      kill_werewolf: "Kill: Werewolf",
+      kill_coconut_crab: "Kill: Coconut Crab",
+      mondo_buff: "Collect: Mondo Buff",
+      stinger_hunt: "Stinger Hunt",
+      auto_field_boost: "Auto Field Boost",
+      ant_challenge: "Ant Challenge",
+      quest_polar_bear: "Quest: Polar Bear",
+      quest_honey_bee: "Quest: Honey Bee",
+      quest_bucko_bee: "Quest: Bucko Bee",
+      quest_riley_bee: "Quest: Riley Bee",
+      blender: "Blender",
+      planters: "Planters",
+    };
+
+    if (displayNames[taskId]) {
+      taskName = displayNames[taskId];
+    }
+
+    const category = getCategory(taskId);
+    const badge = getCategoryBadge(category);
+
+    const itemElement = document.createElement("div");
+    itemElement.className = "drag-item";
+    itemElement.setAttribute("data-id", taskId);
+    itemElement.setAttribute("data-category", category);
+    itemElement.setAttribute("draggable", "true");
+    itemElement.innerHTML = `
+      <span class="drag-handle">⋮⋮</span>
+      <span class="category-badge">${badge}</span>
+      <span class="drag-text">${taskName}</span>
+      <div class="drag-actions">
+        <button class="drag-action-btn move-to-top" title="Move to top">↑ Top</button>
+        <button class="drag-action-btn move-to-bottom" title="Move to bottom">↓ Bottom</button>
+      </div>
+    `;
+    container.appendChild(itemElement);
+  });
+}
+
 //load fields based on the obj data
 eel.expose(loadInputs);
 function loadInputs(obj, save = "") {
@@ -103,6 +226,9 @@ function loadInputs(obj, save = "") {
       ele.dataset.keybind = v;
       const displayText = v ? v.replace(/\+/g, " + ") : "Click to record";
       ele.querySelector(".keybind-display").textContent = displayText;
+    } else if (ele.className.includes("drag-list")) {
+      // Handle drag list elements
+      loadDragListOrder(ele, v);
     } else {
       ele.value = v;
     }
@@ -527,3 +653,261 @@ function handleKeybindKeyUp(event) {
   // Finalize the keybind when any key is released
   finalizeKeybind();
 }
+
+/*
+=============================================
+Image Zoom Functionality
+=============================================
+*/
+
+let zoomLevel = 1;
+let zoomModal = null;
+let zoomedImage = null;
+let currentImageSrc = null;
+let imageContainer = null;
+let mouseX = 0;
+let mouseY = 0;
+let translateX = 0;
+let translateY = 0;
+
+function initializeImageZoom() {
+  // Create zoom modal if it doesn't exist
+  if (!zoomModal) {
+    zoomModal = document.createElement("div");
+    zoomModal.id = "zoom-modal";
+    zoomModal.style.cssText = `
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 10000;
+      cursor: zoom-out;
+      overflow: hidden;
+    `;
+    
+    imageContainer = document.createElement("div");
+    imageContainer.id = "zoom-image-container";
+    imageContainer.style.cssText = `
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    `;
+    
+    zoomedImage = document.createElement("img");
+    zoomedImage.id = "zoomed-image";
+    zoomedImage.style.cssText = `
+      max-width: 90vw;
+      max-height: 90vh;
+      transition: transform 0.1s ease;
+      cursor: zoom-in;
+      transform-origin: center center;
+    `;
+    
+    const controlsContainer = document.createElement("div");
+    controlsContainer.style.cssText = `
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      display: flex;
+      gap: 1rem;
+      z-index: 10001;
+    `;
+    
+    const zoomInBtn = document.createElement("button");
+    zoomInBtn.textContent = "+";
+    zoomInBtn.className = "zoom-control-btn";
+    zoomInBtn.onclick = (e) => {
+      e.stopPropagation();
+      zoomImageCentered(1.2);
+    };
+    
+    const zoomOutBtn = document.createElement("button");
+    zoomOutBtn.textContent = "-";
+    zoomOutBtn.className = "zoom-control-btn";
+    zoomOutBtn.onclick = (e) => {
+      e.stopPropagation();
+      zoomImageCentered(0.8);
+    };
+    
+    const resetBtn = document.createElement("button");
+    resetBtn.textContent = "Reset";
+    resetBtn.className = "zoom-control-btn";
+    resetBtn.onclick = (e) => {
+      e.stopPropagation();
+      resetZoom();
+    };
+    
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "×";
+    closeBtn.className = "zoom-control-btn";
+    closeBtn.style.fontSize = "2rem";
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      closeZoomModal();
+    };
+    
+    controlsContainer.appendChild(zoomInBtn);
+    controlsContainer.appendChild(zoomOutBtn);
+    controlsContainer.appendChild(resetBtn);
+    controlsContainer.appendChild(closeBtn);
+    
+    imageContainer.appendChild(zoomedImage);
+    zoomModal.appendChild(imageContainer);
+    zoomModal.appendChild(controlsContainer);
+    
+    // Track mouse position for scroll wheel zoom
+    imageContainer.addEventListener("mousemove", (e) => {
+      const rect = imageContainer.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    });
+    
+    // Scroll wheel zoom (mouse position based)
+    imageContainer.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      zoomImageAtMouse(delta, e.clientX, e.clientY);
+    });
+    
+    // Close on background click
+    zoomModal.onclick = (e) => {
+      if (e.target === zoomModal) {
+        closeZoomModal();
+      }
+    };
+    
+    // Close on Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && zoomModal.style.display === "block") {
+        closeZoomModal();
+      }
+    });
+    
+    document.body.appendChild(zoomModal);
+  }
+  
+  // Add click handlers to all zoomable images
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("zoomable-image")) {
+      e.preventDefault();
+      e.stopPropagation();
+      openZoomModal(e.target.src);
+    }
+  });
+}
+
+function openZoomModal(imageSrc) {
+  if (!zoomModal) {
+    initializeImageZoom();
+  }
+  currentImageSrc = imageSrc;
+  zoomedImage.src = imageSrc;
+  zoomLevel = 1;
+  translateX = 0;
+  translateY = 0;
+  zoomedImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`;
+  zoomModal.style.display = "block";
+  document.body.style.overflow = "hidden";
+  
+  // Reset transform origin to center
+  zoomedImage.style.transformOrigin = "center center";
+}
+
+function closeZoomModal() {
+  if (zoomModal) {
+    zoomModal.style.display = "none";
+    document.body.style.overflow = "";
+    zoomLevel = 1;
+    translateX = 0;
+    translateY = 0;
+  }
+}
+
+function zoomImageAtMouse(factor, clientX, clientY) {
+  const rect = imageContainer.getBoundingClientRect();
+  const containerCenterX = rect.left + rect.width / 2;
+  const containerCenterY = rect.top + rect.height / 2;
+  
+  // Get mouse position relative to container center
+  const mouseOffsetX = clientX - containerCenterX;
+  const mouseOffsetY = clientY - containerCenterY;
+  
+  // Calculate new zoom level
+  const newZoomLevel = zoomLevel * factor;
+  const clampedZoom = Math.max(0.5, Math.min(newZoomLevel, 5));
+  
+  if (clampedZoom === zoomLevel) return; // No change if at limits
+  
+  // Calculate the zoom point relative to the image center
+  // We need to adjust translate to keep the point under the mouse fixed
+  const zoomRatio = clampedZoom / zoomLevel;
+  
+  // Adjust translate to zoom towards mouse position
+  translateX = translateX * zoomRatio - mouseOffsetX * (zoomRatio - 1);
+  translateY = translateY * zoomRatio - mouseOffsetY * (zoomRatio - 1);
+  
+  zoomLevel = clampedZoom;
+  updateImageTransform();
+}
+
+function zoomImageCentered(factor) {
+  const newZoomLevel = zoomLevel * factor;
+  zoomLevel = Math.max(0.5, Math.min(newZoomLevel, 5));
+  
+  // For centered zoom, reset translate
+  translateX = 0;
+  translateY = 0;
+  zoomedImage.style.transformOrigin = "center center";
+  updateImageTransform();
+}
+
+function updateImageTransform() {
+  zoomedImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`;
+}
+
+function resetZoom() {
+  zoomLevel = 1;
+  translateX = 0;
+  translateY = 0;
+  zoomedImage.style.transformOrigin = "center center";
+  updateImageTransform();
+}
+
+// Initialize zoom when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeImageZoom);
+} else {
+  initializeImageZoom();
+}
+
+// Re-initialize when new content is loaded (for dynamically loaded tabs)
+// Use MutationObserver to detect when new images are added
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    mutation.addedNodes.forEach((node) => {
+      if (node.nodeType === 1) { // Element node
+        // Check if the node or its children contain zoomable images
+        if (node.classList && node.classList.contains("zoomable-image")) {
+          // Image is already set up by event delegation
+        } else if (node.querySelectorAll) {
+          const images = node.querySelectorAll(".zoomable-image");
+          // Images will be handled by event delegation
+        }
+      }
+    });
+  });
+});
+
+// Start observing the document body for changes
+observer.observe(document.body, {
+  childList: true,
+  subtree: true
+});

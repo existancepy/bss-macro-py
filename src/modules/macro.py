@@ -3,9 +3,12 @@ import modules.misc.appManager as appManager
 import modules.misc.settingsManager as settingsManager
 import time
 import pyautogui as pag
+
+# We'll use a wrapper for time.sleep that respects pause state
+# This will be initialized when the macro class is created
 from modules.screen.screenshot import mssScreenshot, mssScreenshotNP, benchmarkMSS, mssScreenshotPillowRGBA
 from modules.controls.keyboard import keyboard
-from modules.controls.sleep import sleep
+from modules.controls.sleep import sleep, set_run_state, pauseable_sleep, wait_while_paused, is_paused
 import modules.controls.mouse as mouse
 from modules.screen.screenData import getScreenData
 import modules.logging.log as logModule
@@ -336,8 +339,15 @@ class macro:
         self.updateGUI = updateGUI
         self.run = run
         self.skipTask = skipTask
+        
+        # Set the run state for pause-aware sleep functions
+        if run is not None:
+            set_run_state(run)
+        
         self.setdat = settingsManager.loadAllSettings()
         self.fieldSettings = settingsManager.loadFields()
+        # Track profile changes to reload settings when profile is switched
+        self._last_profile_change_counter = settingsManager.getProfileChangeCounter()
 
         self.robloxWindow = RobloxWindowBounds()
         
@@ -358,9 +368,9 @@ class macro:
             "ping_hourly_reports": self.setdat.get("ping_hourly_reports", False)
         }
         
-        self.logger = logModule.log(logQueue, self.setdat["enable_webhook"], self.setdat["webhook_link"], self.setdat["send_screenshot"], blocking=self.setdat["low_performance"], hourlyReportOnly=self.setdat["only_send_hourly_report"], robloxWindow=self.robloxWindow, enableDiscordPing=self.setdat["enable_discord_ping"], discordUserID=self.setdat["discord_user_id"], pingSettings=pingSettings)
+        self.logger = logModule.log(logQueue, self.setdat.get("enable_webhook", False), self.setdat.get("webhook_link", ""), self.setdat.get("send_screenshot", True), blocking=self.setdat.get("low_performance", False), hourlyReportOnly=self.setdat.get("only_send_hourly_report", False), robloxWindow=self.robloxWindow, enableDiscordPing=self.setdat.get("enable_discord_ping", False), discordUserID=self.setdat.get("discord_user_id", ""), pingSettings=pingSettings, webhookTimeFormat=self.setdat.get("webhook_time_format", 24))
         self.buffDetector = BuffDetector(self.robloxWindow)
-        self.hourlyReport = HourlyReport(self.buffDetector)
+        self.hourlyReport = HourlyReport(self.buffDetector, self.setdat.get("hourly_report_time_format", 24))
         self.memoryMatch = MemoryMatch(self.robloxWindow)
 
         #setup an internal cooldown tracker. The cooldowns can be modified
@@ -403,11 +413,80 @@ class macro:
 
         self.setRobloxWindowInfo(setYOffset=False)
 
+    def checkAndReloadSettings(self):
+        """Check if profile has changed and reload settings if needed"""
+        current_counter = settingsManager.getProfileChangeCounter()
+        if current_counter != self._last_profile_change_counter:
+            self._last_profile_change_counter = current_counter
+            # Reload settings
+            old_profile = settingsManager.getCurrentProfile()
+            self.setdat = settingsManager.loadAllSettings()
+            self.fieldSettings = settingsManager.loadFields()
+            # Update logger with new webhook settings
+            pingSettings = {
+                "ping_critical_errors": self.setdat.get("ping_critical_errors", False),
+                "ping_disconnects": self.setdat.get("ping_disconnects", False),
+                "ping_character_deaths": self.setdat.get("ping_character_deaths", False),
+                "ping_vicious_bee": self.setdat.get("ping_vicious_bee", False),
+                "ping_mondo_buff": self.setdat.get("ping_mondo_buff", False),
+                "ping_ant_challenge": self.setdat.get("ping_ant_challenge", False),
+                "ping_sticker_events": self.setdat.get("ping_sticker_events", False),
+                "ping_mob_events": self.setdat.get("ping_mob_events", False),
+                "ping_conversion_events": self.setdat.get("ping_conversion_events", False),
+                "ping_hourly_reports": self.setdat.get("ping_hourly_reports", False)
+            }
+            self.logger.enableWebhook = self.setdat.get("enable_webhook", False)
+            self.logger.webhookURL = self.setdat.get("webhook_link", "")
+            self.logger.sendScreenshots = self.setdat.get("send_screenshot", True)
+            self.logger.enableDiscordPing = self.setdat.get("enable_discord_ping", False)
+            self.logger.discordUserID = self.setdat.get("discord_user_id", "")
+            self.logger.pingSettings = pingSettings
+            self.logger.webhookTimeFormat = self.setdat.get("webhook_time_format", 24)
+            self.logger.hourlyReportOnly = self.setdat["only_send_hourly_report"]
+            # Update keyboard movespeed
+            self.keyboard.movespeed = self.setdat["movespeed"]
+            # Update haste compensation
+            self.hasteCompensation = HasteCompensationRevamped(self.robloxWindow, self.setdat["movespeed"])
+            self.keyboard.hasteCompensation = self.setdat["haste_compensation"]
+            self.keyboard.hasteCompensationObj = self.hasteCompensation
+            # Update hourly report time format
+            self.hourlyReport.timeFormat = self.setdat.get("hourly_report_time_format", 24)
+            # Update collect cooldowns
+            self.collectCooldowns = dict([(k, v[2]) for k,v in mergedCollectData.items()])
+            self.collectCooldowns["sticker_printer"] = 1*60*60
+            # Update night detection
+            self.enableNightDetection = True if self.setdat["stinger_hunt"] else False
+            # Update vic fields
+            self.vicFields = ["pepper", "mountain top", "rose", "cactus", "spider", "clover"]
+            self.vicFields = [x for x in self.vicFields if self.setdat["stinger_{}".format(x.replace(" ","_"))]]
+            # Log the profile change
+            self.logger.webhook("Profile Changed", f"Switched to profile: {old_profile}", "blue")
+
     #get the size of the roblox window and update the relevant variables
     def setRobloxWindowInfo(self, setYOffset=True):
         self.robloxWindow.setRobloxWindowBounds(setYOffset=setYOffset)
         if setYOffset:
             self.logger.webhook("", f"Detect Y Offset: {self.robloxWindow.contentYOffset}", "dark brown")
+    
+    def checkPauseAndWait(self):
+        """Check if macro is paused and wait until resumed. Returns True if stop was requested."""
+        if self.run is None:
+            return False
+        # Check for pause request (state 5) - transition to paused (state 6)
+        if self.run.value == 5:
+            # Release all movement keys and mouse
+            self.keyboard.releaseMovement()
+            mouse.mouseUp()
+            # Transition to paused state - this signals the main loop that we've stopped
+            self.run.value = 6
+        # Wait while paused (state 6)
+        while self.run.value == 6:
+            # Keep inputs released while paused
+            self.keyboard.releaseMovement()
+            mouse.mouseUp()
+            time.sleep(0.1)
+        # Check if stop was requested (state 0)
+        return self.run.value == 0
     
     #thread to detect night
     #night detection is done by converting the screenshot to hsv and checking the average brightness
@@ -965,7 +1044,14 @@ class macro:
         if self.enableNightDetection:
             self.keyboard.press(",")
         
-        while True: 
+        while True:
+            # Check if paused and wait
+            if self.checkPauseAndWait():
+                # Stop was requested while paused
+                self.status.value = ""
+                self.converting = False
+                return False
+            
             #check if the macro is done converting/not converting
             text = self.getTextBesideE()
             #done converting
@@ -1036,7 +1122,7 @@ class macro:
         if convertBalloon: self.saveTiming("convert_balloon")
         self.status.value = ""
         #deal with the extra delay
-        self.logger.webhook("", f"Finished converting (Time: {self.convertSecsToMinsAndSecs(time.time()-st)})", "brown", "honey-pollen", ping_category="ping_conversion_events")
+        self.logger.webhook("", f"Finished converting (Time: {self.convertSecsToMinsAndSecs(time.time()-st)})", "brown", "screen", ping_category="ping_conversion_events")
         wait = self.setdat["convert_wait"]
         if (wait):
             self.logger.webhook("", f'Waiting for an additional {wait} seconds', "light green")
@@ -1288,14 +1374,14 @@ class macro:
     
     def rejoin(self, rejoinMsg = "Rejoining"):
         self.canDetectNight = False
-        psLink = self.setdat["private_server_link"]
+        psLink = self.setdat.get("private_server_link", "")
         self.logger.webhook("",rejoinMsg, "dark brown")
         self.status.value = "rejoining"
         mouse.mouseUp()
         keyboard.releaseMovement()
         for i in range(3):
-            joinPS = bool(psLink) #join private server?
-            rejoinMethod = self.setdat["rejoin_method"]
+            joinPS = bool(psLink and psLink.strip()) #join private server?
+            rejoinMethod = self.setdat.get("rejoin_method", "deeplink")
             browserLink = "https://www.roblox.com/games/4189852503?privateServerLinkCode=87708969133388638466933925137129"
             if i == 2 and joinPS: 
                 self.logger.webhook("", "Failed rejoining too many times, falling back to a public server", "red", "screen", ping_category="ping_disconnects")
@@ -1308,7 +1394,15 @@ class macro:
             if rejoinMethod == "deeplink":
                 deeplink = "roblox://placeID=1537690962"
                 if joinPS:
-                    deeplink += f"&linkCode={psLink.lower().split('code=')[1]}"
+                    try:
+                        if "code=" in psLink.lower():
+                            deeplink += f"&linkCode={psLink.lower().split('code=')[1]}"
+                        else:
+                            self.logger.webhook("", "Invalid private server link format. Expected 'code=' in link. Falling back to public server.", "red", ping_category="ping_critical_errors")
+                            joinPS = False
+                    except (IndexError, AttributeError) as e:
+                        self.logger.webhook("", f"Error parsing private server link: {e}. Falling back to public server.", "red", ping_category="ping_critical_errors")
+                        joinPS = False
                 appManager.openDeeplink(deeplink)
             elif rejoinMethod == "new tab":
                 webbrowser.open(browserLink, new = 2)
@@ -1683,21 +1777,12 @@ class macro:
         if fieldSetting["shift_lock"]: 
             self.keyboard.press('shift')
         
-        # Track pause state to send webhook only once when entering pause
-        was_paused = False
-        
         while keepGathering:
-            # Check if macro is paused
-            if self.run is not None:
-                while self.run.value == 5:
-                    if not was_paused:
-                        # Send webhook message when first entering pause state
-                        self.logger.webhook("", "Macro is paused", "orange")
-                        was_paused = True
-                    # Release mouse and keys while paused
-                    mouse.mouseUp()
-                    self.keyboard.releaseMovement()
-                    time.sleep(1)  # Wait while paused
+            # Check if paused and wait
+            if self.checkPauseAndWait():
+                # Stop was requested while paused
+                stopGather()
+                return
             
             # Check if skip was requested
             if self.skipTask is not None and self.skipTask.value == 1:
@@ -1767,11 +1852,11 @@ class macro:
                 self.reset()
                 break
             elif getGatherTime() > maxGatherTime:
-                self.logger.webhook(f"Gathering: Ended", f"Time: {gatherTime} - Time Limit - Return: {returnType.title()}", "light green", "honey-pollen")
+                self.logger.webhook(f"Gathering: Ended", f"Time: {gatherTime} - Time Limit - Return: {returnType.title()}", "light green", "screen")
                 keepGathering = False
             #check backpack
             elif self.getBackpack() >= fieldSetting["backpack"]:
-                self.logger.webhook(f"Gathering: Ended", f"Time: {gatherTime} - Backpack - Return: {returnType.title()}", "light green", "honey-pollen")
+                self.logger.webhook(f"Gathering: Ended", f"Time: {gatherTime} - Backpack - Return: {returnType.title()}", "light green", "screen")
                 keepGathering = False
 
         #gathering was interrupted
@@ -2317,6 +2402,11 @@ class macro:
             elif k in ["a","d"]: lastSideKey = k
             self.keyboard.walk(k, t)
         while True:
+            # Check if paused and wait
+            if self.checkPauseAndWait():
+                # Stop was requested while paused
+                self.mobRunStatus = "done"
+                break
             dodgeWalk("s", distance*1.2)
             if self.mobRunStatus != "attacking": break
             dodgeWalk("a", distance*1.8)
@@ -2355,6 +2445,9 @@ class macro:
                 startFrontKey = "w"
 
             while True:
+                # Check if paused and wait
+                if self.checkPauseAndWait():
+                    return  # Stop was requested
                 for _ in range(2):
                     self.keyboard.walk(startFrontKey, 0.72*f)
                     if self.mobRunStatus == "done": return
@@ -2463,6 +2556,13 @@ class macro:
         self.died = False
         st = time.time() 
         while loop:
+            # Check if paused and wait
+            if self.checkPauseAndWait():
+                # Stop was requested while paused
+                self.night = False
+                self.stopVic = True
+                updateHourlyTime()
+                return
             for code in pathLines:
                 exec(code)
                 #run checks
@@ -2494,6 +2594,10 @@ class macro:
             self.logger.webhook("", "Failed to land in stump field", "red", "screen", ping_category="ping_critical_errors")
             self.reset()
         while True:
+            # Check if paused and wait
+            if self.checkPauseAndWait():
+                # Stop was requested while paused
+                return
             mouse.click()
             keepOldData = self.keepOldCheck()
             if keepOldData is not None:
@@ -3117,15 +3221,27 @@ class macro:
         f.close()
     
     #click the "allow for one month" on the "terminal is requesting to bypass" popup
+    #Source: https://github.com/sevmanash/sevs-modified-macro/blob/main/src/modules/macro.py
     def clickPermissionPopup(self):
         permissionPopup = self.adjustImage("./images/mac", "allow")
+        permissionPopup2 = self.adjustImage("./images/mac", "allowfor")
+        permissionPopup3 = self.adjustImage("./images/mac", "cancel")
         x = self.robloxWindow.mw/4
         y = self.robloxWindow.mh/3
-        res = locateImageOnScreen(permissionPopup, self.robloxWindow.mx+(x), self.robloxWindow.my+(y), self.robloxWindow.mw/2, self.robloxWindow.mh/3, 0.8)
-        if res:
-            self.logger.webhook("", "Detected: Terminal permission popup", "orange")
-            x2, y2 = [j//self.robloxWindow.multi for j in res[1]]
-            mouse.moveTo(self.robloxWindow.mx+(x+x2), self.robloxWindow.my+(y+y2))
+        res = locateImageOnScreen(permissionPopup, x, y, self.robloxWindow.mw/2, self.robloxWindow.mh/3, 0.8)
+        res2 = locateImageOnScreen(permissionPopup2, x, y, self.robloxWindow.mw/2, self.robloxWindow.mh/3, 0.8)
+        res3 = locateImageOnScreen(permissionPopup3, x, y, self.robloxWindow.mw/2, self.robloxWindow.mh/3, 0.8)
+        if res or res2 or res3:
+            if res or res2:
+                self.logger.webhook("", "Detected: Terminal permission popup", "orange")
+            else:
+                self.logger.webhook("", "Detected: Screen permission popup", "orange")
+            reses = res or res2 or res3  
+            x2, y2 = reses[1]
+            if self.display_type == "retina":
+                x2 /= 2
+                y2 /= 2
+            mouse.moveTo(x+x2, y+y2)
             time.sleep(0.08)
             mouse.moveBy(1,1)
             time.sleep(0.1)
@@ -3681,6 +3797,13 @@ class macro:
         return time.time() - timing >= cooldown*mobRespawnBonus
     
     def AFB(self, gatherInterrupt = False, turnOffShiftLock = False):  # Auto Field Boost - WOOHOO
+        
+        def normalize(text):
+            text = text.lower()
+            text = re.sub(r'[^a-z\s]', ' ', text)  # remove symbols
+            text = re.sub(r'\s+', ' ', text).strip()
+            return text
+        
         returnVal = None
         # time limit - :(
         if self.AFBLIMIT: return True
@@ -3692,7 +3815,7 @@ class macro:
         Glitter = threading.Thread(target=self.useItemInInventory, args=("glitter",))
 
         x = self.setdat["AFB_attempts"]
-        field = self.setdat["AFB_field"]
+        field = [f.replace("_", " ") for f in self.setdat["AFB_field"].lower().split(" ")]
         rebuff = self.setdat["AFB_rebuff"]
         dice = self.setdat["AFB_dice"]
         glitter = self.setdat["AFB_glitter"]
@@ -3717,13 +3840,37 @@ class macro:
                 if self.cAFBDice or (self.hasAFBRespawned("AFB_dice_cd", rebuff*60) and not self.AFBglitter):
                     self.cAFBDice = False
                     # get all fields
-                    fields = ["rose", "strawberry", "mushroom", "pepper",  # red
-                            "sunflower", "dandelion", "spider", "coconut", # white
-                            "pine tree", "blue flower", "bamboo", "stump",  # blue
-                            "clover", "pineapple", "pumpkin", "cactus", "mountain top"]  # colored
+                    fields = {
+                        "rose": [["rose"]],
+                        "strawberry": [["strawberry"]],
+                        "mushroom": [["mushroom"]],
+                        "pepper": [["pepper"]],
+                        "sunflower": [["sunflower"]],
+                        "dandelion": [["dandelion"]],
+                        "spider": [["spider"]],
+                        "coconut": [["coconut"]],
+                        "pine tree": [["pine", "tree"]],
+                        "blue flower": [["blue", "flower"]],
+                        "bamboo": [["bamboo"]],
+                        "stump": [["stump"]],
+                        "clover": [["clover"]],
+                        "pineapple": [["pineapple"]],
+                        "pumpkin": [["pumpkin"]],
+                        "cactus": [["cactus"]],
+                        "mountain top": [["mountain", "top"]],
+                    }
                     # ignore detected lines with these words, reduces false positives
-                    ignore = {"strawberry", "strawberries", "blueberry", "blueberries", 
+                    ignore = {"strawberry", "strawberries", "blueberry", "blueberries",
                     "seed", "seeds", "pineapple", "pineapples", "honey", "from"}
+
+                    def ignore2(field, text):
+                        for word in ignore:
+                            # allow the word if it is part of the field name
+                            if word in field.replace(" ", ""):
+                                continue
+                            if word in text.split():
+                                return True
+                        return False
 
                     #begin
                     self.logger.webhook("", f"Auto Field Boost", "white")
@@ -3763,66 +3910,78 @@ class macro:
                                 self.saveAFB("AFB_dice_cd")
                                 self.AFBglitter = False
                                 return
-                        for _ in range(4): # detect text
-                            bluetexts += ocr.imToString("blue").lower() + "\n"
-                        bluetexts = " ".join(bluetexts.split())
+                        for _ in range(4):
+                            bluetexts += ocr.imToString("blue") + "\n"
+
+                        bluetexts = normalize(bluetexts)
+                        tokens = set(bluetexts.split())
 
                         # smooth/loaded
-                        clean = bluetexts.lower().replace(" and the ", " ") 
+                        clean = normalize(bluetexts)
                         # "and the" appears when using loaded and smooth
-                        and_the = [line for line in clean.split("\n") if "and the" in line] 
+                        and_the = [line for line in bluetexts.split("\n") if "boosted" in line]
+                        
                         the = bluetexts.split()  # get each line of detected text
                         boostedField = []
 
                         # for field dice only
-                        if "field" in dice: 
+                        if "field" in dice:
                             boostedField = None
-                            for f in fields:  
-                                if f.lower() in bluetexts and not any(word in f.lower() for word in ignore): 
-                                    if f.lower() == field.lower():  # only allow the chosen field
-                                        boostedField = f
-                                        break 
+                            for cf in field:
+                                for pattern in fields[cf]:
+                                    if set(pattern).issubset(tokens):
+                                        if not ignore2(cf, bluetexts):
+                                            boostedField = cf
+                                            break
+                                if boostedField:
+                                    break
+                            
                         #other die
                         else:
-                            boostedField = None
-                            for sentence in and_the: 
-                                if "boosted" in sentence:
-                                    for f in fields:
-                                        if f.lower() in sentence and not any(word in sentence for word in ignore):
-                                            boostedField = f
-                                    if boostedField: break  
+                            boostedFields = []
+                            for cf in field:
+                                cf_tokens = cf.split()
+                                for sentence in and_the:
+                                    sentence_tokens = set(normalize(sentence).split())
+                                    for pattern in fields[cf]:
+                                        if set(pattern).issubset(sentence_tokens) and not ignore2(cf, sentence):
+                                            if cf not in boostedFields:
+                                                boostedFields.append(cf)
 
                         # field user selected is detected
                         if "field" in dice:
-                            if field == boostedField:
-                                self.logger.webhook("", f"Boosted Field: {field}", "bright green", "blue")
+                            if boostedField is not None:
+                                self.logger.webhook("", f"Boosted Field: {boostedField}", "bright green", "blue")
                                 returnVal = field
                                 self.keyboard.press("pagedown")
                                 for i in range(3):
                                     self.keyboard.press("o")
                                 if diceslot == 0: self.toggleInventory("close")
                                 self.saveAFB("AFB_dice_cd")
-                                if glitter: 
+                                if glitter:
                                     self.AFBglitter = True
                                     self.saveAFB("AFB_glitter_cd")
                                 return returnVal
                             else:
                                 continue
                         else:
-                            if field in boostedField:
-                                self.logger.webhook("", f"Boosted Field: {field}", "bright green", "blue")
+                            if field in boostedFields:
+                                self.logger.webhook("", f"Boosted Fields: {', '.join(boostedFields)}", "blue")
                                 returnVal = field
                                 self.keyboard.press("pagedown")
                                 for i in range(3):
                                     self.keyboard.press("o")
                                 if diceslot == 0: self.toggleInventory("close")
                                 self.saveAFB("AFB_dice_cd")
-                                if glitter: 
+                                if glitter:
                                     self.AFBglitter = True
                                     self.saveAFB("AFB_glitter_cd")
                                 return returnVal
                             else:
-                                self.logger.webhook("", f"Boosted Fields: {', '.join(boostedField)}", "red")
+                                if boostedFields:
+                                    self.logger.webhook("", f"Boosted Fields: {', '.join(boostedFields)}", "red")
+                                else:
+                                    self.logger.webhook("", "Boosted Fields: None", "red")
                                 time.sleep(0.5)
 
                 # glitter    
@@ -3919,8 +4078,9 @@ class macro:
             #     #fullscreen back roblox
             #     appManager.openApp("Roblox")
             #     self.toggleFullScreen()
-            appManager.setAppFullscreen(fullscreen=False)
-            appManager.maximiseAppWindow()
+            # Removed lines that were un-fullscreening Roblox on startup
+            # appManager.setAppFullscreen(fullscreen=False)
+            # appManager.maximiseAppWindow()
             time.sleep(1)
             self.moveMouseToDefault()
 
@@ -3959,7 +4119,8 @@ class macro:
             #     messageBox.msgBox(text='It seems like terminal does not have the accessibility permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Accessibility -> add and enable Terminal.\n\nVisit #6system-settings in the discord for more detailed instructions\n\n NOTE: This popup might be incorrect. If the macro is able to input keypresses and interact with the game, you can dismiss this popup', title='Accessibility Permission')
             # time.sleep(1)
         
-        if "share" in self.setdat["private_server_link"] and self.setdat["rejoin_method"] == "deeplink":
+        private_server_link = self.setdat.get("private_server_link", "")
+        if private_server_link and "share" in private_server_link and self.setdat.get("rejoin_method") == "deeplink":
             messageBox.msgBox(text="You entered a 'share?code' private server link!\n\nTo fix this:\n1. Paste the link in your browser\n2. Wait for roblox to load in\n3. Copy the link from the top of your browser.  It should now be a 'privateServerLinkCode' link", title='Unsupported private server link')
 
     def start(self):

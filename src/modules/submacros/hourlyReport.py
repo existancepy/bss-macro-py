@@ -379,7 +379,7 @@ class BuffDetector():
 
 
 class HourlyReport():
-    def __init__(self, buffDetector: BuffDetector = None):
+    def __init__(self, buffDetector: BuffDetector = None, time_format=24):
         #key: name of buff
         #value: [template for template matching is the buff's top, bottom or middle, if buff image should be transformed, if buff is stackable]
         self.hourBuffs = {
@@ -413,7 +413,7 @@ class HourlyReport():
         }
 
         self.buffDetector = buffDetector
-        self.hourlyReportDrawer = HourlyReportDrawer()
+        self.hourlyReportDrawer = HourlyReportDrawer(time_format)
 
         #setup stats
         self.hourlyReportStats = {}
@@ -563,13 +563,14 @@ class HourlyReport():
 
 
 class HourlyReportDrawer:
-    def __init__(self):
+    def __init__(self, time_format=24):
         self.backgroundColor = "#0E0F13"
         self.canvasSize = (6400, 8000)
         self.sidebarWidth = 1900
         self.leftPadding = 150
         self.availableSpace = self.canvasSize[0] - self.sidebarWidth - self.leftPadding*2
         self.bodyColor = "#FFFFFF"
+        self.time_format = time_format
         self.hour = datetime.now().hour
         self.sideBarBackground = (23, 25, 29)
         if self.hour == 0:
@@ -587,7 +588,17 @@ class HourlyReportDrawer:
             if hour == 24:
                 hour = 0
             val = 0
-        return f"{str(hour).zfill(2)}:{str(val).zfill(2)}"
+
+        time_str = f"{str(hour).zfill(2)}:{str(val).zfill(2)}"
+        if self.time_format == 12:
+            # Convert to 12-hour format
+            hour_12 = hour % 12
+            if hour_12 == 0:
+                hour_12 = 12
+            am_pm = "AM" if hour < 12 else "PM"
+            time_str = f"{str(hour_12).zfill(2)}:{str(val).zfill(2)} {am_pm}"
+
+        return time_str
 
     def millify(self, n):
         if not n: return "0"

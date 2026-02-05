@@ -236,12 +236,6 @@ main {
   background-color: #36393f;
 }
 
-.purple-button.paused {
-  background-color: #f0ad4e;
-  color: #2f3136;
-  font-weight: 500;
-}
-
 .purple-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -285,6 +279,10 @@ main {
   height: 1.5rem;
   width: 0.2rem;
   margin-right: 0.8rem;
+}
+
+.credits {
+  font-size: 0.85rem;
 }
 
 .credits a {
@@ -577,11 +575,234 @@ div:has(#planter-timers-container.show) #credits-container {
 
 .planter-timers .field-row {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
-.planter-timers .field-row img {
-  height: 0.9rem;
-  object-fit: contain;
+/* Drag List Styles */
+.drag-list {
+  border: 2px solid #7a77bb;
+  border-radius: 4px;
+  background: #2f3136;
+  max-height: 600px;
+  overflow-y: auto;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.drag-list-container {
+  padding: 0.5rem;
+}
+
+.drag-item {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem;
+  margin-bottom: 0.3rem;
+  background: #36393f;
+  border-radius: 4px;
+  cursor: move;
+  border: 1px solid #4f545c;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.drag-item:hover {
+  background: #40444b;
+  border-color: #7a77bb;
+  transform: translateX(2px);
+}
+
+.drag-item.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+}
+
+.drag-item.hidden {
+  display: none;
+}
+
+.drag-handle {
+  color: #b9bbbe;
+  font-size: 1.2rem;
+  margin-right: 0.75rem;
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-text {
+  color: #dcddde;
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.drag-item.drag-over {
+  border-top: 3px solid #7a77bb;
+  margin-top: 0.3rem;
+}
+
+/* Category indicators */
+.drag-item[data-category="gather"] {
+  border-left: 4px solid #5865f2;
+}
+
+.drag-item[data-category="collect"] {
+  border-left: 4px solid #57f287;
+}
+
+.drag-item[data-category="kill"] {
+  border-left: 4px solid #ed4245;
+}
+
+.drag-item[data-category="quest"] {
+  border-left: 4px solid #fee75c;
+}
+
+.drag-item[data-category="special"] {
+  border-left: 4px solid #eb459e;
+}
+
+/* Quick action buttons */
+.drag-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.drag-item:hover .drag-actions {
+  opacity: 1;
+}
+
+.drag-action-btn {
+  background: #4f545c;
+  border: none;
+  color: #dcddde;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.drag-action-btn:hover {
+  background: #5a5f66;
+  color: #fff;
+}
+
+.drag-action-btn:active {
+  transform: scale(0.95);
+}
+
+/* Search box */
+.priority-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: #2f3136;
+  border: 2px solid #4f545c;
+  border-radius: 4px;
+  color: #dcddde;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.priority-search:focus {
+  outline: none;
+  border-color: #7a77bb;
+}
+
+.priority-search::placeholder {
+  color: #72767d;
+}
+
+/* Category badges */
+.category-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.drag-item[data-category="gather"] .category-badge {
+  background: #5865f2;
+  color: #fff;
+}
+
+.drag-item[data-category="collect"] .category-badge {
+  background: #57f287;
+  color: #000;
+}
+
+.drag-item[data-category="kill"] .category-badge {
+  background: #ed4245;
+  color: #fff;
+}
+
+.drag-item[data-category="quest"] .category-badge {
+  background: #fee75c;
+  color: #000;
+}
+
+.drag-item[data-category="special"] .category-badge {
+  background: #eb459e;
+  color: #fff;
+}
+
+/* Image Zoom Modal Styles */
+.zoom-control-btn {
+  background-color: #5865f2;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  transition: background-color 0.2s;
+}
+
+.zoom-control-btn:hover {
+  background-color: #4752c4;
+}
+
+.zoom-control-btn:active {
+  background-color: #3c45a5;
+}
+/* Import Modal Styles */
+#import-modal textarea:focus {
+  border-color: #7a77bb;
+  background-color: #36393f;
+  box-shadow: 0 0 0 2px rgba(122, 119, 187, 0.2);
+}
+
+#import-modal #cancel-import-button:hover {
+  background-color: #4f535b;
+  border-color: #4f535b;
+}
+
+#import-modal #cancel-import-button:active {
+  background-color: #36393f;
+  border-color: #36393f;
+}
+
+#import-modal #confirm-import-button:hover {
+  background-color: #9390cc;
+  border-color: #9390cc;
+}
+
+#import-modal #confirm-import-button:active {
+  background-color: #6b688a;
+  border-color: #6b688a;
 }

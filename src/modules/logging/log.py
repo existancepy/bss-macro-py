@@ -44,7 +44,7 @@ class webhookQueue:
         self.queue.put(data)
 
 class log:
-    def __init__(self, logQueue, enableWebhook, webhookURL, sendScreenshots, hourlyReportOnly=False, blocking=False, robloxWindow: RobloxWindowBounds = None, enableDiscordPing=False, discordUserID=None, pingSettings=None):
+    def __init__(self, logQueue, enableWebhook, webhookURL, sendScreenshots, hourlyReportOnly=False, blocking=False, robloxWindow: RobloxWindowBounds = None, enableDiscordPing=False, discordUserID=None, pingSettings=None, webhookTimeFormat=24):
         self.logQueue = logQueue
         self.webhookURL = webhookURL
         self.enableWebhook = enableWebhook
@@ -55,6 +55,7 @@ class log:
         self.enableDiscordPing = enableDiscordPing
         self.discordUserID = discordUserID
         self.pingSettings = pingSettings or {}
+        self.webhookTimeFormat = webhookTimeFormat
 
         if not self.blocking:
             self.webhookQueue = webhookQueue()
@@ -78,6 +79,11 @@ class log:
         print(f"[{time}] {title} {desc}")
 
         if not self.enableWebhook or self.hourlyReportOnly: return
+        
+        # Check if webhook URL is provided
+        if not self.webhookURL or not self.webhookURL.strip():
+            print(f"Warning: Webhook is enabled but no URL is provided. Skipping webhook message: {title} {desc}")
+            return
 
         webhookImgPath = None
         if self.sendScreenshots:
@@ -125,28 +131,49 @@ class log:
             "ping_user_id": ping_user_id
         }
 
+        # Add time_format to webhookData
+        webhookData["time_format"] = self.webhookTimeFormat
+
         # Add the webhook message to the queue
         if self.blocking:
             logWebhook.webhook(**webhookData)
         else:
             self.webhookQueue.add_to_queue(webhookData)
 
-    def hourlyReport(self, title, desc, color):
+    def hourlyReport(self, title, desc, color, time_format=None):
         if not self.enableWebhook: return
         
+        # Check if webhook URL is provided
+        if not self.webhookURL or not self.webhookURL.strip():
+            print(f"Warning: Webhook is enabled but no URL is provided. Skipping hourly report: {title} {desc}")
+            return
+
+        # Use webhook time format if not specified
+        if time_format is None:
+            time_format = self.webhookTimeFormat
+
         # Determine if we should ping for hourly reports
         ping_user_id = None
         if self.enableDiscordPing and self.discordUserID and self.pingSettings.get("ping_hourly_reports", False):
             ping_user_id = self.discordUserID
-            
-        logWebhook.webhook(self.webhookURL, title, desc, timeModule.strftime("%H:%M:%S", timeModule.localtime()), colors[color], "hourlyReport.png", ping_user_id)
+
+        logWebhook.webhook(self.webhookURL, title, desc, timeModule.strftime("%H:%M:%S", timeModule.localtime()), colors[color], "hourlyReport.png", ping_user_id, time_format)
     
-    def finalReport(self, title, desc, color):
+    def finalReport(self, title, desc, color, time_format=None):
         if not self.enableWebhook: return
         
+        # Check if webhook URL is provided
+        if not self.webhookURL or not self.webhookURL.strip():
+            print(f"Warning: Webhook is enabled but no URL is provided. Skipping final report: {title} {desc}")
+            return
+
+        # Use webhook time format if not specified
+        if time_format is None:
+            time_format = self.webhookTimeFormat
+
         # Determine if we should ping for final reports (same as hourly reports)
         ping_user_id = None
         if self.enableDiscordPing and self.discordUserID and self.pingSettings.get("ping_hourly_reports", False):
             ping_user_id = self.discordUserID
-            
-        logWebhook.webhook(self.webhookURL, title, desc, timeModule.strftime("%H:%M:%S", timeModule.localtime()), colors[color], "finalReport.png", ping_user_id) 
+
+        logWebhook.webhook(self.webhookURL, title, desc, timeModule.strftime("%H:%M:%S", timeModule.localtime()), colors[color], "finalReport.png", ping_user_id, time_format) 

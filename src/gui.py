@@ -31,6 +31,16 @@ def stop():
     run.value = 0
 
 @eel.expose
+def pause():
+    if run.value != 2: return #only pause if running
+    run.value = 5  # 5 = pause request
+
+@eel.expose
+def resume():
+    if run.value != 6: return #only resume if paused
+    run.value = 2  # 2 = running (resume)
+
+@eel.expose
 def getPatterns():
     return [x.replace(".py","") for x in os.listdir("../settings/patterns") if ".py" in x]
 
@@ -112,7 +122,51 @@ def clearAFB():
 
     with open("data/user/AFB.txt", "w") as f:
         f.write(data_str)
+
+@eel.expose
+def resetFieldToDefault(field_name):
+    """Reset a field's settings to the default values"""
+    try:
+        # Load default field settings
+        with open("data/default_settings/fields.txt", "r") as f:
+            default_fields = ast.literal_eval(f.read())
+
+        # Get the default settings for the specified field
+        if field_name in default_fields:
+            default_settings = default_fields[field_name]
+            # Save the default settings for this field
+            settingsManager.saveField(field_name, default_settings)
+            return True
+        else:
+            print(f"Warning: Field '{field_name}' not found in default settings")
+            return False
+    except Exception as e:
+        print(f"Error resetting field to default: {e}")
+        return False
+
+@eel.expose
+def exportFieldSettings(field_name):
+    """Export field settings as JSON string"""
+    try:
+        return settingsManager.exportFieldSettings(field_name)
+    except Exception as e:
+        print(f"Error exporting field settings: {e}")
+        return None
+
+@eel.expose
+def importFieldSettings(field_name, json_settings):
+    """Import field settings from JSON string"""
+    try:
+        return settingsManager.importFieldSettings(field_name, json_settings)
+    except Exception as e:
+        print(f"Error importing field settings: {e}")
+        return False
         
+@eel.expose
+def getMacroVersion():
+    """Get the macro version from version.txt"""
+    return settingsManager.getMacroVersion()
+
 @eel.expose
 def update():
     updateFunc()
@@ -131,6 +185,18 @@ eel.expose(settingsManager.saveGeneralSetting)
 eel.expose(settingsManager.saveDictProfileSettings)
 eel.expose(settingsManager.initializeFieldSync)
 
+# Profile management functions
+eel.expose(settingsManager.listProfiles)
+eel.expose(settingsManager.getCurrentProfile)
+eel.expose(settingsManager.switchProfile)
+eel.expose(settingsManager.createProfile)
+eel.expose(settingsManager.deleteProfile)
+eel.expose(settingsManager.renameProfile)
+eel.expose(settingsManager.duplicateProfile)
+eel.expose(settingsManager.exportProfile)
+eel.expose(settingsManager.importProfile)
+eel.expose(settingsManager.importProfileContent)
+
 def updateGUI():
     settings = settingsManager.loadAllSettings()
     eel.loadInputs(settings)
@@ -140,7 +206,8 @@ def toggleStartStop():
     eel.toggleStartStop()
 
 # Global variable to store run state
-_run_state = 3  # 0=stop, 1=start, 2=running, 3=stopped
+# 0=stop request, 1=start request, 2=running, 3=stopped, 4=disconnected, 5=pause request, 6=paused
+_run_state = 3
 
 def setRunState(state):
     global _run_state
@@ -195,9 +262,10 @@ def launch():
     try:
         eel.start('index.html', mode = "chrome", app_mode = True, block = False, cmdline_args=["--incognito", "--app=http://localhost:8000"])
     except EnvironmentError:
-        eel.start('index.html', mode = "chrome-app", app_mode = True, block = False, cmdline_args=["--incognito", "--app=http://localhost:8000"])
-    except EnvironmentError:
-        print("Chrome/Chromium could not be found. You can access the macro at: http://localhost:8000/")
-        eel.start('index.html', block=False, mode=None)
-        time.sleep(2)
-        webbrowser.open("http://localhost:8000/", new=2)
+        try:
+            eel.start('index.html', mode = "chrome-app", app_mode = True, block = False, cmdline_args=["--incognito", "--app=http://localhost:8000"])
+        except EnvironmentError:
+            print("Chrome/Chromium could not be found. Opening in default browser...")
+            eel.start('index.html', block=False, mode=None)
+            time.sleep(2)
+            webbrowser.open("http://localhost:8000/", new=2)
